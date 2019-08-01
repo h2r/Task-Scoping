@@ -21,9 +21,9 @@ STEPS:
    it into the files directory under your local rddlsim repository. Then, run the following command: `./run rddl.competion.Server files/academic-advising/`.
    Here, the 'academic-advising' folder is a domain from the IPC that was moved under rddlsim/files. Now, your rddlsim server 
    should be up and running.
-7. Open a new terminal and navigate to the directory containing your planner.img file. Run the following sequence of commands:
-  a. `mkdir rundir`
-  b. `RUNDIR="$(pwd)/rundir"`
+7. Open a new terminal and navigate to the directory containing your planner.img file. Run the following sequence of commands: <br />
+  a. `mkdir rundir` <br />
+  b. `RUNDIR="$(pwd)/rundir"` <br />
   c. `singularity run -C -H $RUNDIR planner.img academic_advising_mdp__1 2323`. Replace the 'academic_advising_mdp__1' with 
-      whatever rddl file (that the server needs to have loaded in step 6) you'd like to run on.
+      whatever rddl file (that the server needs to have loaded in step 6) you'd like to run on. <br />
 8. TA-DA! Watch the planner run on the provided domain and print our stats!

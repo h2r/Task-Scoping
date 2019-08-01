@@ -4,7 +4,7 @@ editions and formats of the competition.
 STEPS:
 1. Clone the RDDLSim library from the following link: <https://github.com/ssanner/rddlsim>
 2. Follow the steps to install the library outlined here: <https://github.com/ssanner/rddlsim/blob/master/INSTALL.txt> <br />
-  a. Specifically, run the compile script by simply doing ./compile. <br />
+  a. Specifically, run the compile script by simply doing `./compile`. <br />
   b. Next, make sure your CLASSPATH variable is set correctly. If you don't set this, you'll get an error message when 
      you attempt to ./run that certain java classes could not be located. <br />
   c. To set the CLASSPATH correctly, make sure the CLASSPATH environment variable points to the /lib folder under rddlsim.

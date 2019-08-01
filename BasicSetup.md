@@ -18,7 +18,7 @@ STEPS:
    'your-directory-here' with your actual directory structure. This will probably take a while to complete because it will 
    install an OS and all dependencies necessary for the code within the Singularity image.
 6. Once this is done, you need to run the rddlsim server. Pick a rddl domain file (or folder) you'd like to run and move 
-   it into the files directory under your local rddlsim repository. Then, run the following command: `./run rddl.competion.Server files/academic-advising/`.
+   it into the files directory under your local rddlsim repository. Then, run the following command: `./run rddl.competition.Server files/academic-advising/`.
    Here, the 'academic-advising' folder is a domain from the IPC that was moved under rddlsim/files. Now, your rddlsim server 
    should be up and running.
 7. Open a new terminal and navigate to the directory containing your planner.img file. Run the following sequence of commands: <br />

@@ -8,7 +8,7 @@ STEPS:
   b. Next, make sure your CLASSPATH variable is set correctly. If you don't set this, you'll get an error message when 
      you attempt to ./run that certain java classes could not be located. <br />
   c. To set the CLASSPATH correctly, make sure the CLASSPATH environment variable points to the /lib folder under rddlsim.
-     For example, run `export CLASSPATH=~/Documents/GitHub/rddlsim/lib` <br />
+     For example, run `export CLASSPATH=~/Documents/IPC_Code/rddlsim/lib` <br />
 3. Install the specific version of Singularity that you'll need. Instructions on how to do this from the IPC committee can be
    found here: <https://ipc2018-probabilistic.bitbucket.io/>. Scroll down to the 'Details on Singularity' section and 
    check under the 'How do I install Singularity on my machine?' section.

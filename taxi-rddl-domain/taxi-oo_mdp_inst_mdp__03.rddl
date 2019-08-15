@@ -10,12 +10,12 @@
 //                                                                             //
 /////////////////////////////////////////////////////////////////////////////////
 
-instance taxi-oo_mdp_inst_mdp__01 {
+instance taxi-oo_mdp_inst_mdp__03 {
     domain = taxi-oo_mdp;
 
     objects {
-        xpos               : { x00, x01};
-        ypos               : { y00, y01};
+        xpos               : { x00, x01, x02};
+        ypos               : { y00, y01, y02};
         taxi               : { t0 };
         passenger          : { p0 };
     };
@@ -23,24 +23,30 @@ instance taxi-oo_mdp_inst_mdp__01 {
     non-fluents {
         // ADJACENCY
         ADJACENT_LEFT(x00, x01);
+        ADJACENT_LEFT(x01, x02);
         ADJACENT_RIGHT(x01, x00);
+        ADJACENT_RIGHT(x02, x01);
         ADJACENT_DOWN(y00, y01);
+        ADJACENT_DOWN(y01, y02);
         ADJACENT_UP(y01, y00);
+        ADJACENT_UP(y02, y01);
 
         // WALLS
         WALL_LOC(x01, y00);
+        WALL_LOC(x01, y02);
 
         // PASSENGERS
-        PASSENGER_GOAL_LOC(p0, x01, y01);
+        PASSENGER_GOAL_LOC(p0, x02, y02);
         PASSENGERS_YOU_CARE_FOR(p0);
+
     };
 
     init-state {
         taxi-at(t0, x00, y00);
-        passenger-at-curr(p0, x00, y00);
+        passenger-at-curr(p0, x00, y02);
     };
 
-    horizon = 20;
+    horizon = 10;
 
     discount = 1.0;
 }

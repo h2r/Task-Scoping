@@ -47,7 +47,7 @@ domain taxi-oo_mdp {
         WALL_LOC(xpos,ypos)                          : { non-fluent, bool, default = false };
 
     // TAXI_GOAL deterministic
-        TAXI_GOAL(xpos, ypos)                        : { non-fluent, bool, default = false };
+//        TAXI_GOAL(xpos, ypos)                        : { non-fluent, bool, default = false };
 
     // Passenger Goal location
         PASSENGER_GOAL_LOC(passenger, xpos, ypos)    : { non-fluent, bool, default = false };

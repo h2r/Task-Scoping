@@ -1,0 +1,32 @@
+goal = passenger-at-dest(p0)  #not inTaxi(p0) AND p0.pos == p0.dest
+guarantees = []
+used_skills = []
+q = [passenger-at-dest(p0)]
+~~0~~
+#bfs_with_guarantees
+condition = q.pop()  #passenger-at-dest(p0)
+affecting_skills = [Move_N, pickup(p0), dropoff(p0)]
+#Move_N
+precondition = taxi.loc...
+discovered.append(precondition)
+
+#If there is no wall to the north of start:
+	guarantees.append(precondition)
+#What if there is a wall to the north of start:
+	q.append(precondition)
+
+#Skip this one if we only get skills that may make condition true
+#pickup(p0)
+used_skills.append(pickup(p0))
+precondition = forall_{p}[not inTaxi(p)] AND taxi.pos == p0.pos
+discovered.append(precondition)
+guarantees.append(precondition)
+
+#dropoff(p0)
+used_skills.append(dropoff(p0))
+precondition = inTaxi(p0)
+discovered.append(precondition)
+q.append(p0)
+
+#check_guarantees
+#not adjacent_N(taxi, wall)

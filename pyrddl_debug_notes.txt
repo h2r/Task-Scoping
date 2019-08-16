@@ -1,0 +1,4 @@
+recon:
+	composite: keyerror domain
+	instance: keyerror domain
+	domain: keyerror non_fluents

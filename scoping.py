@@ -1,6 +1,6 @@
 import abc
 import z3
-from abstract_classes import *
+from classes import *
 """
 TODO
 Get implies and violates (z3) working

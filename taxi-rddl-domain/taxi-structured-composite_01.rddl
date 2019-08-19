@@ -131,7 +131,9 @@ domain taxi-oo_mdp {
         forall_{ ?t : taxi } [ move_north(?t) => taxi-y(?t) < MAX_Y() ];
         forall_{ ?t : taxi } [ move_south(?t) => taxi-y(?t) > 0 ];
 
-    // All entities must be in grid. This is implied by above (except for walls), but should be easier to parse when stated explicitly. WOuld this alone imply the former?
+    };
+    state-action-constraints {
+        // All entities must be in grid. This is implied by above (except for walls), but should be easier to parse when stated explicitly. WOuld this alone imply the former?
         forall_{ ?t : taxi } [ taxi-x(?t) > 0 ];
         forall_{ ?t : taxi } [ taxi-x(?t) < MAX_X() ];
         forall_{ ?t : taxi } [ taxi-y(?t) < MAX_Y() ];

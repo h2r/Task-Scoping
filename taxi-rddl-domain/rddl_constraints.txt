@@ -1,0 +1,5 @@
+//State description
+The algorithm treats each (pvariable,args) pair as an attribute.
+//z3 constraints
+~Something about one-hot predicates v enumerated/int/real valued functions
+//Transition dynamics

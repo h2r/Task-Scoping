@@ -8,6 +8,12 @@ Tweak scope() to be more general. In particular, have it deal with partially sat
 Have conditions, skills return collection of variables using forall quantifiers, ex. forall(p | not inTaxi(p))
 """
 
+def triplet_dict_to_triples(skill_dict):
+	skill_triples = []
+	for action in skill_dict.keys():
+		for precondition, effect in skill_dict[action].items():
+			skill_triples.append((precondition,action,effect))
+	return skill_triples
 
 class skill(abc.ABC):
 	def get_precondition(self):
@@ -19,6 +25,16 @@ class skill(abc.ABC):
 		:return: list of affected vars. May modify to use forall
 		"""
 		pass
+
+class skill_triplet(skill):
+	def __init__(self, precondition, action, effect):
+		self.triplet = (precondition,action,effect)
+	def get_precondition(self):
+		return self.triplet[0]
+	def get_action(self):
+		return self.triplet[1]
+	def get_affected_vars(self):
+		return self.triplet[2]
 
 class condition(abc.ABC):
 	"""

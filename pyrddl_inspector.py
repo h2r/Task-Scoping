@@ -1,17 +1,18 @@
 from pyrddl.parser import RDDLParser
 import collections
 
-def make_triplet_dict(rddl_file_location='/home/nishanth/Documents/IPC_Code/rddlsim/files/taxi-rddl-domain/taxi-oo_simple.rddl'):
-    # read RDDL file
-    with open(rddl_file_location, 'r') as file:
-        rddl = file.read()
+def make_triplet_dict(rddl_file_location='/home/nishanth/Documents/IPC_Code/rddlsim/files/taxi-rddl-domain/taxi-oo_simple.rddl', model=None):
+    if model is None:
+        # read RDDL file
+        with open(rddl_file_location, 'r') as file:
+            rddl = file.read()
 
-    # buid parser
-    parser = RDDLParser()
-    parser.build()
+        # buid parser
+        parser = RDDLParser()
+        parser.build()
 
-    # parse RDDL
-    model = parser.parse(rddl) # AST
+        # parse RDDL
+        model = parser.parse(rddl) # AST
 
     actions_list = model.domain.action_fluents.keys()
     #print(actions_list)

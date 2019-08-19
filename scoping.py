@@ -1,5 +1,6 @@
 import abc
 import z3
+from abstract_classes import *
 """
 TODO
 Get implies and violates (z3) working
@@ -15,19 +16,15 @@ def triplet_dict_to_triples(skill_dict):
 			skill_triples.append((precondition,action,effect))
 	return skill_triples
 
-class skill(abc.ABC):
-	def get_precondition(self):
-		pass
-	def get_action(self):
-		pass
-	def get_affected_vars(self):
-		"""
-		:return: list of affected vars. May modify to use forall
-		"""
-		pass
+
 
 class skill_triplet(skill):
 	def __init__(self, precondition, action, effect):
+		"""
+		:param precondition: condition object
+		:param action: string
+		:param effect: list of affected variables
+		"""
 		self.triplet = (precondition,action,effect)
 	def get_precondition(self):
 		return self.triplet[0]
@@ -36,15 +33,6 @@ class skill_triplet(skill):
 	def get_affected_vars(self):
 		return self.triplet[2]
 
-class condition(abc.ABC):
-	"""
-	A condition is a first order expression that defines a set of states in a domain
-	"""
-	def get_variables(self):
-		pass
-	def evaluate(self, state):
-		#z3 state implies condition
-		pass
 
 
 def get_overlapping_variables(vars0, vars1):

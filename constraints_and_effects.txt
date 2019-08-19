@@ -1,0 +1,3 @@
+~~Effects of algorithm~~
+The algorithm may delete objects from a rddl instance. Specifically, it will remove objects from within {} in the objects section, and may delete lines mentioning these objects from init_state.
+In the future, it may delete entire classes.

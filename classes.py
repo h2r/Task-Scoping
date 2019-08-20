@@ -26,7 +26,7 @@ class Skill(abc.ABC):
 		pass
 	def get_action(self):
 		pass
-	def get_affected_vars(self):
+	def get_affected_variables(self):
 		"""
 		:return: list of affected vars. May modify to use forall
 		"""
@@ -44,7 +44,7 @@ class SkillTriplet(Skill):
 		return self.triplet[0]
 	def get_action(self):
 		return self.triplet[1]
-	def get_affected_vars(self):
+	def get_affected_variables(self):
 		return self.triplet[2]
 
 class condition():

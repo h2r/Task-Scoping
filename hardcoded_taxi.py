@@ -2,24 +2,12 @@ import copy
 import z3
 from classes import *
 from scoping import *
-#TODO handle quantification by storing grounded attributes in
+#TODO add asserts
 def object_counts_to_names(object_counts):
 	object_names = {}
 	for k,v in object_counts.items():
 		object_names[k] = [str(i) for i in range(v)]
 	return object_names
-
-def check_guarantee(solver, precondition):
-	solver.push()
-	solver.add(z3.Not(precondition))
-	result = solver.check()
-	solver.pop()
-	if result == z3.z3.unsat:
-		print("result: {}".format(result))
-		return True
-	else:
-		print("result: {}".format(result))
-		return False
 
 if __name__ == "__main__":
 	types = ['taxi', 'passenger', 'wall']
@@ -98,6 +86,6 @@ if __name__ == "__main__":
 		#Test whether start state implies skills
 		for skill in skill_triples:
 			print("Action: {}".format(skill.get_action()))
-			print("Affected variables: {}".format(skill.get_affected_vars()))
-			guaranteed = check_guarantee(solver, skill.get_precondition())
+			print("Affected variables: {}".format(skill.get_affected_variables()))
+			guaranteed = solver_implies_condition(solver, skill.get_precondition())
 			print("Precondition guaranteed: {}".format(guaranteed))

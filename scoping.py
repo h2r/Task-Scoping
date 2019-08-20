@@ -1,6 +1,7 @@
 import abc
 import z3
 from classes import *
+from utils import *
 """
 TODO
 Get rddl parser (pyrddl) working
@@ -14,10 +15,12 @@ def solver_implies_condition(solver, precondition):
 	result = solver.check()
 	solver.pop()
 	if result == z3.z3.unsat:
-		print("result: {}".format(result))
+		# print("result: {}".format(result))
 		return True
 	else:
-		print("result: {}".format(result))
+		if result == z3.z3.unknown:
+			print("Unknown guarantee for precondition: {}".format(precondition))
+		# print("result: {}".format(result))
 		return False
 
 def triplet_dict_to_triples(skill_dict):
@@ -28,10 +31,10 @@ def triplet_dict_to_triples(skill_dict):
 	return skill_triples
 
 def get_affecting_skills(condition, skills):
-	#TODO: rewrite to work with condition and the actual data structures
+	#TODO: rewrite to work with Precondition and the actual data structures
 	affecting_skills = []
 	for s in skills:
-		overlapping_vars = [v for v in condition.get_variables() if v in s.get_affected_variables()]
+		overlapping_vars = [v for v in get_var_names(condition) if v in s.get_affected_variables()]
 		if len(overlapping_vars) > 0:
 			affecting_skills.append(s)
 	return affecting_skills
@@ -42,24 +45,27 @@ def get_affecting_skills(condition, skills):
 # 	pass
 
 def violates(skill, condition):
-	"""Returns True if executing the skill can lead to a violation of condition"""
-	common_vars = [v for v in skill.get_affected_variables() if v in condition.get_variables()]
+	"""Returns True if executing the skill can lead to a violation of Precondition"""
+	common_vars = [v for v in skill.get_affected_variables() if v in get_var_names(condition)]
 	return len(common_vars) > 0
 
 
-def scope(goal, start_condition, skills):
+def scope(goal, skills, start_condition = None, solver=None):
+	if solver is None:
+		solver = z3.Solver()
+		solver.add(start_condition)
 	discovered = [goal]
 	guarantees = []
 	used_skills = []
 	q = [goal]
 	#Create solver from start_condition
-	solver = z3.Solver()
-	solver.add(start_condition)
+
 	while len(q) > 0:
 		bfs_with_guarantees(discovered,q,solver,skills, used_skills,guarantees)
 		check_guarantees(guarantees,used_skills, discovered, q)
 	discovered_not_guarantees = [c for c in discovered if c not in guarantees]
-	return discovered_not_guarantees, used_skills
+	relevant_vars = list(set([x for c in discovered_not_guarantees for x in get_var_names(c)]))
+	return relevant_vars, used_skills
 
 def bfs_with_guarantees(discovered,q,solver,skills, used_skills,guarantees):
 	while len(q) > 0:

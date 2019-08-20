@@ -35,7 +35,7 @@ class Skill(abc.ABC):
 class SkillTriplet(Skill):
 	def __init__(self, precondition, action, effect):
 		"""
-		:param precondition: condition object
+		:param precondition: Precondition object
 		:param action: string
 		:param effect: list of affected variables
 		"""
@@ -47,9 +47,9 @@ class SkillTriplet(Skill):
 	def get_affected_variables(self):
 		return self.triplet[2]
 
-class condition():
+class Precondition():
 	"""
-	A condition is a first order expression that defines a set of states in a domain
+	A Precondition is a first order expression that defines a set of states in a domain
 	"""
 	def __init__(self, variables, z3_condition):
 		self.variables = variables

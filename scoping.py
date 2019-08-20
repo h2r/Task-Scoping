@@ -8,6 +8,7 @@ Get rddl parser (pyrddl) working
 Tweak scope() to be more general. In particular, have it deal with partially satisfied universal 
 Have conditions, skills return collection of variables using forall quantifiers, ex. forall(p | not inTaxi(p))
 Change how we check for guarantee violation. When we add a new skill, we should remove from the solver any conditions that depend on variables the skill affects
+!!!Split preconditions by and
 """
 def solver_implies_condition(solver, precondition):
 	solver.push()

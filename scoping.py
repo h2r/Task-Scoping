@@ -16,25 +16,6 @@ def triplet_dict_to_triples(skill_dict):
 			skill_triples.append((precondition,action,effect))
 	return skill_triples
 
-
-
-class skill_triplet(skill):
-	def __init__(self, precondition, action, effect):
-		"""
-		:param precondition: condition object
-		:param action: string
-		:param effect: list of affected variables
-		"""
-		self.triplet = (precondition,action,effect)
-	def get_precondition(self):
-		return self.triplet[0]
-	def get_action(self):
-		return self.triplet[1]
-	def get_affected_vars(self):
-		return self.triplet[2]
-
-
-
 def get_overlapping_variables(vars0, vars1):
 	"""
 	:vars0: list of variables (TODO generalize to a quantified set)

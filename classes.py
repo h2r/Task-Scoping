@@ -21,7 +21,7 @@ def get_all_groundings(base_str, names, keys = None):
 		groundings.append(grounded_attribute_str)
 	return groundings
 
-class skill(abc.ABC):
+class Skill(abc.ABC):
 	def get_precondition(self):
 		pass
 	def get_action(self):
@@ -31,6 +31,21 @@ class skill(abc.ABC):
 		:return: list of affected vars. May modify to use forall
 		"""
 		pass
+
+class SkillTriplet(Skill):
+	def __init__(self, precondition, action, effect):
+		"""
+		:param precondition: condition object
+		:param action: string
+		:param effect: list of affected variables
+		"""
+		self.triplet = (precondition,action,effect)
+	def get_precondition(self):
+		return self.triplet[0]
+	def get_action(self):
+		return self.triplet[1]
+	def get_affected_vars(self):
+		return self.triplet[2]
 
 class condition():
 	"""

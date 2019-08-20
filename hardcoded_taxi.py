@@ -1,5 +1,6 @@
 import copy
 import z3
+from classes import *
 from scoping import *
 #TODO handle quantification by storing grounded attributes in
 def object_counts_to_names(object_counts):
@@ -7,6 +8,18 @@ def object_counts_to_names(object_counts):
 	for k,v in object_counts.items():
 		object_names[k] = [str(i) for i in range(v)]
 	return object_names
+
+def check_guarantee(solver, precondition):
+	solver.push()
+	solver.add(z3.Not(precondition))
+	result = solver.check()
+	solver.pop()
+	if result == z3.z3.unsat:
+		print("result: {}".format(result))
+		return True
+	else:
+		print("result: {}".format(result))
+		return False
 
 if __name__ == "__main__":
 	types = ['taxi', 'passenger', 'wall']
@@ -38,12 +51,13 @@ if __name__ == "__main__":
 			name_to_z3_var[g] = att.type(g)
 			#Apply constraints
 			pass
-	s = z3.Solver()
+	solver = z3.Solver()
 	#Define init state
 	passengers_in_taxi_var_names = passenger_in_taxi.ground(all_object_names)
 	for p in passengers_in_taxi_var_names:
 		p_in_t_att = name_to_z3_var[p]
-		s.add(p_in_t_att == False)
+		solver.add(p_in_t_att == False)
+	# solver.push()
 	#Make skill triples
 	skill_triples = []
 
@@ -56,10 +70,34 @@ if __name__ == "__main__":
 		object_names["taxi"] = [str(t)]
 		#Empty taxi condition
 		passengers_in_taxi_var_names = passenger_in_taxi.ground(object_names)
-		for p in passengers_in_taxi_var_names: print(p)
+		# for p in passengers_in_taxi_var_names: print(p)
 		taxi_empty_vars = [z3.Not(name_to_z3_var[x]) for x in passengers_in_taxi_var_names]
 		taxi_empty_condition = z3.And(*taxi_empty_vars)
 		#No wall condition
 		pass
-		skill_triples.append()
+		skill_triples.append(SkillTriplet(taxi_empty_condition, "move_north_{}".format(t), ['taxi-y_{}'.format(t)]))
+		skill_triples.append(SkillTriplet(taxi_empty_condition, "move_south_{}".format(t), ['taxi-y_{}'.format(t)]))
+		skill_triples.append(SkillTriplet(taxi_empty_condition, "move_east_{}".format(t), ['taxi-x_{}'.format(t)]))
+		skill_triples.append(SkillTriplet(taxi_empty_condition, "move_west_{}".format(t), ['taxi-x_{}'.format(t)]))
 
+		#Passenger in taxi
+		for p_id in range(len(passengers_in_taxi_var_names)):
+			passenger_in_taxi_conditions = []
+			for p_id2 in range(len(passengers_in_taxi_var_names)):
+				p_inTaxi_name = passengers_in_taxi_var_names[p_id2]
+				if p_id2 == p_id:
+					passenger_in_taxi_conditions.append(name_to_z3_var[p_inTaxi_name])
+				else:
+					passenger_in_taxi_conditions.append(z3.Not(name_to_z3_var[p_inTaxi_name]))
+			taxi_occupance_condition = z3.And(*passenger_in_taxi_conditions)
+			skill_triples.append(SkillTriplet(taxi_occupance_condition, "move_north_{}".format(t), ['taxi-y_{}'.format(t), 'passenger-x-curr_{}'.format(p_id)]))
+			skill_triples.append(SkillTriplet(taxi_occupance_condition, "move_south_{}".format(t), ['taxi-y_{}'.format(t),'passenger-x-curr_{}'.format(p_id)]))
+			skill_triples.append(SkillTriplet(taxi_occupance_condition, "move_east_{}".format(t), ['taxi-x_{}'.format(t),'passenger-y-curr_{}'.format(p_id)]))
+			skill_triples.append(SkillTriplet(taxi_occupance_condition, "move_west_{}".format(t), ['taxi-x_{}'.format(t),'passenger-y-curr_{}'.format(p_id)]))
+
+		#Test whether start state implies skills
+		for skill in skill_triples:
+			print("Action: {}".format(skill.get_action()))
+			print("Affected variables: {}".format(skill.get_affected_vars()))
+			guaranteed = check_guarantee(solver, skill.get_precondition())
+			print("Precondition guaranteed: {}".format(guaranteed))

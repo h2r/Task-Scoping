@@ -64,7 +64,11 @@ class UngroundedThing():
 		self.name = name
 		self.arguments = arguments
 	def ground(self, object_names):
-		return get_all_groundings(self.name,  object_names, self.arguments)
+		#If there are no args, it is already grounded
+		if len(self.arguments) == 0:
+			return self.name
+		else:
+			return get_all_groundings(self.name,  object_names, self.arguments)
 
 class DomainAttribute(UngroundedThing):
 	def __init__(self, name, type, arguments, constraints = ()):

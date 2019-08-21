@@ -8,3 +8,4 @@ The multi passenger domain
 Academic advising with distractors
 student life
 3 other domains glued together
+Kitchen domain (ingredients, meals to make, dirty dishes. May have to move some items to get to other items)

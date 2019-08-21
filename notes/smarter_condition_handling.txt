@@ -28,3 +28,10 @@ def Z3_func_entry_get_arg(a0, a1, a2, _elems=Elementaries(_lib.Z3_func_entry_get
 	r = _elems.f(a0, a1, a2)
 	_elems.Check(a0)
 	return r
+~~Smarter handling of Or~~
+http://www.cs.tau.ac.il/~msagiv/courses/asv/z3py/strategies-examples.htm
+	mentions split-clause, which decomposes an OR. See other tactics
+~~Converting to CNF~~
+Tactics take in a goal ( set of formulas) and outputs either sat, unsat, a sequence of subgoals (what does that mean?), or fails
+	ctx-simplify (or regular simplify)
+	tseitin-cnf (converts to cnf, but may introduce extra variables to avoid )

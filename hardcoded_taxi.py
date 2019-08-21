@@ -90,6 +90,8 @@ if __name__ == "__main__":
 		solver.add(ground2var("passenger-y-curr",[p_id]) == passenger_start_y_values[p_id])
 		for t_id in range(object_counts['taxi']):
 			solver.add(ground2var('passenger-in-taxi',[p_id,t_id]) == False)
+	solver.add(ground2var('taxi-x',[0]) == 0)
+	solver.add(ground2var('taxi-y',[0]) == 0)
 	assert solver.check() == z3.sat
 	# print(solver.assertions())
 	solver.push()

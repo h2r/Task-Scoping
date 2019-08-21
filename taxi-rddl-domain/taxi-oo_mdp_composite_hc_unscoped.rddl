@@ -1,0 +1,199 @@
+/////////////////////////////////////////////////////////////////////////////////
+//                                                                             //
+// RDDL MDP version of the Taxi Domain described in original                   //
+// OO-MDP paper by Diuk et al. (2008)                                          //
+// IMPORTANT : This implementation is only intended to work when there is only //
+// a single taxi. Don't instantiate this with more than one taxi.              //
+//                                                                             //
+/////////////////////////////////////////////////////////////////////////////////
+
+
+domain taxi-oo_mdp {
+    requirements {
+        reward-deterministic,
+        cpf-deterministic,
+        preconditions
+    };
+
+    types {
+        xpos          : object;
+        ypos          : object;
+        taxi          : object;
+        passenger     : object;
+    };
+
+    pvariables {
+    //////////////////////////////// States /////////////////////////////////
+    // Position variables
+        taxi-at(taxi, xpos, ypos)                   : { state-fluent, bool, default=false };
+        passenger-at-curr(passenger, xpos, ypos)    : { state-fluent, bool, default=false };
+
+    // Taxi occupied variables
+        passenger-in-taxi(passenger, taxi)          : { state-fluent, bool, default=false };
+
+    // Passenger reached goal variable
+        passenger-at-dest(passenger)                : { state-fluent, bool, default=false };
+
+    //////////////////////////////// Actions ////////////////////////////////
+        move_north(taxi)                           : { action-fluent, bool, default = false };
+        move_south(taxi)                           : { action-fluent, bool, default = false };
+        move_east(taxi)                            : { action-fluent, bool, default = false };
+        move_west(taxi)                            : { action-fluent, bool, default = false };
+        pickup(taxi, passenger)                    : { action-fluent, bool, default = false };
+        dropoff(taxi, passenger)                   : { action-fluent, bool, default = false };
+
+    //////////////////////////////// Non-Fluents ////////////////////////////////
+    // Wall location
+        WALL_LOC(xpos,ypos)                          : { non-fluent, bool, default = false };
+
+    // TAXI_GOAL deterministic
+        TAXI_GOAL(xpos, ypos)                        : { non-fluent, bool, default = false };
+
+    // Passenger Goal location
+        PASSENGER_GOAL_LOC(passenger, xpos, ypos)    : { non-fluent, bool, default = false };
+
+    // Passengers whom you actually need to drop off (i.e, get reward for)
+        PASSENGERS_YOU_CARE_FOR(passenger)           : {non-fluent, bool, default = false };
+taxi-oo_mdp_composite_01.rddl
+    // connectivity of the grid
+        ADJACENT_UP(ypos,ypos)                       : { non-fluent, bool, default = false };
+        ADJACENT_DOWN(ypos,ypos)                     : { non-fluent, bool, default = false };
+        ADJACENT_RIGHT(xpos, xpos)                   : { non-fluent, bool, default = false };
+        ADJACENT_LEFT(xpos,xpos)                     : { non-fluent, bool, default = false };
+
+    };
+
+    cdfs {
+    // Pickup and Dropoff Transition function
+        passenger-in-taxi'(?p, ?t) =
+            // If there is no passenger in the taxi, the taxi is on the passenger and the agent executes pickup, make true
+            if ( pickup(?t, ?p) & ( exists_{ ?x1 : xpos, ?y1 : ypos } [ taxi-at(?t, ?x1, ?y1) & passenger-at-curr(?p, ?x1, ?y1) ] ) & ( ~exists_{ ?p1 : passenger } [ passenger-in-taxi( ?p1, ?t ) ] ) )
+                then true
+
+            // If there is this passenger in the taxi and the agent executes the dropoff action, make false
+            else if ( dropoff(?t, ?p) & passenger-in-taxi(?p, ?t ) )
+                then false
+
+            // Else, the value of passenger-in-taxi is whatever it used to be
+            else passenger-in-taxi(?p, ?t);
+
+    // Taxi movement transition function
+        taxi-at'(?t, ?x, ?y) =
+            // If the agent calls the move_west action and there exists an x2 such that the taxi is currently at x2 and there
+            // exists a grid cell adjacent and there is not a Wall adjacent to the left
+            if ( move_west(?t) & ( exists_{ ?x2 : xpos } [ taxi-at(?t, ?x2, ?y) & ADJACENT_LEFT( ?x, ?x2 ) ] ) & ~WALL_LOC(?x, ?y) )
+                then true
+            else if ( move_east(?t) & ( exists_{ ?x2 : xpos } [ taxi-at(?t, ?x2, ?y) & ADJACENT_RIGHT( ?x, ?x2 ) ] ) & ~WALL_LOC(?x, ?y) )
+                then true
+            else if ( move_north(?t) & ( exists_{ ?y2 : ypos } [ taxi-at(?t, ?x, ?y2) & ADJACENT_UP( ?y, ?y2 ) ] ) & ~WALL_LOC(?x, ?y) )
+                then true
+            else if ( move_south(?t) & ( exists_{ ?y2 : ypos } [ taxi-at(?t, ?x, ?y2) & ADJACENT_DOWN( ?y, ?y2 ) ] ) & ~WALL_LOC(?x, ?y) )
+                then true
+
+            //Update location we moved from
+            else if ( move_west(?t) & ( exists_{ ?x2 : xpos } [ taxi-at(?t, ?x, ?y) & ADJACENT_LEFT( ?x2, ?x ) & ~WALL_LOC(?x2, ?y) ] ) )
+                then false
+            else if ( move_east(?t) & ( exists_{ ?x2 : xpos } [ taxi-at(?t, ?x, ?y) & ADJACENT_RIGHT( ?x2, ?x ) & ~WALL_LOC(?x2, ?y) ] )  )
+                then false
+            else if ( move_north(?t) & ( exists_{ ?y2 : ypos } [ taxi-at(?t, ?x, ?y) & ADJACENT_UP( ?y2, ?y ) & ~WALL_LOC(?x, ?y2) ] ) )
+                then false
+            else if ( move_south(?t) & ( exists_{ ?y2 : ypos } [ taxi-at(?t, ?x, ?y) & ADJACENT_DOWN( ?y2, ?y ) & ~WALL_LOC(?x, ?y2) ] ) )
+                then false
+
+            // agent doesn't move, so it is here only if it was already here
+            else taxi-at(?t, ?x, ?y);
+
+    // Passenger movement transition function
+        passenger-at-curr'(?p, ?x, ?y) =
+        // This appears to be creating weird issues. I think the thing to do is to parameterize this fluent
+        // to include a taxi, then we can do something similar to the move function transition...
+            if ( exists_{?t2 : taxi} [ passenger-in-taxi( ?p, ?t2) & taxi-at(?t2, ?x, ?y)] )
+                then true
+            else if ( exists_{?t2 : taxi} [ passenger-in-taxi( ?p, ?t2) & ~taxi-at(?t2, ?x, ?y)] )
+                then false
+            else passenger-at-curr(?p, ?x, ?y);
+
+    // Passenger reached destination transitions
+        passenger-at-dest'(?p) =
+            if ( ~passenger-at-dest(?p) & forall_{?t2 : taxi} [ ~passenger-in-taxi( ?p, ?t2) ] & exists_{?x: xpos, ?y: ypos} [PASSENGER_GOAL_LOC(?p, ?x, ?y) & passenger-at-curr(?p, ?x, ?y)] )
+                then true
+            else passenger-at-dest(?p);
+
+    };
+
+    reward =
+    //    ( -5 * ( ~forall_{ ?p : passenger, ?x : xpos, ?y : ypos } [ PASSENGERS_YOU_CARE_FOR(?p) => passenger-at-dest(?p, ?x, ?y) ] ) );
+    //      if ( exists_{ ?t : taxi, ?x : xpos, ?y : ypos } [ TAXI_GOAL(?x, ?y) & taxi-at(?t, ?x, ?y) ] )
+    //          then 5
+    //      else -5;
+          if ( exists_{ ?p : passenger } [ PASSENGERS_YOU_CARE_FOR(?p) & passenger-at-dest(?p) ] )
+              then 5
+          else -5;
+
+    action-preconditions {
+    // there can only be one move per turn
+          ( forall_{ ?t : taxi } [move_west(?t) + move_east(?t) + move_south(?t) + move_north(?t) +
+                                  ( sum_{ ?p : passenger } [pickup(?t, ?p) + dropoff(?t, ?p)] ) ] <= 1 ) ;
+    //    ( forall_{ ?t : taxi} [move_west(?t) + move_east(?t) + move_south(?t) + move_north(?t) <= 1] ) ;
+
+    // don't move outside of the grid
+        forall_{ ?t : taxi } [ move_west(?t) => exists_{ ?x1 : xpos, ?x2 : xpos, ?y : ypos } [ taxi-at(?t, ?x1, ?y) & ADJACENT_LEFT(?x2, ?x1) ] ];
+        forall_{ ?t : taxi } [ move_east(?t) => exists_{ ?x1 : xpos, ?x2 : xpos, ?y : ypos } [ taxi-at(?t, ?x1, ?y) & ADJACENT_RIGHT(?x2, ?x1) ] ];
+        forall_{ ?t : taxi } [ move_north(?t) => exists_{ ?x : xpos, ?y1 : ypos, ?y2 : ypos } [ taxi-at(?t, ?x, ?y1) & ADJACENT_UP(?y2, ?y1) ] ];
+        forall_{ ?t : taxi } [ move_south(?t) => exists_{ ?x : xpos, ?y1 : ypos, ?y2 : ypos } [ taxi-at(?t, ?x, ?y1) & ADJACENT_DOWN(?y2, ?y1) ] ];
+
+    };
+}
+non-fluents taxi-2wide-2pass {
+    domain = taxi-oo_mdp;
+
+    objects {
+        xpos               : { x00,x01,x02,x03,x04};
+        ypos               : { y00,y01,y02,y03,y04};
+        taxi               : { t00 };
+        passenger          : { p00, p01 };
+    };
+
+    non-fluents {
+        // ADJACENCY
+    ADJACENT_LEFT(x00, x01);
+    ADJACENT_RIGHT(x01, x00);
+    ADJACENT_LEFT(x01, x02);
+    ADJACENT_RIGHT(x02, x01);
+    ADJACENT_LEFT(x02, x03);
+    ADJACENT_RIGHT(x03, x02);
+    ADJACENT_LEFT(x03, x04);
+    ADJACENT_RIGHT(x04, x03);
+    ADJACENT_DOWN(y00, y01);
+    ADJACENT_UP(y01, y00);
+    ADJACENT_DOWN(y01, y02);
+    ADJACENT_UP(y02, y01);
+    ADJACENT_DOWN(y02, y03);
+    ADJACENT_UP(y03, y02);
+    ADJACENT_DOWN(y03, y04);
+    ADJACENT_UP(y04, y03);
+
+        // WALLS
+        //WALL_LOC(x01, y00);
+
+        // PASSENGERS
+        PASSENGER_GOAL_LOC(p00, x02, y03);
+        PASSENGER_GOAL_LOC(p01, x03, y02);
+        PASSENGERS_YOU_CARE_FOR(p00);
+    };
+}
+
+instance taxi-oo_mdp_inst_mdp__01 {
+    domain = taxi-oo_mdp;
+    non-fluents = taxi-2wide-2pass;
+
+    init-state {
+        taxi-at(t00, x00, y00);
+        passenger-at-curr(p00, x01, y00);
+        passenger-at-curr(p01, x00, y01);
+    };
+
+    horizon = 20;
+
+    discount = 1.0;
+}

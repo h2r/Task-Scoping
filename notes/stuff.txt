@@ -1,0 +1,10 @@
+~~Domain~~
+~Characteristics~
+We want domains where there are many variables, few of which are relevant to a given (start,goal) pair.
+Tasha mentioned the distinction between large and complex domains, saying planners are good for large domains, sat solvers for complex domains. How does that relate to the above description of domains? How can we lean more heavily on the sat solvers?
+~Examples~
+The z3 docs include a scheduling problem example. Nakul/Tasha suggested we use a scheduling domain as well.
+The multi passenger domain
+Academic advising with distractors
+student life
+3 other domains glued together

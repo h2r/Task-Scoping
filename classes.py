@@ -1,4 +1,5 @@
 import abc, copy
+import z3
 
 def get_all_groundings(base_str, names, keys = None):
 	if keys is None:
@@ -108,3 +109,9 @@ class DomainAction(UngroundedThing):
 		# self.name = name
 		# self.arguments = arguments
 	# def ground(self,  object_names):
+
+class AndList():
+	def __init__(self, *args):
+		self.args = args
+	def toConjunction(self):
+		return z3.And(*self.args)

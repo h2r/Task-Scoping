@@ -1,0 +1,30 @@
+~~Purpose~~
+We need to decompose conjunctions so that we can keep check guarantees over their components
+~~How to decompose conjunctions~~
+0: Dont merge the components in the first place!
+1: python api. Can maybe do it
+2: c api can (almost definitely) do it. Can interface via cython.
+
+0:
+Instead of applying z3.And, apply classes.And. Then in scoping algorithm, check whether a precondition is
+z3.expr of classes.And
+
+1:
+~Functions of interest~
+z3core.py:
+def Z3_func_entry_get_num_args(a0, a1, _elems=Elementaries(_lib.Z3_func_entry_get_num_args)):
+	r = _elems.f(a0, a1)  
+	_elems.Check(a0)
+	return r
+"""
+Example code for c api: { unsigned r = Z3_func_entry_get_num_args(ctx(), m_entry); check_error(); return r; }
+(source https://z3prover.github.io/api/html/classz3_1_1func__entry.html)
+It seems we need to pass it a context and an m_entry. What's an m_entry?
+
+We call this with default _elems arg. _lib is a dll, which is written in hex.
+_lib.Z3_func_entry_get_num_args is a function from the dll, which I can't look inside of.
+"""
+def Z3_func_entry_get_arg(a0, a1, a2, _elems=Elementaries(_lib.Z3_func_entry_get_arg)):
+	r = _elems.f(a0, a1, a2)
+	_elems.Check(a0)
+	return r

@@ -110,8 +110,47 @@ class DomainAction(UngroundedThing):
 		# self.arguments = arguments
 	# def ground(self,  object_names):
 
-class AndList():
+class AndList(list):
 	def __init__(self, *args):
-		self.args = args
+		#If any of the args are an AndList, flatten them
+		self.args = self.flatten(args)
 	def toConjunction(self):
 		return z3.And(*self.args)
+	def flatten(self,a):
+		new_list = []
+		for x in a:
+			if hasattr(x,"__getitem__"):
+				new_list = new_list + self.flatten(x)
+			else:
+				new_list.append(x)
+		return new_list
+	def __getitem__(self, item):
+		return self.args[item]
+	def __iter__(self):
+		return self.args.__iter__()
+	def __repr__(self):
+		return str(self.args)
+	def __str__(self):
+		return self.__repr__()
+
+def test_AndList():
+	z3_vars = []
+	for i in range(10):
+		z3_vars.append(z3.Bool(str(i)))
+	a = AndList(*z3_vars[1:3])
+	for x in a:
+		print(x)
+	b = AndList(z3_vars[0],a)
+	c = AndList(z3_vars[4:6])
+	d = AndList(b,c)
+	print("a:")
+	for x in a.args:
+		print(x)
+	print("b:")
+	for x in b.args:
+		print(x)
+	print("d")
+	for x in d.args: print(x)
+
+if __name__ == "__main__":
+	test_AndList()

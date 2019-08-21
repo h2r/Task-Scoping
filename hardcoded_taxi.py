@@ -90,7 +90,8 @@ if __name__ == "__main__":
 		solver.add(ground2var("passenger-y-curr",[p_id]) == passenger_start_y_values[p_id])
 		for t_id in range(object_counts['taxi']):
 			solver.add(ground2var('passenger-in-taxi',[p_id,t_id]) == False)
-	print(solver.assertions())
+	assert solver.check() == z3.sat
+	# print(solver.assertions())
 	solver.push()
 	# Make skill triples
 	skill_triples = []
@@ -106,7 +107,7 @@ if __name__ == "__main__":
 		passengers_in_taxi_var_names = passenger_in_taxi.ground(object_names)
 		# for p in passengers_in_taxi_var_names: print(p)
 		taxi_empty_vars = [z3.Not(name_to_z3_var[x]) for x in passengers_in_taxi_var_names]
-		taxi_empty_condition = z3.And(*taxi_empty_vars)
+		taxi_empty_condition = AndList(*taxi_empty_vars)
 		# Create not-touching wall conditions
 		wall_x_groundings = wall_x.ground(all_object_names)
 		wall_y_groundings = wall_y.ground(all_object_names)
@@ -139,20 +140,15 @@ if __name__ == "__main__":
 		no_touch_east_condition = z3.Not(z3.Or(*wall_touch_east_list))
 		no_touch_south_condition = z3.Not(z3.Or(*wall_touch_south_list))
 		no_touch_west_condition = z3.Not(z3.Or(*wall_touch_west_list))
-		# And no_touch conditions with empty passenger
-		move_north_empty_condition = z3.And(no_touch_north_condition, taxi_empty_condition)
-		move_east_empty_condition = z3.And(no_touch_east_condition, taxi_empty_condition)
-		move_south_empty_condition = z3.And(no_touch_south_condition, taxi_empty_condition)
-		move_west_empty_condition = z3.And(no_touch_west_condition, taxi_empty_condition)
-		# Add skills for each movement direction with empty taxi
+		# Add skills for each movement direction
 		skill_triples.append(
-			SkillTriplet(move_north_empty_condition, "move_north_{}".format(t_id), ['taxi-y_{}'.format(t_id)]))
+			SkillTriplet(no_touch_north_condition, "move_north_{}".format(t_id), ['taxi-y_{}'.format(t_id)]))
 		skill_triples.append(
-			SkillTriplet(move_south_empty_condition, "move_south_{}".format(t_id), ['taxi-y_{}'.format(t_id)]))
+			SkillTriplet(no_touch_south_condition, "move_south_{}".format(t_id), ['taxi-y_{}'.format(t_id)]))
 		skill_triples.append(
-			SkillTriplet(move_east_empty_condition, "move_east_{}".format(t_id), ['taxi-x_{}'.format(t_id)]))
+			SkillTriplet(no_touch_east_condition, "move_east_{}".format(t_id), ['taxi-x_{}'.format(t_id)]))
 		skill_triples.append(
-			SkillTriplet(move_west_empty_condition, "move_west_{}".format(t_id), ['taxi-x_{}'.format(t_id)]))
+			SkillTriplet(no_touch_west_condition, "move_west_{}".format(t_id), ['taxi-x_{}'.format(t_id)]))
 
 		# Create single-passenger-in-taxi conditions, and pickup/dropoff
 		for p_id in range(len(passengers_in_taxi_var_names)):
@@ -164,12 +160,13 @@ if __name__ == "__main__":
 				#We don't need to mention the other passengers, but it doesn't hurt. Consider rewriting this bit.
 				else:
 					passenger_in_taxi_conditions.append(z3.Not(name_to_z3_var[p_inTaxi_name]))
-			taxi_occupance_condition = z3.And(*passenger_in_taxi_conditions)
+			# taxi_occupance_condition = AndList(*passenger_in_taxi_conditions)
+			taxi_occupance_condition = ground2var('passenger-in-taxi',[p_id,0])
 			#  Combine passenger in taxi Precondition with no_touch conditions
-			move_north_with_passenger_condition = z3.And(no_touch_north_condition, taxi_occupance_condition)
-			move_east_with_passenger_condition = z3.And(no_touch_east_condition, taxi_occupance_condition)
-			move_south_with_passenger_condition = z3.And(no_touch_south_condition, taxi_occupance_condition)
-			move_west_with_passenger_condition = z3.And(no_touch_west_condition, taxi_occupance_condition)
+			move_north_with_passenger_condition = AndList(no_touch_north_condition, taxi_occupance_condition)
+			move_east_with_passenger_condition = AndList(no_touch_east_condition, taxi_occupance_condition)
+			move_south_with_passenger_condition = AndList(no_touch_south_condition, taxi_occupance_condition)
+			move_west_with_passenger_condition = AndList(no_touch_west_condition, taxi_occupance_condition)
 
 			skill_triples.append(SkillTriplet(move_north_with_passenger_condition, "move_north_{}".format(t_id),
 											  ['passenger-x-curr_{}'.format(p_id)]))
@@ -183,7 +180,7 @@ if __name__ == "__main__":
 			# Add pickup actions
 			shared_x_condition = (ground2var('taxi-x',[t_id]) == ground2var('passenger-x-curr',[p_id]))
 			shared_y_condition = (ground2var('taxi-y',[t_id]) == ground2var('passenger-y-curr',[p_id]))
-			pickup_condition = z3.And(shared_x_condition,shared_y_condition,taxi_empty_condition)
+			pickup_condition = AndList(shared_x_condition,shared_y_condition,taxi_empty_condition)
 			dropoff_condition = name_to_z3_var[passengers_in_taxi_var_names[p_id]]
 			skill_triples.append(SkillTriplet(pickup_condition,'pickup_{}_{}'.format(t_id,p_id),[passengers_in_taxi_var_names[p_id]]))
 			skill_triples.append(SkillTriplet(dropoff_condition,"dropoff_{}_{}".format(t_id,p_id),passengers_in_taxi_var_names[p_id]))
@@ -197,13 +194,39 @@ if __name__ == "__main__":
 		goal_y_var = ground2var('PASSENGER_GOAL_Y',[p_id])
 		at_goal_condition = ((cur_x_var == goal_x_var) and (cur_y_var == goal_y_var))
 		at_goal_or_unimportant_conditions.append(z3.Or(at_goal_condition,z3.Not(ground2var('PASSENGERS_YOU_CARE_FOR',[p_id]))))
-	goal_condition = z3.And(*at_goal_or_unimportant_conditions)
+	# Since this condition includes each passenger's location in an OR, the scoper thinks they are relevant
+	# We can fix this by plugging in constants to expressions and simplifying, but for now I will define an easier goal
+	goal_condition_hard_to_parse = AndList(*at_goal_or_unimportant_conditions)
+	cared_for_goal_conditions = []
+	#Checking this assertion in the loop raises an s
+	assert solver.check() == z3.z3.sat
+
+	for p_id in range(object_counts['passenger']):
+		result = solver.check()
+		assert result == z3.z3.sat, result
+
+		#Check whether we care for the passenger
+		solver.push()
+		# If the passenger cannot not be cared for, they are cared for
+		solver.add(ground2var('PASSENGERS_YOU_CARE_FOR',[p_id]) == False)
+		result = solver.check()
+		solver.pop()
+		if result == z3.z3.unsat:
+			cur_x_var = ground2var('passenger-x-curr', [p_id])
+			cur_y_var = ground2var('passenger-y-curr', [p_id])
+			goal_x_var = ground2var('PASSENGER_GOAL_X', [p_id])
+			goal_y_var = ground2var('PASSENGER_GOAL_Y', [p_id])
+			at_goal_condition = ((cur_x_var == goal_x_var) and (cur_y_var == goal_y_var))
+			cared_for_goal_conditions.append(at_goal_condition)
+	goal_condition_easy_to_parse = AndList(cared_for_goal_conditions)
+
 	# goal_condition = Precondition()
 	# Test whether start state implies skills
-	for skill in skill_triples:
+	# for skill in skill_triples:
+	# 	pass
 		# print("Action: {}".format(skill.get_action()))
 		# print("Affected variables: {}".format(skill.get_affected_variables()))
-		guaranteed = solver_implies_condition(solver, skill.get_precondition())
+		# guaranteed = solver_implies_condition(solver, skill.get_precondition())
 		# print("Precondition guaranteed: {}".format(guaranteed))
 	# x = z3.z3util.get_vars(goal_z3)
 	# y = x[0]
@@ -211,5 +234,6 @@ if __name__ == "__main__":
 	# print(y)
 
 #Run scoping
-	discovered_not_guarantees, used_skills = scope(goal_condition,skill_triples,solver=solver)
+	print("Scoping")
+	discovered_not_guarantees, used_skills = scope(goal_condition_easy_to_parse,skill_triples,solver=solver)
 	print(discovered_not_guarantees)

@@ -1,0 +1,9 @@
+Problem: scoper is not removing other passengers
+Changed move skills so that there is base skill conditioned upon no_touch, then passenger-specific skills conditioned upon no_touch AND passeneger-in-taxi.
+Currently, conditions on correct p in taxi, others not in taxi. Could this make the scoper think the other passengers are relevant?
+
+The goal condition is specified as And(dont care about pi OR pi.loc == pi.goal)
+This mentions the other locations...
+Ideally, I want z3 to realize that since we dont care about p1, (dont care about p1 or p1.loc==p1.goal) is true. 
+In the meantime, we can rewrite the goal condition
+More robust solutions: for each OR, if a component is true because of a constant, simplify to True. Dually for And

@@ -12,6 +12,8 @@ Change how we check for guarantee violation. When we add a new skill, we should 
 """
 def solver_implies_condition(solver, precondition):
 	solver.push()
+	# assert z3.is_expr(precondition), "{}; {}".format(type(precondition),precondition)
+	# print(type(precondition))
 	solver.add(z3.Not(precondition))
 	result = solver.check()
 	solver.pop()
@@ -55,10 +57,15 @@ def scope(goal, skills, start_condition = None, solver=None):
 	if solver is None:
 		solver = z3.Solver()
 		solver.add(start_condition)
-	discovered = [goal]
+	if type(goal) is AndList:
+		discovered = copy.copy(goal.args)
+		q = copy.copy(goal.args)
+	else:
+		discovered = [goal]
+		q = [goal]
+
 	guarantees = []
 	used_skills = []
-	q = [goal]
 	#Create solver from start_condition
 
 	while len(q) > 0:
@@ -71,18 +78,29 @@ def scope(goal, skills, start_condition = None, solver=None):
 def bfs_with_guarantees(discovered,q,solver,skills, used_skills,guarantees):
 	while len(q) > 0:
 		condition = q.pop()
+		if type(condition) is AndList:
+			print("dang")
 		#We are not trying to find a target (Is the start the target??), so we ignore this step
 		#If not is_goal(v)
 		for skill in get_affecting_skills(condition, skills):
 			if skill in used_skills: continue
 			used_skills.append(skill)
 			precondition = skill.get_precondition()
-			if precondition not in discovered:  #Could we do something fancier, like if discovered implies precondition?
-				discovered.append(precondition)
-				if solver_implies_condition(solver,precondition):
-					guarantees.append(precondition)
-				else:
-					q.append(precondition)
+			if type(precondition) is AndList:
+				precondition_list = copy.copy(precondition.args)
+			else:
+				precondition_list = [precondition]
+			for precondition in precondition_list:
+				if precondition not in discovered:  #Could we do something fancier, like if discovered implies precondition?
+					if str(precondition) == "passenger-in-taxi_1_0":
+						print("booooiii")
+					discovered.append(precondition)
+					if type(precondition) is AndList:
+						print(skill)
+					if solver_implies_condition(solver,precondition):
+						guarantees.append(precondition)
+					else:
+						q.append(precondition)
 
 
 def check_guarantees(guarantees,used_skills, discovered, q):
@@ -90,6 +108,8 @@ def check_guarantees(guarantees,used_skills, discovered, q):
 	for g in guarantees:
 		for s in used_skills:
 			if violates(s,g):
+				if 'passenger-in-taxi_1_0' in get_var_names(g):
+					print("ruroh")
 				violated_guarantees.append(g)
 				break  #Break out of inner loop, since we know the gaurantee is violated by some skill
 	for g in violated_guarantees:

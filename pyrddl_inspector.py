@@ -36,25 +36,32 @@ def make_triplet_dict(rddl_model):
 	# print(actions_list)
 
 	# print(type(model.domain.cpfs[1]))
-	action_to_precond_to_effect = collections.defaultdict(lambda: collections.defaultdict(list))
+	action_to_effect_to_precond = collections.defaultdict(lambda: collections.defaultdict(list))
 
 	for state_variable_cpf in rddl_model.domain.cpfs[1]:
 		if (state_variable_cpf.expr.etype[0] == 'control'):
-			for action_precondition in state_variable_cpf.expr._expr[1]:
+			condition = state_variable_cpf.expr.args[0]
+			false_case = state_variable_cpf.expr.args[2]
+			while(false_case.etype[0] == 'control'):
 				for action in actions_list:
-					if action in action_precondition.scope:
-						print(state_variable_cpf.name.replace("'", ""))
-						action_to_precond_to_effect[action][action_precondition._expr].append(
-							state_variable_cpf.name.replace("'", ""))
-	print(action_to_precond_to_effect)
+					if action in condition.scope:
+						action_to_effect_to_precond[action][state_variable_cpf.name.replace("'", "")].append(condition)
+				condition = false_case
+				false_case = condition.args[2]
 
-	print('BREAK!')
+	# for state_variable_cpf in rddl_model.domain.cpfs[1]:
+	# 	if (state_variable_cpf.expr.etype[0] == 'control'):
+	# 		for action_precondition in state_variable_cpf.expr._expr[1]:
+	# 			for action in actions_list:
+	# 				if action in action_precondition.scope:
+	# 					action_to_effect_to_precond[action][state_variable_cpf.name.replace("'", "")].append(action_precondition._expr)
+	# 					print("Temporary Break!")
 
-	return action_to_precond_to_effect
+	return action_to_effect_to_precond
 
 	# IMPORTANT!!!
 	# This parser will only work for a transition function that begins with if statements for every block
-	# Further, every block needs to contain statements with only one action
+	# Further, every block needs to contain statements with only one action => only one action allowed per time-step
 
 
 # For every state predicate function, see which objects it takes in:
@@ -107,10 +114,10 @@ def convert_to_z3(init_state, domain_objects, init_nonfluents, model_states, mod
 			name_to_z3_var[g] = c.type(g)
 			# Apply constraints
 			pass
-	print("grojunded atts:")
+	print("grounded atts:")
 	for n in name_to_z3_var.keys():
 		print(n)
-	print("grojunded atts over")
+	print("grounded atts over")
 
 	# def ground2name(att_name, object_vals):
 	# 	# print(att_name)
@@ -133,27 +140,12 @@ def convert_to_z3(init_state, domain_objects, init_nonfluents, model_states, mod
 	for init_nonf in init_nonfluents:
 		solver.add(ground2var(init_nonf[0][0], init_nonf[0][1]) == init_nonf[1])
 
-	# print(solver.assertions)
-
-	# TODO:
-	# 1. Look into how to convert the preconditions to z3
-
 	for action in triplet_dict.keys():
-		for precond in triplet_dict[action].keys():
-			curr_exp = precond
-			print("BREAK!")
-
-	# CODE WRITTEN BEFORE MICHAEL WROTE HIS CLASSES THAT MADE EVERYTHING CLEARER/BETTER!
-	# list_of_list_of_propositions = []
-	# for param_type in state.param_types:
-	#     # Could speed this up with a dictionary, but trivial increase for now
-	#     for instantiated_object in domain_objects:
-
-	#     # For loop iterator
-	#     #     if instantiated_object[0] == param_type:
-	#     #         list_of_list_of_propositions.append(instantiated_object[1])
-	#     # itertools.product(*list_of_list_of_propositions)
-
+		for effect in triplet_dict[action]:
+			for precond in triplet_dict[action][effect]:
+				print(precond)
+				z3_expr = _compile_expression(precond)
+				print("Temp break here!")
 
 def _compile_expression(expr: Expression):
 	etype2compiler = {
@@ -166,7 +158,7 @@ def _compile_expression(expr: Expression):
 		# These are functions like 'abs', etc. that we can handle later probably.
 		# They don't appear in any of the domains that we care about.
 		# 'func':        _compile_function_expression,
-		'control': _compile_control_flow_expression,
+		#'control': _compile_control_flow_expression,
 		'aggregation': _compile_aggregation_expression
 	}
 
@@ -187,20 +179,18 @@ def _compile_pvariable_expression(expr: Expression):
 	:param expr:
 	:return: returns list of z3 vars, one for each possible set of arguments to the function
 	"""
-	# If it's an action, we don't want it in the precondition. The
-	# precondition is explicitly only over states
-	# !!!!!!!!!!!!!!!CHECK!!!!!!!!!!!!!!!
-	# IMPORTANT RETURN A Z3 VARIABLE FROM HAVING LOOKED IT UP IN THE Z3 NAME_TO_VAR DICT
 
-	#Return all groundings of this expression
+	# Return all groundings of this expression
 	#TODO make sure this works for 0 arg pvars
 	att_name = expr.etype[1]
 	att = att_name_to_domain_attribute[att_name]
 	#list of str
 	all_att_groundings = att.ground(all_object_names)
 	#list of z3 vars
+	all_att_var_groundings = []
 	all_att_var_groundings = [name_to_z3_var[g] for g in all_att_groundings]
 	return all_att_var_groundings
+
 	# return expr.scope
 	# etype = expr.etype
 	# args = expr.args
@@ -272,18 +262,18 @@ def _compile_relational_expression(expr: Expression):
 # 1. Change the dictionary to be precond to effect to action
 # 2. Rip out the precond and add the if/else preconds to the dict in place of the first precond
 #
-def _compile_control_flow_expression(expr: Expression):
-	etype = expr.etype
-	args = expr.args
-	if etype[1] == 'if':
-		condition = _compile_expression(args[0])
-		true_case = _compile_expression(args[1])
-		false_case = _compile_expression(args[2])
-		# Compile the cases together sensibly with help from Michael!
-		fluent = TensorFluent.if_then_else(condition, true_case, false_case)
-	else:
-		raise ValueError('Invalid control flow expression:\n{}'.format(expr))
-	return fluent
+# def _compile_control_flow_expression(expr: Expression):
+# 	etype = expr.etype
+# 	args = expr.args
+# 	if etype[1] == 'if':
+# 		condition = _compile_expression(args[0])
+# 		true_case = _compile_expression(args[1])
+# 		false_case = _compile_expression(args[2])
+# 		# Compile the cases together sensibly with help from Michael!
+# 		fluent = TensorFluent.if_then_else(condition, true_case, false_case)
+# 	else:
+# 		raise ValueError('Invalid control flow expression:\n{}'.format(expr))
+# 	return fluent
 
 
 def _compile_aggregation_expression(expr: Expression):
@@ -319,8 +309,8 @@ def _compile_aggregation_expression(expr: Expression):
 
 
 if __name__ == '__main__':
-	# rddl_file_location = "/home/nishanth/Documents/IPC_Code/rddlsim/files/taxi-rddl-domain/taxi-oo_simple.rddl"
-	rddl_file_location = "./taxi-rddl-domain/taxi-oo_mdp_composite_01.rddl"
+	rddl_file_location = "/home/nishanth/Documents/IPC_Code/rddlsim/files/taxi-rddl-domain/taxi-oo_simple.rddl"
+	#rddl_file_location = "./taxi-rddl-domain/taxi-oo_mdp_composite_01.rddl"
 	with open(rddl_file_location, 'r') as file:
 		rddl = file.read()
 

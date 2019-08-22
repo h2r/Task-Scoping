@@ -118,7 +118,38 @@ def check_guarantees(guarantees,used_skills, discovered, q):
 	return guarantees
 
 def scope_rddl_file(input_file_path, output_file_path, irrelevant_objects):
-	pass
+	"""
+	:param input_file_path:
+	:param output_file_path:
+	:param irrelevant_objects: (type, name) list
+	:return:
+	"""
+	with open(input_file_path, 'r') as f:
+		input_lines = f.readlines()
+	output_lines = []
+	for l in input_lines:
+		#Check whether line contains irrelevant object
+		contains_irrelevant = False
+		for (t,o) in irrelevant_objects:
+			if o in l:
+				contains_irrelevant = True
+				#If this is an object declaration
+				if l.strip()[:len(t)] == t:
+					comma_split = l.split(",")
+					comma_split_no_spaces = [x.replace(" ","") for x in comma_split]
+					o_id = comma_split_no_spaces.index(o)
+					comma_split_o_removed = [comma_split[i] for i in range(len(comma_split)) if i != o_id]
+					new_l = ",".join(comma_split_o_removed)
+					output_lines.append(new_l)
+				break
+		if not contains_irrelevant:
+			output_lines.append(l)
+	with open(output_file_path,'w') as f:
+		f.writelines(output_lines)
 
+def scope_rddl_file_test():
+	input_file_path = "./taxi-rddl-domain/taxi-oo_mdp_composite_01.rddl"
+if __name__ == "__main__":
+	pass
 
 

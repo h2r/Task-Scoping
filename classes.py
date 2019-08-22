@@ -1,25 +1,14 @@
 import abc, copy
 import z3
+import itertools
+from instance_building_utils import *
 
-def get_all_groundings(base_str, names, keys = None):
-	if keys is None:
-		keys = names.keys()
-	groundings = []
-	object_index_tuples = [[]]
-	# Incorporate all arguments into the object index tuples
-	for object_type in keys:
-		new_object_index_tuples = []
-		names_for_this_type = names[object_type]
-		for partial_index_list in object_index_tuples:
-			for i in names_for_this_type:
-				extended_index_list = copy.deepcopy(partial_index_list)
-				extended_index_list.append(str(i))
-				new_object_index_tuples.append(extended_index_list)
-		object_index_tuples = new_object_index_tuples
-	for object_indices in object_index_tuples:
-		indices_str = "_".join(object_indices)
-		grounded_attribute_str = "{}_{}".format(base_str, indices_str)
-		groundings.append(grounded_attribute_str)
+def get_all_groundings(base_str, names, keys):
+	name_lists = [names[k] for k in keys]
+	object_name_sequence_list = itertools.product(*name_lists)
+	x = object_name_sequence_list
+	# x = list([i[0] for i in object_name_sequence_list])
+	groundings = [g2n(base_str,object_names) for object_names in x]
 	return groundings
 
 class Skill(abc.ABC):
@@ -67,7 +56,7 @@ class UngroundedThing():
 	def ground(self, object_names):
 		#If there are no args, it is already grounded
 		if len(self.arguments) == 0:
-			return self.name
+			return [self.name]
 		else:
 			return get_all_groundings(self.name,  object_names, self.arguments)
 
@@ -80,28 +69,6 @@ class DomainAttribute(UngroundedThing):
 		# self.arguments = arguments
 		self.object_counts = {}
 		self.groundings = []
-	# def ground(self, object_names):
-	# 	"""
-	# 	:param object_counts: Dict[str, int]
-	# 	:return: groundings of this attribute based on object_counts
-	# 	"""
-	# 	groundings = []
-	# 	object_index_tuples = [[]]
-	# 	# Incorporate all arguments into the object index tuples
-	# 	for object_type in self.arguments:
-	# 		new_object_index_tuples = []
-	# 		names_for_this_type = object_names[object_type]
-	# 		for partial_index_list in object_index_tuples:
-	# 			for i in names_for_this_type:
-	# 				extended_index_list = copy.deepcopy(partial_index_list)
-	# 				extended_index_list.append(str(i))
-	# 				new_object_index_tuples.append(extended_index_list)
-	# 		object_index_tuples = new_object_index_tuples
-	# 	for object_indices in object_index_tuples:
-	# 		indices_str = "_".join(object_indices)
-	# 		grounded_attribute_str = "{}_{}".format(self.name, indices_str)
-	# 		groundings.append(grounded_attribute_str)
-	# 	return groundings
 
 class DomainAction(UngroundedThing):
 	def __init__(self, name, arguments):

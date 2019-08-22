@@ -6,7 +6,7 @@ from scoping import *
 
 # TODO add asserts
 # TODO rewrite so that [north, south, east, west] always come in same order to reduce chance of bugs. NSEW seams best, since it groups x,y
-# TODO finish refactoring to use ground2var
+# TODO finish refactoring to use g2v
 def object_counts_to_names(object_counts):
 	object_names = {}
 	for k, v in object_counts.items():
@@ -70,28 +70,30 @@ if __name__ == "__main__":
 			name_to_z3_var[g] = c.type(g)
 			# Apply constraints
 			pass
-	def ground2name(att_name, object_ids):
+	def g2n(att_name, object_ids):
 		name = att_name + "_" +  "_".join([str(i) for i in object_ids])
 		return name
-	def ground2var(att_name, object_ids,var_dict = name_to_z3_var):
-		return var_dict[ground2name(att_name,object_ids)]
+	def g2v(att_name, object_ids, var_dict = name_to_z3_var):
+		return var_dict[g2n(att_name, object_ids)]
 	solver = z3.Solver()
 	# Assign constants and init state
 	passengers_you_care_for_value_list = [True] + [False for _ in range(object_counts['passenger'] - 1)]
 	passenger_goal_x_values = [2,3]
 	passenger_goal_y_values = [3,2]
-	passenger_start_x_values = [1,0]
-	passenger_start_y_values = [0,1]
+	passenger_start_x_values = [1,1]
+	passenger_start_y_values = [3,1]
 	for p_id in range(object_counts['passenger']):
-		solver.add(ground2var('PASSENGERS_YOU_CARE_FOR',[p_id]) == passengers_you_care_for_value_list[p_id])
-		solver.add(ground2var("PASSENGER_GOAL_X", [p_id]) == passenger_goal_x_values[p_id])
-		solver.add(ground2var("PASSENGER_GOAL_Y", [p_id]) == passenger_goal_y_values[p_id])
-		solver.add(ground2var("passenger-x-curr",[p_id]) == passenger_start_x_values[p_id])
-		solver.add(ground2var("passenger-y-curr",[p_id]) == passenger_start_y_values[p_id])
+		solver.add(g2v('PASSENGERS_YOU_CARE_FOR', [p_id]) == passengers_you_care_for_value_list[p_id])
+		solver.add(g2v("PASSENGER_GOAL_X", [p_id]) == passenger_goal_x_values[p_id])
+		solver.add(g2v("PASSENGER_GOAL_Y", [p_id]) == passenger_goal_y_values[p_id])
+		solver.add(g2v("passenger-x-curr", [p_id]) == passenger_start_x_values[p_id])
+		solver.add(g2v("passenger-y-curr", [p_id]) == passenger_start_y_values[p_id])
 		for t_id in range(object_counts['taxi']):
-			solver.add(ground2var('passenger-in-taxi',[p_id,t_id]) == False)
-	solver.add(ground2var('taxi-x',[0]) == 0)
-	solver.add(ground2var('taxi-y',[0]) == 0)
+			solver.add(g2v('passenger-in-taxi', [p_id, t_id]) == False)
+	solver.add(g2v('taxi-x', [0]) == 0)
+	solver.add(g2v('taxi-y', [0]) == 0)
+	# solver.add(g2v('WALL_X',[0]) == 0)
+	# solver.add(g2v('WALL_Y',[0]) == 1)
 	assert solver.check() == z3.sat
 	# print(solver.assertions())
 	solver.push()
@@ -122,16 +124,16 @@ if __name__ == "__main__":
 			w_x = wall_x_groundings[w_id]
 			w_y = wall_y_groundings[w_id]
 			# Pycharm complained about typechecking here; the noinspection comments disable that
-			same_x = (ground2var('taxi-x',[t_id]) == name_to_z3_var[w_x])
+			same_x = (g2v('taxi-x', [t_id]) == name_to_z3_var[w_x])
 			# noinspection PyTypeChecker
-			east_x = (ground2var('taxi-x',[t_id]) + 1 == name_to_z3_var[w_x])
+			east_x = (g2v('taxi-x', [t_id]) + 1 == name_to_z3_var[w_x])
 			# noinspection PyTypeChecker
-			west_x = (ground2var('taxi-x',[t_id])- 1 == name_to_z3_var[w_x])
-			same_y = (ground2var('taxi-y',[t_id]) == name_to_z3_var[w_y])
+			west_x = (g2v('taxi-x', [t_id]) - 1 == name_to_z3_var[w_x])
+			same_y = (g2v('taxi-y', [t_id]) == name_to_z3_var[w_y])
 			# noinspection PyTypeChecker
-			north_y = (ground2var('taxi-y',[t_id]) + 1 == name_to_z3_var[w_y])
+			north_y = (g2v('taxi-y', [t_id]) + 1 == name_to_z3_var[w_y])
 			# noinspection PyTypeChecker
-			south_y = (ground2var('taxi-y',[t_id]) - 1 == name_to_z3_var[w_y])
+			south_y = (g2v('taxi-y', [t_id]) - 1 == name_to_z3_var[w_y])
 
 			wall_touch_north_list.append(z3.And(same_x, north_y))
 			wall_touch_east_list.append(z3.And(east_x, same_y))
@@ -163,7 +165,7 @@ if __name__ == "__main__":
 				else:
 					passenger_in_taxi_conditions.append(z3.Not(name_to_z3_var[p_inTaxi_name]))
 			# taxi_occupance_condition = AndList(*passenger_in_taxi_conditions)
-			taxi_occupance_condition = ground2var('passenger-in-taxi',[p_id,0])
+			taxi_occupance_condition = g2v('passenger-in-taxi', [p_id, 0])
 			#  Combine passenger in taxi Precondition with no_touch conditions
 			move_north_with_passenger_condition = AndList(no_touch_north_condition, taxi_occupance_condition)
 			move_east_with_passenger_condition = AndList(no_touch_east_condition, taxi_occupance_condition)
@@ -180,8 +182,8 @@ if __name__ == "__main__":
 											  ['passenger-y-curr_{}'.format(p_id)]))
 
 			# Add pickup actions
-			shared_x_condition = (ground2var('taxi-x',[t_id]) == ground2var('passenger-x-curr',[p_id]))
-			shared_y_condition = (ground2var('taxi-y',[t_id]) == ground2var('passenger-y-curr',[p_id]))
+			shared_x_condition = (g2v('taxi-x', [t_id]) == g2v('passenger-x-curr', [p_id]))
+			shared_y_condition = (g2v('taxi-y', [t_id]) == g2v('passenger-y-curr', [p_id]))
 			pickup_condition = AndList(shared_x_condition,shared_y_condition,taxi_empty_condition)
 			dropoff_condition = name_to_z3_var[passengers_in_taxi_var_names[p_id]]
 			skill_triples.append(SkillTriplet(pickup_condition,'pickup_{}_{}'.format(t_id,p_id),[passengers_in_taxi_var_names[p_id]]))
@@ -190,12 +192,12 @@ if __name__ == "__main__":
 	# Create goal Precondition. For now, we are using explicit goal Precondition rather than a more general reward
 	at_goal_or_unimportant_conditions = []
 	for p_id in range(object_counts['passenger']):
-		cur_x_var = ground2var('passenger-x-curr',[p_id])
-		cur_y_var = ground2var('passenger-y-curr',[p_id])
-		goal_x_var = ground2var('PASSENGER_GOAL_X',[p_id])
-		goal_y_var = ground2var('PASSENGER_GOAL_Y',[p_id])
+		cur_x_var = g2v('passenger-x-curr', [p_id])
+		cur_y_var = g2v('passenger-y-curr', [p_id])
+		goal_x_var = g2v('PASSENGER_GOAL_X', [p_id])
+		goal_y_var = g2v('PASSENGER_GOAL_Y', [p_id])
 		at_goal_condition = ((cur_x_var == goal_x_var) and (cur_y_var == goal_y_var))
-		at_goal_or_unimportant_conditions.append(z3.Or(at_goal_condition,z3.Not(ground2var('PASSENGERS_YOU_CARE_FOR',[p_id]))))
+		at_goal_or_unimportant_conditions.append(z3.Or(at_goal_condition, z3.Not(g2v('PASSENGERS_YOU_CARE_FOR', [p_id]))))
 	# Since this condition includes each passenger's location in an OR, the scoper thinks they are relevant
 	# We can fix this by plugging in constants to expressions and simplifying, but for now I will define an easier goal
 	goal_condition_hard_to_parse = AndList(*at_goal_or_unimportant_conditions)
@@ -210,14 +212,14 @@ if __name__ == "__main__":
 		#Check whether we care for the passenger
 		solver.push()
 		# If the passenger cannot not be cared for, they are cared for
-		solver.add(ground2var('PASSENGERS_YOU_CARE_FOR',[p_id]) == False)
+		solver.add(g2v('PASSENGERS_YOU_CARE_FOR', [p_id]) == False)
 		result = solver.check()
 		solver.pop()
 		if result == z3.z3.unsat:
-			cur_x_var = ground2var('passenger-x-curr', [p_id])
-			cur_y_var = ground2var('passenger-y-curr', [p_id])
-			goal_x_var = ground2var('PASSENGER_GOAL_X', [p_id])
-			goal_y_var = ground2var('PASSENGER_GOAL_Y', [p_id])
+			cur_x_var = g2v('passenger-x-curr', [p_id])
+			cur_y_var = g2v('passenger-y-curr', [p_id])
+			goal_x_var = g2v('PASSENGER_GOAL_X', [p_id])
+			goal_y_var = g2v('PASSENGER_GOAL_Y', [p_id])
 			at_goal_condition = ((cur_x_var == goal_x_var) and (cur_y_var == goal_y_var))
 			cared_for_goal_conditions.append(at_goal_condition)
 	goal_condition_easy_to_parse = AndList(cared_for_goal_conditions)
@@ -236,6 +238,15 @@ if __name__ == "__main__":
 	# print(y)
 
 #Run scoping
+	correct_vars = [g2n('taxi-y',[0]),g2n('taxi-x',[0]), g2n('passenger-in-taxi',[0,0]), g2n('passenger-x-curr',[0]),g2n('passenger-y-curr',[0]),g2n('PASSENGER_GOAL_X',[0]),g2n('PASSENGER_GOAL_Y',[0])]
+	correct_vars.sort()
+	print("correct vars:")
+	print(correct_vars)
 	print("Scoping")
 	discovered_not_guarantees, used_skills = scope(goal_condition_easy_to_parse,skill_triples,solver=solver)
+	discovered_not_guarantees.sort()
+	missing = [i for i in correct_vars if i not in discovered_not_guarantees]
+	extra = [i for i in discovered_not_guarantees if i not in correct_vars]
 	print(discovered_not_guarantees)
+	print("Missing: {}".format(missing))
+	print("Extra: {}".format(extra))

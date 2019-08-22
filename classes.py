@@ -8,7 +8,7 @@ def get_all_groundings(base_str, names, keys):
 	object_name_sequence_list = itertools.product(*name_lists)
 	x = object_name_sequence_list
 	# x = list([i[0] for i in object_name_sequence_list])
-	groundings = [g2n(base_str,object_names) for object_names in x]
+	groundings = [g2n_names(base_str,object_names) for object_names in x]
 	return groundings
 
 class Skill(abc.ABC):

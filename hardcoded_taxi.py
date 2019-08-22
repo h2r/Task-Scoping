@@ -10,12 +10,10 @@ from instance_building_utils import *
 def object_counts_to_names(object_counts):
 	object_names = {}
 	for k, v in object_counts.items():
-		object_names[k] = [str(i) for i in range(v)]
+		object_names[k] = [type_and_id2name(k,i) for i in range(v)]
 	return object_names
 
-def make_move_skills():
-	pass
-def set_init_state_and_constants(solver, object_counts):
+def set_init_state_and_constants(solver, object_counts, g2v):
 	passengers_you_care_for_value_list = [True] + [False for _ in range(object_counts['passenger'] - 1)]
 	passenger_goal_x_values = [2, 3]
 	passenger_goal_y_values = [3, 2]
@@ -36,7 +34,7 @@ def set_init_state_and_constants(solver, object_counts):
 	assert solver.check() == z3.sat
 	# print(solver.assertions())
 	solver.push()
-def create_no_touch_conditions(object_counts):
+def create_no_touch_conditions(object_counts, g2v):
 	"""
 	:param object_counts:
 	:return: [t_id][nesw] list of no_touch conditions
@@ -78,9 +76,9 @@ def create_no_touch_conditions(object_counts):
 		notouch_by_taxi.append(notouch_this_taxi)
 	return notouch_by_taxi
 
-def make_skills(object_counts):
+def make_skills(object_counts, g2n, g2v):
 	skill_triples = []
-	notouch_by_taxi = create_no_touch_conditions(object_counts)
+	notouch_by_taxi = create_no_touch_conditions(object_counts, g2v)
 	for t_id in range(object_counts['taxi']):
 		taxi_empty_vars = [z3.Not(g2v('passenger-in-taxi',[p_id,t_id])) for p_id in range(object_counts['passenger'])]
 		taxi_empty_condition = AndList(*taxi_empty_vars)
@@ -135,8 +133,14 @@ def make_skills(object_counts):
 
 if __name__ == "__main__":
 	types = ['taxi', 'passenger', 'wall']
-	actions = [("move_north", 'taxi'), ("move_south", 'taxi'), ("move_east", 'taxi'), ("move_west", 'taxi'),
-			   ("pickup", "taxi", "passenger"), ("dropoff", "taxi", "passenger")]
+	actions = [
+		DomainAction("move_north", ['taxi']),
+		DomainAction("move_south", ['taxi']),
+		DomainAction("move_east", ['taxi']),
+		DomainAction("move_west", ['taxi']),
+		DomainAction("pickup", ["taxi", "passenger"]),
+		DomainAction("dropoff", ["taxi", "passenger"])
+	]
 	object_counts = {
 		"passenger": 2,
 		"taxi": 1,
@@ -175,15 +179,17 @@ if __name__ == "__main__":
 		for g in grounded_attributes:
 			# Define var
 			name_to_z3_var[g] = att.type(g)
+			print(g)
 			# Apply constraints
 			pass
-	g2v = g2v_builder(name_to_z3_var)
+	g2n = g2n_builder(attributes + constants + actions)
+	g2v = g2v_builder(name_to_z3_var, g2n)
 	solver = z3.Solver()
 	# Assign constants and init state
-	set_init_state_and_constants(solver, object_counts)
+	set_init_state_and_constants(solver, object_counts, g2v)
 
 	# Make skill triples
-	skill_triples = make_skills(object_counts)
+	skill_triples = make_skills(object_counts, g2n, g2v)
 	# Create goal Precondition. For now, we are using explicit goal Precondition rather than a more general reward
 	at_goal_or_unimportant_conditions = []
 	for p_id in range(object_counts['passenger']):

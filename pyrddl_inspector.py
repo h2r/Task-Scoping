@@ -7,6 +7,9 @@ from classes import *
 from scoping import *
 import instance_building_utils
 
+att_name_to_domain_attribute = {}
+all_object_names = {}
+name_to_z3_var = {}
 def pull_state_var_dict(rddl_model):
 	return rddl_model.domain.state_fluents
 
@@ -58,6 +61,9 @@ def make_triplet_dict(rddl_model):
 # Now, for every combination of those objects in the instance, make a proposition in z3
 # Only set the proposition corresponding to the init-state to true!
 def convert_to_z3(init_state, domain_objects, init_nonfluents, model_states, model_nonfluents, triplet_dict):
+	global att_name_to_domain_attribute
+	global all_object_names
+	global name_to_z3_var
 	# Makes a dict out of the state-variables like xpos=[x00,x01],ypos=[y00,y01]
 	# These are already for the domain itself.
 	all_object_names = {}
@@ -79,8 +85,10 @@ def convert_to_z3(init_state, domain_objects, init_nonfluents, model_states, mod
 
 	# Converts the attributes to z3 and assigns them to a dict
 	name_to_z3_var = {}
+	att_name_to_domain_attribute = {}
 	attribute_to_grounded_names = {}
 	for att in attributes_list:
+		att_name_to_domain_attribute[att.name] = att
 		grounded_attributes = att.ground(all_object_names)
 		attribute_to_grounded_names[att.name] = grounded_attributes
 		for g in grounded_attributes:
@@ -175,11 +183,25 @@ def _compile_constant_expression(expr: Expression):
 
 
 def _compile_pvariable_expression(expr: Expression):
+	"""
+	:param expr:
+	:return: returns list of z3 vars, one for each possible set of arguments to the function
+	"""
 	# If it's an action, we don't want it in the precondition. The
 	# precondition is explicitly only over states
 	# !!!!!!!!!!!!!!!CHECK!!!!!!!!!!!!!!!
 	# IMPORTANT RETURN A Z3 VARIABLE FROM HAVING LOOKED IT UP IN THE Z3 NAME_TO_VAR DICT
-	return expr.scope
+
+	#Return all groundings of this expression
+	#TODO make sure this works for 0 arg pvars
+	att_name = expr.etype[1]
+	att = att_name_to_domain_attribute[att_name]
+	#list of str
+	all_att_groundings = att.ground(all_object_names)
+	#list of z3 vars
+	all_att_var_groundings = [name_to_z3_var[g] for g in all_att_groundings]
+	return all_att_var_groundings
+	# return expr.scope
 	# etype = expr.etype
 	# args = expr.args
 	# name = expr._pvar_to_name(args)
@@ -264,35 +286,34 @@ def _compile_control_flow_expression(expr: Expression):
 	return fluent
 
 
-# TODO: Fix this function to make it actually z3 worthy!
 def _compile_aggregation_expression(expr: Expression):
 	etype = expr.etype
 	args = expr.args
 
 	typed_var_list = args[:-1]
 	vars_list = [var for _, (var, _) in typed_var_list]
-	# type_list = [t for t,]
 	expr = args[-1]
 
-	x = _compile_expression(expr)
+	compiled_expr = _compile_expression(expr)
 
 	# These functions in the values of the dict are incorrect, make sure to make them better. I have no clue
 	# how to do this...
 	etype2aggr = {
-		'sum': x.sum,
-		'prod': x.prod,
-		'avg': x.avg,
-		'maximum': x.maximum,
-		'minimum': x.minimum,
-		'exists': x.exists,
-		'forall': x.forall
+		# 'sum': x.sum,
+		# 'prod': x.prod,
+		# 'avg': x.avg,
+		# 'maximum': x.maximum,
+		# 'minimum': x.minimum,
+		'exists': lambda x: z3.Or(*x),
+		'forall': lambda x: AndList(*x)
 	}
 
 	if etype[1] not in etype2aggr:
 		raise ValueError('Invalid aggregation expression {}.'.format(expr))
 
 	aggr = etype2aggr[etype[1]]
-	fluent = aggr(vars_list=vars_list)
+	fluent = aggr(compiled_expr)
+	# fluent = aggr(vars_list=vars_list)
 
 	return fluent
 

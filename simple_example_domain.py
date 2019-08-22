@@ -12,7 +12,7 @@ attributes = [
 	DomainAttribute('on',z3.Bool,['light']),
 	DomainAttribute('pressed',z3.Bool,['button'])
 ]
-object_counts = {"light":1, "button":1}
+object_counts = {"light":2, "button":2}
 object_names = object_counts_to_names(object_counts)
 #Make str2var dict
 str2var = {}

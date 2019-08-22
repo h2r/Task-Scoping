@@ -115,5 +115,10 @@ def check_guarantees(guarantees,used_skills, discovered, q):
 	for g in violated_guarantees:
 		q.append(g)
 		guarantees.remove(g)
-	return guarantees,
+	return guarantees
+
+def scope_rddl_file(input_file_path, output_file_path, irrelevant_objects):
+	pass
+
+
 

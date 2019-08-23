@@ -36,6 +36,10 @@ class SkillTriplet(Skill):
 		return self.triplet[1]
 	def get_affected_variables(self):
 		return self.triplet[2]
+	def __repr__(self):
+		return "({},{},{})".format(self.triplet[0],self.triplet[1],self.triplet[2])
+	def __str__(self):
+		return self.__repr__()
 
 class Precondition():
 	"""

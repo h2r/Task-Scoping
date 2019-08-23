@@ -161,13 +161,16 @@ def convert_to_z3(init_state, domain_objects, init_nonfluents, model_states, mod
 	for init_nonf in init_nonfluents:
 		solver.add(ground2var(init_nonf[0][0], init_nonf[0][1]) == init_nonf[1])
 
+	skills_triplets = []
 	for action in triplet_dict.keys():
 		for effect in triplet_dict[action]:
 			for precond in triplet_dict[action][effect]:
 				print(precond)
 				z3_expr = _compile_expression(precond)
+				new_skill = SkillTriplet(z3_expr,action,effect)
+				skills_triplets.append(new_skill)
 				print("Temp break here!")
-
+	return skills_triplets
 def _compile_expression(expr: Expression):
 	etype2compiler = {
 		'constant': _compile_constant_expression,
@@ -360,4 +363,7 @@ if __name__ == '__main__':
 	instance_nonfluents = pull_init_nonfluent(model)
 	initial_state = pull_init_state(model)
 
-	convert_to_z3(initial_state, instance_objects, instance_nonfluents, model_states, model_non_fluents, test_dict)
+	skill_triplets = convert_to_z3(initial_state, instance_objects, instance_nonfluents, model_states, model_non_fluents, test_dict)
+
+	print("skills:")
+	for s in skill_triplets: print(s)

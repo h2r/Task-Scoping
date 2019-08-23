@@ -5,33 +5,34 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 
-domain switch-mdp {
+domain button-mdp {
     requirements {
         reward-deterministic,
         cpf-deterministic
     };
 
     types {
-        switch   : object;
+        button   : object;
     };
 
     pvariables {
     //////////////////////////////// States /////////////////////////////////
     // Passenger reached goal variable
-        switch-on(switch)                : { state-fluent, bool, default=false };
+        button-on(button)                : { state-fluent, bool, default=false };
 
     //////////////////////////////// Actions ////////////////////////////////
-        toggle-switch(switch)                           : { action-fluent, bool, default = false };
+        toggle-button(button)                           : { action-fluent, bool, default = false };
 
 
     //////////////////////////////// Non-Fluents ////////////////////////////////
+        grandma(button)                       : { non-fluent, bool, default = false };
     };
     cdfs {
     // Pickup and Dropoff Transition function
-       switch-on'(?s) =
-            if (toggle-switch(?s))
-                then ~switch-on(?s)
-            else switch-on(?s);
+       button-on'(?b) =
+            if (toggle-button(?b))
+                then ~button-on(?b)
+            else button-on(?b);
           
     };
 
@@ -40,7 +41,7 @@ domain switch-mdp {
     //      if ( exists_{ ?t : taxi, ?x : xpos, ?y : ypos } [ TAXI_GOAL(?x, ?y) & taxi-at(?t, ?x, ?y) ] )
     //          then 5
     //      else -5;
-          if ( forall_{ ?s : switch } [ switch-on(?s) ] )
+          if ( forall_{ ?b : button } [ button-on(?b) ] )
               then 5
           else -5;
 
@@ -48,26 +49,26 @@ domain switch-mdp {
    
    // };
 }
-non-fluents switch-mdp_single {
-    domain = switch-mdp;
+non-fluents button-mdp_single {
+    domain = button-mdp;
 
     objects {
-        switch               : { s0 };
+        button               : { b0 };
     };
 
-    //non-fluents {
+    non-fluents {
        
-
-   // };
+        grandma(b0);
+    };
 }
 
-instance switch-mdp_inst_mdp_01 {
-    domain = switch-mdp;
-    non-fluents = switch-mdp_single;
+instance button-mdp_inst_mdp_01 {
+    domain = button-mdp;
+    non-fluents = button-mdp_single;
 
-    //init-state {
-
-    //};
+    init-state {
+        button-on(b0);
+    };
 
     horizon = 20;
 

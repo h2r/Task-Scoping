@@ -1,0 +1,8 @@
+~~Scoping algorithm~~
+Reward must by goal-based. Ie, a single if-else statement with a high-reward and low-reward condition
+
+~~RDDL inspactor~~
+RDDL files need:
+    non-fluent section
+    init-state section
+Transition/reward funcitons must be made of blocks of if/else statements

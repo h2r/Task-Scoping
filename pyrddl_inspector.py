@@ -11,6 +11,17 @@ att_name_to_domain_attribute = {}
 all_object_names = {}
 name_to_z3_var = {}
 actions_list = []
+
+
+def andlist_safe_or(*x):
+	new_x = []
+	for i in x:
+		if isinstance(i,AndList):
+			new_x.append(z3.And(*i.args))
+		else:
+			new_x.append(i)
+	return z3.Or(*new_x)
+
 def expr2slashyName(expr):
 	return "{}/{}".format(expr.args[0],len(expr.args[1]))
 def pull_state_var_dict(rddl_model):
@@ -249,11 +260,11 @@ def _compile_boolean_expression(expr: Expression):
 
 	else:
 		etype2op = {
-			'^': lambda x, y: AndList([x, y]),
-			'&': lambda x, y: AndList([x, y]),
-			'|': lambda x, y: z3.Or(x, y),
-			'=>': lambda x, y: z3.Or(z3.Not(x), y),
-			'<=>': lambda x, y: z3.Or(AndList([x, y]), AndList([z3.Not(x), z3.Not(y)]))
+			'^': lambda x, y: AndList(*[x, y]),
+			'&': lambda x, y: AndList(*[x, y]),
+			'|': lambda x, y: andlist_safe_or(x, y),
+			'=>': lambda x, y: andlist_safe_or(z3.Not(x), y),
+			'<=>': lambda x, y: andlist_safe_or(z3.And(*[x, y]), z3.And(*[z3.Not(x), z3.Not(y)]))
 		}
 
 		if etype[1] not in etype2op:
@@ -316,9 +327,9 @@ def _compile_aggregation_expression(expr: Expression):
 
 	typed_var_list = args[:-1]
 	vars_list = [var for _, (var, _) in typed_var_list]
-	expr = args[-1]
+	expr2 = args[-1]
 
-	compiled_expr = _compile_expression(expr)
+	compiled_expr = _compile_expression(expr2)
 
 	# These functions in the values of the dict are incorrect, make sure to make them better. I have no clue
 	# how to do this...
@@ -330,7 +341,7 @@ def _compile_aggregation_expression(expr: Expression):
 		# 'minimum': x.minimum,
 		# 'exists': lambda x: z3.Or(*x),
 		# 'forall': lambda x: AndList(*x)
-		'exists': lambda x: z3.Or(*x),
+		'exists': lambda x: andlist_safe_or(*x),
 		'forall': lambda x: AndList(*x)
 	}
 

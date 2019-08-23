@@ -8,8 +8,7 @@
 domain switch-mdp {
     requirements {
         reward-deterministic,
-        cpf-deterministic,
-        preconditions
+        cpf-deterministic
     };
 
     types {
@@ -45,9 +44,9 @@ domain switch-mdp {
               then 5
           else -5;
 
-    action-preconditions {
+   // action-preconditions {
    
-    };
+   // };
 }
 non-fluents switch-mdp_single {
     domain = switch-mdp;
@@ -56,19 +55,19 @@ non-fluents switch-mdp_single {
         switch               : { s0 };
     };
 
-    non-fluents {
+    //non-fluents {
        
 
-    };
+   // };
 }
 
 instance switch-mdp_inst_mdp_01 {
     domain = switch-mdp;
     non-fluents = switch-mdp_single;
 
-    init-state {
+    //init-state {
 
-    };
+    //};
 
     horizon = 20;
 

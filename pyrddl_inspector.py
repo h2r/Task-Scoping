@@ -237,7 +237,7 @@ def _compile_boolean_expression(expr: Expression):
 		x = _compile_expression(args[0])
 		if(isinstance(x, list)):
 			if(len(x) > 1):
-				bool_in_z3 = AndList(op(x_elem) for x_elem in x)
+				bool_in_z3 = AndList(*[op(x_elem) for x_elem in x])
 			else:
 				bool_in_z3 = op(x[0])
 		else:
@@ -326,8 +326,8 @@ def _compile_aggregation_expression(expr: Expression):
 		# 'minimum': x.minimum,
 		# 'exists': lambda x: z3.Or(*x),
 		# 'forall': lambda x: AndList(*x)
-		'exists': lambda x: z3.Or(x),
-		'forall': lambda x: AndList(x)
+		'exists': lambda x: z3.Or(*x),
+		'forall': lambda x: AndList(*x)
 	}
 
 	if etype[1] not in etype2aggr:
@@ -342,7 +342,7 @@ def _compile_aggregation_expression(expr: Expression):
 
 if __name__ == '__main__':
 	# rddl_file_location = "/home/nishanth/Documents/IPC_Code/rddlsim/files/taxi-rddl-domain/taxi-oo_simple.rddl"
-	#rddl_file_location = "./taxi-rddl-domain/taxi-oo_mdp_composite_01.rddl"
+	# rddl_file_location = "./taxi-rddl-domain/taxi-oo_mdp_composite_01.rddl"
 	rddl_file_location = "./misc-domains/switch.rddl"
 	with open(rddl_file_location, 'r') as file:
 		rddl = file.read()

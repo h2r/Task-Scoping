@@ -10,6 +10,9 @@ import instance_building_utils
 att_name_to_domain_attribute = {}
 all_object_names = {}
 name_to_z3_var = {}
+actions_list = []
+def expr2slashyName(expr):
+	return "{}/{}".format(expr.args[0],len(expr.args[1]))
 def pull_state_var_dict(rddl_model):
 	return rddl_model.domain.state_fluents
 
@@ -31,9 +34,10 @@ def pull_init_state(rddl_model):
 
 
 def make_triplet_dict(rddl_model):
+	global actions_list
 	# read RDDL file
 	actions_list = rddl_model.domain.action_fluents.keys()
-	# print(actions_list)
+	print("actions_list:\n{}".format(actions_list))
 
 	# print(type(model.domain.cpfs[1]))
 	action_to_effect_to_precond = collections.defaultdict(lambda: collections.defaultdict(list))
@@ -94,7 +98,7 @@ def convert_to_z3(init_state, domain_objects, init_nonfluents, model_states, mod
 	name_to_z3_var = {}
 	att_name_to_domain_attribute = {}
 	attribute_to_grounded_names = {}
-	for att in attributes_list:
+	for att in attributes_list + constants:
 		att_name_to_domain_attribute[att.name] = att
 		grounded_attributes = att.ground(all_object_names)
 		attribute_to_grounded_names[att.name] = grounded_attributes
@@ -105,15 +109,15 @@ def convert_to_z3(init_state, domain_objects, init_nonfluents, model_states, mod
 			pass
 
 	# Converts the nonfluent constants to z3
-	constant_to_grounded_names = {}
-	for c in constants:
-		grounded_attributes = c.ground(all_object_names)
-		constant_to_grounded_names[c.name] = grounded_attributes
-		for g in grounded_attributes:
-			# Define var
-			name_to_z3_var[g] = c.type(g)
-			# Apply constraints
-			pass
+	# constant_to_grounded_names = {}
+	# for c in constants:
+	# 	grounded_attributes = c.ground(all_object_names)
+	# 	constant_to_grounded_names[c.name] = grounded_attributes
+	# 	for g in grounded_attributes:
+	# 		# Define var
+	# 		name_to_z3_var[g] = c.type(g)
+	# 		# Apply constraints
+	# 		pass
 	print("grounded atts:")
 	for n in name_to_z3_var.keys():
 		print(n)
@@ -183,13 +187,16 @@ def _compile_pvariable_expression(expr: Expression):
 	# Return all groundings of this expression
 	#TODO make sure this works for 0 arg pvars
 	att_name = expr.etype[1]
-	att = att_name_to_domain_attribute[att_name]
-	#list of str
-	all_att_groundings = att.ground(all_object_names)
-	#list of z3 vars
-	all_att_var_groundings = []
-	all_att_var_groundings = [name_to_z3_var[g] for g in all_att_groundings]
-	return all_att_var_groundings
+	if expr2slashyName(expr) in actions_list:
+		return True
+	else:
+		att = att_name_to_domain_attribute[att_name]
+		#list of str
+		all_att_groundings = att.ground(all_object_names)
+		#list of z3 vars
+		all_att_var_groundings = []
+		all_att_var_groundings = [name_to_z3_var[g] for g in all_att_groundings]
+		return all_att_var_groundings
 
 	# return expr.scope
 	# etype = expr.etype
@@ -309,8 +316,8 @@ def _compile_aggregation_expression(expr: Expression):
 
 
 if __name__ == '__main__':
-	rddl_file_location = "/home/nishanth/Documents/IPC_Code/rddlsim/files/taxi-rddl-domain/taxi-oo_simple.rddl"
-	#rddl_file_location = "./taxi-rddl-domain/taxi-oo_mdp_composite_01.rddl"
+	# rddl_file_location = "/home/nishanth/Documents/IPC_Code/rddlsim/files/taxi-rddl-domain/taxi-oo_simple.rddl"
+	rddl_file_location = "./taxi-rddl-domain/taxi-oo_mdp_composite_01.rddl"
 	with open(rddl_file_location, 'r') as file:
 		rddl = file.read()
 

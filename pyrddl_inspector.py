@@ -46,12 +46,29 @@ def make_triplet_dict(rddl_model):
 		if (state_variable_cpf.expr.etype[0] == 'control'):
 			condition = state_variable_cpf.expr.args[0]
 			false_case = state_variable_cpf.expr.args[2]
-			while(false_case.etype[0] == 'control'):
+			if(false_case.etype[0] != 'control'):
 				for action in actions_list:
 					if action in condition.scope:
 						action_to_effect_to_precond[action][state_variable_cpf.name.replace("'", "")].append(condition)
-				condition = false_case
-				false_case = condition.args[2]
+			else:
+				while(false_case.etype[0] == 'control'):
+					for action in actions_list:
+						if action in condition.scope:
+							action_to_effect_to_precond[action][state_variable_cpf.name.replace("'", "")].append(condition)
+					
+					# print(state_variable_cpf.expr)
+					# print("CONDITION ==============================")
+					# print(condition)
+					# print("FALSE CASE ==============================")
+					# print(false_case)
+					# print("Temp break here!")
+					condition = false_case.args[0]
+					false_case = false_case.args[2]
+					# print("CONDITION ==============================")
+					# print(condition)
+					# print("FALSE CASE ==============================")
+					# print(false_case)
+					# print("Temp break here!")
 
 	# for state_variable_cpf in rddl_model.domain.cpfs[1]:
 	# 	if (state_variable_cpf.expr.etype[0] == 'control'):
@@ -218,7 +235,13 @@ def _compile_boolean_expression(expr: Expression):
 
 		op = etype2op[etype[1]]
 		x = _compile_expression(args[0])
-		bool_in_z3 = op(x)
+		if(isinstance(x, list)):
+			if(len(x) > 1):
+				bool_in_z3 = AndList(op(x_elem) for x_elem in x)
+			else:
+				bool_in_z3 = op(x[0])
+		else:
+			bool_in_z3 = op(x)
 
 	else:
 		etype2op = {
@@ -301,8 +324,10 @@ def _compile_aggregation_expression(expr: Expression):
 		# 'avg': x.avg,
 		# 'maximum': x.maximum,
 		# 'minimum': x.minimum,
-		'exists': lambda x: z3.Or(*x),
-		'forall': lambda x: AndList(*x)
+		# 'exists': lambda x: z3.Or(*x),
+		# 'forall': lambda x: AndList(*x)
+		'exists': lambda x: z3.Or(x),
+		'forall': lambda x: AndList(x)
 	}
 
 	if etype[1] not in etype2aggr:
@@ -316,8 +341,8 @@ def _compile_aggregation_expression(expr: Expression):
 
 
 if __name__ == '__main__':
-	# rddl_file_location = "/home/nishanth/Documents/IPC_Code/rddlsim/files/taxi-rddl-domain/taxi-oo_simple.rddl"
-	rddl_file_location = "./taxi-rddl-domain/taxi-oo_mdp_composite_01.rddl"
+	rddl_file_location = "/home/nishanth/Documents/IPC_Code/rddlsim/files/taxi-rddl-domain/taxi-oo_simple.rddl"
+	#rddl_file_location = "./taxi-rddl-domain/taxi-oo_mdp_composite_01.rddl"
 	with open(rddl_file_location, 'r') as file:
 		rddl = file.read()
 

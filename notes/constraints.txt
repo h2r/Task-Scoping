@@ -6,3 +6,4 @@ RDDL files need:
     non-fluent section
     init-state section
 Transition/reward funcitons must be made of blocks of if/else statements
+Each if statement in a cpt must mention an action

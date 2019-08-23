@@ -100,7 +100,7 @@ class AndList(list):
 	def __iter__(self):
 		return self.args.__iter__()
 	def __repr__(self):
-		return str(self.args)
+		return "AndList({})".format(self.args)
 	def __str__(self):
 		return self.__repr__()
 

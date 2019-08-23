@@ -20,5 +20,11 @@ def split_clause_ex():
 	for g in r:
 		print(g)
 
+def var2str():
+	names = list(range(3))
+	vars = [z3.Bool(n) for n in names]
+	a = And(*vars[:2])
+	print(a)
 if __name__ == "__main__":
-	split_clause_ex()
+	# split_clause_ex()
+	var2str()

@@ -341,8 +341,9 @@ def _compile_aggregation_expression(expr: Expression):
 
 
 if __name__ == '__main__':
-	rddl_file_location = "/home/nishanth/Documents/IPC_Code/rddlsim/files/taxi-rddl-domain/taxi-oo_simple.rddl"
+	# rddl_file_location = "/home/nishanth/Documents/IPC_Code/rddlsim/files/taxi-rddl-domain/taxi-oo_simple.rddl"
 	#rddl_file_location = "./taxi-rddl-domain/taxi-oo_mdp_composite_01.rddl"
+	rddl_file_location = "./misc-domains/switch.rddl"
 	with open(rddl_file_location, 'r') as file:
 		rddl = file.read()
 

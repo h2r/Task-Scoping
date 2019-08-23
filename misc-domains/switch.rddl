@@ -13,7 +13,7 @@ domain switch-mdp {
     };
 
     types {
-        switch          : object;
+        switch   : object;
     };
 
     pvariables {
@@ -26,14 +26,13 @@ domain switch-mdp {
 
 
     //////////////////////////////// Non-Fluents ////////////////////////////////
-
+    };
     cdfs {
     // Pickup and Dropoff Transition function
        switch-on'(?s) =
-            // If there is no passenger in the taxi, the taxi is on the passenger and the agent executes pickup, make true
             if (toggle-switch(?s))
                 then ~switch-on(?s)
-            else switch-on(?s)
+            else switch-on(?s);
           
     };
 

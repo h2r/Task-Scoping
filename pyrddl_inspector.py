@@ -80,9 +80,13 @@ def get_pvar_args_strings(pvar_name: str, expr: Expression) -> List[str]:
 	"""
 	# if isinstance(expr, CPF)
 	#Search through expr, its args, etc.
+	if isinstance(expr.args,int):
+		print("int ya boii")
 	for arg_id in range(len(expr.args)):
 		if isinstance(expr.args[arg_id],Expression):
 			x = get_pvar_args_strings(pvar_name,expr.args[arg_id])
+			if x is None:
+				print("Nani!???")
 			if len(x) > 0:
 				return x
 		elif isinstance(expr.args[arg_id],str):
@@ -132,6 +136,15 @@ def get_grounding_dict_pairs(variable_param_strings: List[str],groundings_by_par
 			grounding_dict[variable_param_str] = arg
 		total_groundings_dict_pairs.append((tg,grounding_dict))
 	return total_groundings_dict_pairs
+
+def get_reward_condition(rddl_model):
+	reward_expr = rddl_model.domain.reward
+	if(reward_expr.etype[0] == 'control'):
+		condition = reward_expr.args[0]
+		return condition
+
+	else:
+		raise ValueError("The reward is not specified as an if/else sequence")
 
 def make_triplet_dict(rddl_model, type2names):
 	"""
@@ -189,6 +202,11 @@ def make_triplet_dict(rddl_model, type2names):
 							if action in condition.scope:
 								# Ground the action based on groundings_from_top.
 								cleaned_action_name = action.split("/")[0]
+								print(cleaned_action_name)
+								if cleaned_action_name == "move_west":
+									print("ruroh")
+									asdfsadfsa = 8
+									print(asdfsadfsa)
 								action_variable_args = get_pvar_args_strings(cleaned_action_name, condition)
 								grounded_action_str = plugin_objects_to_pvar(cleaned_action_name, action_variable_args,
 																			 groundings_from_top)
@@ -205,7 +223,7 @@ def make_triplet_dict(rddl_model, type2names):
 # For every state predicate function, see which objects it takes in:
 # Now, for every combination of those objects in the instance, make a proposition in z3
 # Only set the proposition corresponding to the init-state to true!
-def convert_to_z3(init_state, domain_objects, init_nonfluents, model_states, model_nonfluents, rddl_model):
+def convert_to_z3(init_state, domain_objects, init_nonfluents, model_states, model_nonfluents, reward_condition, rddl_model):
 	global att_name_to_domain_attribute
 	global all_object_names
 	global name_to_z3_var
@@ -217,17 +235,23 @@ def convert_to_z3(init_state, domain_objects, init_nonfluents, model_states, mod
 
 	# Makes a list of the non-fluents (constants) from the domain
 	att_name_to_domain_attribute = {}
-
+	rddl2z3_sorts = {
+		"bool":z3.Bool,
+		"int":z3.Int,
+		"real":z3.Real
+	}
 	constants = []
 	for nonf in model_nonfluents:
 		print(nonf)
-		if (model_nonfluents[nonf].range == 'bool'):
-			constants.append(DomainAttribute(model_nonfluents[nonf].name, z3.Bool, model_nonfluents[nonf].param_types))
+		rddl_range = model_nonfluents[nonf].range
+		z3_sort = rddl2z3_sorts[rddl_range]
+		constants.append(DomainAttribute(model_nonfluents[nonf].name, z3_sort, model_nonfluents[nonf].param_types))
 	# Makes a list of all the attributes (state variables like passenger-in-taxi)
 	attributes_list = []
 	for state in model_states:
-		if (model_states[state].range == 'bool'):
-			attributes_list.append(DomainAttribute(model_states[state].name, z3.Bool, model_states[state].param_types))
+		rddl_range = model_states[state].range
+		z3_sort = rddl2z3_sorts[rddl_range]
+		attributes_list.append(DomainAttribute(model_states[state].name, z3_sort, model_states[state].param_types))
 			# att_name_to_domain_attribute[model_states[state].name] = model_states[state].args_names
 
 	# Converts the attributes to z3 and assigns them to a dict
@@ -236,7 +260,10 @@ def convert_to_z3(init_state, domain_objects, init_nonfluents, model_states, mod
 	attribute_to_grounded_names = {}
 	for att in attributes_list + constants:
 		att_name_to_domain_attribute[att.name] = att
-		grounded_attributes = att.ground(all_object_names)
+		if att.arguments is None or len(att.arguments) == 0:
+			grounded_attributes = [g2n_names(att.name,[])]
+		else:
+			grounded_attributes = att.ground(all_object_names)
 		attribute_to_grounded_names[att.name] = grounded_attributes
 		for g in grounded_attributes:
 			# Define var
@@ -260,8 +287,13 @@ def convert_to_z3(init_state, domain_objects, init_nonfluents, model_states, mod
 
 	# Give all the initial non-fluents their values and push them into the solver
 	for init_nonf in init_nonfluents:
-		solver.add(ground2var(init_nonf[0][0], init_nonf[0][1]) == init_nonf[1])
+		att_name = init_nonf[0][0]
+		obj_names = init_nonf[0][1]
+		if obj_names is None:
+			obj_names = []
+		solver.add(ground2var(att_name, obj_names) == init_nonf[1])
 
+	compiled_reward = _compile_expression(reward_condition, dict())
 	triplet_dict = make_triplet_dict(rddl_model, all_object_names)
 
 	skills_triplets = []
@@ -273,7 +305,7 @@ def convert_to_z3(init_state, domain_objects, init_nonfluents, model_states, mod
 				new_skill = SkillTriplet(z3_expr,action,effect)
 				skills_triplets.append(new_skill)
 				print("Temp break here!")
-	return skills_triplets
+	return skills_triplets, compiled_reward
 def _compile_expression(expr: Expression, groundings_from_top: Dict[str,str]):
 	etype2compiler = {
 		'constant': _compile_constant_expression,
@@ -300,6 +332,40 @@ def _compile_expression(expr: Expression, groundings_from_top: Dict[str,str]):
 def _compile_constant_expression(expr: Expression, groundings_from_top: Dict[str,str]):
 	return expr.value
 
+def _compile_arithmetic_expression(expr: Expression, grounding_dict:Dict[str,str]):
+        etype = expr.etype
+        args = expr.args
+
+        if len(args) == 1:
+            etype2op = {
+                '+': lambda x: x,
+                '-': lambda x: -x
+            }
+
+            if etype[1] not in etype2op:
+                raise ValueError('Invalid binary arithmetic expression:\n{}'.format(expr))
+
+            op = etype2op[etype[1]]
+            x = _compile_expression(args[0], grounding_dict)
+            fluent = op(x)
+
+        else:
+            etype2op = {
+                '+': lambda x, y: x + y,
+                '-': lambda x, y: x - y,
+                '*': lambda x, y: x * y,
+                '/': lambda x, y: x / y,
+            }
+
+            if etype[1] not in etype2op:
+                raise ValueError('Invalid binary arithmetic expression:\n{}'.format(expr))
+
+            op = etype2op[etype[1]]
+            x = _compile_expression(args[0], grounding_dict)
+            y = _compile_expression(args[1], grounding_dict)
+            fluent = op(x, y)
+
+        return fluent
 
 def _compile_pvariable_expression(expr: Expression, grounding_dict: Dict[str, str]):
 	"""
@@ -388,25 +454,6 @@ def _compile_relational_expression(expr: Expression, groundings_from_top: Dict[s
 
 	return fluent
 
-
-# TODO: Finish this function!
-# 1. Change the dictionary to be precond to effect to action
-# 2. Rip out the precond and add the if/else preconds to the dict in place of the first precond
-#
-# def _compile_control_flow_expression(expr: Expression):
-# 	etype = expr.etype
-# 	args = expr.args
-# 	if etype[1] == 'if':
-# 		condition = _compile_expression(args[0])
-# 		true_case = _compile_expression(args[1])
-# 		false_case = _compile_expression(args[2])
-# 		# Compile the cases together sensibly with help from Michael!
-# 		fluent = TensorFluent.if_then_else(condition, true_case, false_case)
-# 	else:
-# 		raise ValueError('Invalid control flow expression:\n{}'.format(expr))
-# 	return fluent
-
-
 def _compile_aggregation_expression(expr: Expression, grounding_dict: Dict[str,str]):
 	#TODO test against aggregators that introduce multiple vars, ex. forall_{?x, ?y}
 
@@ -418,8 +465,6 @@ def _compile_aggregation_expression(expr: Expression, grounding_dict: Dict[str,s
 		# 'avg': x.avg,
 		# 'maximum': x.maximum,
 		# 'minimum': x.minimum,
-		# 'exists': lambda x: z3.Or(*x),
-		# 'forall': lambda x: AndList(*x)
 		'exists': lambda x: andlist_safe_or(*x),
 		'forall': lambda x: AndList(*x)
 	}
@@ -464,10 +509,13 @@ if __name__ == '__main__':
 		test_get_pvar_args_strings()
 	else:
 		# rddl_file_location = "/home/nishanth/Documents/IPC_Code/rddlsim/files/taxi-rddl-domain/taxi-oo_simple.rddl"
-		rddl_file_location = "./taxi-rddl-domain/taxi-oo_mdp_composite_01.rddl"
+		# rddl_file_location = "./taxi-rddl-domain/taxi-oo_mdp_composite_01.rddl"
+		rddl_file_location = "./taxi-rddl-domain/taxi-structured-composite_01.rddl"
+		rddl_file_location = "./taxi-rddl-domain/taxi-structured-deparameterized_actions.rddl"
 		# rddl_file_location = "./button-domains/2buttons3atts.rddl"
 		# rddl_file_location = "./button-domains/2buttons4atts.rddl"
 		# rddl_file_location = "./button-domains/buttons_two-arg_pvar.rddl"
+#		rddl_file_location = "./ipc2018-domains/original/academic-advising/academic-advising_composite_01.rddl"
 		with open(rddl_file_location, 'r') as file:
 			rddl = file.read()
 
@@ -483,8 +531,9 @@ if __name__ == '__main__':
 		instance_objects = pull_instance_objects(model)
 		instance_nonfluents = pull_init_nonfluent(model)
 		initial_state = pull_init_state(model)
+		reward_condition = get_reward_condition(model)
 
-		skill_triplets = convert_to_z3(initial_state, instance_objects, instance_nonfluents, model_states, model_non_fluents, model)
+		skill_triplets, compiled_reward = convert_to_z3(initial_state, instance_objects, instance_nonfluents, model_states, model_non_fluents, reward_condition, model)
 
 		print("skills:")
 		for s in skill_triplets: print(s)

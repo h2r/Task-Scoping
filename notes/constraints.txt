@@ -7,6 +7,8 @@ RDDL files need:
     non-fluent section
     init-state section
 Transition/reward funcitons must be made of blocks of if/else statements
+FIX: can't yet handle stochasticity
+FIX: Can't handle actions that use quantified vars
 Each if statement in a cpt must mention an action
 get_pvar_args_strings assumes there will only be a single instance of the specified pvar (action)
     in the expression's descendants. If there are multiple, and they have different parameter names, it will simply return

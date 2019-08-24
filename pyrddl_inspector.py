@@ -6,12 +6,13 @@ import z3
 from classes import *
 from scoping import *
 import instance_building_utils
-from typing import List
+from typing import List, Dict, Tuple
 
 att_name_to_domain_attribute = {}
 all_object_names = {}
 name_to_z3_var = {}
 actions_list = []
+pvar_to_param_types = {}
 #z3.get_var_names(z3 conditoimn)
 def get_model_from_filepath(rddl_file_location):
 	with open(rddl_file_location, 'r') as file:
@@ -102,6 +103,36 @@ def plugin_objects_to_pvar(pvar_name,pvar_parameters,groundings):
 		object_names.append(groundings[p])
 	return instance_building_utils.g2n_names(pvar_name,object_names)
 
+def get_possible_groundings(pvar_name, variable_param_strings, known_groundings):
+	groundings_by_param = []
+	for vps in variable_param_strings:
+		# If the variable is defined at the top of the cpf, we have already determined it's value
+		if vps in known_groundings.keys():
+			groundings_by_param.append([known_groundings[vps]])
+		# Otherwise, it can be any object of the correct type
+		else:
+			param_type = pvar_to_param_types[pvar_name]
+			groundings_by_param.append(all_object_names[param_type])
+	return groundings_by_param
+def get_grounding_dict_pairs(variable_param_strings: List[str],groundings_by_param: List[List[str]]) -> List[Tuple[Tuple[str,...],Dict[str,str]]]:
+	"""
+	:param variable_param_strings: list of strings of parameters, ex ["?p1,"?t0"]
+	:param groundings_by_param: List of possible groundings for each param, aligned with variable_param_strings
+		ex. [["p0","p1"],["t0"]}
+	:return: List of pairs, where pair[0] is a list containing a single object from each lisst in groundings_by_param
+		and pair[1] is a dictionary that maps from variable_param_strings to the object name it was replaced with in pair[0]
+	"""
+	total_groundings_no_dict = itertools.product(*groundings_by_param)
+	total_groundings_dict_pairs = []
+	for tg_id, tg in enumerate(total_groundings_no_dict):
+		#Make grounding dict
+		grounding_dict = {}
+		for arg_place, arg in enumerate(tg):
+			variable_param_str = variable_param_strings[arg_place]
+			grounding_dict[variable_param_str] = arg
+		total_groundings_dict_pairs.append((tg,grounding_dict))
+	return total_groundings_dict_pairs
+
 def make_triplet_dict(rddl_model, type2names):
 	"""
 	:param rddl_model:
@@ -110,6 +141,7 @@ def make_triplet_dict(rddl_model, type2names):
 	:return: Dict of form [grounded_action][grounded_pvar] -> (condition ast, grounding dictionary)
 	"""
 	global actions_list
+	global pvar_to_param_types
 	# read RDDL file
 	actions_list = rddl_model.domain.action_fluents.keys()
 	print("actions_list:\n{}".format(actions_list))
@@ -126,6 +158,7 @@ def make_triplet_dict(rddl_model, type2names):
 		arg_strings_ungrounded = state_variable_cpf.pvar[1][1]
 		#Get arg types of this pvar
 		arg_types = get_pvar_arg_types(state_variable_name,rddl_model)
+		pvar_to_param_types[state_variable_name] = arg_types
 		#Get all sequences of objects that can be used as arguments for this pvar
 		all_possible_arg_lists = list(get_all_sequences_of_objects(arg_types,rddl_model))
 		#For each sequence of args, ground this pvar and create a skill
@@ -211,29 +244,11 @@ def convert_to_z3(init_state, domain_objects, init_nonfluents, model_states, mod
 			# Apply constraints
 			pass
 
-	# Converts the nonfluent constants to z3
-	# constant_to_grounded_names = {}
-	# for c in constants:
-	# 	grounded_attributes = c.ground(all_object_names)
-	# 	constant_to_grounded_names[c.name] = grounded_attributes
-	# 	for g in grounded_attributes:
-	# 		# Define var
-	# 		name_to_z3_var[g] = c.type(g)
-	# 		# Apply constraints
-	# 		pass
 	print("grounded atts:")
 	for n in name_to_z3_var.keys():
 		print(n)
 	print("grounded atts over")
 
-	# def ground2name(att_name, object_vals):
-	# 	# print(att_name)
-	# 	# print(object_vals)
-	# 	name = att_name + "_" + "_".join([str(i) for i in object_vals])
-	# 	return name
-	#
-	# def ground2var(att_name, object_vals, var_dict=name_to_z3_var):
-	# 	return var_dict[ground2name(att_name, object_vals)]
 	ground2name = instance_building_utils.g2n_names
 	ground2var = instance_building_utils.g2v_builder(name_to_z3_var,ground2name)
 	# Initialize a z3 solver to be returned when it contains the necessary z3 instantiation of z3 instances
@@ -254,12 +269,12 @@ def convert_to_z3(init_state, domain_objects, init_nonfluents, model_states, mod
 		for effect in triplet_dict[action]:
 			for precond in triplet_dict[action][effect]:
 				print(precond)
-				z3_expr = _compile_expression(precond)
+				z3_expr = _compile_expression(*precond)
 				new_skill = SkillTriplet(z3_expr,action,effect)
 				skills_triplets.append(new_skill)
 				print("Temp break here!")
 	return skills_triplets
-def _compile_expression(expr: Expression):
+def _compile_expression(expr: Expression, groundings_from_top: Dict[str,str]):
 	etype2compiler = {
 		'constant': _compile_constant_expression,
 		'pvar': _compile_pvariable_expression,
@@ -279,40 +294,42 @@ def _compile_expression(expr: Expression):
 		raise ValueError('Expression type unknown: {}'.format(etype))
 
 	compiler_fn = etype2compiler[etype[0]]
-	return compiler_fn(expr)
+	return compiler_fn(expr,groundings_from_top)
 
 
-def _compile_constant_expression(expr: Expression):
+def _compile_constant_expression(expr: Expression, groundings_from_top: Dict[str,str]):
 	return expr.value
 
 
-def _compile_pvariable_expression(expr: Expression):
+def _compile_pvariable_expression(expr: Expression, groundings_from_top: Dict[str,str]):
 	"""
 	:param expr:
-	:return: returns list of z3 vars, one for each possible set of arguments to the function
+	:return: returns list of (z3_var, grounding_dict) pairs. (it returns [(True,dict())] for actions)
 	"""
-
+	z3_var_list = []
+	groundings_from_bottom = {}
 	# Return all groundings of this expression
 	#TODO make sure this works for 0 arg pvars
-	att_name = expr.etype[1]
+	pvar_name, variable_param_strings = expr.args
+	#Get list of possible groundings for each variable_param
+	groundings_by_param = get_possible_groundings(pvar_name, variable_param_strings, groundings_from_top)
+	args_groundings_pairs: List[Tuple[List[str], Dict[str,str]]] = get_grounding_dict_pairs(variable_param_strings,groundings_by_param)
+	#We have already split the cpf by action, so if we see an action, we must have taken it
 	if expr2slashyName(expr) in actions_list:
-		return True
+		#We didn't perform any new groundings, so we return an empty grounding_dict
+		return [(True,dict())]
 	else:
-		att = att_name_to_domain_attribute[att_name]
-		#list of str
-		all_att_groundings = att.ground(all_object_names)
+		att = att_name_to_domain_attribute[pvar_name]
 		#list of z3 vars
-		all_att_var_groundings = []
-		all_att_var_groundings = [name_to_z3_var[g] for g in all_att_groundings]
-		return all_att_var_groundings
+		var_grounding_pairs = []
+		for object_names, groundings in args_groundings_pairs:
+			grounded_str = instance_building_utils.g2n_names(att.name,object_names)
+			z3_var = z3_var_list[grounded_str]
+			var_grounding_pairs.append((z3_var,groundings))
+		return var_grounding_pairs
 
-	# return expr.scope
-	# etype = expr.etype
-	# args = expr.args
-	# name = expr._pvar_to_name(args)
-
-
-def _compile_boolean_expression(expr: Expression):
+def _compile_boolean_expression(expr: Expression, groundings_from_top: Dict[str,str]):
+	#TODO handle [(var,grounding_dict)] list that will be returned from compile_pvariable
 	etype = expr.etype
 	args = expr.args
 
@@ -348,15 +365,17 @@ def _compile_boolean_expression(expr: Expression):
 			raise ValueError('Invalid binary boolean expression:\n{}'.format(expr))
 
 		op = etype2op[etype[1]]
-		x = _compile_expression(args[0])
-		y = _compile_expression(args[1])
+		x = _compile_expression(args[0],groundings_from_top)
+		y = _compile_expression(args[1],groundings_from_top)
 		bool_in_z3 = op(x, y)
 
 	return bool_in_z3
 
 
 # Done!
-def _compile_relational_expression(expr: Expression):
+def _compile_relational_expression(expr: Expression, groundings_from_top: Dict[str,str]):
+	#TODO handle [(var,grounding_dict)] list that will be returned from compile_pvariable
+
 	etype = expr.etype
 	args = expr.args
 
@@ -373,8 +392,8 @@ def _compile_relational_expression(expr: Expression):
 		raise ValueError('Invalid relational expression:\n{}'.format(expr))
 
 	op = etype2op[etype[1]]
-	x = _compile_expression(args[0])
-	y = _compile_expression(args[1])
+	x = _compile_expression(args[0],groundings_from_top)
+	y = _compile_expression(args[1],groundings_from_top)
 	fluent = op(x, y)
 
 	return fluent
@@ -398,7 +417,9 @@ def _compile_relational_expression(expr: Expression):
 # 	return fluent
 
 
-def _compile_aggregation_expression(expr: Expression):
+def _compile_aggregation_expression(expr: Expression, grounding_dict: Dict[str,str]):
+	#TODO handle [(var,grounding_dict)] list that will be returned from compile_pvariable
+
 	etype = expr.etype
 	args = expr.args
 

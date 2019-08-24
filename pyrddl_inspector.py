@@ -301,32 +301,22 @@ def _compile_constant_expression(expr: Expression, groundings_from_top: Dict[str
 	return expr.value
 
 
-def _compile_pvariable_expression(expr: Expression, groundings_from_top: Dict[str,str]):
+def _compile_pvariable_expression(expr: Expression, grounding_dict: Dict[str, str]):
 	"""
 	:param expr:
-	:return: returns list of (z3_var, grounding_dict) pairs. (it returns [(True,dict())] for actions)
+	:return: returns a z3 expr with the specified groundings
 	"""
-	z3_var_list = []
-	groundings_from_bottom = {}
+
 	# Return all groundings of this expression
 	#TODO make sure this works for 0 arg pvars
 	pvar_name, variable_param_strings = expr.args
-	#Get list of possible groundings for each variable_param
-	groundings_by_param = get_possible_groundings(pvar_name, variable_param_strings, groundings_from_top)
-	args_groundings_pairs: List[Tuple[List[str], Dict[str,str]]] = get_grounding_dict_pairs(variable_param_strings,groundings_by_param)
-	#We have already split the cpf by action, so if we see an action, we must have taken it
+
 	if expr2slashyName(expr) in actions_list:
-		#We didn't perform any new groundings, so we return an empty grounding_dict
-		return [(True,dict())]
+		return True
 	else:
-		att = att_name_to_domain_attribute[pvar_name]
-		#list of z3 vars
-		var_grounding_pairs = []
-		for object_names, groundings in args_groundings_pairs:
-			grounded_str = instance_building_utils.g2n_names(att.name,object_names)
-			z3_var = z3_var_list[grounded_str]
-			var_grounding_pairs.append((z3_var,groundings))
-		return var_grounding_pairs
+		object_names = [grounding_dict[x] for x in variable_param_strings]
+		z3_var = name_to_z3_var[instance_building_utils.g2n_names(pvar_name,object_names)]
+		return z3_var
 
 def _compile_boolean_expression(expr: Expression, groundings_from_top: Dict[str,str]):
 	#TODO handle [(var,grounding_dict)] list that will be returned from compile_pvariable
@@ -418,16 +408,7 @@ def _compile_relational_expression(expr: Expression, groundings_from_top: Dict[s
 
 
 def _compile_aggregation_expression(expr: Expression, grounding_dict: Dict[str,str]):
-	#TODO handle [(var,grounding_dict)] list that will be returned from compile_pvariable
-
-	etype = expr.etype
-	args = expr.args
-
-	typed_var_list = args[:-1]
-	vars_list = [var for _, (var, _) in typed_var_list]
-	expr2 = args[-1]
-
-	compiled_expr = _compile_expression(expr2)
+	#TODO test against aggregators that introduce multiple vars, ex. forall_{?x, ?y}
 
 	# These functions in the values of the dict are incorrect, make sure to make them better. I have no clue
 	# how to do this...
@@ -442,15 +423,30 @@ def _compile_aggregation_expression(expr: Expression, grounding_dict: Dict[str,s
 		'exists': lambda x: andlist_safe_or(*x),
 		'forall': lambda x: AndList(*x)
 	}
-
-	if etype[1] not in etype2aggr:
-		raise ValueError('Invalid aggregation expression {}.'.format(expr))
-
+	etype = expr.etype
+	args = expr.args
+	typed_vars_list = args[:-1]
+	new_params = [v[1] for v in typed_vars_list]
+	expr2compile = args[-1]
+	compiled_expressions = []
 	aggr = etype2aggr[etype[1]]
-	fluent = aggr(compiled_expr)
-	# fluent = aggr(vars_list=vars_list)
+	#Get all groundings of new params
+	possible_objects_by_param = []
+	new_params_names = []
+	for param_name, param_type in new_params:
+		possible_objects_by_param.append(all_object_names[param_type])
+		new_params_names.append(param_name)
+	possible_argument_sequences = itertools.product(*possible_objects_by_param)
+	for arg_sequence in possible_argument_sequences:
+		new_grounding_dict = copy.copy(grounding_dict)
+		for param_id, object_name in enumerate(arg_sequence):
+			param_name = new_params[param_id][0]
+			new_grounding_dict[param_name] = object_name
+		#Get z3 expression
+		compiled_expressions.append(_compile_expression(expr2compile, new_grounding_dict))
+	#Apply aggregator
+	return aggr(compiled_expressions)
 
-	return fluent
 
 def test_get_pvar_args_strings():
 	rddl_file_location = "./button-domains/buttons_two-arg_pvar.rddl"
@@ -470,7 +466,8 @@ if __name__ == '__main__':
 		# rddl_file_location = "/home/nishanth/Documents/IPC_Code/rddlsim/files/taxi-rddl-domain/taxi-oo_simple.rddl"
 		# rddl_file_location = "./taxi-rddl-domain/taxi-oo_mdp_composite_01.rddl"
 		# rddl_file_location = "./button-domains/2buttons3atts.rddl"
-		rddl_file_location = "./button-domains/buttons_two-arg_pvar.rddl"
+		rddl_file_location = "./button-domains/2buttons4atts.rddl"
+		# rddl_file_location = "./button-domains/buttons_two-arg_pvar.rddl"
 		with open(rddl_file_location, 'r') as file:
 			rddl = file.read()
 

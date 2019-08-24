@@ -12,3 +12,4 @@ Kitchen domain (ingredients, meals to make, dirty dishes. May have to move some 
 
 
 Model Finders (cogcod) better at quantifiers, theorem provers (z3) are better at integers/reals
+

@@ -41,13 +41,13 @@ domain button-mdp {
                 then ~att1(?b)
             else att1(?b);
 
-    //    att2'(?b) = 
-    //        if (toggle-button(?b) & forall_{?b1: button} [att0(?b1) | att1(?b1)])
-    //            then true
-    //        else false;
-
-        att3'(?b) = 
+       att2'(?b) =
             if (toggle-button(?b) & exists_{?b1 : button} [att0(?b1) & att1(?b1)])
+                then true
+            else false;
+
+       att3'(?b) =
+            if (toggle-button(?b) & forall_{?b1: button} [att0(?b1) | att1(?b1)])
                 then true
             else false;
     };

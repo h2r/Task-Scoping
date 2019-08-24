@@ -1,0 +1,8 @@
+~~Notes on dealing with ungrounded actions and attributes~~
+We currently ground all attributes and actions, ex. if there is a parameterized action pickup(?x), we create a separate
+grounded pickup action for each possible ?x.
+We do this because it is easier to implement, but we would prefer to leave object references ungrounded unless they must be grounded.
+Groundings would start based on the objects mentioned in the goal condition, and propagate from there.
+Similarly, we currently ground forall and exists statements via And and Or respectively. We would rather deal with the
+quantifiers in a more elegant way. Dealing with parameterized actions/attributes and quantifiers more intelligently
+would probably save computation.

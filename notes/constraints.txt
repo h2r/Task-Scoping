@@ -1,5 +1,6 @@
 ~~Scoping algorithm~~
 Reward must by goal-based. Ie, a single if-else statement with a high-reward and low-reward condition
+There must be multi-valued attributes for the scoper to be useful. Otherwise, the scoper is basically doing goal regression planning.
 
 ~~RDDL inspactor~~
 RDDL files need:

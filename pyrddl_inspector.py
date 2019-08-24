@@ -11,7 +11,7 @@ att_name_to_domain_attribute = {}
 all_object_names = {}
 name_to_z3_var = {}
 actions_list = []
-
+#z3.get_var_names(z3 conditoimn)
 
 def andlist_safe_or(*x):
 	new_x = []
@@ -44,62 +44,81 @@ def pull_init_state(rddl_model):
 	return rddl_model.instance.init_state
 
 
-def make_triplet_dict(rddl_model):
+def get_pvar_arg_types(pvar_name,rddl_model):
+	for pvar in rddl_model.domain.pvariables:
+		if pvar.name == pvar_name:
+			return pvar.param_types
+	raise KeyError("No pvar with name \"{}\" in rddl_model".format(pvar_name))
+
+def get_all_objects_of_type(object_type, rddl_model):
+	for x in rddl_model.non_fluents.objects:
+		if x[0] == object_type:
+			return x[1]
+	raise KeyError("There are no objects of type {} in the rddl_model".format(object_type))
+
+def get_all_sequences_of_objects(object_types, rddl_model):
+	objects_by_type_list = [get_all_objects_of_type(t,rddl_model) for t in object_types]
+	all_sequences = itertools.product(*objects_by_type_list)
+	return all_sequences
+
+def make_triplet_dict(rddl_model, type2names):
+	"""
+	:param rddl_model:
+	:param type2names:
+	:param ground2name: takes in attribute name and list of object names, and returns a str of the grounded att
+	:return:
+	"""
 	global actions_list
 	# read RDDL file
 	actions_list = rddl_model.domain.action_fluents.keys()
 	print("actions_list:\n{}".format(actions_list))
+	#Get grounded actions
+
 
 	# print(type(model.domain.cpfs[1]))
 	action_to_effect_to_precond = collections.defaultdict(lambda: collections.defaultdict(list))
 
 	for state_variable_cpf in rddl_model.domain.cpfs[1]:
-		if (state_variable_cpf.expr.etype[0] == 'control'):
-			condition = state_variable_cpf.expr.args[0]
-			false_case = state_variable_cpf.expr.args[2]
-			if(false_case.etype[0] != 'control'):
-				for action in actions_list:
-					if action in condition.scope:
-						action_to_effect_to_precond[action][state_variable_cpf.name.replace("'", "")].append(condition)
-			else:
-				while(false_case.etype[0] == 'control'):
+		#Get state variable name by removing the "'" suffix
+		pvar_name = state_variable_cpf.pvar[1][0][:-1]
+		#Get strings used as arguments for pvar
+		arg_strings_ungrounded = state_variable_cpf.pvar[1][1]
+		#Get arg types of this pvar
+		arg_types = get_pvar_arg_types(pvar_name,rddl_model)
+		#Get all sequences of objects that can be used as arguments for this pvar
+		all_possible_arg_lists = get_all_sequences_of_objects(arg_types,rddl_model)
+		#For each sequence of args, ground this pvar and create a skill
+		for current_arg_list in all_possible_arg_lists:
+			#Make the grounding dictionary we will pass down the recursive compilation chain
+			groundings_from_top = {}
+			for arg_id in range(len(arg_strings_ungrounded)):
+				groundings_from_top[arg_strings_ungrounded[arg_id]] = current_arg_list[arg_id]
+
+			if (state_variable_cpf.expr.etype[0] == 'control'):
+				condition = state_variable_cpf.expr.args[0]
+				false_case = state_variable_cpf.expr.args[2]
+				if (false_case.etype[0] != 'control'):
 					for action in actions_list:
 						if action in condition.scope:
+							#TODO ground action based on groundings from top, and everything else below this line
+							#Ground the action based on groundings_from_top
 							action_to_effect_to_precond[action][state_variable_cpf.name.replace("'", "")].append(condition)
-					
-					# print(state_variable_cpf.expr)
-					# print("CONDITION ==============================")
-					# print(condition)
-					# print("FALSE CASE ==============================")
-					# print(false_case)
-					# print("Temp break here!")
-					condition = false_case.args[0]
-					false_case = false_case.args[2]
-					# print("CONDITION ==============================")
-					# print(condition)
-					# print("FALSE CASE ==============================")
-					# print(false_case)
-					# print("Temp break here!")
+				else:
+					while (false_case.etype[0] == 'control'):
+						for action in actions_list:
+							if action in condition.scope:
+								action_to_effect_to_precond[action][state_variable_cpf.name.replace("'", "")].append(
+									condition)
 
-	# for state_variable_cpf in rddl_model.domain.cpfs[1]:
-	# 	if (state_variable_cpf.expr.etype[0] == 'control'):
-	# 		for action_precondition in state_variable_cpf.expr._expr[1]:
-	# 			for action in actions_list:
-	# 				if action in action_precondition.scope:
-	# 					action_to_effect_to_precond[action][state_variable_cpf.name.replace("'", "")].append(action_precondition._expr)
-	# 					print("Temporary Break!")
+						condition = false_case.args[0]
+						false_case = false_case.args[2]
 
 	return action_to_effect_to_precond
-
-	# IMPORTANT!!!
-	# This parser will only work for a transition function that begins with if statements for every block
-	# Further, every block needs to contain statements with only one action => only one action allowed per time-step
-
 
 # For every state predicate function, see which objects it takes in:
 # Now, for every combination of those objects in the instance, make a proposition in z3
 # Only set the proposition corresponding to the init-state to true!
-def convert_to_z3(init_state, domain_objects, init_nonfluents, model_states, model_nonfluents, triplet_dict):
+def convert_to_z3(init_state, domain_objects, init_nonfluents, model_states, model_nonfluents, rddl_model):
 	global att_name_to_domain_attribute
 	global all_object_names
 	global name_to_z3_var
@@ -110,21 +129,23 @@ def convert_to_z3(init_state, domain_objects, init_nonfluents, model_states, mod
 		all_object_names[dom_obj[0]] = dom_obj[1]
 
 	# Makes a list of the non-fluents (constants) from the domain
+	att_name_to_domain_attribute = {}
+
 	constants = []
 	for nonf in model_nonfluents:
 		print(nonf)
 		if (model_nonfluents[nonf].range == 'bool'):
 			constants.append(DomainAttribute(model_nonfluents[nonf].name, z3.Bool, model_nonfluents[nonf].param_types))
-
 	# Makes a list of all the attributes (state variables like passenger-in-taxi)
 	attributes_list = []
 	for state in model_states:
 		if (model_states[state].range == 'bool'):
 			attributes_list.append(DomainAttribute(model_states[state].name, z3.Bool, model_states[state].param_types))
+			# att_name_to_domain_attribute[model_states[state].name] = model_states[state].args_names
 
 	# Converts the attributes to z3 and assigns them to a dict
+	att_name_to_arg_names = {}
 	name_to_z3_var = {}
-	att_name_to_domain_attribute = {}
 	attribute_to_grounded_names = {}
 	for att in attributes_list + constants:
 		att_name_to_domain_attribute[att.name] = att
@@ -171,6 +192,8 @@ def convert_to_z3(init_state, domain_objects, init_nonfluents, model_states, mod
 	# Give all the initial non-fluents their values and push them into the solver
 	for init_nonf in init_nonfluents:
 		solver.add(ground2var(init_nonf[0][0], init_nonf[0][1]) == init_nonf[1])
+
+	triplet_dict = make_triplet_dict(rddl_model, all_object_names)
 
 	skills_triplets = []
 	for action in triplet_dict.keys():
@@ -354,11 +377,8 @@ def _compile_aggregation_expression(expr: Expression):
 
 	return fluent
 
-
-if __name__ == '__main__':
-	# rddl_file_location = "/home/nishanth/Documents/IPC_Code/rddlsim/files/taxi-rddl-domain/taxi-oo_simple.rddl"
-	# rddl_file_location = "./taxi-rddl-domain/taxi-oo_mdp_composite_01.rddl"
-	rddl_file_location = "./misc-domains/button2.rddl"
+def test_make_triplet_dict():
+	rddl_file_location = "./button-domains/2buttons3atts.rddl"
 	with open(rddl_file_location, 'r') as file:
 		rddl = file.read()
 
@@ -368,14 +388,32 @@ if __name__ == '__main__':
 
 	# parse RDDL
 	model = parser.parse(rddl)  # AST
-	test_dict = make_triplet_dict(model)
+	#Get the [action][effect] -> [pyrddl preconditions] dict
+	triplet_dict = make_triplet_dict(model)
+	print("cat")
+
+if __name__ == '__main__':
+	# rddl_file_location = "/home/nishanth/Documents/IPC_Code/rddlsim/files/taxi-rddl-domain/taxi-oo_simple.rddl"
+	# rddl_file_location = "./taxi-rddl-domain/taxi-oo_mdp_composite_01.rddl"
+	# rddl_file_location = "./button-domains/2buttons3atts.rddl"
+	rddl_file_location = "./button-domains/buttons_two-arg_pvar.rddl"
+	with open(rddl_file_location, 'r') as file:
+		rddl = file.read()
+
+	# buid parser
+	parser = RDDLParser()
+	parser.build()
+
+	# parse RDDL
+	model = parser.parse(rddl)  # AST
+#	test_dict = make_triplet_dict(model)
 	model_states = pull_state_var_dict(model)
 	model_non_fluents = pull_nonfluent_var_dict(model)
 	instance_objects = pull_instance_objects(model)
 	instance_nonfluents = pull_init_nonfluent(model)
 	initial_state = pull_init_state(model)
 
-	skill_triplets = convert_to_z3(initial_state, instance_objects, instance_nonfluents, model_states, model_non_fluents, test_dict)
+	skill_triplets = convert_to_z3(initial_state, instance_objects, instance_nonfluents, model_states, model_non_fluents, model)
 
 	print("skills:")
 	for s in skill_triplets: print(s)

@@ -332,7 +332,7 @@ def _compile_boolean_expression(expr: Expression, groundings_from_top: Dict[str,
 			raise ValueError('Invalid unary boolean expression:\n{}'.format(expr))
 
 		op = etype2op[etype[1]]
-		x = _compile_expression(args[0])
+		x = _compile_expression(args[0], groundings_from_top)
 		if(isinstance(x, list)):
 			if(len(x) > 1):
 				# bool_in_z3 = AndList(*[op(x_elem) for x_elem in x])
@@ -464,9 +464,9 @@ if __name__ == '__main__':
 		test_get_pvar_args_strings()
 	else:
 		# rddl_file_location = "/home/nishanth/Documents/IPC_Code/rddlsim/files/taxi-rddl-domain/taxi-oo_simple.rddl"
-		# rddl_file_location = "./taxi-rddl-domain/taxi-oo_mdp_composite_01.rddl"
+		rddl_file_location = "./taxi-rddl-domain/taxi-oo_mdp_composite_01.rddl"
 		# rddl_file_location = "./button-domains/2buttons3atts.rddl"
-		rddl_file_location = "./button-domains/2buttons4atts.rddl"
+		# rddl_file_location = "./button-domains/2buttons4atts.rddl"
 		# rddl_file_location = "./button-domains/buttons_two-arg_pvar.rddl"
 		with open(rddl_file_location, 'r') as file:
 			rddl = file.read()

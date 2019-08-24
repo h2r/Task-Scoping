@@ -20,7 +20,7 @@ domain button-mdp {
     // Passenger reached goal variable
         att0(button)                : { state-fluent, bool, default=false };
         att1(button)                  : { state-fluent, bool, default=false };
-        att2(button)                  : { state-fluent, bool, default=false };
+        att2(button,button)                  : { state-fluent, bool, default=false };
        // att3(button)                  : { state-fluent, bool, default=false };
     //////////////////////////////// Actions ////////////////////////////////
         toggle-button(button)                           : { action-fluent, bool, default = false };

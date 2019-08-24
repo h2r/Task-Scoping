@@ -90,12 +90,24 @@ def get_pvar_args_strings(pvar_name: str, expr: Expression) -> List[str]:
 
 	return []
 
+def plugin_objects_to_pvar(pvar_name,pvar_parameters,groundings):
+	"""
+	:param pvar_name: name of pvar, ex. "toggle-button"
+	:param pvar_parameters: list of strings for variable parameters, ex. ["?b"]
+	:param groundings: dictionary that maps variable parameters to object names. Ex {"?b": "b0"}
+	:return: pvar applied to the object names. Ex "toggle-button(b0)" (this example assumes g2n has not changed)
+	"""
+	object_names = []
+	for p in pvar_parameters:
+		object_names.append(groundings[p])
+	return instance_building_utils.g2n_names(pvar_name,object_names)
+
 def make_triplet_dict(rddl_model, type2names):
 	"""
 	:param rddl_model:
 	:param type2names:
 	:param ground2name: takes in attribute name and list of object names, and returns a str of the grounded att
-	:return:
+	:return: Dict of form [grounded_action][grounded_pvar] -> (condition ast, grounding dictionary)
 	"""
 	global actions_list
 	# read RDDL file
@@ -109,37 +121,48 @@ def make_triplet_dict(rddl_model, type2names):
 
 	for state_variable_cpf in rddl_model.domain.cpfs[1]:
 		#Get state variable name by removing the "'" suffix
-		pvar_name = state_variable_cpf.pvar[1][0][:-1]
+		state_variable_name = state_variable_cpf.pvar[1][0][:-1]
 		#Get strings used as arguments for pvar
 		arg_strings_ungrounded = state_variable_cpf.pvar[1][1]
 		#Get arg types of this pvar
-		arg_types = get_pvar_arg_types(pvar_name,rddl_model)
+		arg_types = get_pvar_arg_types(state_variable_name,rddl_model)
 		#Get all sequences of objects that can be used as arguments for this pvar
-		all_possible_arg_lists = get_all_sequences_of_objects(arg_types,rddl_model)
+		all_possible_arg_lists = list(get_all_sequences_of_objects(arg_types,rddl_model))
 		#For each sequence of args, ground this pvar and create a skill
 		for current_arg_list in all_possible_arg_lists:
+			#Ground state_variable to current_arg_list
+			grounded_state_variable = g2n_names(state_variable_name,current_arg_list)
 			#Make the grounding dictionary we will pass down the recursive compilation chain
 			groundings_from_top = {}
 			for arg_id in range(len(arg_strings_ungrounded)):
 				groundings_from_top[arg_strings_ungrounded[arg_id]] = current_arg_list[arg_id]
-
 			if (state_variable_cpf.expr.etype[0] == 'control'):
 				condition = state_variable_cpf.expr.args[0]
 				false_case = state_variable_cpf.expr.args[2]
 				if (false_case.etype[0] != 'control'):
 					for action in actions_list:
 						if action in condition.scope:
-							#TODO ground action based on groundings from top, and everything else below this line
+							#TODO get rid of code duplication between this and next block of code
 							#Ground the action based on groundings_from_top.
-							#We may have to search through the expression's descendents to find the action.
-							#ex. if the condition is (action & other_pvar)
-							action_to_effect_to_precond[action][state_variable_cpf.name.replace("'", "")].append(condition)
+							cleaned_action_name = action.split("/")[0]
+							action_variable_args = get_pvar_args_strings(cleaned_action_name, condition)
+							grounded_action_str = plugin_objects_to_pvar(cleaned_action_name,action_variable_args,groundings_from_top)
+							condition_grounding_pair = (condition,groundings_from_top)
+							#Add to the dictionary.
+							action_to_effect_to_precond[grounded_action_str][grounded_state_variable].append(condition_grounding_pair)
 				else:
 					while (false_case.etype[0] == 'control'):
 						for action in actions_list:
 							if action in condition.scope:
-								action_to_effect_to_precond[action][state_variable_cpf.name.replace("'", "")].append(
-									condition)
+								# Ground the action based on groundings_from_top.
+								cleaned_action_name = action.split("/")[0]
+								action_variable_args = get_pvar_args_strings(cleaned_action_name, condition)
+								grounded_action_str = plugin_objects_to_pvar(cleaned_action_name, action_variable_args,
+																			 groundings_from_top)
+								condition_grounding_pair = (condition, groundings_from_top)
+								# Add to the dictionary.
+								action_to_effect_to_precond[grounded_action_str][grounded_state_variable].append(
+									condition_grounding_pair)
 
 						condition = false_case.args[0]
 						false_case = false_case.args[2]
@@ -420,7 +443,7 @@ def test_get_pvar_args_strings():
 		assert pvar_args_strings_true == pvar_args_strings_empirical, "{}\n{}".format(pvar_args_strings_true,pvar_args_strings_empirical)
 
 if __name__ == '__main__':
-	if True:
+	if False:
 		test_get_pvar_args_strings()
 	else:
 		# rddl_file_location = "/home/nishanth/Documents/IPC_Code/rddlsim/files/taxi-rddl-domain/taxi-oo_simple.rddl"

@@ -80,13 +80,17 @@ def get_pvar_args_strings(pvar_name: str, expr: Expression) -> List[str]:
 	"""
 	# if isinstance(expr, CPF)
 	#Search through expr, its args, etc.
+	if pvar_name == "move_west":
+		print("westward, ho")
 	if isinstance(expr.args,int):
 		print("int ya boii")
 	for arg_id in range(len(expr.args)):
 		if isinstance(expr.args[arg_id],Expression):
+			if expr.args[arg_id].etype[0] == 'constant': return []
 			x = get_pvar_args_strings(pvar_name,expr.args[arg_id])
 			if x is None:
 				print("Nani!???")
+				return []
 			if len(x) > 0:
 				return x
 		elif isinstance(expr.args[arg_id],str):

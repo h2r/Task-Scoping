@@ -8,3 +8,6 @@ RDDL files need:
     init-state section
 Transition/reward funcitons must be made of blocks of if/else statements
 Each if statement in a cpt must mention an action
+get_pvar_args_strings assumes there will only be a single instance of the specified pvar (action)
+    in the expression's descendants. If there are multiple, and they have different parameter names, it will simply return
+    paramter names of the first found instance, and bad things will happen.

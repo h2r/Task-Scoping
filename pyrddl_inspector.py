@@ -6,13 +6,22 @@ import z3
 from classes import *
 from scoping import *
 import instance_building_utils
+from typing import List
 
 att_name_to_domain_attribute = {}
 all_object_names = {}
 name_to_z3_var = {}
 actions_list = []
 #z3.get_var_names(z3 conditoimn)
-
+def get_model_from_filepath(rddl_file_location):
+	with open(rddl_file_location, 'r') as file:
+		rddl = file.read()
+	# buid parser
+	parser = RDDLParser()
+	parser.build()
+	# parse RDDL
+	model = parser.parse(rddl)  # AST
+	return model
 def andlist_safe_or(*x):
 	new_x = []
 	for i in x:
@@ -60,6 +69,26 @@ def get_all_sequences_of_objects(object_types, rddl_model):
 	objects_by_type_list = [get_all_objects_of_type(t,rddl_model) for t in object_types]
 	all_sequences = itertools.product(*objects_by_type_list)
 	return all_sequences
+def get_pvar_args_strings(pvar_name: str, expr: Expression) -> List[str]:
+	"""
+	:param att_name: name of pvar, ex. "toggle-button", "taxi-at"
+	:param expr: the pyrddl.Expression object we are searching in
+	:return: the strings used for the variable arguments in the pvar, ex. "?x". Returns the first found strings.
+	Meant to be used when the pvar is an action, and thus would only be found once.
+	Returns [] if the pvar is not found
+	"""
+	# if isinstance(expr, CPF)
+	#Search through expr, its args, etc.
+	for arg_id in range(len(expr.args)):
+		if isinstance(expr.args[arg_id],Expression):
+			x = get_pvar_args_strings(pvar_name,expr.args[arg_id])
+			if len(x) > 0:
+				return x
+		elif isinstance(expr.args[arg_id],str):
+			if expr.args[arg_id] == pvar_name:
+				return expr.args[arg_id + 1]
+
+	return []
 
 def make_triplet_dict(rddl_model, type2names):
 	"""
@@ -101,7 +130,9 @@ def make_triplet_dict(rddl_model, type2names):
 					for action in actions_list:
 						if action in condition.scope:
 							#TODO ground action based on groundings from top, and everything else below this line
-							#Ground the action based on groundings_from_top
+							#Ground the action based on groundings_from_top.
+							#We may have to search through the expression's descendents to find the action.
+							#ex. if the condition is (action & other_pvar)
 							action_to_effect_to_precond[action][state_variable_cpf.name.replace("'", "")].append(condition)
 				else:
 					while (false_case.etype[0] == 'control'):
@@ -377,43 +408,42 @@ def _compile_aggregation_expression(expr: Expression):
 
 	return fluent
 
-def test_make_triplet_dict():
-	rddl_file_location = "./button-domains/2buttons3atts.rddl"
-	with open(rddl_file_location, 'r') as file:
-		rddl = file.read()
-
-	# buid parser
-	parser = RDDLParser()
-	parser.build()
-
-	# parse RDDL
-	model = parser.parse(rddl)  # AST
-	#Get the [action][effect] -> [pyrddl preconditions] dict
-	triplet_dict = make_triplet_dict(model)
-	print("cat")
+def test_get_pvar_args_strings():
+	rddl_file_location = "./button-domains/buttons_two-arg_pvar.rddl"
+	model = get_model_from_filepath(rddl_file_location)
+	pvar_args_strings_true = ["?b"]
+	cpfs =  model.domain.cpfs[1]
+	action_name = "toggle-button"
+	for c in cpfs:
+		condition = c.expr.args[0]
+		pvar_args_strings_empirical = get_pvar_args_strings(action_name,c.expr)
+		assert pvar_args_strings_true == pvar_args_strings_empirical, "{}\n{}".format(pvar_args_strings_true,pvar_args_strings_empirical)
 
 if __name__ == '__main__':
-	# rddl_file_location = "/home/nishanth/Documents/IPC_Code/rddlsim/files/taxi-rddl-domain/taxi-oo_simple.rddl"
-	# rddl_file_location = "./taxi-rddl-domain/taxi-oo_mdp_composite_01.rddl"
-	# rddl_file_location = "./button-domains/2buttons3atts.rddl"
-	rddl_file_location = "./button-domains/buttons_two-arg_pvar.rddl"
-	with open(rddl_file_location, 'r') as file:
-		rddl = file.read()
+	if True:
+		test_get_pvar_args_strings()
+	else:
+		# rddl_file_location = "/home/nishanth/Documents/IPC_Code/rddlsim/files/taxi-rddl-domain/taxi-oo_simple.rddl"
+		# rddl_file_location = "./taxi-rddl-domain/taxi-oo_mdp_composite_01.rddl"
+		# rddl_file_location = "./button-domains/2buttons3atts.rddl"
+		rddl_file_location = "./button-domains/buttons_two-arg_pvar.rddl"
+		with open(rddl_file_location, 'r') as file:
+			rddl = file.read()
 
-	# buid parser
-	parser = RDDLParser()
-	parser.build()
+		# buid parser
+		parser = RDDLParser()
+		parser.build()
 
-	# parse RDDL
-	model = parser.parse(rddl)  # AST
-#	test_dict = make_triplet_dict(model)
-	model_states = pull_state_var_dict(model)
-	model_non_fluents = pull_nonfluent_var_dict(model)
-	instance_objects = pull_instance_objects(model)
-	instance_nonfluents = pull_init_nonfluent(model)
-	initial_state = pull_init_state(model)
+		# parse RDDL
+		model = parser.parse(rddl)  # AST
+	#	test_dict = make_triplet_dict(model)
+		model_states = pull_state_var_dict(model)
+		model_non_fluents = pull_nonfluent_var_dict(model)
+		instance_objects = pull_instance_objects(model)
+		instance_nonfluents = pull_init_nonfluent(model)
+		initial_state = pull_init_state(model)
 
-	skill_triplets = convert_to_z3(initial_state, instance_objects, instance_nonfluents, model_states, model_non_fluents, model)
+		skill_triplets = convert_to_z3(initial_state, instance_objects, instance_nonfluents, model_states, model_non_fluents, model)
 
-	print("skills:")
-	for s in skill_triplets: print(s)
+		print("skills:")
+		for s in skill_triplets: print(s)

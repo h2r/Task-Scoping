@@ -184,6 +184,8 @@ instance taxi-oo_mdp_inst_mdp__01 {
         taxi-y(t0) = 0;
         passenger-x-curr(p0) = 0;
         passenger-y-curr(p0) = 0;
+        passenger-in-taxi(p0, t0) = false;
+        passenger-in-taxi(p1, t0) = false;
     };
 
     horizon = 20;

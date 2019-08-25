@@ -37,10 +37,6 @@ domain button-mdp {
     };
 
     reward =
-    //    ( -5 * ( ~forall_{ ?p : passenger, ?x : xpos, ?y : ypos } [ PASSENGERS_YOU_CARE_FOR(?p) => passenger-at-dest(?p, ?x, ?y) ] ) );
-    //      if ( exists_{ ?t : taxi, ?x : xpos, ?y : ypos } [ TAXI_GOAL(?x, ?y) & taxi-at(?t, ?x, ?y) ] )
-    //          then 5
-    //      else -5;
           if ( forall_{ ?b : button } [ ~special(?b) | button-on(?b) ] )
               then 5
           else -5;

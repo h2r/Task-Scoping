@@ -6,7 +6,8 @@ import z3
 from classes import *
 import instance_building_utils
 from typing import List, Dict, Tuple
-
+from logic_utils import solver_implies_condition, check_implication
+from logic_utils import solver_implies_condition, check_implication
 att_name_to_domain_attribute = {}
 all_object_names = {}
 name_to_z3_var = {}
@@ -22,15 +23,22 @@ def get_model_from_filepath(rddl_file_location):
 	# parse RDDL
 	model = parser.parse(rddl)  # AST
 	return model
-def andlist_safe_or(*x):
+
+def or2(*x, solver=None):
+	"""
+	A wrapper for z3.Or meant to handle ConditionLists and simplifications based on the constant conditions
+	"""
 	new_x = []
 	for i in x:
 		if isinstance(i,AndList):
-			new_x.append(z3.And(*i.args))
+			new_x.append(i.to_z3())
 		else:
 			new_x.append(i)
-	return z3.Or(*new_x)
-
+	condition = z3.Or(*new_x)
+	if solver is not None:
+		if solver_implies_condition(solver, condition):
+			condition = True
+	return condition
 def expr2slashyName(expr):
 	if(expr.args[1] is not None):
 		return "{}/{}".format(expr.args[0],len(expr.args[1]))
@@ -49,10 +57,13 @@ def pull_instance_objects(rddl_model):
 
 
 def pull_init_nonfluent(rddl_model):
+	#TODO handle default values
+
 	return rddl_model.non_fluents.init_non_fluent
 
 
 def pull_init_state(rddl_model):
+	#TODO handle default values
 	return rddl_model.instance.init_state
 
 
@@ -148,7 +159,6 @@ def get_reward_condition(rddl_model):
 	if(reward_expr.etype[0] == 'control'):
 		condition = reward_expr.args[0]
 		return condition
-
 	else:
 		raise ValueError("The reward is not specified as an if/else sequence")
 
@@ -229,12 +239,17 @@ def make_triplet_dict(rddl_model, type2names):
 # For every state predicate function, see which objects it takes in:
 # Now, for every combination of those objects in the instance, make a proposition in z3
 # Only set the proposition corresponding to the init-state to true!
-def convert_to_z3(init_state, domain_objects, init_nonfluents, model_states, model_nonfluents, reward_condition, rddl_model):
+def convert_to_z3(rddl_model):
 	global att_name_to_domain_attribute
 	global all_object_names
 	global name_to_z3_var
 	# Makes a dict out of the state-variables like xpos=[x00,x01],ypos=[y00,y01]
 	# These are already for the domain itself.
+	model_states = pull_state_var_dict(rddl_model)
+	model_nonfluents = pull_nonfluent_var_dict(rddl_model)
+	domain_objects = pull_instance_objects(rddl_model)
+	reward_condition = get_reward_condition(rddl_model)
+
 	all_object_names = {}
 	for dom_obj in domain_objects:
 		all_object_names[dom_obj[0]] = dom_obj[1]
@@ -246,6 +261,7 @@ def convert_to_z3(init_state, domain_objects, init_nonfluents, model_states, mod
 		"int":z3.Int,
 		"real":z3.Real
 	}
+	#TODO add default values for pvars
 	constants = []
 	for nonf in model_nonfluents:
 		print(nonf)
@@ -285,12 +301,16 @@ def convert_to_z3(init_state, domain_objects, init_nonfluents, model_states, mod
 	ground2name = instance_building_utils.g2n_names
 	ground2var = instance_building_utils.g2v_builder(name_to_z3_var,ground2name)
 	# Initialize a z3 solver to be returned when it contains the necessary z3 instantiation of z3 instances
+	init_nonfluents = pull_init_nonfluent(rddl_model)
+	init_state = pull_init_state(rddl_model)
+	# A solver that contains all information about the start state
 	solver = z3.Solver()
+	#A solver that contains only constant assertions
+	solver_constants_only = z3.Solver()
 
 	# Give the passenger, etc. their init values and push them into the solver
 	for init_val in init_state:
 		solver.add(ground2var(init_val[0][0], init_val[0][1]) == init_val[1])
-
 	# Give all the initial non-fluents their values and push them into the solver
 	for init_nonf in init_nonfluents:
 		att_name = init_nonf[0][0]
@@ -298,8 +318,9 @@ def convert_to_z3(init_state, domain_objects, init_nonfluents, model_states, mod
 		if obj_names is None:
 			obj_names = []
 		solver.add(ground2var(att_name, obj_names) == init_nonf[1])
+		solver_constants_only.add(ground2var(att_name, obj_names) == init_nonf[1])
 
-	compiled_reward = _compile_expression(reward_condition, dict())
+	compiled_reward = _compile_expression(reward_condition, dict(),solver_constants_only)
 	triplet_dict = make_triplet_dict(rddl_model, all_object_names)
 
 	skills_triplets = []
@@ -307,12 +328,12 @@ def convert_to_z3(init_state, domain_objects, init_nonfluents, model_states, mod
 		for effect in triplet_dict[action]:
 			for precond in triplet_dict[action][effect]:
 				print(precond)
-				z3_expr = _compile_expression(*precond)
+				z3_expr = _compile_expression(*precond,solver_constants_only)
 				new_skill = Skill(z3_expr, action, [effect])
 				skills_triplets.append(new_skill)
 				print("Temp break here!")
 	return skills_triplets, compiled_reward, solver
-def _compile_expression(expr: Expression, groundings_from_top: Dict[str,str]):
+def _compile_expression(expr: Expression, groundings_from_top: Dict[str,str],solver_constants_only):
 	etype2compiler = {
 		'constant': _compile_constant_expression,
 		'pvar': _compile_pvariable_expression,
@@ -332,13 +353,13 @@ def _compile_expression(expr: Expression, groundings_from_top: Dict[str,str]):
 		raise ValueError('Expression type unknown: {}'.format(etype))
 
 	compiler_fn = etype2compiler[etype[0]]
-	return compiler_fn(expr,groundings_from_top)
+	return compiler_fn(expr,groundings_from_top,solver_constants_only)
 
 
-def _compile_constant_expression(expr: Expression, groundings_from_top: Dict[str,str]):
+def _compile_constant_expression(expr: Expression, groundings_from_top: Dict[str,str],solver_constants_only):
 	return expr.value
 
-def _compile_arithmetic_expression(expr: Expression, grounding_dict:Dict[str,str]):
+def _compile_arithmetic_expression(expr: Expression, grounding_dict:Dict[str,str],solver_constants_only):
         etype = expr.etype
         args = expr.args
 
@@ -367,13 +388,13 @@ def _compile_arithmetic_expression(expr: Expression, grounding_dict:Dict[str,str
                 raise ValueError('Invalid binary arithmetic expression:\n{}'.format(expr))
 
             op = etype2op[etype[1]]
-            x = _compile_expression(args[0], grounding_dict)
-            y = _compile_expression(args[1], grounding_dict)
+            x = _compile_expression(args[0], grounding_dict,solver_constants_only)
+            y = _compile_expression(args[1], grounding_dict,solver_constants_only)
             fluent = op(x, y)
 
         return fluent
 
-def _compile_pvariable_expression(expr: Expression, grounding_dict: Dict[str, str]):
+def _compile_pvariable_expression(expr: Expression, grounding_dict: Dict[str, str],solver_constants_only):
 	"""
 	:param expr:
 	:return: returns a z3 expr with the specified groundings
@@ -382,7 +403,8 @@ def _compile_pvariable_expression(expr: Expression, grounding_dict: Dict[str, st
 	# Return all groundings of this expression
 	#TODO make sure this works for 0 arg pvars
 	pvar_name, variable_param_strings = expr.args
-
+	if pvar_name == "PASSENGERS_YOU_CARE_FOR":
+		print("BREAK")
 	if expr2slashyName(expr) in actions_list:
 		return True
 	else:
@@ -390,7 +412,7 @@ def _compile_pvariable_expression(expr: Expression, grounding_dict: Dict[str, st
 		z3_var = name_to_z3_var[instance_building_utils.g2n_names(pvar_name,object_names)]
 		return z3_var
 
-def _compile_boolean_expression(expr: Expression, groundings_from_top: Dict[str,str]):
+def _compile_boolean_expression(expr: Expression, groundings_from_top: Dict[str,str],solver_constants_only):
 	#TODO handle [(var,grounding_dict)] list that will be returned from compile_pvariable
 	etype = expr.etype
 	args = expr.args
@@ -404,7 +426,7 @@ def _compile_boolean_expression(expr: Expression, groundings_from_top: Dict[str,
 			raise ValueError('Invalid unary boolean expression:\n{}'.format(expr))
 
 		op = etype2op[etype[1]]
-		x = _compile_expression(args[0], groundings_from_top)
+		x = _compile_expression(args[0], groundings_from_top,solver_constants_only)
 		if(isinstance(x, list)):
 			if(len(x) > 1):
 				# bool_in_z3 = AndList(*[op(x_elem) for x_elem in x])
@@ -418,24 +440,24 @@ def _compile_boolean_expression(expr: Expression, groundings_from_top: Dict[str,
 		etype2op = {
 			'^': lambda x, y: AndList(*[x, y]),
 			'&': lambda x, y: AndList(*[x, y]),
-			'|': lambda x, y: andlist_safe_or(x, y),
-			'=>': lambda x, y: andlist_safe_or(z3.Not(x), y),
-			'<=>': lambda x, y: andlist_safe_or(z3.And(*[x, y]), z3.And(*[z3.Not(x), z3.Not(y)]))
+			'|': lambda x, y: or2(x, y, solver=solver_constants_only),
+			'=>': lambda x, y: or2(z3.Not(x), y),
+			'<=>': lambda x, y: or2(z3.And(*[x, y]), z3.And(*[z3.Not(x), z3.Not(y)]))
 		}
 
 		if etype[1] not in etype2op:
 			raise ValueError('Invalid binary boolean expression:\n{}'.format(expr))
 
 		op = etype2op[etype[1]]
-		x = _compile_expression(args[0],groundings_from_top)
-		y = _compile_expression(args[1],groundings_from_top)
+		x = _compile_expression(args[0],groundings_from_top,solver_constants_only)
+		y = _compile_expression(args[1],groundings_from_top,solver_constants_only)
 		bool_in_z3 = op(x, y)
 
 	return bool_in_z3
 
 
 # Done!
-def _compile_relational_expression(expr: Expression, groundings_from_top: Dict[str,str]):
+def _compile_relational_expression(expr: Expression, groundings_from_top: Dict[str,str],solver_constants_only):
 	#TODO handle [(var,grounding_dict)] list that will be returned from compile_pvariable
 
 	etype = expr.etype
@@ -454,13 +476,13 @@ def _compile_relational_expression(expr: Expression, groundings_from_top: Dict[s
 		raise ValueError('Invalid relational expression:\n{}'.format(expr))
 
 	op = etype2op[etype[1]]
-	x = _compile_expression(args[0],groundings_from_top)
-	y = _compile_expression(args[1],groundings_from_top)
+	x = _compile_expression(args[0],groundings_from_top,solver_constants_only)
+	y = _compile_expression(args[1],groundings_from_top,solver_constants_only)
 	fluent = op(x, y)
 
 	return fluent
 
-def _compile_aggregation_expression(expr: Expression, grounding_dict: Dict[str,str]):
+def _compile_aggregation_expression(expr: Expression, grounding_dict: Dict[str,str],solver_constants_only):
 	#TODO test against aggregators that introduce multiple vars, ex. forall_{?x, ?y}
 
 	# These functions in the values of the dict are incorrect, make sure to make them better. I have no clue
@@ -471,7 +493,7 @@ def _compile_aggregation_expression(expr: Expression, grounding_dict: Dict[str,s
 		# 'avg': x.avg,
 		# 'maximum': x.maximum,
 		# 'minimum': x.minimum,
-		'exists': lambda x: andlist_safe_or(*x),
+		'exists': lambda x: or2(*x),
 		'forall': lambda x: AndList(*x)
 	}
 	etype = expr.etype
@@ -494,7 +516,7 @@ def _compile_aggregation_expression(expr: Expression, grounding_dict: Dict[str,s
 			param_name = new_params[param_id][0]
 			new_grounding_dict[param_name] = object_name
 		#Get z3 expression
-		compiled_expressions.append(_compile_expression(expr2compile, new_grounding_dict))
+		compiled_expressions.append(_compile_expression(expr2compile, new_grounding_dict,solver_constants_only))
 	#Apply aggregator
 	return aggr(compiled_expressions)
 
@@ -528,7 +550,7 @@ def prepare_rddl_for_scoper(rddl_file_location):
 		initial_state = pull_init_state(model)
 		reward_condition = get_reward_condition(model)
 
-		skill_triplets, compiled_reward, solver = convert_to_z3(initial_state, instance_objects, instance_nonfluents, model_states, model_non_fluents, reward_condition, model)
+		skill_triplets, compiled_reward, solver = convert_to_z3(model)
 		return compiled_reward, skill_triplets, solver
 
 if __name__ == '__main__':
@@ -548,16 +570,9 @@ if __name__ == '__main__':
 		parser.build()
 
 		# parse RDDL
-		model = parser.parse(rddl)  # AST
+		rddl_model = parser.parse(rddl)  # AST
 	#	test_dict = make_triplet_dict(model)
-		model_states = pull_state_var_dict(model)
-		model_non_fluents = pull_nonfluent_var_dict(model)
-		instance_objects = pull_instance_objects(model)
-		instance_nonfluents = pull_init_nonfluent(model)
-		initial_state = pull_init_state(model)
-		reward_condition = get_reward_condition(model)
 
-		skill_triplets, compiled_reward, solver = convert_to_z3(initial_state, instance_objects, instance_nonfluents, model_states, model_non_fluents, reward_condition, model)
-
+		skill_triplets, compiled_reward, solver = convert_to_z3(rddl_model)
 		print("skills:")
 		for s in skill_triplets: print(s)

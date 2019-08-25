@@ -2,48 +2,14 @@ from typing import List, Dict, Tuple, Union
 import abc
 import z3
 from classes import *
-from utils import *
+# from utils import *
+from logic_utils import check_implication, solver_implies_condition, get_var_names
 from pyrddl_inspector import prepare_rddl_for_scoper
 """
 TODO
-Get rddl parser (pyrddl) working
-Tweak scope() to be more general. In particular, have it deal with partially satisfied universal 
-Have conditions, skills return collection of variables using forall quantifiers, ex. forall(p | not inTaxi(p))
 Change how we check for guarantee violation. When we add a new skill, we should remove from the solver any conditions that depend on variables the skill affects
-!!!Split preconditions by and
-"""
-def solver_implies_condition(solver, precondition):
-	solver.push()
-	# assert z3.is_expr(precondition), "{}; {}".format(type(precondition),precondition)
-	# print(type(precondition))
-	solver.add(z3.Not(precondition))
-	result = solver.check()
-	solver.pop()
-	if result == z3.z3.unsat:
-		# print("result: {}".format(result))
-		return True
-	else:
-		if result == z3.z3.unknown:
-			print("Unknown guarantee for precondition: {}".format(precondition))
-		# print("result: {}".format(result))
-		return False
+~"""
 
-def check_implication(antecedent, consequent):
-	#TODO make global empty solver instead of creating new one every time. Creating a solver may take nontrivial time
-	if isinstance(antecedent,AndList):
-		antecedent = antecedent.to_z3()
-	if isinstance(consequent,AndList):
-		consequent = consequent.to_z3()
-	solver = z3.Solver()
-	solver.add(antecedent)
-	solver.add(z3.Not(consequent))
-	result = solver.check()
-	if result == z3.z3.unsat:
-		return True
-	else:
-		if result == z3.z3.unknown:
-			print("Unknown implication for precondition: {} => {}".format(antecedent,consequent))
-		return False
 
 def get_implied_effects(skills: List[Skill]) -> List[Skill]:
 	"""
@@ -200,6 +166,7 @@ def clean_AndLists(skills):
 			s.precondition = new_AndList
 def run_scope_on_file(rddl_file_location):
 	compiled_reward, skill_triplets, solver = prepare_rddl_for_scoper(rddl_file_location)
+	print("Goal:\n".format(compiled_reward))
 	# skill_triplets = triplet_dict_to_triples(skill_dict)
 	clean_AndLists(skill_triplets)
 	get_implied_effects(skill_triplets)
@@ -209,4 +176,6 @@ def run_scope_on_file(rddl_file_location):
 		print(r)
 
 if __name__ == "__main__":
-	run_scope_on_file("./taxi-rddl-domain/taxi-structured-deparameterized_actions.rddl")
+	file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions.rddl"
+	# file_path = "button-domains/button_special_button.rddl"
+	run_scope_on_file(file_path)

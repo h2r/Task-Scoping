@@ -115,7 +115,7 @@ domain taxi-oo_mdp {
     };
 
     reward =
-          if ( exists_{ ?p : passenger } [ PASSENGERS_YOU_CARE_FOR(?p) & forall_{ ?t : taxi} [ ~passenger-in-taxi(?p, ?t) ]   & (passenger-x-curr(?p) == PASSENGER_GOAL_X(?p) & (passenger-y-curr(?p) == PASSENGER_GOAL_Y(?p) ) ) ] )
+          if ( forall_{ ?p : passenger } [ ~PASSENGERS_YOU_CARE_FOR(?p) | ( forall_{ ?t : taxi} [ ~passenger-in-taxi(?p, ?t) ]   & (passenger-x-curr(?p) == PASSENGER_GOAL_X(?p) & (passenger-y-curr(?p) == PASSENGER_GOAL_Y(?p) ) ) ) ] )
               then 5
           else -5;
 
@@ -156,7 +156,7 @@ non-fluents taxi-2wide-1pass {
 
     objects {
         taxi               : { t0 };
-        passenger          : { p0 };
+        passenger          : { p0, p1 };
         wall               : { w0 };
     };
 
@@ -169,6 +169,7 @@ non-fluents taxi-2wide-1pass {
         PASSENGER_GOAL_X(p0) = 1;
         PASSENGER_GOAL_Y(p0) = 1;
         PASSENGERS_YOU_CARE_FOR(p0);
+        PASSENGERS_YOU_CARE_FOR(p1) = false;
 
     };
 }

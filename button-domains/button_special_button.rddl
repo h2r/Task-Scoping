@@ -1,0 +1,76 @@
+/////////////////////////////////////////////////////////////////////////////////
+//                                                                             //
+// Simple RDDL domain                                                          //
+//                                                                             //
+/////////////////////////////////////////////////////////////////////////////////
+
+
+domain button-mdp {
+    requirements {
+        reward-deterministic,
+        cpf-deterministic
+    };
+
+    types {
+        button   : object;
+    };
+
+    pvariables {
+    //////////////////////////////// States /////////////////////////////////
+    // Passenger reached goal variable
+        button-on(button)                : { state-fluent, bool, default=false };
+
+    //////////////////////////////// Actions ////////////////////////////////
+        toggle-button(button)                           : { action-fluent, bool, default = false };
+
+
+    //////////////////////////////// Non-Fluents ////////////////////////////////
+        special(button)                       : { non-fluent, bool, default = false };
+    };
+    cdfs {
+    // Pickup and Dropoff Transition function
+       button-on'(?b) =
+            if (toggle-button(?b))
+                then ~button-on(?b)
+            else button-on(?b);
+          
+    };
+
+    reward =
+    //    ( -5 * ( ~forall_{ ?p : passenger, ?x : xpos, ?y : ypos } [ PASSENGERS_YOU_CARE_FOR(?p) => passenger-at-dest(?p, ?x, ?y) ] ) );
+    //      if ( exists_{ ?t : taxi, ?x : xpos, ?y : ypos } [ TAXI_GOAL(?x, ?y) & taxi-at(?t, ?x, ?y) ] )
+    //          then 5
+    //      else -5;
+          if ( forall_{ ?b : button } [ ~special(?b) | button-on(?b) ] )
+              then 5
+          else -5;
+
+   // action-preconditions {
+   
+   // };
+}
+non-fluents button-mdp_single {
+    domain = button-mdp;
+
+    objects {
+        button               : { b0, b1 };
+    };
+
+    non-fluents {
+        special(b0) = true;
+        special(b1) = false;
+    };
+}
+
+instance button-mdp_inst_mdp_01 {
+    domain = button-mdp;
+    non-fluents = button-mdp_single;
+
+    init-state {
+        button-on(b0);
+    };
+
+    horizon = 20;
+
+    discount = 1.0;
+}

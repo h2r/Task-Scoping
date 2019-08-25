@@ -31,9 +31,9 @@ def solver_implies_condition(solver, precondition):
 def check_implication(antecedent, consequent):
 	#TODO make global empty solver instead of creating new one every time. Creating a solver may take nontrivial time
 	if isinstance(antecedent,AndList):
-		antecedent = antecedent.to_conjunction()
+		antecedent = antecedent.to_z3()
 	if isinstance(consequent,AndList):
-		consequent = consequent.to_conjunction()
+		consequent = consequent.to_z3()
 	solver = z3.Solver()
 	solver.add(antecedent)
 	solver.add(z3.Not(consequent))

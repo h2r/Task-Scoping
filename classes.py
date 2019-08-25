@@ -2,7 +2,7 @@ import abc, copy
 import z3
 import itertools
 from instance_building_utils import *
-
+Z3_HANDLED_TYPES = [z3.z3.ExprRef ,bool]
 def get_all_groundings(base_str, names, keys):
 	name_lists = [names[k] for k in keys]
 	object_name_sequence_list = itertools.product(*name_lists)
@@ -76,41 +76,68 @@ class DomainAction(UngroundedThing):
 		super().__init__(name,arguments)
 		# self.name = name
 		# self.arguments = arguments
-	# def ground(self,  object_names):
 
-class AndList(list):
+class ConditionList():
 	def __init__(self, *args):
 		#If any of the args are an AndList, flatten them
 		self.args = self.flatten(args)
-	def to_conjunction(self):
-		return z3.And(*self.args)
 	def flatten(self,a):
 		new_list = []
 		for x in a:
-			if hasattr(x,"__getitem__"):
-				new_list = new_list + self.flatten(x)
-			else:
-				new_list.append(x)
+			#If x a z3 expression, add it to the list
+			z3_handleable = False
+			for t in Z3_HANDLED_TYPES:
+				if isinstance(x,t):
+					z3_handleable = True
+					new_list.append(x)
+					break
+			if not z3_handleable:
+				if isinstance(x,type(self)):
+					new_list.extend(self.flatten(x))
+				else:
+					print(type(x))
+					raise TypeError("Don't know how to flatten {}".format(x))
+					# new_list.extend(self.flatten(x))
 		return new_list
 	def __getitem__(self, item):
 		return self.args[item]
 	def __iter__(self):
 		return self.args.__iter__()
 	def __repr__(self):
-		return "AndList({})".format(self.args)
+		return "{}({})".format(self.name,self.args)
 	def __str__(self):
 		return self.__repr__()
+
+class AndList(ConditionList):
+	def __init__(self, *args):
+		super().__init__(*args)
+		self.name = "AndList"
+	def to_z3(self):
+		return z3.And(*self.args)
+
+
+class OrList(ConditionList):
+	def __init__(self, *args):
+		super().__init__(*args)
+		self.name = "OrList"
+	def to_z3(self):
+		return z3.Or(*self.args)
 
 def test_AndList():
 	z3_vars = []
 	for i in range(10):
 		z3_vars.append(z3.Bool(str(i)))
+	a_correct = z3_vars[1:3]
 	a = AndList(*z3_vars[1:3])
-	for x in a:
-		print(x)
+	# for x in a:
+	# 	print(x)
+	b_correct = z3_vars[:3]
+	c_correct = z3_vars[4:6]
+	d_correct = b_correct + c_correct
 	b = AndList(z3_vars[0],a)
-	c = AndList(z3_vars[4:6])
+	c = AndList(*z3_vars[4:6])
 	d = AndList(b,c)
+	assert d.args == d_correct, "{}\n{}".format(d.args,d_correct)
 	print("a:")
 	for x in a.args:
 		print(x)
@@ -119,6 +146,9 @@ def test_AndList():
 		print(x)
 	print("d")
 	for x in d.args: print(x)
+
+def test_OrList():
+	pass
 
 if __name__ == "__main__":
 	test_AndList()

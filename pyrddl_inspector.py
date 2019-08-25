@@ -472,7 +472,7 @@ def _compile_aggregation_expression(expr: Expression, grounding_dict: Dict[str,s
 		# 'maximum': x.maximum,
 		# 'minimum': x.minimum,
 		'exists': lambda x: andlist_safe_or(*x),
-		'forall': lambda x: AndList(*[x])
+		'forall': lambda x: AndList(*x)
 	}
 	etype = expr.etype
 	args = expr.args

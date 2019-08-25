@@ -86,13 +86,13 @@ def make_skills(object_counts, g2n, g2v):
 		no_touch_north_condition, no_touch_east_condition, no_touch_south_condition, no_touch_west_condition = notouch_by_taxi[t_id]
 		# Add skills for each movement direction
 		skill_triples.append(
-			SkillTriplet(no_touch_north_condition, "move_north_{}".format(t_id), ['taxi-y_{}'.format(t_id)]))
+			Skill(no_touch_north_condition, "move_north_{}".format(t_id), ['taxi-y_{}'.format(t_id)]))
 		skill_triples.append(
-			SkillTriplet(no_touch_south_condition, "move_south_{}".format(t_id), ['taxi-y_{}'.format(t_id)]))
+			Skill(no_touch_south_condition, "move_south_{}".format(t_id), ['taxi-y_{}'.format(t_id)]))
 		skill_triples.append(
-			SkillTriplet(no_touch_east_condition, "move_east_{}".format(t_id), ['taxi-x_{}'.format(t_id)]))
+			Skill(no_touch_east_condition, "move_east_{}".format(t_id), ['taxi-x_{}'.format(t_id)]))
 		skill_triples.append(
-			SkillTriplet(no_touch_west_condition, "move_west_{}".format(t_id), ['taxi-x_{}'.format(t_id)]))
+			Skill(no_touch_west_condition, "move_west_{}".format(t_id), ['taxi-x_{}'.format(t_id)]))
 
 		# Create single-passenger-in-taxi conditions, and pickup/dropoff
 		for p_id in range(object_counts['passenger']):
@@ -111,14 +111,14 @@ def make_skills(object_counts, g2n, g2v):
 			move_south_with_passenger_condition = AndList(no_touch_south_condition, taxi_occupance_condition)
 			move_west_with_passenger_condition = AndList(no_touch_west_condition, taxi_occupance_condition)
 
-			skill_triples.append(SkillTriplet(move_north_with_passenger_condition, "move_north_{}".format(t_id),
-											  [g2n('passenger-y-curr',[p_id])]))
-			skill_triples.append(SkillTriplet(move_south_with_passenger_condition, "move_south_{}".format(t_id),
-											  [g2n('passenger-y-curr',[p_id])]))
-			skill_triples.append(SkillTriplet(move_east_with_passenger_condition, "move_east_{}".format(t_id),
-											  [g2n('passenger-x-curr',[p_id])]))
-			skill_triples.append(SkillTriplet(move_west_with_passenger_condition, "move_west_{}".format(t_id),
-											  [g2n('passenger-x-curr',[p_id])]))
+			skill_triples.append(Skill(move_north_with_passenger_condition, "move_north_{}".format(t_id),
+									   [g2n('passenger-y-curr',[p_id])]))
+			skill_triples.append(Skill(move_south_with_passenger_condition, "move_south_{}".format(t_id),
+									   [g2n('passenger-y-curr',[p_id])]))
+			skill_triples.append(Skill(move_east_with_passenger_condition, "move_east_{}".format(t_id),
+									   [g2n('passenger-x-curr',[p_id])]))
+			skill_triples.append(Skill(move_west_with_passenger_condition, "move_west_{}".format(t_id),
+									   [g2n('passenger-x-curr',[p_id])]))
 
 			# Add pickup actions
 			shared_x_condition = (g2v('taxi-x', [t_id]) == g2v('passenger-x-curr', [p_id]))
@@ -126,9 +126,9 @@ def make_skills(object_counts, g2n, g2v):
 			pickup_condition = AndList(shared_x_condition, shared_y_condition, taxi_empty_condition)
 			dropoff_condition = g2v('passenger-in-taxi',[p_id,t_id])
 			skill_triples.append(
-				SkillTriplet(pickup_condition, 'pickup_{}_{}'.format(t_id, p_id), [g2n('passenger-in-taxi',[p_id,t_id])]))
+				Skill(pickup_condition, 'pickup_{}_{}'.format(t_id, p_id), [g2n('passenger-in-taxi', [p_id, t_id])]))
 			skill_triples.append(
-				SkillTriplet(dropoff_condition, "dropoff_{}_{}".format(t_id, p_id), [g2n('passenger-in-taxi',[p_id,t_id])]))
+				Skill(dropoff_condition, "dropoff_{}_{}".format(t_id, p_id), [g2n('passenger-in-taxi', [p_id, t_id])]))
 	return skill_triples
 
 if __name__ == "__main__":
@@ -231,7 +231,7 @@ if __name__ == "__main__":
 	# for skill in skill_triples:
 	# 	pass
 		# print("Action: {}".format(skill.get_action()))
-		# print("Affected variables: {}".format(skill.get_affected_variables()))
+		# print("Affected variables: {}".format(skill.get_targeted_variables()))
 		# guaranteed = solver_implies_condition(solver, skill.get_precondition())
 		# print("Precondition guaranteed: {}".format(guaranteed))
 	# x = z3.z3util.get_vars(goal_z3)

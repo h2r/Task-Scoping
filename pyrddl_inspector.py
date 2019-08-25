@@ -4,7 +4,6 @@ import itertools
 import collections
 import z3
 from classes import *
-from scoping import *
 import instance_building_utils
 from typing import List, Dict, Tuple
 
@@ -309,10 +308,10 @@ def convert_to_z3(init_state, domain_objects, init_nonfluents, model_states, mod
 			for precond in triplet_dict[action][effect]:
 				print(precond)
 				z3_expr = _compile_expression(*precond)
-				new_skill = SkillTriplet(z3_expr,action,effect)
+				new_skill = Skill(z3_expr, action, [effect])
 				skills_triplets.append(new_skill)
 				print("Temp break here!")
-	return skills_triplets, compiled_reward
+	return skills_triplets, compiled_reward, solver
 def _compile_expression(expr: Expression, groundings_from_top: Dict[str,str]):
 	etype2compiler = {
 		'constant': _compile_constant_expression,
@@ -473,7 +472,7 @@ def _compile_aggregation_expression(expr: Expression, grounding_dict: Dict[str,s
 		# 'maximum': x.maximum,
 		# 'minimum': x.minimum,
 		'exists': lambda x: andlist_safe_or(*x),
-		'forall': lambda x: AndList(*x)
+		'forall': lambda x: AndList(*[x])
 	}
 	etype = expr.etype
 	args = expr.args
@@ -511,10 +510,28 @@ def test_get_pvar_args_strings():
 		pvar_args_strings_empirical = get_pvar_args_strings(action_name,c.expr)
 		assert pvar_args_strings_true == pvar_args_strings_empirical, "{}\n{}".format(pvar_args_strings_true,pvar_args_strings_empirical)
 
+def prepare_rddl_for_scoper(rddl_file_location):
+		with open(rddl_file_location, 'r') as file:
+			rddl = file.read()
+
+		# buid parser
+		parser = RDDLParser()
+		parser.build()
+
+		# parse RDDL
+		model = parser.parse(rddl)  # AST
+	#	test_dict = make_triplet_dict(model)
+		model_states = pull_state_var_dict(model)
+		model_non_fluents = pull_nonfluent_var_dict(model)
+		instance_objects = pull_instance_objects(model)
+		instance_nonfluents = pull_init_nonfluent(model)
+		initial_state = pull_init_state(model)
+		reward_condition = get_reward_condition(model)
+
+		skill_triplets, compiled_reward, solver = convert_to_z3(initial_state, instance_objects, instance_nonfluents, model_states, model_non_fluents, reward_condition, model)
+		return compiled_reward, skill_triplets, solver
+
 if __name__ == '__main__':
-	if False:
-		test_get_pvar_args_strings()
-	else:
 		# rddl_file_location = "/home/nishanth/Documents/IPC_Code/rddlsim/files/taxi-rddl-domain/taxi-oo_simple.rddl"
 		# rddl_file_location = "./taxi-rddl-domain/taxi-oo_mdp_composite_01.rddl"
 		# rddl_file_location = "./taxi-rddl-domain/taxi-structured-composite_01.rddl"
@@ -540,7 +557,7 @@ if __name__ == '__main__':
 		initial_state = pull_init_state(model)
 		reward_condition = get_reward_condition(model)
 
-		skill_triplets, compiled_reward = convert_to_z3(initial_state, instance_objects, instance_nonfluents, model_states, model_non_fluents, reward_condition, model)
+		skill_triplets, compiled_reward, solver = convert_to_z3(initial_state, instance_objects, instance_nonfluents, model_states, model_non_fluents, reward_condition, model)
 
 		print("skills:")
 		for s in skill_triplets: print(s)

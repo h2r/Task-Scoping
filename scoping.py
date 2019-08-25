@@ -1,7 +1,9 @@
+from typing import List, Dict, Tuple, Union
 import abc
 import z3
 from classes import *
 from utils import *
+from pyrddl_inspector import prepare_rddl_for_scoper
 """
 TODO
 Get rddl parser (pyrddl) working
@@ -26,18 +28,53 @@ def solver_implies_condition(solver, precondition):
 		# print("result: {}".format(result))
 		return False
 
-def triplet_dict_to_triples(skill_dict):
+def check_implication(antecedent, consequent):
+	#TODO make global empty solver instead of creating new one every time. Creating a solver may take nontrivial time
+	if isinstance(antecedent,AndList):
+		antecedent = antecedent.to_conjunction()
+	if isinstance(consequent,AndList):
+		consequent = consequent.to_conjunction()
+	solver = z3.Solver()
+	solver.add(antecedent)
+	solver.add(z3.Not(consequent))
+	result = solver.check()
+	if result == z3.z3.unsat:
+		return True
+	else:
+		if result == z3.z3.unknown:
+			print("Unknown implication for precondition: {} => {}".format(antecedent,consequent))
+		return False
+
+def get_implied_effects(skills: List[Skill]) -> List[Skill]:
+	"""
+	Update each skill with the variables implicity affected by it. Ex. Moving with a passenger in the taxi explicitly moves the passenger, implicitly moves the taxi
+	Note: This would be faster if we had a partial ordering of skills
+	:param skills:
+	:return:
+	"""
+	solver = z3.Solver()
+	for (s0,s1) in itertools.product(skills,skills):
+		if s0.get_action() == s1.get_action() and check_implication(s0.get_precondition(), s1.get_precondition()):
+			s0.implicitly_affected_variables.extend(s1.get_targeted_variables())
+	for s in skills:
+		s.implicitly_affected_variables = list(set(s.implicitly_affected_variables))
+		s.implicit_effects_processed = True
+	return skills
+def triplet_dict_to_triples(skill_dict: Dict[str,Dict[str,List[Union[z3.z3.ExprRef,AndList]]]]) -> Tuple[Union[z3.z3.ExprRef,AndList],str,List[str]]:
+	"""
+	:param skill_dict: [action][effect] -> List[preconditions]
+	"""
 	skill_triples = []
 	for action in skill_dict.keys():
-		for precondition, effect in skill_dict[action].items():
-			skill_triples.append((precondition,action,effect))
+		for effect, precondition in skill_dict[action].items():
+			skill_triples.append(Skill(precondition, action, [effect]))
 	return skill_triples
 
 def get_affecting_skills(condition, skills):
 	#TODO: rewrite to work with Precondition and the actual data structures
 	affecting_skills = []
 	for s in skills:
-		overlapping_vars = [v for v in get_var_names(condition) if v in s.get_affected_variables()]
+		overlapping_vars = [v for v in get_var_names(condition) if v in s.get_targeted_variables()]
 		if len(overlapping_vars) > 0:
 			affecting_skills.append(s)
 	return affecting_skills
@@ -147,9 +184,29 @@ def scope_rddl_file(input_file_path, output_file_path, irrelevant_objects):
 	with open(output_file_path,'w') as f:
 		f.writelines(output_lines)
 
+def test_get_implied_effects():
+	raise NotImplementedError()
+	pass
 def scope_rddl_file_test():
 	input_file_path = "./taxi-rddl-domain/taxi-oo_mdp_composite_01.rddl"
+def clean_AndLists(skills):
+	"""
+	Removes "True" from AndLists
+	"""
+	for s in skills:
+		precond = s.get_precondition()
+		if isinstance(precond,AndList):
+			new_AndList = AndList(*[x for x in precond if x is not True])
+			s.precondition = new_AndList
+def run_scope_on_file(rddl_file_location):
+	compiled_reward, skill_triplets, solver = prepare_rddl_for_scoper(rddl_file_location)
+	# skill_triplets = triplet_dict_to_triples(skill_dict)
+	clean_AndLists(skill_triplets)
+	get_implied_effects(skill_triplets)
+	relevant_vars, used_skills = scope(compiled_reward,skill_triplets,solver=solver)
+	print("relevant_vars:")
+	for r in relevant_vars:
+		print(r)
+
 if __name__ == "__main__":
-	pass
-
-
+	run_scope_on_file("./taxi-rddl-domain/taxi-structured-deparameterized_actions.rddl")

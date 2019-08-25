@@ -26,11 +26,11 @@ skills = []
 #push button skills
 lights_on_condition = AndList(*[g2v('on',[i]) for i in range(object_counts['light'])])
 for b_id in range(object_counts['button']):
-	skills.append(SkillTriplet(lights_on_condition,g2n('press',[b_id]),[g2n('pressed',[b_id])]))
+	skills.append(Skill(lights_on_condition, g2n('press', [b_id]), [g2n('pressed', [b_id])]))
 #Turn on light skills
 for l_id in range(object_counts['light']):
 	light_off_condition = (g2v('on',[l_id]) == False)
-	skills.append(SkillTriplet(light_off_condition,g2n('turn_on',[l_id]),[g2n('on',[l_id])]))
+	skills.append(Skill(light_off_condition, g2n('turn_on', [l_id]), [g2n('on', [l_id])]))
 #Set init state
 solver_init_lights_off = z3.Solver()
 solver_init_lights_on = z3.Solver()

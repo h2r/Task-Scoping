@@ -11,33 +11,30 @@ def get_all_groundings(base_str, names, keys):
 	groundings = [g2n_names(base_str,object_names) for object_names in x]
 	return groundings
 
-class Skill(abc.ABC):
-	def get_precondition(self):
-		pass
-	def get_action(self):
-		pass
-	def get_affected_variables(self):
-		"""
-		:return: list of affected vars. May modify to use forall
-		"""
-		pass
-
-class SkillTriplet(Skill):
+class Skill():
 	def __init__(self, precondition, action, effect):
 		"""
 		:param precondition: Precondition object
 		:param action: string
 		:param effect: list of affected variables
 		"""
-		self.triplet = (precondition,action,effect)
+		self.precondition = precondition
+		self.action = action
+		self.effect = effect
+		self.implicitly_affected_variables = []
+		self.implicit_effects_processed = False
 	def get_precondition(self):
-		return self.triplet[0]
+		return self.precondition
 	def get_action(self):
-		return self.triplet[1]
+		return self.action
+	def get_targeted_variables(self):
+		return self.effect
 	def get_affected_variables(self):
-		return self.triplet[2]
+		if not self.implicit_effects_processed:
+			raise ValueError("Implicit effects of this skill not yet processed")
+		return self.effect + self.implicitly_affected_variables
 	def __repr__(self):
-		return "({},{},{})".format(self.triplet[0],self.triplet[1],self.triplet[2])
+		return "({},{},{})".format(self.get_precondition(),self.get_action(),self.get_targeted_variables())
 	def __str__(self):
 		return self.__repr__()
 
@@ -85,7 +82,7 @@ class AndList(list):
 	def __init__(self, *args):
 		#If any of the args are an AndList, flatten them
 		self.args = self.flatten(args)
-	def toConjunction(self):
+	def to_conjunction(self):
 		return z3.And(*self.args)
 	def flatten(self,a):
 		new_list = []

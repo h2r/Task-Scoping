@@ -2,6 +2,10 @@ We store toplevel Ands as AndLists and treat the components as separate conditio
 We are Trying to replace every Or that includes a condition true based on constants with True. It works for button_special_button.rddl, but not taxi.
     We currently don't set default constant values. This is an issue.
 
+We want to store Ands as AndLists so we can check guarantees of each component separately
+We want to simplify Or's based on conditions
+I think we want to simplify Ands based on conditions. How does this interact with AndLists? As it stands, and2 doesn't make sense
+
 ~~Converting to CNF~~
 Tactics take in a goal ( set of formulas) and outputs either sat, unsat, a sequence of subgoals (what does that mean?), or fails
 	ctx-simplify (or regular simplify)

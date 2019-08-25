@@ -62,7 +62,7 @@ def or2(*x, solver=None):
 
 def and2(*x, solver=None):
 	"""
-	A wrapper for z3.Or meant to handle ConditionLists and simplifications based on the constant conditions
+	A wrapper for z3.And meant to handle ConditionLists and simplifications based on the constant conditions
 	"""
 	new_x = []
 	for i in x:

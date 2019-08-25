@@ -1,9 +1,9 @@
 from typing import List, Dict, Tuple, Union
 import abc
 import z3
-from classes import *
 # from utils import *
-from logic_utils import check_implication, solver_implies_condition, get_var_names
+from classes import *
+from logic_utils import check_implication, solver_implies_condition, get_var_names, AndList, OrList
 from pyrddl_inspector import prepare_rddl_for_scoper
 """
 TODO

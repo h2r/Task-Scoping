@@ -6,8 +6,7 @@ import z3
 from classes import *
 import instance_building_utils
 from typing import List, Dict, Tuple
-from logic_utils import solver_implies_condition, check_implication
-from logic_utils import solver_implies_condition, check_implication
+from logic_utils import solver_implies_condition, check_implication, or2, and2, AndList, OrList
 att_name_to_domain_attribute = {}
 all_object_names = {}
 name_to_z3_var = {}
@@ -24,21 +23,8 @@ def get_model_from_filepath(rddl_file_location):
 	model = parser.parse(rddl)  # AST
 	return model
 
-def or2(*x, solver=None):
-	"""
-	A wrapper for z3.Or meant to handle ConditionLists and simplifications based on the constant conditions
-	"""
-	new_x = []
-	for i in x:
-		if isinstance(i,AndList):
-			new_x.append(i.to_z3())
-		else:
-			new_x.append(i)
-	condition = z3.Or(*new_x)
-	if solver is not None:
-		if solver_implies_condition(solver, condition):
-			condition = True
-	return condition
+
+
 def expr2slashyName(expr):
 	if(expr.args[1] is not None):
 		return "{}/{}".format(expr.args[0],len(expr.args[1]))

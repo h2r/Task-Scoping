@@ -33,7 +33,10 @@ def andlist_safe_or(*x):
 	return z3.Or(*new_x)
 
 def expr2slashyName(expr):
-	return "{}/{}".format(expr.args[0],len(expr.args[1]))
+	if(expr.args[1] is not None):
+		return "{}/{}".format(expr.args[0],len(expr.args[1]))
+	else:
+		return "{}/{}".format(expr.args[0],0)
 def pull_state_var_dict(rddl_model):
 	return rddl_model.domain.state_fluents
 
@@ -315,7 +318,7 @@ def _compile_expression(expr: Expression, groundings_from_top: Dict[str,str]):
 		'constant': _compile_constant_expression,
 		'pvar': _compile_pvariable_expression,
 		#        'randomvar':   _compile_random_variable_expression,
-		#        'arithmetic':  _compile_arithmetic_expression,
+		'arithmetic':  _compile_arithmetic_expression,
 		'boolean': _compile_boolean_expression,
 		'relational': _compile_relational_expression,
 		# These are functions like 'abs', etc. that we can handle later probably.
@@ -514,7 +517,7 @@ if __name__ == '__main__':
 	else:
 		# rddl_file_location = "/home/nishanth/Documents/IPC_Code/rddlsim/files/taxi-rddl-domain/taxi-oo_simple.rddl"
 		# rddl_file_location = "./taxi-rddl-domain/taxi-oo_mdp_composite_01.rddl"
-		rddl_file_location = "./taxi-rddl-domain/taxi-structured-composite_01.rddl"
+		# rddl_file_location = "./taxi-rddl-domain/taxi-structured-composite_01.rddl"
 		rddl_file_location = "./taxi-rddl-domain/taxi-structured-deparameterized_actions.rddl"
 		# rddl_file_location = "./button-domains/2buttons3atts.rddl"
 		# rddl_file_location = "./button-domains/2buttons4atts.rddl"

@@ -165,13 +165,13 @@ def clean_AndLists(skills):
 			new_AndList = AndList(*[x for x in precond if x is not True])
 			s.precondition = new_AndList
 def run_scope_on_file(rddl_file_location):
-	compiled_reward, skill_triplets, solver = prepare_rddl_for_scoper(rddl_file_location)
-	algorithm_sections = ["clean_AndLists", "get_implied_effects", "scope"]
+	algorithm_sections = ["pyrddl_inspector","clean_AndLists", "get_implied_effects", "scope"]
 	boundary_times = []
-	print("all skills:")
-	for s in skill_triplets: print(s)
-	print("Goal:\n".format(compiled_reward))
-	# skill_triplets = triplet_dict_to_triples(skill_dict)
+	boundary_times.append(time.time())
+	compiled_reward, skill_triplets, solver = prepare_rddl_for_scoper(rddl_file_location)
+	# print("all skills:")
+	# for s in skill_triplets: print(s)
+	# print("Goal:\n".format(compiled_reward))
 	boundary_times.append(time.time())
 	clean_AndLists(skill_triplets)
 	boundary_times.append(time.time())

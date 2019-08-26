@@ -166,6 +166,8 @@ def clean_AndLists(skills):
 			s.precondition = new_AndList
 def run_scope_on_file(rddl_file_location):
 	compiled_reward, skill_triplets, solver = prepare_rddl_for_scoper(rddl_file_location)
+	print("all skills:")
+	for s in skill_triplets: print(s)
 	print("Goal:\n".format(compiled_reward))
 	# skill_triplets = triplet_dict_to_triples(skill_dict)
 	clean_AndLists(skill_triplets)

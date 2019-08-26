@@ -77,10 +77,11 @@ def and2(*x, solver=None):
 	return condition
 
 class ConditionList(ABC):
-	def __init__(self, *args):
+	def __init__(self, *args, name, z3_combinator):
 		#If any of the args are an AndList, flatten them
 		self.args = self.flatten(args)
-		self.z3_combinator = None
+		self.z3_combinator = z3_combinator
+		self.name = name
 	def flatten(self,a):
 		new_list = []
 		for x in a:
@@ -118,16 +119,12 @@ class ConditionList(ABC):
 
 class AndList(ConditionList):
 	def __init__(self, *args):
-		super().__init__(*args)
-		self.name = "AndList"
-		self.z3_combinator = and2
+		super().__init__(*args, name="AndList", z3_combinator=z3.And)
 
 
 class OrList(ConditionList):
 	def __init__(self, *args):
-		super().__init__(*args)
-		self.name = "OrList"
-		self.z3_combinator = or2
+		super().__init__(*args, name="OrList", z3_combinator=or2)
 def acceptable_z3_condition(x):
 	Z3_HANDLED_TYPES = [z3.z3.ExprRef, bool]
 	for t in Z3_HANDLED_TYPES:

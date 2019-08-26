@@ -65,7 +65,8 @@ domain taxi-oo_mdp {
     // Pickup and Dropoff Transition function
         passenger-in-taxi'(?p, ?t) =
             // If there is no passenger in the taxi, the taxi is on the passenger and the agent executes pickup, make true
-            if ( pickup(?p) & ( taxi-x(?t) == passenger-x-curr(?p) ) & ( taxi-y(?t) == passenger-y-curr(?p) ) & ( ~exists_{ ?p1 : passenger } [ passenger-in-taxi( ?p1, ?t ) ] ) )
+            // if ( pickup(?p) & ( taxi-x(?t) == passenger-x-curr(?p) ) & ( taxi-y(?t) == passenger-y-curr(?p) ) & ( ~exists_{ ?p1 : passenger } [ passenger-in-taxi( ?p1, ?t ) ] ) )
+            if ( pickup(?p) & ( taxi-x(?t) == passenger-x-curr(?p) ) & ( taxi-y(?t) == passenger-y-curr(?p) ) & ( forall_{ ?p1 : passenger } [ ~passenger-in-taxi( ?p1, ?t ) ] ) )
                 then true
 
             // If there is this passenger in the taxi and the agent executes the dropoff action, make false

@@ -1,5 +1,5 @@
 from typing import List, Dict, Tuple, Union
-import abc
+import abc, time
 import z3
 # from utils import *
 from classes import *
@@ -166,18 +166,30 @@ def clean_AndLists(skills):
 			s.precondition = new_AndList
 def run_scope_on_file(rddl_file_location):
 	compiled_reward, skill_triplets, solver = prepare_rddl_for_scoper(rddl_file_location)
+	algorithm_sections = ["clean_AndLists", "get_implied_effects", "scope"]
+	boundary_times = []
 	print("all skills:")
 	for s in skill_triplets: print(s)
 	print("Goal:\n".format(compiled_reward))
 	# skill_triplets = triplet_dict_to_triples(skill_dict)
+	boundary_times.append(time.time())
 	clean_AndLists(skill_triplets)
+	boundary_times.append(time.time())
 	get_implied_effects(skill_triplets)
+	boundary_times.append(time.time())
 	relevant_vars, used_skills = scope(compiled_reward,skill_triplets,solver=solver)
+	boundary_times.append(time.time())
+
 	print("relevant_vars:")
 	for r in relevant_vars:
 		print(r)
+	print("times:")
+	for section_id, section_name in enumerate(algorithm_sections):
+		section_time = boundary_times[section_id+1] - boundary_times[section_id]
+		print("{}: {}".format(section_name,section_time))
 
 if __name__ == "__main__":
-	file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions.rddl"
+	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions.rddl"
+	file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions_complex.rddl"
 	# file_path = "button-domains/button_special_button.rddl"
 	run_scope_on_file(file_path)

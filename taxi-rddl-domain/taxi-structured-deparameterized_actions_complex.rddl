@@ -65,7 +65,7 @@ domain taxi-oo_mdp {
     // Pickup and Dropoff Transition function
         passenger-in-taxi'(?p, ?t) =
             // If there is no passenger in the taxi, the taxi is on the passenger and the agent executes pickup, make true
-                // if ( pickup(?p) & ( taxi-x(?t) == passenger-x-curr(?p) ) & ( taxi-y(?t) == passenger-y-curr(?p) ) & ( ~exists_{ ?p1 : passenger } [ passenger-in-taxi( ?p1, ?t ) ] ) )
+            // if ( pickup(?p) & ( taxi-x(?t) == passenger-x-curr(?p) ) & ( taxi-y(?t) == passenger-y-curr(?p) ) & ( ~exists_{ ?p1 : passenger } [ passenger-in-taxi( ?p1, ?t ) ] ) )
             if ( pickup(?p) & ( taxi-x(?t) == passenger-x-curr(?p) ) & ( taxi-y(?t) == passenger-y-curr(?p) ) & ( forall_{ ?p1 : passenger } [ ~passenger-in-taxi( ?p1, ?t ) ] ) )
                 then true
 
@@ -157,7 +157,8 @@ non-fluents taxi-2wide-1pass {
 
     objects {
         taxi               : { t0 };
-        passenger          : { p0, p1 };
+        passenger          : { p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19,
+                               p20, p21, p22, p23, p24, p25, p26, p27, p28 };
         wall               : { w0 };
     };
 
@@ -166,11 +167,128 @@ non-fluents taxi-2wide-1pass {
         WALL_X(w0) = 1;
         WALL_Y(w0) = 0;
 
+        // X and Y Location
+        MAX_X = 5;
+        MAX_Y = 5;
+
         // PASSENGERS
-        PASSENGER_GOAL_X(p0) = 1;
-        PASSENGER_GOAL_Y(p0) = 1;
+        PASSENGER_GOAL_X(p0) = 5;
+        PASSENGER_GOAL_Y(p0) = 5;
+
+        PASSENGER_GOAL_X(p1) = 0;
+        PASSENGER_GOAL_Y(p1) = 1;
+        
+        PASSENGER_GOAL_X(p2) = 1;
+        PASSENGER_GOAL_Y(p2) = 1;
+        
+        PASSENGER_GOAL_X(p3) = 1;
+        PASSENGER_GOAL_Y(p3) = 1;
+        
+        PASSENGER_GOAL_X(p4) = 0;
+        PASSENGER_GOAL_Y(p4) = 1;
+        
+        PASSENGER_GOAL_X(p5) = 0;
+        PASSENGER_GOAL_Y(p5) = 2;
+
+        PASSENGER_GOAL_X(p6) = 0;
+        PASSENGER_GOAL_Y(p6) = 0;
+
+        PASSENGER_GOAL_X(p7) = 0;
+        PASSENGER_GOAL_Y(p7) = 1;
+
+        PASSENGER_GOAL_X(p8) = 2;
+        PASSENGER_GOAL_Y(p8) = 1;
+
+        PASSENGER_GOAL_X(p9) = 2;
+        PASSENGER_GOAL_Y(p9) = 1;
+
+        PASSENGER_GOAL_X(p10) = 2;
+        PASSENGER_GOAL_Y(p10) = 1;
+        
+        PASSENGER_GOAL_X(p11) = 5;
+        PASSENGER_GOAL_Y(p11) = 1;
+
+        PASSENGER_GOAL_X(p12) = 2;
+        PASSENGER_GOAL_Y(p12) = 5;
+
+        PASSENGER_GOAL_X(p13) = 2;
+        PASSENGER_GOAL_Y(p13) = 1;
+
+        PASSENGER_GOAL_X(p14) = 4;
+        PASSENGER_GOAL_Y(p14) = 1;
+
+        PASSENGER_GOAL_X(p15) = 3;
+        PASSENGER_GOAL_Y(p15) = 1;
+
+        PASSENGER_GOAL_X(p16) = 1;
+        PASSENGER_GOAL_Y(p16) = 1;
+
+        PASSENGER_GOAL_X(p17) = 2;
+        PASSENGER_GOAL_Y(p17) = 5;
+
+        PASSENGER_GOAL_X(p18) = 2;
+        PASSENGER_GOAL_Y(p18) = 4;
+
+        PASSENGER_GOAL_X(p19) = 2;
+        PASSENGER_GOAL_Y(p19) = 3;
+
+        PASSENGER_GOAL_X(p20) = 2;
+        PASSENGER_GOAL_Y(p20) = 2;
+
+        PASSENGER_GOAL_X(p21) = 4;
+        PASSENGER_GOAL_Y(p21) = 3;
+
+        PASSENGER_GOAL_X(p22) = 4;
+        PASSENGER_GOAL_Y(p22) = 2;
+
+        PASSENGER_GOAL_X(p23) = 4;
+        PASSENGER_GOAL_Y(p23) = 4;
+
+        PASSENGER_GOAL_X(p24) = 3;
+        PASSENGER_GOAL_Y(p24) = 5;
+
+        PASSENGER_GOAL_X(p25) = 3;
+        PASSENGER_GOAL_Y(p25) = 3;
+
+        PASSENGER_GOAL_X(p26) = 2;
+        PASSENGER_GOAL_Y(p26) = 5;
+
+        PASSENGER_GOAL_X(p27) = 0;
+        PASSENGER_GOAL_Y(p27) = 4;
+
+        PASSENGER_GOAL_X(p28) = 5;
+        PASSENGER_GOAL_Y(p28) = 2;        
+        
         PASSENGERS_YOU_CARE_FOR(p0);
         PASSENGERS_YOU_CARE_FOR(p1) = false;
+        PASSENGERS_YOU_CARE_FOR(p2) = false;
+        PASSENGERS_YOU_CARE_FOR(p3) = false;
+        PASSENGERS_YOU_CARE_FOR(p4) = false;
+        PASSENGERS_YOU_CARE_FOR(p5) = false;
+        PASSENGERS_YOU_CARE_FOR(p6) = false;
+        PASSENGERS_YOU_CARE_FOR(p7) = false;
+        PASSENGERS_YOU_CARE_FOR(p8) = false;
+        PASSENGERS_YOU_CARE_FOR(p9) = false;
+        PASSENGERS_YOU_CARE_FOR(p10) = false;
+        PASSENGERS_YOU_CARE_FOR(p11) = false;
+        PASSENGERS_YOU_CARE_FOR(p12) = false;
+        PASSENGERS_YOU_CARE_FOR(p13) = false;
+        PASSENGERS_YOU_CARE_FOR(p14) = false;
+        PASSENGERS_YOU_CARE_FOR(p15) = false;
+        PASSENGERS_YOU_CARE_FOR(p16) = false;
+        PASSENGERS_YOU_CARE_FOR(p17) = false;
+        PASSENGERS_YOU_CARE_FOR(p18) = false;
+        PASSENGERS_YOU_CARE_FOR(p19) = false;
+        PASSENGERS_YOU_CARE_FOR(p20) = false;
+        PASSENGERS_YOU_CARE_FOR(p21) = false;
+        PASSENGERS_YOU_CARE_FOR(p22) = false;
+        PASSENGERS_YOU_CARE_FOR(p23) = false;
+        PASSENGERS_YOU_CARE_FOR(p24) = false;
+        PASSENGERS_YOU_CARE_FOR(p25) = false;
+        PASSENGERS_YOU_CARE_FOR(p26) = false;
+        PASSENGERS_YOU_CARE_FOR(p27) = false;
+        PASSENGERS_YOU_CARE_FOR(p28) = false;
+
 
     };
 }
@@ -187,6 +305,33 @@ instance taxi-oo_mdp_inst_mdp__01 {
         passenger-y-curr(p0) = 0;
         passenger-in-taxi(p0, t0) = false;
         passenger-in-taxi(p1, t0) = false;
+        passenger-in-taxi(p2, t0) = false;
+        passenger-in-taxi(p3, t0) = false;
+        passenger-in-taxi(p4, t0) = false;
+        passenger-in-taxi(p5, t0) = false;
+        passenger-in-taxi(p6, t0) = false;
+        passenger-in-taxi(p7, t0) = false;
+        passenger-in-taxi(p8, t0) = false;
+        passenger-in-taxi(p9, t0) = false;
+        passenger-in-taxi(p10, t0) = false;
+        passenger-in-taxi(p11, t0) = false;
+        passenger-in-taxi(p12, t0) = false;
+        passenger-in-taxi(p13, t0) = false;
+        passenger-in-taxi(p14, t0) = false;
+        passenger-in-taxi(p15, t0) = false;
+        passenger-in-taxi(p16, t0) = false;
+        passenger-in-taxi(p17, t0) = false;
+        passenger-in-taxi(p18, t0) = false;
+        passenger-in-taxi(p19, t0) = false;
+        passenger-in-taxi(p20, t0) = false;
+        passenger-in-taxi(p21, t0) = false;
+        passenger-in-taxi(p22, t0) = false;
+        passenger-in-taxi(p23, t0) = false;
+        passenger-in-taxi(p24, t0) = false;
+        passenger-in-taxi(p25, t0) = false;
+        passenger-in-taxi(p26, t0) = false;
+        passenger-in-taxi(p27, t0) = false;
+        passenger-in-taxi(p28, t0) = false;
     };
 
     horizon = 20;

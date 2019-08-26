@@ -38,7 +38,18 @@ def get_rddl_str(min_x,max_x,min_y,max_y):
 	result = "\n".join([xpos_str,ypos_str,adjacency_string])
 	return result
 
+def get_in_taxi_str(num_passengers, num_taxis):
+	template_str = "passenger-in-taxi(p{}, t{}) = false;"
+	result_list = []
+	for t_id in range(num_taxis):
+		for p_id in range(num_passengers):
+			result_list.append(template_str.format(p_id,t_id))
+	result = "\n".join(result_list)
+	return result
+
 if __name__ == "__main__":
 	min_x, max_x, min_y, max_y = [0,4,0,4]
 	r = get_rddl_str(min_x,max_x,min_y,max_y)
 	print(r)
+	in_taxi_str = get_in_taxi_str(28,1)
+	print(in_taxi_str)

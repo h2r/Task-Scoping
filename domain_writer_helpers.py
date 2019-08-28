@@ -51,5 +51,5 @@ if __name__ == "__main__":
 	min_x, max_x, min_y, max_y = [0,4,0,4]
 	r = get_rddl_str(min_x,max_x,min_y,max_y)
 	print(r)
-	in_taxi_str = get_in_taxi_str(28,1)
+	in_taxi_str = get_in_taxi_str(2,1)
 	print(in_taxi_str)

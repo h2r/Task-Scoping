@@ -221,7 +221,27 @@ def make_triplet_dict(rddl_model, type2names):
 						false_case = false_case.args[2]
 
 	return action_to_effect_to_precond
+def get_goal_conditions_from_reward(reward, conditions_in_reward, solver):
+	"""
+	:param reward: z3 function var corresponding to the rddl reward.
+	:param conditions_in_reward: list of z3 conditions mentioned in reward, in order
+	:param solver: z3 Solver with reward function and constants asserted
+	:return:
+	"""
+	goal_conditions = []
+	for c_id in range(len(conditions_in_reward)):
+		#Check if c True makes reward higher, c False makes reward higher, or unknown. We assume the condition matters, otherwise its poorly defined
+		reward_args_true_c = [conditions_in_reward[i] if i != c_id else True for i in range(len(conditions_in_reward))]
+		reward_args_false_c = [conditions_in_reward[i] if i != c_id else False for i in range(len(conditions_in_reward))]
+		#These conditions are, respectively, c always being good for reward, c always being bad for reward
+		c_is_goal = (reward(*reward_args_true_c) >= reward(*conditions_in_reward))
+		not_c_is_goal = (reward(*reward_args_false_c) >= reward(*conditions_in_reward))
 
+		if solver_implies_condition(solver, c_is_goal):
+			goal_conditions.append(conditions_in_reward[c_id])
+		elif solver_implies_condition(solver,not_c_is_goal):
+			goal_conditions.append(z3.Not(conditions_in_reward[c_id]))
+	return goal_conditions
 # For every state predicate function, see which objects it takes in:
 # Now, for every combination of those objects in the instance, make a proposition in z3
 # Only set the proposition corresponding to the init-state to true!
@@ -235,6 +255,7 @@ def convert_to_z3(rddl_model):
 	model_nonfluents = pull_nonfluent_var_dict(rddl_model)
 	domain_objects = pull_instance_objects(rddl_model)
 	reward_condition = get_reward_condition(rddl_model)
+
 
 	all_object_names = {}
 	for dom_obj in domain_objects:

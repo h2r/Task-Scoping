@@ -151,7 +151,7 @@ non-fluents taxi-2wide-2pass {
         xpos               : { x00, x01};
         ypos               : { y00, y01};
         taxi               : { t0 };
-        passenger          : { p0 };
+        passenger          : { p0, p1 };
     };
 
     non-fluents {
@@ -166,7 +166,9 @@ non-fluents taxi-2wide-2pass {
 
         // PASSENGERS
         PASSENGER_GOAL_LOC(p0, x01, y01);
+        PASSENGER_GOAL_LOC(p1, x01, y01);
         PASSENGERS_YOU_CARE_FOR(p0);
+        PASSENGERS_YOU_CARE_FOR(p1) = false;
         TAXI_GOAL(x01, y01);
 
     };
@@ -179,6 +181,9 @@ instance taxi-oo_mdp_inst_mdp__01 {
     init-state {
         taxi-at(t0, x00, y00);
         passenger-at-curr(p0, x00, y00);
+        passenger-at-curr(p1, x00, y01);
+        passenger-in-taxi(p0, t0) = false;
+        passenger-in-taxi(p1, t0) = false;
     };
 
     horizon = 20;

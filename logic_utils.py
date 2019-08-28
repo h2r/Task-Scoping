@@ -24,6 +24,7 @@ def solver_implies_condition(solver, precondition):
 	else:
 		if result == z3.z3.unknown:
 			print("Unknown guarantee for precondition: {}".format(precondition))
+			raise TimeoutError("solver returned unknown")
 		# print("result: {}".format(result))
 		return False
 

@@ -11,21 +11,33 @@ Change how we check for guarantee violation. When we add a new skill, we should 
 ~"""
 
 
-def get_implied_effects(skills: List[Skill]) -> List[Skill]:
+def get_implied_effects(skills: List[Skill], fast_version= False) -> List[Skill]:
 	"""
 	Update each skill with the variables implicity affected by it. Ex. Moving with a passenger in the taxi explicitly moves the passenger, implicitly moves the taxi
-	Note: This would be faster if we had a partial ordering of skills
+	Note: This would be faster if we had a partial ordering of skills. We could then start at the root skills (no implied effects), see their effects on their children, etc,
+	using get_all_affected_variables() instead of get_targeted_variables()
+	Alternatively/additionally, we could put this into cython (would it help? itertools.product should be fast already)
 	:param skills:
 	:return:
 	"""
 	solver = z3.Solver()
-	for (s0,s1) in itertools.product(skills,skills):
-		if s0.get_action() == s1.get_action() and check_implication(s0.get_precondition(), s1.get_precondition()):
-			s0.implicitly_affected_variables.extend(s1.get_targeted_variables())
-	for s in skills:
-		s.implicitly_affected_variables = list(set(s.implicitly_affected_variables))
-		s.implicit_effects_processed = True
+	implication_time = 0
+	if not fast_version:
+		for (s0,s1) in itertools.product(skills,skills):
+			if s0.get_action() == s1.get_action():
+				implication_start = time.time()
+				if check_implication(s0.get_precondition(), s1.get_precondition()):
+					s0.implicitly_affected_variables.extend(s1.get_targeted_variables())
+				implication_time += time.time() - implication_start
+		for s in skills:
+			s.implicitly_affected_variables = list(set(s.implicitly_affected_variables))
+			s.implicit_effects_processed = True
+	if fast_version:
+		pass
+	print("Get_implied_effects implication time: {}".format(implication_time))
 	return skills
+
+
 def triplet_dict_to_triples(skill_dict: Dict[str,Dict[str,List[Union[z3.z3.ExprRef,AndList]]]]) -> Tuple[Union[z3.z3.ExprRef,AndList],str,List[str]]:
 	"""
 	:param skill_dict: [action][effect] -> List[preconditions]
@@ -190,6 +202,7 @@ def run_scope_on_file(rddl_file_location):
 
 if __name__ == "__main__":
 	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions.rddl"
-	file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions_complex.rddl"
+	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions_complex.rddl"
+	file_path = "./taxi-rddl-domain/taxi-oo_mdp_composite_01.rddl"
 	# file_path = "button-domains/button_special_button.rddl"
 	run_scope_on_file(file_path)

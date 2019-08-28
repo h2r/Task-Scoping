@@ -6,3 +6,4 @@ Groundings would start based on the objects mentioned in the goal condition, and
 Similarly, we currently ground forall and exists statements via And and Or respectively. We would rather deal with the
 quantifiers in a more elegant way. Dealing with parameterized actions/attributes and quantifiers more intelligently
 would probably save computation.
+If all actions affecting a certain variable that must be changed have the same, idempotent effect, then we can assume that effect. Modify the algorithm to exploit this. (It may not be worth the computational cost)

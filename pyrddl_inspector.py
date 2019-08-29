@@ -236,7 +236,7 @@ def get_goal_conditions_from_reward(reward, conditions_in_reward, solver):
 		#These conditions are, respectively, c always being good for reward, c always being bad for reward
 		c_is_goal = (reward(*reward_args_true_c) >= reward(*conditions_in_reward))
 		not_c_is_goal = (reward(*reward_args_false_c) >= reward(*conditions_in_reward))
-
+		# print("assertions for {}: {}".format(c_id,solver.assertions))
 		if solver_implies_condition(solver, c_is_goal):
 			goal_conditions.append(conditions_in_reward[c_id])
 		elif solver_implies_condition(solver,not_c_is_goal):

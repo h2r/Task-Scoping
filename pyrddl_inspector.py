@@ -154,7 +154,7 @@ def reward_to_z3_function(reward_ast, solver):
 	:param solver: z3.Solver object we will push the reward function to
 	:return: a z3 function object corresponding to the reward, a list of conditions corresponding to the arguments of the reward function
 	"""
-	pass
+
 
 def make_triplet_dict(rddl_model, type2names):
 	"""
@@ -572,11 +572,11 @@ if __name__ == '__main__':
 		# rddl_file_location = "/home/nishanth/Documents/IPC_Code/rddlsim/files/taxi-rddl-domain/taxi-oo_simple.rddl"
 		# rddl_file_location = "./taxi-rddl-domain/taxi-oo_mdp_composite_01.rddl"
 		# rddl_file_location = "./taxi-rddl-domain/taxi-structured-composite_01.rddl"
-		rddl_file_location = "./taxi-rddl-domain/taxi-structured-deparameterized_actions.rddl"
+		# rddl_file_location = "./taxi-rddl-domain/taxi-structured-deparameterized_actions.rddl"
 		# rddl_file_location = "./button-domains/2buttons3atts.rddl"
 		# rddl_file_location = "./button-domains/2buttons4atts.rddl"
 		# rddl_file_location = "./button-domains/buttons_two-arg_pvar.rddl"
-#		rddl_file_location = "./ipc2018-domains/original/academic-advising/academic-advising_composite_01.rddl"
+		rddl_file_location = "./ipc2018-domains/original/academic-advising/academic-advising_composite_01.rddl"
 		with open(rddl_file_location, 'r') as file:
 			rddl = file.read()
 

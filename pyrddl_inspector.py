@@ -148,6 +148,14 @@ def get_reward_condition(rddl_model):
 	else:
 		raise ValueError("The reward is not specified as an if/else sequence")
 
+def reward_to_z3_function(reward_ast, solver):
+	"""
+	:param reward_ast: the ast of the reward functionje
+	:param solver: z3.Solver object we will push the reward function to
+	:return: a z3 function object corresponding to the reward, a list of conditions corresponding to the arguments of the reward function
+	"""
+	pass
+
 def make_triplet_dict(rddl_model, type2names):
 	"""
 	:param rddl_model:

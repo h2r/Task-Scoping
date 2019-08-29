@@ -47,9 +47,25 @@ def get_in_taxi_str(num_passengers, num_taxis):
 	result = "\n".join(result_list)
 	return result
 
+def taken_no_courses():
+	courses = ["c0000", "c0001", "c0002", "c0003", "c0004", "c0100", "c0101", "c0102", "c0103", "c0200", "c0201", "c0202", "c0300", "c0301", "c0302"]
+	not_taken_strings = []
+	for c in courses:
+		not_taken_strings.append("~passed({});".format(c))
+	not_taken = "\n".join(not_taken_strings)
+	not_prereq_strings = []
+	for c0 in courses:
+		for c1 in courses:
+			if c0 != c1:
+				not_prereq_strings.append("~PREREQ({}, {});".format(c0,c1))
+	not_prereq = "\n".join(not_prereq_strings)
+	print(not_taken)
+	print(not_prereq)
+
 if __name__ == "__main__":
-	min_x, max_x, min_y, max_y = [0,4,0,4]
-	r = get_rddl_str(min_x,max_x,min_y,max_y)
-	print(r)
-	in_taxi_str = get_in_taxi_str(2,1)
-	print(in_taxi_str)
+	# min_x, max_x, min_y, max_y = [0,4,0,4]
+	# r = get_rddl_str(min_x,max_x,min_y,max_y)
+	# print(r)
+	# in_taxi_str = get_in_taxi_str(2,1)
+	# print(in_taxi_str)
+	taken_no_courses()

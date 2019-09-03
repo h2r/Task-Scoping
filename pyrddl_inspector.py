@@ -358,7 +358,7 @@ def _compile_expression(expr: Expression, groundings_from_top: Dict[str,str],sol
 	etype2compiler = {
 		'constant': _compile_constant_expression,
 		'pvar': _compile_pvariable_expression,
-		#        'randomvar':   _compile_random_variable_expression,
+		'randomvar':   _compile_random_variable_expression,
 		'arithmetic':  _compile_arithmetic_expression,
 		'boolean': _compile_boolean_expression,
 		'relational': _compile_relational_expression,
@@ -502,13 +502,66 @@ def _compile_relational_expression(expr: Expression, groundings_from_top: Dict[s
 	fluent = op(x, y)
 
 	return fluent
-#
-# def _compile_sum(expr: Expression, grounding_dict: Dict[str,str],solver_constants_only):
-# 	#Get types in sum
-# 	#Get list of objects of each type
-# 	#Define sum
-# 	pass
-def _compile_aggregation_expression(expr: Expression, grounding_dict: Dict[str,str],solver_constants_only, return_pvars = False):
+
+def _compile_random_variable_expression(self,
+                                            expr: Expression, groundings_from_top: Dict[str,str],solver_constants_only):
+        etype = expr.etype
+        args = expr.args
+		
+        if etype[1] == 'Bernoulli':
+            return True
+
+            # mean = self._compile_expression(args[0], scope, batch_size, noise)
+            # dist, sample = TensorFluent.Bernoulli(mean, batch_size)
+        # elif etype[1] == 'Uniform':
+        #     if noise is None:
+        #         low = self._compile_expression(args[0], scope, batch_size, noise)
+        #         high = self._compile_expression(args[1], scope, batch_size, noise)
+        #         dist, sample = TensorFluent.Uniform(low, high, batch_size)
+        #     else:
+        #         xi = noise.pop()
+        #         # xi = TensorFluent(xi, scope=[], batch=True)
+        #         xi = TensorFluent(tf.sigmoid(xi), scope=[], batch=True) # squashed noise
+        #         low = self._compile_expression(args[0], scope, batch_size, noise)
+        #         high = self._compile_expression(args[0], scope, batch_size, noise)
+        #         sample = low + (high - low) * xi
+
+        # elif etype[1] == 'Normal':
+        #     if noise is None:
+        #         mean = self._compile_expression(args[0], scope, batch_size, noise)
+        #         variance = self._compile_expression(args[1], scope, batch_size, noise)
+        #         dist, sample = TensorFluent.Normal(mean, variance, batch_size)
+        #     else:
+        #         xi = noise.pop()
+        #         # xi = TensorFluent(xi, scope=[], batch=True)
+        #         xi = TensorFluent(2.0 * tf.tanh(xi / 2.0), scope=[], batch=True) # squashed noise
+        #         mean = self._compile_expression(args[0], scope, batch_size, noise)
+        #         variance = self._compile_expression(args[1], scope, batch_size, noise)
+        #         sample = mean + TensorFluent.sqrt(variance) * xi
+        # elif etype[1] == 'Laplace':
+        #     mean = self._compile_expression(args[0], scope, batch_size, noise)
+        #     variance = self._compile_expression(args[1], scope, batch_size, noise)
+        #     dist, sample = TensorFluent.Laplace(mean, variance, batch_size)
+        # elif etype[1] == 'Gamma':
+        #     shape = self._compile_expression(args[0], scope, batch_size, noise)
+        #     scale = self._compile_expression(args[1], scope, batch_size, noise)
+        #     dist, sample = TensorFluent.Gamma(shape, scale, batch_size)
+        # elif etype[1] == 'Exponential':
+        #     if noise is None:
+        #         rate = self._compile_expression(args[0], scope, batch_size, noise)
+        #         dist, sample = TensorFluent.Exponential(rate, batch_size)
+        #     else:
+        #         xi = noise.pop()
+        #         # xi = TensorFluent(xi, scope=[], batch=True)
+        #         xi = TensorFluent(tf.sigmoid(xi), scope=[], batch=True) # squashed noise
+        #         rate = self._compile_expression(args[0], scope, batch_size, noise)
+        #         sample = - (TensorFluent.constant(1.0) / rate) * TensorFluent.log(xi)
+        else:
+            raise ValueError('Invalid random variable expression:\n{}.'.format(expr))
+
+        # return sample
+
+def _compile_aggregation_expression(expr: Expression, grounding_dict: Dict[str,str],solver_constants_only):
 	#TODO test against aggregators that introduce multiple vars, ex. forall_{?x, ?y}
 
 	# These functions in the values of the dict are incorrect, make sure to make them better. I have no clue

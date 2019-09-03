@@ -140,13 +140,21 @@ def get_grounding_dict_pairs(variable_param_strings: List[str],groundings_by_par
 		total_groundings_dict_pairs.append((tg,grounding_dict))
 	return total_groundings_dict_pairs
 
-def get_reward_condition(rddl_model):
+def get_reward_conditions(rddl_model, solver):
+	"""
+	:param rddl_model:
+	:param solver: solver with constant values asserted
+	:return: list of z3 conditions that serve as arguments to the reward function
+	"""
 	reward_expr = rddl_model.domain.reward
 	if(reward_expr.etype[0] == 'control'):
 		condition = reward_expr.args[0]
-		return condition
+		return [condition]
 	else:
-		raise ValueError("The reward is not specified as an if/else sequence")
+		#Assume the reward is a sum of sums, or at least has no ifs
+		#We assume here that all pvars are bools. We can generalize later if we keep track of the types and fill in domains for each.
+		return reward_expr
+		# raise ValueError("The reward is not specified as an if/else sequence")
 
 def reward_to_z3_function(reward_ast, solver):
 	"""
@@ -262,7 +270,6 @@ def convert_to_z3(rddl_model):
 	model_states = pull_state_var_dict(rddl_model)
 	model_nonfluents = pull_nonfluent_var_dict(rddl_model)
 	domain_objects = pull_instance_objects(rddl_model)
-	reward_condition = get_reward_condition(rddl_model)
 
 
 	all_object_names = {}
@@ -334,8 +341,7 @@ def convert_to_z3(rddl_model):
 			obj_names = []
 		solver.add(ground2var(att_name, obj_names) == init_nonf[1])
 		solver_constants_only.add(ground2var(att_name, obj_names) == init_nonf[1])
-
-	compiled_reward = _compile_expression(reward_condition, dict(),solver_constants_only)
+	reward_ast = get_reward_conditions(rddl_model, solver_constants_only)
 	triplet_dict = make_triplet_dict(rddl_model, all_object_names)
 
 	skills_triplets = []
@@ -348,7 +354,7 @@ def convert_to_z3(rddl_model):
 				skills_triplets.append(new_skill)
 				print("Temp break here!")
 	return skills_triplets, compiled_reward, solver
-def _compile_expression(expr: Expression, groundings_from_top: Dict[str,str],solver_constants_only):
+def _compile_expression(expr: Expression, groundings_from_top: Dict[str,str],solver_constants_only, return_pvars = False):
 	etype2compiler = {
 		'constant': _compile_constant_expression,
 		'pvar': _compile_pvariable_expression,
@@ -371,10 +377,10 @@ def _compile_expression(expr: Expression, groundings_from_top: Dict[str,str],sol
 	return compiler_fn(expr,groundings_from_top,solver_constants_only)
 
 
-def _compile_constant_expression(expr: Expression, groundings_from_top: Dict[str,str],solver_constants_only):
+def _compile_constant_expression(expr: Expression, groundings_from_top: Dict[str,str],solver_constants_only, return_pvars = False):
 	return expr.value
 
-def _compile_arithmetic_expression(expr: Expression, grounding_dict:Dict[str,str],solver_constants_only):
+def _compile_arithmetic_expression(expr: Expression, grounding_dict:Dict[str,str],solver_constants_only, return_pvars = False):
         etype = expr.etype
         args = expr.args
 
@@ -409,7 +415,7 @@ def _compile_arithmetic_expression(expr: Expression, grounding_dict:Dict[str,str
 
         return fluent
 
-def _compile_pvariable_expression(expr: Expression, grounding_dict: Dict[str, str],solver_constants_only):
+def _compile_pvariable_expression(expr: Expression, grounding_dict: Dict[str, str],solver_constants_only, return_pvars = False):
 	"""
 	:param expr:
 	:return: returns a z3 expr with the specified groundings
@@ -427,7 +433,7 @@ def _compile_pvariable_expression(expr: Expression, grounding_dict: Dict[str, st
 		z3_var = name_to_z3_var[instance_building_utils.g2n_names(pvar_name,object_names)]
 		return z3_var
 
-def _compile_boolean_expression(expr: Expression, groundings_from_top: Dict[str,str],solver_constants_only):
+def _compile_boolean_expression(expr: Expression, groundings_from_top: Dict[str,str],solver_constants_only, return_pvars = False):
 	#TODO handle [(var,grounding_dict)] list that will be returned from compile_pvariable
 	etype = expr.etype
 	args = expr.args
@@ -472,7 +478,7 @@ def _compile_boolean_expression(expr: Expression, groundings_from_top: Dict[str,
 
 
 # Done!
-def _compile_relational_expression(expr: Expression, groundings_from_top: Dict[str,str],solver_constants_only):
+def _compile_relational_expression(expr: Expression, groundings_from_top: Dict[str,str],solver_constants_only, return_pvars = False):
 	#TODO handle [(var,grounding_dict)] list that will be returned from compile_pvariable
 
 	etype = expr.etype
@@ -496,14 +502,19 @@ def _compile_relational_expression(expr: Expression, groundings_from_top: Dict[s
 	fluent = op(x, y)
 
 	return fluent
-
-def _compile_aggregation_expression(expr: Expression, grounding_dict: Dict[str,str],solver_constants_only):
+#
+# def _compile_sum(expr: Expression, grounding_dict: Dict[str,str],solver_constants_only):
+# 	#Get types in sum
+# 	#Get list of objects of each type
+# 	#Define sum
+# 	pass
+def _compile_aggregation_expression(expr: Expression, grounding_dict: Dict[str,str],solver_constants_only, return_pvars = False):
 	#TODO test against aggregators that introduce multiple vars, ex. forall_{?x, ?y}
 
 	# These functions in the values of the dict are incorrect, make sure to make them better. I have no clue
 	# how to do this...
 	etype2aggr = {
-		# 'sum': x.sum,
+		'sum': lambda x: z3.Sum(x),
 		# 'prod': x.prod,
 		# 'avg': x.avg,
 		# 'maximum': x.maximum,
@@ -563,7 +574,7 @@ def prepare_rddl_for_scoper(rddl_file_location):
 		instance_objects = pull_instance_objects(model)
 		instance_nonfluents = pull_init_nonfluent(model)
 		initial_state = pull_init_state(model)
-		reward_condition = get_reward_condition(model)
+		reward_condition = get_reward_conditions(model)
 
 		skill_triplets, compiled_reward, solver = convert_to_z3(model)
 		return compiled_reward, skill_triplets, solver
@@ -576,7 +587,7 @@ if __name__ == '__main__':
 		# rddl_file_location = "./button-domains/2buttons3atts.rddl"
 		# rddl_file_location = "./button-domains/2buttons4atts.rddl"
 		# rddl_file_location = "./button-domains/buttons_two-arg_pvar.rddl"
-		rddl_file_location = "./ipc2018-domains/original/academic-advising/academic-advising_composite_01.rddl"
+		rddl_file_location = "./misc-domains/academic-advising_composite_01.rddl"
 		with open(rddl_file_location, 'r') as file:
 			rddl = file.read()
 

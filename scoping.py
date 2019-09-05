@@ -72,9 +72,12 @@ def scope(goal, skills, start_condition = None, solver=None):
 	if solver is None:
 		solver = z3.Solver()
 		solver.add(start_condition)
-	if type(goal) is AndList:
-		discovered = copy.copy(goal.args)
-		q = copy.copy(goal.args)
+	if hasattr(goal,"__iter__"):
+		discovered = [x for x in goal]
+		q = [x for x in goal]
+	# if type(goal) is AndList:
+	# 	discovered = copy.copy(goal.args)
+	# 	q = copy.copy(goal.args)
 	else:
 		discovered = [goal]
 		q = [goal]
@@ -201,8 +204,8 @@ def run_scope_on_file(rddl_file_location):
 		print("{}: {}".format(section_name,section_time))
 
 if __name__ == "__main__":
-	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions.rddl"
+	file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions.rddl"
 	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions_complex.rddl"
-	file_path = "./taxi-rddl-domain/taxi-oo_mdp_composite_01.rddl"
+	# file_path = "./taxi-rddl-domain/taxi-oo_mdp_composite_01.rddl"
 	# file_path = "button-domains/button_special_button.rddl"
 	run_scope_on_file(file_path)

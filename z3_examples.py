@@ -25,6 +25,14 @@ def var2str():
 	vars = [z3.Bool(n) for n in names]
 	a = And(*vars[:2])
 	print(a)
+def is_condition():
+	bool0 = z3.Bool('bool0')
+	int0 = z3.Int("int0")
+	int1 = z3.Int("int1")
+	print(bool0.__class__)
+	equality0 = (int0==int1)
+	print(equality0.__class__)
+
 if __name__ == "__main__":
 	# split_clause_ex()
-	var2str()
+	is_condition()

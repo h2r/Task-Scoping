@@ -10,7 +10,8 @@ def get_goal_conditions_test(num_args = 3):
 	s = z3.Solver()
 	reward_signature = [z3.BoolSort() for _ in range(num_args)] + [z3.IntSort()]
 	reward = z3.Function("reward", *reward_signature)
-	reward_definition = z3.ForAll(bool_vars, reward(*bool_vars) == z3.Sum([z3.If(bool_vars[i],1,0) for i in range(len(bool_vars))]))
+	reward_expr = z3.Sum([z3.If(bool_vars[i],1,0) for i in range(len(bool_vars))])
+	reward_definition = z3.ForAll(bool_vars, reward(*bool_vars) == reward_expr)
 	s.add(reward_definition)
 	# x = solver_implies_condition(s,reward(True,True,bool_vars[2]) >= reward())
 	# print(x)

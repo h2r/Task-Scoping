@@ -365,7 +365,7 @@ def convert_to_z3(rddl_model):
 				skills_triplets.append(new_skill)
 				print("Temp break here!")
 	return skills_triplets, compiled_reward, solver
-def _compile_expression(expr: Expression, groundings_from_top: Dict[str,str],solver_constants_only, conditions_list = None, out_of_condition_pvars = None, in_condition = False):
+def _compile_expression(expr: Expression, groundings_from_top: Dict[str,str],solver_constants_only, reward_args=None):
 	etype2compiler = {
 		'constant': _compile_constant_expression,
 		'pvar': _compile_pvariable_expression,
@@ -384,32 +384,36 @@ def _compile_expression(expr: Expression, groundings_from_top: Dict[str,str],sol
 	compiler_type = etype[0]
 	if compiler_type not in etype2compiler.keys():
 		raise ValueError('Expression type unknown: {}'.format(etype))
-
-	#If the compiler_type is one of the following, then the result will be a condition, so we set in_condition=True
-	# Some pvars or constants are also conditions, but in those cases there will be no sub-conditions, so we don't need to set in_condition
-	condition_compiler_types = ['boolean', 'relational', 'aggregation']
-	if compiler_type in condition_compiler_types:
-		#TODO avoid making in_condition_new. It's ugly and (probably) avoidable.
-		# The most obvious way to avoid it is to handle condition adding in the other _compile_expression functions, but
-		#that doesn't seem worth the extra code
-		in_condition_new = True
-	else:
-		in_condition_new = in_condition
 	compiler_fn = etype2compiler[compiler_type]
-	new_expr =  compiler_fn(expr,groundings_from_top,solver_constants_only,conditions_list,out_of_condition_pvars,in_condition_new)
+	#if we are compiling a reward expression
+	if reward_args is not None:
+		#We copy the reward_args dictionary so that in_condition is only changed for the descendents of this function call.
+		#The copy is shallow because we want the compilation to edit an existing list, so we must pass the lists by reference
+		#in_condition is the only variable in reward_args that we don't want to pass by reference, and this is the only place
+		#it is modified, so this should be safe
+		reward_args = copy.copy(reward_args)
+		in_condition_old = reward_args["in_condition"]
+		#If the compiler_type is one of the following, then the result will be a condition, so we set in_condition=True
+		# Some pvars or constants are also conditions, but in those cases there will be no sub-conditions, so we don't need to set in_condition
+		condition_compiler_types = ['boolean', 'relational', 'aggregation']
+		if compiler_type in condition_compiler_types:
+			#TODO avoid making in_condition_new. It's ugly and (probably) avoidable.
+			# The most obvious way to avoid it is to handle condition adding in the other _compile_expression functions, but
+			#that doesn't seem worth the extra code
+			reward_args["in_condition"] = True
+	new_expr =  compiler_fn(expr,groundings_from_top,solver_constants_only,reward_args)
 	#If we are gathering conditions and we are not yet in a condition
-	if conditions_list is not None and not in_condition:
+	if reward_args is not None and not in_condition_old:
 		#If the new expression is a condition, add it to the list
 		if isinstance(new_expr,z3.z3.BoolRef):
-				conditions_list.append(new_expr)
-	in_condition = in_condition_new
+				reward_args["conditions_list"].append(new_expr)
 	return new_expr
 
 
-def _compile_constant_expression(expr: Expression, groundings_from_top: Dict[str,str],solver_constants_only , conditions_list = None, out_of_condition_pvars = None,in_condition = False):
+def _compile_constant_expression(expr: Expression, groundings_from_top: Dict[str,str],solver_constants_only , reward_args=None):
 	return expr.value
 
-def _compile_arithmetic_expression(expr: Expression, grounding_dict:Dict[str,str],solver_constants_only, conditions_list = None, out_of_condition_pvars = None,in_condition = False):
+def _compile_arithmetic_expression(expr: Expression, grounding_dict:Dict[str,str],solver_constants_only, reward_args=None):
         etype = expr.etype
         args = expr.args
 
@@ -423,7 +427,7 @@ def _compile_arithmetic_expression(expr: Expression, grounding_dict:Dict[str,str
                 raise ValueError('Invalid binary arithmetic expression:\n{}'.format(expr))
 
             op = etype2op[etype[1]]
-            x = _compile_expression(args[0], grounding_dict, conditions_list, in_condition)
+            x = _compile_expression(args[0], grounding_dict, reward_args)
             fluent = op(x)
 
         else:
@@ -438,13 +442,13 @@ def _compile_arithmetic_expression(expr: Expression, grounding_dict:Dict[str,str
                 raise ValueError('Invalid binary arithmetic expression:\n{}'.format(expr))
 
             op = etype2op[etype[1]]
-            x = _compile_expression(args[0], grounding_dict,solver_constants_only, conditions_list,out_of_condition_pvars, in_condition)
-            y = _compile_expression(args[1], grounding_dict,solver_constants_only, conditions_list,out_of_condition_pvars, in_condition)
+            x = _compile_expression(args[0], grounding_dict,solver_constants_only, reward_args)
+            y = _compile_expression(args[1], grounding_dict,solver_constants_only, reward_args)
             fluent = op(x, y)
 
         return fluent
 
-def _compile_pvariable_expression(expr: Expression, grounding_dict: Dict[str, str],solver_constants_only, conditions_list = None, out_of_condition_pvars = None,in_condition = False):
+def _compile_pvariable_expression(expr: Expression, grounding_dict: Dict[str, str],solver_constants_only, reward_args=None):
 	"""
 	:param expr:
 	:return: returns a z3 expr with the specified groundings
@@ -460,11 +464,11 @@ def _compile_pvariable_expression(expr: Expression, grounding_dict: Dict[str, st
 	else:
 		object_names = [grounding_dict[x] for x in variable_param_strings]
 		z3_var = name_to_z3_var[instance_building_utils.g2n_names(pvar_name,object_names)]
-		if out_of_condition_pvars is not None and not in_condition:
-			out_of_condition_pvars.append(z3_var)
+		if reward_args is not None and not reward_args["in_condition"]:
+			reward_args["out_of_condition_pvars"].append(z3_var)
 		return z3_var
 
-def _compile_boolean_expression(expr: Expression, groundings_from_top: Dict[str,str],solver_constants_only, conditions_list = None, out_of_condition_pvars = None,in_condition = False):
+def _compile_boolean_expression(expr: Expression, groundings_from_top: Dict[str,str],solver_constants_only, reward_args=None):
 	#TODO handle [(var,grounding_dict)] list that will be returned from compile_pvariable
 	etype = expr.etype
 	args = expr.args
@@ -478,7 +482,7 @@ def _compile_boolean_expression(expr: Expression, groundings_from_top: Dict[str,
 			raise ValueError('Invalid unary boolean expression:\n{}'.format(expr))
 
 		op = etype2op[etype[1]]
-		x = _compile_expression(args[0], groundings_from_top,solver_constants_only, conditions_list, in_condition)
+		x = _compile_expression(args[0], groundings_from_top,solver_constants_only, reward_args)
 		if(isinstance(x, list)):
 			if(len(x) > 1):
 				# bool_in_z3 = AndList(*[op(x_elem) for x_elem in x])
@@ -501,15 +505,15 @@ def _compile_boolean_expression(expr: Expression, groundings_from_top: Dict[str,
 			raise ValueError('Invalid binary boolean expression:\n{}'.format(expr))
 
 		op = etype2op[etype[1]]
-		x = _compile_expression(args[0],groundings_from_top,solver_constants_only, conditions_list, out_of_condition_pvars,in_condition)
-		y = _compile_expression(args[1],groundings_from_top,solver_constants_only, conditions_list, out_of_condition_pvars,in_condition)
+		x = _compile_expression(args[0],groundings_from_top,solver_constants_only, reward_args)
+		y = _compile_expression(args[1],groundings_from_top,solver_constants_only, reward_args)
 		bool_in_z3 = op(x, y)
 
 	return bool_in_z3
 
 
 # Done!
-def _compile_relational_expression(expr: Expression, groundings_from_top: Dict[str,str],solver_constants_only, conditions_list = None, out_of_condition_pvars = None,in_condition = False):
+def _compile_relational_expression(expr: Expression, groundings_from_top: Dict[str,str],solver_constants_only, reward_args=None):
 	#TODO handle [(var,grounding_dict)] list that will be returned from compile_pvariable
 
 	etype = expr.etype
@@ -528,14 +532,14 @@ def _compile_relational_expression(expr: Expression, groundings_from_top: Dict[s
 		raise ValueError('Invalid relational expression:\n{}'.format(expr))
 
 	op = etype2op[etype[1]]
-	x = _compile_expression(args[0],groundings_from_top,solver_constants_only, conditions_list, out_of_condition_pvars,in_condition)
-	y = _compile_expression(args[1],groundings_from_top,solver_constants_only, conditions_list, out_of_condition_pvars,in_condition)
+	x = _compile_expression(args[0],groundings_from_top,solver_constants_only, reward_args)
+	y = _compile_expression(args[1],groundings_from_top,solver_constants_only, reward_args)
 	fluent = op(x, y)
 
 	return fluent
 
 def _compile_random_variable_expression(self,
-                                            expr: Expression, groundings_from_top: Dict[str,str],solver_constants_only, conditions_list = None, out_of_condition_pvars = None,in_condition = False):
+                                            expr: Expression, groundings_from_top: Dict[str,str],solver_constants_only, reward_args=None):
         etype = expr.etype
         args = expr.args
 		
@@ -592,7 +596,7 @@ def _compile_random_variable_expression(self,
 
         # return sample
 
-def _compile_aggregation_expression(expr: Expression, grounding_dict: Dict[str,str],solver_constants_only, conditions_list = None, out_of_condition_pvars = None,in_condition = False):
+def _compile_aggregation_expression(expr: Expression, grounding_dict: Dict[str,str],solver_constants_only, reward_args=None):
 	#TODO test against aggregators that introduce multiple vars, ex. forall_{?x, ?y}
 
 	# These functions in the values of the dict are incorrect, make sure to make them better. I have no clue
@@ -626,7 +630,7 @@ def _compile_aggregation_expression(expr: Expression, grounding_dict: Dict[str,s
 			param_name = new_params[param_id][0]
 			new_grounding_dict[param_name] = object_name
 		#Get z3 expression
-		compiled_expressions.append(_compile_expression(expr2compile, new_grounding_dict,solver_constants_only,conditions_list,out_of_condition_pvars,in_condition))
+		compiled_expressions.append(_compile_expression(expr2compile, new_grounding_dict,solver_constants_only,reward_args))
 	#Apply aggregator
 	return aggr(compiled_expressions)
 

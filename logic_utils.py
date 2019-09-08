@@ -45,6 +45,14 @@ def check_implication(antecedent, consequent):
 			print("Unknown implication for precondition: {} => {}".format(antecedent,consequent))
 		return False
 
+def get_implies(x,y):
+	return ((not x) or y)
+
+def get_iff(x,y):
+	both_true = z3.And(x,y)
+	both_false = z3.And(z3.Not(x),z3.Not(y))
+	return z3.Or(both_true,both_false)
+
 def or2(*x, solver=None):
 	"""
 	A wrapper for z3.Or meant to handle ConditionLists and simplifications based on the constant conditions
@@ -152,3 +160,17 @@ def test_ConditionList():
 	and0_z3 = and0.to_z3()
 	print(and0)
 	print(and0_z3)
+
+def split_conjunction(x):
+	"""Not implemented. Thought I could do something with sexpr, but that might just be equivalent to str(), and I'm not sure how to get references to the composite conditions from it.
+	I thought we had some issue with not being able to see pieces of a composite expression, but I rememvber now the issue was decomposing the ast itself, not the string"""
+	pass
+
+def split_conjunction_test():
+	x = z3.Bool('x')
+	y = z3.Bool('y')
+	x_and_y = z3.And(x,y)
+	print(x_and_y)
+
+if __name__ == "__main__":
+	pass

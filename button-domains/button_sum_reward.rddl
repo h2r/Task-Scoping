@@ -47,7 +47,7 @@ non-fluents button-mdp_single {
     domain = button-mdp;
 
     objects {
-        button               : { b0 };
+        button               : { b0,b1,b2 };
     };
 
     non-fluents {

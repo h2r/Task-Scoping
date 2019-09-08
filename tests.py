@@ -14,7 +14,7 @@ def test_reward_compilation():
 	model = parser.parse(rddl)  # AST
 	reward_ast = model.domain.reward
 	groundings_from_top = dict()
-	solver =
+	# solver =
 	conditions_list = []
 	reward_expr = pyrddl_inspector._compile_expression(reward_ast,)
 if __name__ == "__main__":

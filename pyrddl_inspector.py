@@ -190,6 +190,11 @@ def get_reward_conditions(rddl_model, solver=None):
 		#We need to separate pvars that occur only in conditions from pvars that occur outside of conditions.
 		#We can do this by passing in an unconditions_pvars list to _compile_expression
 		print("reward got")
+		#TODO return only the relevant conditions, and also the list of pvars we definitely care about
+		#TODO create function. To get signature right, we need to know how to put together synthetic_conditions and out_of_condition_pvars.
+		#Easiest way is to create another list for the parameters, and add conditions and pvars to this list as we recurse. Then get types of this lists elements
+		# reward_func = z3.Function('reward_func',)
+		return reward_args["conditions_list"], reward_args["out_of_condition_pvars"]
 
 
 def reward_to_z3_function(reward_ast, solver):
@@ -358,7 +363,7 @@ def convert_to_z3(rddl_model):
 		solver.add(ground2var(att_name, obj_names) == init_nonf[1])
 		solver_constants_only.add(ground2var(att_name, obj_names) == init_nonf[1])
 	# reward_ast = get_reward_conditions(rddl_model, solver_constants_only)
-	compiled_reward = get_reward_conditions(rddl_model, solver_constants_only)
+	goal_conditions, necessarily_relevant_pvars = get_reward_conditions(rddl_model, solver_constants_only)
 	triplet_dict = make_triplet_dict(rddl_model, all_object_names)
 
 	skills_triplets = []
@@ -370,7 +375,7 @@ def convert_to_z3(rddl_model):
 				new_skill = Skill(z3_expr, action, [effect])
 				skills_triplets.append(new_skill)
 				print("Temp break here!")
-	return skills_triplets, compiled_reward, solver
+	return skills_triplets, goal_conditions, necessarily_relevant_pvars, solver
 def _compile_expression(expr: Expression, groundings_from_top: Dict[str,str],solver_constants_only, reward_args=None):
 	etype2compiler = {
 		'constant': _compile_constant_expression,
@@ -387,7 +392,7 @@ def _compile_expression(expr: Expression, groundings_from_top: Dict[str,str],sol
 	}
 
 	etype = expr.etype
-	compiler_type = etype[0]
+	compiler_type, compiler_subtype = etype
 	if compiler_type not in etype2compiler.keys():
 		raise ValueError('Expression type unknown: {}'.format(etype))
 	compiler_fn = etype2compiler[compiler_type]
@@ -402,13 +407,14 @@ def _compile_expression(expr: Expression, groundings_from_top: Dict[str,str],sol
 		#If the compiler_type is one of the following, then the result will be a condition, so we set in_condition=True
 		# Some pvars or constants are also conditions, but in those cases there will be no sub-conditions, so we don't need to set in_condition
 		condition_compiler_types = ['boolean', 'relational', 'aggregation']
-		if compiler_type in condition_compiler_types:
+		if compiler_type in condition_compiler_types and compiler_subtype != 'sum':
 			#that doesn't seem worth the extra code
 			reward_args["in_condition"] = True
+	else: in_condition_old = None
 	new_expr =  compiler_fn(expr,groundings_from_top,solver_constants_only,reward_args)
 	#If we are gathering conditions and we are not yet in a condition
 	if reward_args is not None:
-		print("Ooga")
+		# print("Ooga")
 		if in_condition_old == False:
 			#If the new expression is a condition, add it to the list
 			if isinstance(new_expr,z3.z3.BoolRef):
@@ -681,8 +687,8 @@ def prepare_rddl_for_scoper(rddl_file_location):
 		initial_state = pull_init_state(model)
 		# reward_condition = get_reward_conditions(model)
 
-		skill_triplets, compiled_reward, solver = convert_to_z3(model)
-		return compiled_reward, skill_triplets, solver
+		skill_triplets, goal_conditions, necessarily_relevant_pvars, solver = convert_to_z3(model)
+		return goal_conditions, necessarily_relevant_pvars, skill_triplets, solver
 
 if __name__ == '__main__':
 		# rddl_file_location = "/home/nishanth/Documents/IPC_Code/rddlsim/files/taxi-rddl-domain/taxi-oo_simple.rddl"
@@ -704,6 +710,6 @@ if __name__ == '__main__':
 		rddl_model = parser.parse(rddl)  # AST
 	#	test_dict = make_triplet_dict(model)
 
-		skill_triplets, compiled_reward, solver = convert_to_z3(rddl_model)
+		skill_triplets, goal_conditions, necessarily_relevant_pvars, solver = convert_to_z3(rddl_model)
 		print("skills:")
 		for s in skill_triplets: print(s)

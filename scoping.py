@@ -183,7 +183,7 @@ def run_scope_on_file(rddl_file_location):
 	algorithm_sections = ["pyrddl_inspector","clean_AndLists", "get_implied_effects", "scope"]
 	boundary_times = []
 	boundary_times.append(time.time())
-	compiled_reward, skill_triplets, solver = prepare_rddl_for_scoper(rddl_file_location)
+	goal_conditions, necessarily_relevant_pvars, skill_triplets, solver = prepare_rddl_for_scoper(rddl_file_location)
 	# print("all skills:")
 	# for s in skill_triplets: print(s)
 	# print("Goal:\n".format(compiled_reward))
@@ -192,7 +192,9 @@ def run_scope_on_file(rddl_file_location):
 	boundary_times.append(time.time())
 	get_implied_effects(skill_triplets)
 	boundary_times.append(time.time())
-	relevant_vars, used_skills = scope(compiled_reward,skill_triplets,solver=solver)
+	relevant_vars, used_skills = scope(goal_conditions,skill_triplets,solver=solver)
+	relevant_vars = relevant_vars + [str(i) for i in necessarily_relevant_pvars]
+	relevant_vars = list(set(relevant_vars))
 	boundary_times.append(time.time())
 
 	print("relevant_vars:")

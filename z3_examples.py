@@ -41,8 +41,26 @@ def ast_v_var_example():
 def boolref_check():
 	x = z3.Bool('x')
 	assert isinstance(x,z3.BoolRef)
+
+def adding_bools_example():
+	b0 = z3.Bool('b0')
+	b1 = z3.Bool('b1')
+	x1 = z3.If(b0,1,0)
+	x2 = z3.If(b1,1,0)
+	x1_x2 = z3.Sum(x1,x2)
+	print(x1_x2)
+	try:
+		b0_b1 = z3.Sum(b0,b1)
+		crashed = False
+	except:
+		crashed = True
+	if not crashed:
+		raise Exception("Should have raised z3 exception for adding bools")
+
+
 if __name__ == "__main__":
 	# split_clause_ex()
 	# is_condition()
 	# ast_v_var_example()
-	boolref_check()
+	# boolref_check()
+	adding_bools_example()

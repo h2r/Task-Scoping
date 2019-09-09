@@ -13,7 +13,8 @@ name_to_z3_var = {}
 actions_list = []
 pvar_to_param_types = {}
 #z3.get_var_names(z3 conditoimn)
-#TODO rename synthetic_conditions. Some of the conditions are in fact the original z3 vars, so not synthetic
+#TODO rename reward_args, reward_params. Those are confusing names
+#TODO Find out why we are getting if(button-on(b0),1,grandma(b0)) instead of if(button-on(b0),1,0)
 def get_model_from_filepath(rddl_file_location):
 	with open(rddl_file_location, 'r') as file:
 		rddl = file.read()
@@ -140,26 +141,27 @@ def get_grounding_dict_pairs(variable_param_strings: List[str],groundings_by_par
 			grounding_dict[variable_param_str] = arg
 		total_groundings_dict_pairs.append((tg,grounding_dict))
 	return total_groundings_dict_pairs
-def get_goal_conditions_from_reward(reward, conditions_in_reward, solver):
+def get_goal_conditions_from_reward(reward, reward_parameters, solver):
 	"""
 	:param reward: z3 function var corresponding to the rddl reward.
-	:param conditions_in_reward: list of z3 conditions mentioned in reward, in order
+	:param reward_parameters: list of z3 conditions mentioned in reward, in order
 	:param solver: z3 Solver with reward function and constants asserted
 	:return:
 	"""
 	goal_conditions = []
-	for c_id in range(len(conditions_in_reward)):
-		#Check if c True makes reward higher, c False makes reward higher, or unknown. We assume the condition matters, otherwise its poorly defined
-		reward_args_true_c = [conditions_in_reward[i] if i != c_id else True for i in range(len(conditions_in_reward))]
-		reward_args_false_c = [conditions_in_reward[i] if i != c_id else False for i in range(len(conditions_in_reward))]
-		#These conditions are, respectively, c always being good for reward, c always being bad for reward
-		c_is_goal = (reward(*reward_args_true_c) >= reward(*conditions_in_reward))
-		not_c_is_goal = (reward(*reward_args_false_c) >= reward(*conditions_in_reward))
-		# print("assertions for {}: {}".format(c_id,solver.assertions))
-		if solver_implies_condition(solver, c_is_goal):
-			goal_conditions.append(conditions_in_reward[c_id])
-		elif solver_implies_condition(solver,not_c_is_goal):
-			goal_conditions.append(z3.Not(conditions_in_reward[c_id]))
+	for c_id in range(len(reward_parameters)):
+		if isinstance(reward_parameters[c_id],z3.BoolRef):
+			#Check if c True makes reward higher, c False makes reward higher, or unknown. We assume the condition matters, otherwise its poorly defined
+			reward_args_true_c = [reward_parameters[i] if i != c_id else True for i in range(len(reward_parameters))]
+			reward_args_false_c = [reward_parameters[i] if i != c_id else False for i in range(len(reward_parameters))]
+			#These conditions are, respectively, c always being good for reward, c always being bad for reward
+			c_is_goal = (reward(*reward_args_true_c) >= reward(*reward_parameters))
+			not_c_is_goal = (reward(*reward_args_false_c) >= reward(*reward_parameters))
+			# print("assertions for {}: {}".format(c_id,solver.assertions))
+			if solver_implies_condition(solver, c_is_goal):
+				goal_conditions.append(reward_parameters[c_id])
+			elif solver_implies_condition(solver,not_c_is_goal):
+				goal_conditions.append(z3.Not(reward_parameters[c_id]))
 	return goal_conditions
 
 def get_reward_conditions(rddl_model, solver=None):
@@ -178,12 +180,15 @@ def get_reward_conditions(rddl_model, solver=None):
 		#Assume the reward is a sum of sums, or at least has no ifs
 
 		grounding_dict = dict()
+		reward_params = []
 		reward_args = {
 			"conditions_list":[],
-			"out_of_condition_pvars":[],
+			"unscopable_pvars":[],
 			"synthetic_conditions":[],
+			"reward_function_parameters":reward_params,
 			"in_condition":False
 		}
+		#TODO figure out why button-on(bi) is being put in unscopable_pvars and conditions_list/synthetic_conditions, so is duplicated in reward_function_parameters
 		compiled_reward = _compile_expression(reward_expr,grounding_dict,solver,reward_args=reward_args)
 		print("Conditions in reward:")
 		for c in reward_args["conditions_list"]: print(c)
@@ -191,10 +196,17 @@ def get_reward_conditions(rddl_model, solver=None):
 		#We can do this by passing in an unconditions_pvars list to _compile_expression
 		print("reward got")
 		#TODO return only the relevant conditions, and also the list of pvars we definitely care about
-		#TODO create function. To get signature right, we need to know how to put together synthetic_conditions and out_of_condition_pvars.
-		#Easiest way is to create another list for the parameters, and add conditions and pvars to this list as we recurse. Then get types of this lists elements
+		#TODO create function. To get signature right, we need to know how to put together synthetic_conditions and unscopable_pvars.
+		#TODO Easiest way is to create another list for the parameters, and add conditions and pvars to this list as we recurse. Then get types of this lists elements
 		# reward_func = z3.Function('reward_func',)
-		return reward_args["conditions_list"], reward_args["out_of_condition_pvars"]
+		reward_signature = [x.sort() for x in reward_params] + [z3.RealSort()] #Consider changing to IntSort() if that makes this faster
+		reward_function = z3.Function('reward_function',reward_signature)
+		reward_definition = z3.ForAll(reward_params,reward_function(*reward_params) == compiled_reward)
+		solver.add(reward_definition)
+		goal_conditions = get_goal_conditions_from_reward(reward_function,reward_params,solver)
+		print("Got Goal conditions")
+
+		return reward_args["conditions_list"], reward_args["unscopable_pvars"]
 
 
 def reward_to_z3_function(reward_ast, solver):
@@ -406,9 +418,10 @@ def _compile_expression(expr: Expression, groundings_from_top: Dict[str,str],sol
 		in_condition_old = reward_args["in_condition"]
 		#If the compiler_type is one of the following, then the result will be a condition, so we set in_condition=True
 		# Some pvars or constants are also conditions, but in those cases there will be no sub-conditions, so we don't need to set in_condition
+		# that doesn't seem worth the extra code
+
 		condition_compiler_types = ['boolean', 'relational', 'aggregation']
 		if compiler_type in condition_compiler_types and compiler_subtype != 'sum':
-			#that doesn't seem worth the extra code
 			reward_args["in_condition"] = True
 	else: in_condition_old = None
 	new_expr =  compiler_fn(expr,groundings_from_top,solver_constants_only,reward_args)
@@ -421,11 +434,12 @@ def _compile_expression(expr: Expression, groundings_from_top: Dict[str,str],sol
 				reward_args["conditions_list"].append(new_expr)
 				#If new_expr is a z3 var, add it to synthetic_conditions. Else, create a new var to represent the condition and add it
 				if new_expr.num_args() == 0:
-					reward_args["synthetic_conditions"].append(new_expr)
+					new_parameter = new_expr
 				else:
-					new_var = z3.Bool("synth_{}".format(new_expr))
-					solver_constants_only.add(get_iff(new_var,new_expr))
-					reward_args["synthetic_conditions"].append(new_var)
+					new_parameter = z3.Bool("synth_{}".format(new_expr))
+					solver_constants_only.add(get_iff(new_parameter,new_expr))
+				reward_args["synthetic_conditions"].append(new_parameter)
+				reward_args["reward_function_parameters"].append(new_parameter)
 	return new_expr
 
 
@@ -433,39 +447,44 @@ def _compile_constant_expression(expr: Expression, groundings_from_top: Dict[str
 	return expr.value
 
 def _compile_arithmetic_expression(expr: Expression, grounding_dict:Dict[str,str],solver_constants_only, reward_args=None):
-        etype = expr.etype
-        args = expr.args
+		etype = expr.etype
+		args = expr.args
 
-        if len(args) == 1:
-            etype2op = {
-                '+': lambda x: x,
-                '-': lambda x: -x
-            }
+		if len(args) == 1:
+			etype2op = {
+				'+': lambda x: x,
+				'-': lambda x: -x
+			}
 
-            if etype[1] not in etype2op:
-                raise ValueError('Invalid binary arithmetic expression:\n{}'.format(expr))
+			if etype[1] not in etype2op:
+				raise ValueError('Invalid binary arithmetic expression:\n{}'.format(expr))
 
-            op = etype2op[etype[1]]
-            x = _compile_expression(args[0], grounding_dict, reward_args)
-            fluent = op(x)
+			op = etype2op[etype[1]]
+			x = _compile_expression(args[0], grounding_dict, reward_args)
+			fluent = op(x)
 
-        else:
-            etype2op = {
-                '+': lambda x, y: x + y,
-                '-': lambda x, y: x - y,
-                '*': lambda x, y: x * y,
-                '/': lambda x, y: x / y,
-            }
+		else:
+			etype2op = {
+				'+': lambda x, y: x + y,
+				'-': lambda x, y: x - y,
+				'*': lambda x, y: x * y,
+				'/': lambda x, y: x / y,
+			}
 
-            if etype[1] not in etype2op:
-                raise ValueError('Invalid binary arithmetic expression:\n{}'.format(expr))
+			if etype[1] not in etype2op:
+				raise ValueError('Invalid binary arithmetic expression:\n{}'.format(expr))
 
-            op = etype2op[etype[1]]
-            x = _compile_expression(args[0], grounding_dict,solver_constants_only, reward_args)
-            y = _compile_expression(args[1], grounding_dict,solver_constants_only, reward_args)
-            fluent = op(x, y)
+			op = etype2op[etype[1]]
+			x = _compile_expression(args[0], grounding_dict,solver_constants_only, reward_args)
+			y = _compile_expression(args[1], grounding_dict,solver_constants_only, reward_args)
+			#Make sure we are adding numbers, not bools
+			if isinstance(x,z3.BoolRef):
+				x = z3.If(x,1,0)
+			if isinstance(y,z3.BoolRef):
+				y = z3.If(y,1,0)
+			fluent = op(x, y)
 
-        return fluent
+		return fluent
 
 def _compile_pvariable_expression(expr: Expression, grounding_dict: Dict[str, str],solver_constants_only, reward_args=None):
 	"""
@@ -484,7 +503,8 @@ def _compile_pvariable_expression(expr: Expression, grounding_dict: Dict[str, st
 		object_names = [grounding_dict[x] for x in variable_param_strings]
 		z3_var = name_to_z3_var[instance_building_utils.g2n_names(pvar_name,object_names)]
 		if reward_args is not None and not reward_args["in_condition"]:
-			reward_args["out_of_condition_pvars"].append(z3_var)
+			reward_args["unscopable_pvars"].append(z3_var)
+			reward_args["reward_function_parameters"].append(z3_var)
 		return z3_var
 
 def _compile_boolean_expression(expr: Expression, groundings_from_top: Dict[str,str],solver_constants_only, reward_args=None):
@@ -555,62 +575,62 @@ def _compile_relational_expression(expr: Expression, groundings_from_top: Dict[s
 	return fluent
 
 def _compile_random_variable_expression(self,
-                                            expr: Expression, groundings_from_top: Dict[str,str],solver_constants_only, reward_args=None):
-        etype = expr.etype
-        args = expr.args
+											expr: Expression, groundings_from_top: Dict[str,str],solver_constants_only, reward_args=None):
+		etype = expr.etype
+		args = expr.args
 		
-        if etype[1] == 'Bernoulli':
-            return True
+		if etype[1] == 'Bernoulli':
+			return True
 
-            # mean = self._compile_expression(args[0], scope, batch_size, noise)
-            # dist, sample = TensorFluent.Bernoulli(mean, batch_size)
-        # elif etype[1] == 'Uniform':
-        #     if noise is None:
-        #         low = self._compile_expression(args[0], scope, batch_size, noise)
-        #         high = self._compile_expression(args[1], scope, batch_size, noise)
-        #         dist, sample = TensorFluent.Uniform(low, high, batch_size)
-        #     else:
-        #         xi = noise.pop()
-        #         # xi = TensorFluent(xi, scope=[], batch=True)
-        #         xi = TensorFluent(tf.sigmoid(xi), scope=[], batch=True) # squashed noise
-        #         low = self._compile_expression(args[0], scope, batch_size, noise)
-        #         high = self._compile_expression(args[0], scope, batch_size, noise)
-        #         sample = low + (high - low) * xi
+			# mean = self._compile_expression(args[0], scope, batch_size, noise)
+			# dist, sample = TensorFluent.Bernoulli(mean, batch_size)
+		# elif etype[1] == 'Uniform':
+		#     if noise is None:
+		#         low = self._compile_expression(args[0], scope, batch_size, noise)
+		#         high = self._compile_expression(args[1], scope, batch_size, noise)
+		#         dist, sample = TensorFluent.Uniform(low, high, batch_size)
+		#     else:
+		#         xi = noise.pop()
+		#         # xi = TensorFluent(xi, scope=[], batch=True)
+		#         xi = TensorFluent(tf.sigmoid(xi), scope=[], batch=True) # squashed noise
+		#         low = self._compile_expression(args[0], scope, batch_size, noise)
+		#         high = self._compile_expression(args[0], scope, batch_size, noise)
+		#         sample = low + (high - low) * xi
 
-        # elif etype[1] == 'Normal':
-        #     if noise is None:
-        #         mean = self._compile_expression(args[0], scope, batch_size, noise)
-        #         variance = self._compile_expression(args[1], scope, batch_size, noise)
-        #         dist, sample = TensorFluent.Normal(mean, variance, batch_size)
-        #     else:
-        #         xi = noise.pop()
-        #         # xi = TensorFluent(xi, scope=[], batch=True)
-        #         xi = TensorFluent(2.0 * tf.tanh(xi / 2.0), scope=[], batch=True) # squashed noise
-        #         mean = self._compile_expression(args[0], scope, batch_size, noise)
-        #         variance = self._compile_expression(args[1], scope, batch_size, noise)
-        #         sample = mean + TensorFluent.sqrt(variance) * xi
-        # elif etype[1] == 'Laplace':
-        #     mean = self._compile_expression(args[0], scope, batch_size, noise)
-        #     variance = self._compile_expression(args[1], scope, batch_size, noise)
-        #     dist, sample = TensorFluent.Laplace(mean, variance, batch_size)
-        # elif etype[1] == 'Gamma':
-        #     shape = self._compile_expression(args[0], scope, batch_size, noise)
-        #     scale = self._compile_expression(args[1], scope, batch_size, noise)
-        #     dist, sample = TensorFluent.Gamma(shape, scale, batch_size)
-        # elif etype[1] == 'Exponential':
-        #     if noise is None:
-        #         rate = self._compile_expression(args[0], scope, batch_size, noise)
-        #         dist, sample = TensorFluent.Exponential(rate, batch_size)
-        #     else:
-        #         xi = noise.pop()
-        #         # xi = TensorFluent(xi, scope=[], batch=True)
-        #         xi = TensorFluent(tf.sigmoid(xi), scope=[], batch=True) # squashed noise
-        #         rate = self._compile_expression(args[0], scope, batch_size, noise)
-        #         sample = - (TensorFluent.constant(1.0) / rate) * TensorFluent.log(xi)
-        else:
-            raise ValueError('Invalid random variable expression:\n{}.'.format(expr))
+		# elif etype[1] == 'Normal':
+		#     if noise is None:
+		#         mean = self._compile_expression(args[0], scope, batch_size, noise)
+		#         variance = self._compile_expression(args[1], scope, batch_size, noise)
+		#         dist, sample = TensorFluent.Normal(mean, variance, batch_size)
+		#     else:
+		#         xi = noise.pop()
+		#         # xi = TensorFluent(xi, scope=[], batch=True)
+		#         xi = TensorFluent(2.0 * tf.tanh(xi / 2.0), scope=[], batch=True) # squashed noise
+		#         mean = self._compile_expression(args[0], scope, batch_size, noise)
+		#         variance = self._compile_expression(args[1], scope, batch_size, noise)
+		#         sample = mean + TensorFluent.sqrt(variance) * xi
+		# elif etype[1] == 'Laplace':
+		#     mean = self._compile_expression(args[0], scope, batch_size, noise)
+		#     variance = self._compile_expression(args[1], scope, batch_size, noise)
+		#     dist, sample = TensorFluent.Laplace(mean, variance, batch_size)
+		# elif etype[1] == 'Gamma':
+		#     shape = self._compile_expression(args[0], scope, batch_size, noise)
+		#     scale = self._compile_expression(args[1], scope, batch_size, noise)
+		#     dist, sample = TensorFluent.Gamma(shape, scale, batch_size)
+		# elif etype[1] == 'Exponential':
+		#     if noise is None:
+		#         rate = self._compile_expression(args[0], scope, batch_size, noise)
+		#         dist, sample = TensorFluent.Exponential(rate, batch_size)
+		#     else:
+		#         xi = noise.pop()
+		#         # xi = TensorFluent(xi, scope=[], batch=True)
+		#         xi = TensorFluent(tf.sigmoid(xi), scope=[], batch=True) # squashed noise
+		#         rate = self._compile_expression(args[0], scope, batch_size, noise)
+		#         sample = - (TensorFluent.constant(1.0) / rate) * TensorFluent.log(xi)
+		else:
+			raise ValueError('Invalid random variable expression:\n{}.'.format(expr))
 
-        # return sample
+		# return sample
 
 def _compile_aggregation_expression(expr: Expression, grounding_dict: Dict[str,str],solver_constants_only, reward_args=None):
 	# These functions in the values of the dict are incorrect, make sure to make them better. I have no clue

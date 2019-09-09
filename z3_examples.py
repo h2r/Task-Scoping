@@ -57,10 +57,14 @@ def adding_bools_example():
 	if not crashed:
 		raise Exception("Should have raised z3 exception for adding bools")
 
+def expr_sorts():
+	b0 = z3.Bool('b0')
+	print(b0.sort() == z3.BoolSort())
 
 if __name__ == "__main__":
 	# split_clause_ex()
 	# is_condition()
 	# ast_v_var_example()
 	# boolref_check()
-	adding_bools_example()
+	# adding_bools_example()
+	expr_sorts()

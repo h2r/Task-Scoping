@@ -206,7 +206,7 @@ def get_reward_conditions(rddl_model, solver=None):
 		goal_conditions = get_goal_conditions_from_reward(reward_function,reward_params,solver)
 		print("Got Goal conditions")
 
-		return reward_args["conditions_list"], reward_args["unscopable_pvars"]
+		return goal_conditions, reward_args["unscopable_pvars"]
 
 
 def reward_to_z3_function(reward_ast, solver):
@@ -503,8 +503,11 @@ def _compile_pvariable_expression(expr: Expression, grounding_dict: Dict[str, st
 		object_names = [grounding_dict[x] for x in variable_param_strings]
 		z3_var = name_to_z3_var[instance_building_utils.g2n_names(pvar_name,object_names)]
 		if reward_args is not None and not reward_args["in_condition"]:
-			reward_args["unscopable_pvars"].append(z3_var)
-			reward_args["reward_function_parameters"].append(z3_var)
+			#If it is a bool, it is a condition and will be processed by the parent _compile_expression
+			#Otherwise, it is unscopable and we must deal with it here
+			if not isinstance(z3_var,z3.BoolRef):
+				reward_args["unscopable_pvars"].append(z3_var)
+				reward_args["reward_function_parameters"].append(z3_var)
 		return z3_var
 
 def _compile_boolean_expression(expr: Expression, groundings_from_top: Dict[str,str],solver_constants_only, reward_args=None):
@@ -671,6 +674,11 @@ def _compile_aggregation_expression(expr: Expression, grounding_dict: Dict[str,s
 		for c in compiled_expressions:
 			if isinstance(c,z3.BoolRef):
 				numberized_compiled_expressions.append(z3.If(c,1,0))
+				# if not reward_args["in_condition"]:
+				# 	# The pvar was added to both unscopable_pvars and conditions_list. It should only have been added to conditions_list
+				# 	reward_args["unscopable_pvars"].remove(c)
+				# 	reward_args["reward_function_parameters"].remove(c)
+				# 	# reward_args["conditions_list"].append(c)
 			else:
 				numberized_compiled_expressions.append(c)
 		compiled_expressions = numberized_compiled_expressions

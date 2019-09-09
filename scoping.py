@@ -72,9 +72,17 @@ def scope(goal, skills, start_condition = None, solver=None):
 	if solver is None:
 		solver = z3.Solver()
 		solver.add(start_condition)
+	guarantees = []
+	discovered = []
+	q = []
 	if hasattr(goal,"__iter__"):
-		discovered = [x for x in goal]
-		q = [x for x in goal]
+		discovered = []
+		for x in goal:
+			discovered.append(x)
+			if solver_implies_condition(solver,x):
+				guarantees.append(x)
+			else:
+				q.append(x)
 	# if type(goal) is AndList:
 	# 	discovered = copy.copy(goal.args)
 	# 	q = copy.copy(goal.args)
@@ -82,7 +90,6 @@ def scope(goal, skills, start_condition = None, solver=None):
 		discovered = [goal]
 		q = [goal]
 
-	guarantees = []
 	used_skills = []
 	#Create solver from start_condition
 

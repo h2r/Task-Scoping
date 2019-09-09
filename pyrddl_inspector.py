@@ -6,13 +6,14 @@ import z3
 from classes import *
 import instance_building_utils
 from typing import List, Dict, Tuple
-from logic_utils import solver_implies_condition, check_implication, or2, and2, AndList, OrList
+from logic_utils import solver_implies_condition, check_implication, or2, and2, AndList, OrList, get_iff
 att_name_to_domain_attribute = {}
 all_object_names = {}
 name_to_z3_var = {}
 actions_list = []
 pvar_to_param_types = {}
 #z3.get_var_names(z3 conditoimn)
+#TODO rename synthetic_conditions. Some of the conditions are in fact the original z3 vars, so not synthetic
 def get_model_from_filepath(rddl_file_location):
 	with open(rddl_file_location, 'r') as file:
 		rddl = file.read()
@@ -175,12 +176,17 @@ def get_reward_conditions(rddl_model, solver=None):
 		return AndList(compiled_reward)
 	else:
 		#Assume the reward is a sum of sums, or at least has no ifs
-		conditions_list = []
-		out_of_condition_pvars = []
+
 		grounding_dict = dict()
-		compiled_reward = _compile_expression(reward_expr,grounding_dict,solver,conditions_list=conditions_list,out_of_condition_pvars=out_of_condition_pvars)
-		# print("Conditions in reward:")
-		# for c in conditions_list: print(c)
+		reward_args = {
+			"conditions_list":[],
+			"out_of_condition_pvars":[],
+			"synthetic_conditions":[],
+			"in_condition":False
+		}
+		compiled_reward = _compile_expression(reward_expr,grounding_dict,solver,reward_args=reward_args)
+		print("Conditions in reward:")
+		for c in reward_args["conditions_list"]: print(c)
 		#We need to separate pvars that occur only in conditions from pvars that occur outside of conditions.
 		#We can do this by passing in an unconditions_pvars list to _compile_expression
 		print("reward got")
@@ -390,23 +396,30 @@ def _compile_expression(expr: Expression, groundings_from_top: Dict[str,str],sol
 		#We copy the reward_args dictionary so that in_condition is only changed for the descendents of this function call.
 		#The copy is shallow because we want the compilation to edit an existing list, so we must pass the lists by reference
 		#in_condition is the only variable in reward_args that we don't want to pass by reference, and this is the only place
-		#it is modified, so this should be safe
+		#it is modified, so this should be safe. If there is a bug, it's probably here.
 		reward_args = copy.copy(reward_args)
 		in_condition_old = reward_args["in_condition"]
 		#If the compiler_type is one of the following, then the result will be a condition, so we set in_condition=True
 		# Some pvars or constants are also conditions, but in those cases there will be no sub-conditions, so we don't need to set in_condition
 		condition_compiler_types = ['boolean', 'relational', 'aggregation']
 		if compiler_type in condition_compiler_types:
-			#TODO avoid making in_condition_new. It's ugly and (probably) avoidable.
-			# The most obvious way to avoid it is to handle condition adding in the other _compile_expression functions, but
 			#that doesn't seem worth the extra code
 			reward_args["in_condition"] = True
 	new_expr =  compiler_fn(expr,groundings_from_top,solver_constants_only,reward_args)
 	#If we are gathering conditions and we are not yet in a condition
-	if reward_args is not None and not in_condition_old:
-		#If the new expression is a condition, add it to the list
-		if isinstance(new_expr,z3.z3.BoolRef):
+	if reward_args is not None:
+		print("Ooga")
+		if in_condition_old == False:
+			#If the new expression is a condition, add it to the list
+			if isinstance(new_expr,z3.z3.BoolRef):
 				reward_args["conditions_list"].append(new_expr)
+				#If new_expr is a z3 var, add it to synthetic_conditions. Else, create a new var to represent the condition and add it
+				if new_expr.num_args() == 0:
+					reward_args["synthetic_conditions"].append(new_expr)
+				else:
+					new_var = z3.Bool("synth_{}".format(new_expr))
+					solver_constants_only.add(get_iff(new_var,new_expr))
+					reward_args["synthetic_conditions"].append(new_var)
 	return new_expr
 
 
@@ -469,7 +482,6 @@ def _compile_pvariable_expression(expr: Expression, grounding_dict: Dict[str, st
 		return z3_var
 
 def _compile_boolean_expression(expr: Expression, groundings_from_top: Dict[str,str],solver_constants_only, reward_args=None):
-	#TODO handle [(var,grounding_dict)] list that will be returned from compile_pvariable
 	etype = expr.etype
 	args = expr.args
 
@@ -514,8 +526,6 @@ def _compile_boolean_expression(expr: Expression, groundings_from_top: Dict[str,
 
 # Done!
 def _compile_relational_expression(expr: Expression, groundings_from_top: Dict[str,str],solver_constants_only, reward_args=None):
-	#TODO handle [(var,grounding_dict)] list that will be returned from compile_pvariable
-
 	etype = expr.etype
 	args = expr.args
 
@@ -597,8 +607,6 @@ def _compile_random_variable_expression(self,
         # return sample
 
 def _compile_aggregation_expression(expr: Expression, grounding_dict: Dict[str,str],solver_constants_only, reward_args=None):
-	#TODO test against aggregators that introduce multiple vars, ex. forall_{?x, ?y}
-
 	# These functions in the values of the dict are incorrect, make sure to make them better. I have no clue
 	# how to do this...
 	etype2aggr = {
@@ -630,7 +638,16 @@ def _compile_aggregation_expression(expr: Expression, grounding_dict: Dict[str,s
 			param_name = new_params[param_id][0]
 			new_grounding_dict[param_name] = object_name
 		#Get z3 expression
-		compiled_expressions.append(_compile_expression(expr2compile, new_grounding_dict,solver_constants_only,reward_args))
+		new_expr = _compile_expression(expr2compile, new_grounding_dict,solver_constants_only,reward_args)
+		compiled_expressions.append(new_expr)
+	if etype[1] == "sum":
+		numberized_compiled_expressions = []
+		for c in compiled_expressions:
+			if isinstance(c,z3.BoolRef):
+				numberized_compiled_expressions.append(z3.If(c,1,0))
+			else:
+				numberized_compiled_expressions.append(c)
+		compiled_expressions = numberized_compiled_expressions
 	#Apply aggregator
 	return aggr(compiled_expressions)
 

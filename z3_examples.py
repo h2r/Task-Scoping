@@ -32,7 +32,17 @@ def is_condition():
 	print(bool0.__class__)
 	equality0 = (int0==int1)
 	print(equality0.__class__)
-
+def ast_v_var_example():
+	b0 = z3.Bool('b0')
+	b1 = z3.Bool('b1')
+	b0_or_b1 = z3.Or(b0,b1)
+	assert b0.num_args() == 0
+	assert b0_or_b1.num_args() == 2
+def boolref_check():
+	x = z3.Bool('x')
+	assert isinstance(x,z3.BoolRef)
 if __name__ == "__main__":
 	# split_clause_ex()
-	is_condition()
+	# is_condition()
+	# ast_v_var_example()
+	boolref_check()

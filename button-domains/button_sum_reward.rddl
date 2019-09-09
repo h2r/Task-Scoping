@@ -53,6 +53,8 @@ non-fluents button-mdp_single {
     non-fluents {
        
         grandma(b0);
+        grandma(b1);
+        grandma(b2);
     };
 }
 
@@ -61,7 +63,9 @@ instance button-mdp_inst_mdp_01 {
     non-fluents = button-mdp_single;
 
     init-state {
-        button-on(b0);
+        ~button-on(b0);
+        ~button-on(b1);
+        ~button-on(b2);
     };
 
     horizon = 20;

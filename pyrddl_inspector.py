@@ -332,6 +332,8 @@ def convert_to_z3(rddl_model):
 		#TODO make sure this works for pvars with no arguments
 		init_values_dict = collections.defaultdict(lambda: collections.defaultdict(lambda: None))
 		for (pvar, args_list), val in init_values_list:
+			if args_list is None:
+				args_list = []
 			init_values_dict[pvar][tuple(args_list)] = val
 		constants = []
 		for pvar_name, pvar in pvars_dict.items():
@@ -341,7 +343,9 @@ def convert_to_z3(rddl_model):
 			# constants.append(DomainAttribute(pvar.name, z3_sort, pvar.param_types))
 			# Assert constant values.
 			# Get all possible args to the pvar
-			argument_product_space = [all_object_names[x] for x in pvar.param_types]
+			param_types = pvar.param_types
+			if param_types is None: param_types = []
+			argument_product_space = [all_object_names[x] for x in param_types]
 			all_possible_arg_lists = itertools.product(*argument_product_space)
 			#Create z3_vars
 			for args_list in all_possible_arg_lists:
@@ -555,6 +559,8 @@ def _compile_pvariable_expression(expr: Expression, grounding_dict: Dict[str, st
 	if expr2slashyName(expr) in actions_list:
 		return True
 	else:
+		if variable_param_strings is None:
+			variable_param_strings = []
 		object_names = [grounding_dict[x] for x in variable_param_strings]
 		z3_var = name_to_z3_var[instance_building_utils.g2n_names(pvar_name,object_names)]
 		if reward_args is not None and not reward_args["in_condition"]:

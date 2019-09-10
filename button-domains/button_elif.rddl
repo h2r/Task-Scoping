@@ -1,0 +1,79 @@
+/////////////////////////////////////////////////////////////////////////////////
+//                                                                             //
+// Simple RDDL domain                                                          //
+//                                                                             //
+/////////////////////////////////////////////////////////////////////////////////
+
+
+domain button-mdp {
+    requirements {
+        reward-deterministic,
+        cpf-deterministic
+    };
+
+    types {
+        button   : object;
+    };
+
+    pvariables {
+    //////////////////////////////// States /////////////////////////////////
+    // Passenger reached goal variable
+        button-on(button)                : { state-fluent, bool, default=false };
+
+    //////////////////////////////// Actions ////////////////////////////////
+        toggle-button(button)                           : { action-fluent, bool, default = false };
+
+
+    //////////////////////////////// Non-Fluents ////////////////////////////////
+        special(button)                       : { non-fluent, bool, default = false };
+    };
+    cdfs {
+    // Pickup and Dropoff Transition function
+       button-on'(?b) =
+            if (toggle-button(?b))
+                then ~button-on(?b)
+            else button-on(?b);
+          
+    };
+
+    reward =
+           if( forall_{ ?b : button } [button-on(?b)])
+                then 5
+           else if( forall_{ ?b : button } [~button-on(?b)] )
+                then 1
+           else 0;
+
+
+   // action-preconditions {
+   
+   // };
+}
+non-fluents button-mdp_single {
+    domain = button-mdp;
+
+    objects {
+        button               : { b0,b1,b2 };
+    };
+
+    non-fluents {
+       
+        special(b0);
+        special(b1);
+        special(b2);
+    };
+}
+
+instance button-mdp_inst_mdp_01 {
+    domain = button-mdp;
+    non-fluents = button-mdp_single;
+
+    init-state {
+        button-on(b0);
+        ~button-on(b1);
+        ~button-on(b2);
+    };
+
+    horizon = 20;
+
+    discount = 1.0;
+}

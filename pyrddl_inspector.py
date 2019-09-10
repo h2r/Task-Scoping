@@ -360,7 +360,7 @@ def convert_to_z3(rddl_model):
 	#TODO add default values for pvars
 
 	initialize_variables(model_nonfluents,init_nonfluents,name_to_z3_var,[solver,solver_constants_only])
-	initialize_variables(model_states,init_state,name_to_z3_var,[solver_constants_only])
+	initialize_variables(model_states,init_state,name_to_z3_var,[solver])
 	name_to_z3_var_copy = name_to_z3_var
 	for k,v in name_to_z3_var.items(): print(k)
 	# ground2var = instance_building_utils.g2v_builder(name_to_z3_var,ground2name)

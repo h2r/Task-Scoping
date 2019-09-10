@@ -3,7 +3,7 @@ import abc, time
 import z3
 # from utils import *
 from classes import *
-from logic_utils import check_implication, solver_implies_condition, get_var_names, AndList, OrList
+from logic_utils import check_implication, solver_implies_condition, get_var_names, AndList, OrList, pvar2obj_str
 from pyrddl_inspector import prepare_rddl_for_scoper
 """
 TODO
@@ -200,9 +200,14 @@ def run_scope_on_file(rddl_file_location):
 	get_implied_effects(skill_triplets)
 	boundary_times.append(time.time())
 	relevant_vars, used_skills = scope(goal_conditions,skill_triplets,solver=solver)
+	boundary_times.append(time.time())
 	relevant_vars = relevant_vars + [str(i) for i in necessarily_relevant_pvars]
 	relevant_vars = list(set(relevant_vars))
-	boundary_times.append(time.time())
+	relevant_objects = [pvar2obj_str(x) for x in relevant_vars]
+	relevant_objects = list(set([i for j in relevant_objects for i in j]))
+	print("relevant_objects:")
+	for o in relevant_objects:
+		print(o)
 
 	print("relevant_vars:")
 	for r in relevant_vars:

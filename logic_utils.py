@@ -8,13 +8,10 @@ def get_var_names(expr):
 	return vars
 
 
-def get_object_names_from_z3_str(expr_str):
-	#Objects are between "(" and ")", and sometimes ","
-	#
-	#First, get substrings "(...)"
-	x = expr_str.split("(")
-	#Next, remove the parentheses and split by commas
-	pass
+def pvar2obj_str(expr_str):
+	#Ex "passenger-in-taxi(p0,t0)" -> ["p0","t0"]
+	object_names = expr_str.split("(")[1].split(")")[0].split(",")
+	return object_names
 
 def solver_implies_condition(solver, precondition):
 	# print("Assertions:")

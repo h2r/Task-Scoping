@@ -213,8 +213,8 @@ def run_scope_on_file(rddl_file_location):
 		print("{}: {}".format(section_name,section_time))
 
 if __name__ == "__main__":
-	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions.rddl"
-	file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions_complex.rddl"
+	file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions.rddl"
+	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions_complex.rddl"
 	# file_path = "./taxi-rddl-domain/taxi-oo_mdp_composite_01.rddl"
 	# file_path = "button-domains/button_special_button.rddl"
 	# file_path = "button-domains/button_sum_reward.rddl"

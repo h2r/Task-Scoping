@@ -7,7 +7,7 @@ from classes import *
 import instance_building_utils
 from typing import List, Dict, Tuple
 from logic_utils import solver_implies_condition, check_implication, or2, and2, AndList, OrList, get_iff
-att_name_to_domain_attribute = {}
+# att_name_to_domain_attribute = {}
 all_object_names = {}
 name_to_z3_var = {}
 actions_list = []
@@ -112,17 +112,17 @@ def plugin_objects_to_pvar(pvar_name,pvar_parameters,groundings):
 		object_names.append(groundings[p])
 	return instance_building_utils.g2n_names(pvar_name,object_names)
 
-def get_possible_groundings(pvar_name, variable_param_strings, known_groundings):
-	groundings_by_param = []
-	for vps in variable_param_strings:
-		# If the variable is defined at the top of the cpf, we have already determined it's value
-		if vps in known_groundings.keys():
-			groundings_by_param.append([known_groundings[vps]])
-		# Otherwise, it can be any object of the correct type
-		else:
-			param_type = pvar_to_param_types[pvar_name]
-			groundings_by_param.append(all_object_names[param_type])
-	return groundings_by_param
+# def get_possible_groundings(pvar_name, variable_param_strings, known_groundings):
+# 	groundings_by_param = []
+# 	for vps in variable_param_strings:
+# 		# If the variable is defined at the top of the cpf, we have already determined it's value
+# 		if vps in known_groundings.keys():
+# 			groundings_by_param.append([known_groundings[vps]])
+# 		# Otherwise, it can be any object of the correct type
+# 		else:
+# 			param_type = pvar_to_param_types[pvar_name]
+# 			groundings_by_param.append(all_object_names[param_type])
+# 	return groundings_by_param
 def get_grounding_dict_pairs(variable_param_strings: List[str],groundings_by_param: List[List[str]]) -> List[Tuple[Tuple[str,...],Dict[str,str]]]:
 	"""
 	:param variable_param_strings: list of strings of parameters, ex ["?p1,"?t0"]
@@ -298,6 +298,7 @@ def convert_to_z3(rddl_model):
 	global att_name_to_domain_attribute
 	global all_object_names
 	global name_to_z3_var
+
 	# Makes a dict out of the state-variables like xpos=[x00,x01],ypos=[y00,y01]
 	# These are already for the domain itself.
 	model_states = pull_state_var_dict(rddl_model)
@@ -308,7 +309,8 @@ def convert_to_z3(rddl_model):
 	all_object_names = {}
 	for dom_obj in domain_objects:
 		all_object_names[dom_obj[0]] = dom_obj[1]
-
+	print("all_object_names:")
+	for k,v in all_object_names.items(): print("{}: {}".format(k,v))
 	# Makes a list of the non-fluents (constants) from the domain
 	att_name_to_domain_attribute = {}
 	rddl2z3_sorts = {
@@ -316,65 +318,100 @@ def convert_to_z3(rddl_model):
 		"int":z3.Int,
 		"real":z3.Real
 	}
+
+	#TODO when and why do I use each of these?
+	# A solver that contains all information about the start state. Used by the scoping algorithm
+	solver = z3.Solver()
+	#A solver that contains only constant assertions. Used for ...
+	solver_constants_only = z3.Solver()
+	init_nonfluents = pull_init_nonfluent(rddl_model)
+	init_state = pull_init_state(rddl_model)
+
+	# ground2name = instance_building_utils.g2n_names
+	def initialize_variables(pvars_dict,init_values_list,name_to_z3_var,solvers_list):
+		#TODO make sure this works for pvars with no arguments
+		init_values_dict = collections.defaultdict(lambda: collections.defaultdict(lambda: None))
+		for (pvar, args_list), val in init_values_list:
+			init_values_dict[pvar][tuple(args_list)] = val
+		constants = []
+		for pvar_name, pvar in pvars_dict.items():
+			print(pvar_name)
+			rddl_range = pvar.range
+			z3_sort = rddl2z3_sorts[rddl_range]
+			# constants.append(DomainAttribute(pvar.name, z3_sort, pvar.param_types))
+			# Assert constant values.
+			# Get all possible args to the pvar
+			argument_product_space = [all_object_names[x] for x in pvar.param_types]
+			all_possible_arg_lists = itertools.product(*argument_product_space)
+			#Create z3_vars
+			for args_list in all_possible_arg_lists:
+				#Declare z3 var
+				grounded_name = g2n_names(pvar.name, args_list)
+				z3_var = rddl2z3_sorts[rddl_range](grounded_name)
+				name_to_z3_var[grounded_name] = z3_var
+					# grounded_attributes = att.ground(all_object_names)
+				# attribute_to_grounded_names[att.name] = grounded_attributes
+				val = init_values_dict[pvar.name][tuple(args_list)]
+				if val is None:
+					val = pvar.default
+				for s in solvers_list:
+					s.add(z3_var == val)
+		# Add to solvers
 	#TODO add default values for pvars
-	constants = []
-	for nonf in model_nonfluents:
-		print(nonf)
-		rddl_range = model_nonfluents[nonf].range
-		z3_sort = rddl2z3_sorts[rddl_range]
-		constants.append(DomainAttribute(model_nonfluents[nonf].name, z3_sort, model_nonfluents[nonf].param_types))
+
+	initialize_variables(model_nonfluents,init_nonfluents,name_to_z3_var,[solver,solver_constants_only])
+	initialize_variables(model_states,init_state,name_to_z3_var,[solver_constants_only])
+	name_to_z3_var_copy = name_to_z3_var
+	for k,v in name_to_z3_var.items(): print(k)
+	# ground2var = instance_building_utils.g2v_builder(name_to_z3_var,ground2name)
+
 	# Makes a list of all the attributes (state variables like passenger-in-taxi)
-	attributes_list = []
-	for state in model_states:
-		rddl_range = model_states[state].range
-		z3_sort = rddl2z3_sorts[rddl_range]
-		attributes_list.append(DomainAttribute(model_states[state].name, z3_sort, model_states[state].param_types))
+	# attributes_list = []
+	# for state in model_states:
+	# 	rddl_range = model_states[state].range
+	# 	z3_sort = rddl2z3_sorts[rddl_range]
+	# 	attributes_list.append(DomainAttribute(model_states[state].name, z3_sort, model_states[state].param_types))
 			# att_name_to_domain_attribute[model_states[state].name] = model_states[state].args_names
 
 	# Converts the attributes to z3 and assigns them to a dict
-	att_name_to_arg_names = {}
-	name_to_z3_var = {}
-	attribute_to_grounded_names = {}
-	for att in attributes_list + constants:
-		att_name_to_domain_attribute[att.name] = att
-		if att.arguments is None or len(att.arguments) == 0:
-			grounded_attributes = [g2n_names(att.name,[])]
-		else:
-			grounded_attributes = att.ground(all_object_names)
-		attribute_to_grounded_names[att.name] = grounded_attributes
-		for g in grounded_attributes:
-			# Define var
-			name_to_z3_var[g] = att.type(g)
-			# Apply constraints
-			pass
+	# att_name_to_arg_names = {}
+	# name_to_z3_var = {}
+	# attribute_to_grounded_names = {}
+	# for att in attributes_list + constants:
+	# 	# att_name_to_domain_attribute[att.name] = att
+	# 	if att.arguments is None or len(att.arguments) == 0:
+	# 		grounded_attributes = [g2n_names(att.name,[])]
+	# 	else:
+	# 		grounded_attributes = att.ground(all_object_names)
+	# 	attribute_to_grounded_names[att.name] = grounded_attributes
+	# 	for g in grounded_attributes:
+	# 		# Define var
+	# 		name_to_z3_var[g] = att.type(g)
+	# 		# Apply constraints
+	# 		pass
 
 	print("grounded atts:")
 	for n in name_to_z3_var.keys():
 		print(n)
 	print("grounded atts over")
 
-	ground2name = instance_building_utils.g2n_names
-	ground2var = instance_building_utils.g2v_builder(name_to_z3_var,ground2name)
 	# Initialize a z3 solver to be returned when it contains the necessary z3 instantiation of z3 instances
-	init_nonfluents = pull_init_nonfluent(rddl_model)
-	init_state = pull_init_state(rddl_model)
-	# A solver that contains all information about the start state
-	solver = z3.Solver()
-	#A solver that contains only constant assertions
-	solver_constants_only = z3.Solver()
+
+
 
 	# Give the passenger, etc. their init values and push them into the solver
-	for init_val in init_state:
-		solver.add(ground2var(init_val[0][0], init_val[0][1]) == init_val[1])
-	# Give all the initial non-fluents their values and push them into the solver
-	for init_nonf in init_nonfluents:
-		att_name = init_nonf[0][0]
-		obj_names = init_nonf[0][1]
-		if obj_names is None:
-			obj_names = []
-		solver.add(ground2var(att_name, obj_names) == init_nonf[1])
-		solver_constants_only.add(ground2var(att_name, obj_names) == init_nonf[1])
+	# for init_val in init_state:
+	# 	solver.add(ground2var(init_val[0][0], init_val[0][1]) == init_val[1])
+	# # Give all the initial non-fluents their values and push them into the solver
+	# for init_nonf in init_nonfluents:
+	# 	att_name = init_nonf[0][0]
+	# 	obj_names = init_nonf[0][1]
+	# 	if obj_names is None:
+	# 		obj_names = []
+	# 	solver.add(ground2var(att_name, obj_names) == init_nonf[1])
+	# 	solver_constants_only.add(ground2var(att_name, obj_names) == init_nonf[1])
 	# reward_ast = get_reward_conditions(rddl_model, solver_constants_only)
+	#TODO why do we use solver_constants_only here?
 	goal_conditions, necessarily_relevant_pvars = get_reward_conditions(rddl_model, solver_constants_only)
 	triplet_dict = make_triplet_dict(rddl_model, all_object_names)
 
@@ -383,6 +420,7 @@ def convert_to_z3(rddl_model):
 		for effect in triplet_dict[action]:
 			for precond in triplet_dict[action][effect]:
 				print(precond)
+				#TODO Why do we use solver_constants_only?
 				z3_expr = _compile_expression(*precond,solver_constants_only)
 				new_skill = Skill(z3_expr, action, [effect])
 				skills_triplets.append(new_skill)

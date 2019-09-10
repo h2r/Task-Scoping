@@ -203,7 +203,12 @@ def get_reward_conditions(rddl_model, solver=None):
 		reward_function = z3.Function('reward_function',reward_signature)
 		reward_definition = z3.ForAll(reward_params,reward_function(*reward_params) == compiled_reward)
 		solver.add(reward_definition)
-		goal_conditions = get_goal_conditions_from_reward(reward_function,reward_params,solver)
+		goal_conditions_synthetic = get_goal_conditions_from_reward(reward_function,reward_params,solver)
+		goal_conditions = []
+		for c_id, c in enumerate(reward_args["conditions_list"]):
+			if reward_args["synthetic_conditions"][c_id] in goal_conditions_synthetic:
+				goal_conditions.append(c)
+
 		print("Got Goal conditions")
 
 		return goal_conditions, reward_args["unscopable_pvars"]

@@ -6,6 +6,16 @@ def get_var_names(expr):
 		return []
 	vars = [str(i) for i in z3.z3util.get_vars(expr)]
 	return vars
+
+
+def get_object_names_from_z3_str(expr_str):
+	#Objects are between "(" and ")", and sometimes ","
+	#
+	#First, get substrings "(...)"
+	x = expr_str.split("(")
+	#Next, remove the parentheses and split by commas
+	pass
+
 def solver_implies_condition(solver, precondition):
 	# print("Assertions:")
 	# for a in solver.assertions(): print(a)

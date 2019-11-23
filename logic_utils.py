@@ -1,6 +1,8 @@
 from abc import ABC
 import z3
 
+solver = z3.Solver()
+
 def get_var_names(expr):
 	if isinstance(expr, bool):
 		return []
@@ -29,12 +31,11 @@ def solver_implies_condition(solver, precondition):
 		return False
 
 def check_implication(antecedent, consequent):
-	#TODO make global empty solver instead of creating new one every time. Creating a solver may take nontrivial time
 	if isinstance(antecedent,AndList):
 		antecedent = antecedent.to_z3()
 	if isinstance(consequent,AndList):
 		consequent = consequent.to_z3()
-	solver = z3.Solver()
+	global solver
 	solver.add(antecedent)
 	solver.add(z3.Not(consequent))
 	result = solver.check()

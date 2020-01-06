@@ -42,7 +42,16 @@ def move_var_from_implied_to_target(skills: List[Skill], vars: List[str]) -> Lis
 	For any skill which affects, but does not target, a var in vars, split the skill into a version that targets var
 	and a version that does not affect var.
 	"""
-	pass
+	"""
+	Pseudocode: For each skill s that accidentally affects var, find the skills with stronger preconditions that target x.
+		Conjoin s.prec with AND(NOT(si.prec))
+	Speed up by storing poset structure? This is probably going to be real slow
+	"""
+# 	Naive, probably painfully slow version
+	for var in vars:
+		targeting_skills, accidentally_affecting_skills = get_targeting_and_accidentally_affecting_skills(var, skills)
+# 		TODO finish
+
 
 def triplet_dict_to_triples(skill_dict: Dict[str,Dict[str,List[Union[z3.z3.ExprRef,AndList]]]]) -> Tuple[Union[z3.z3.ExprRef,AndList],str,List[str]]:
 	"""
@@ -62,7 +71,11 @@ def get_affecting_skills(condition, skills):
 		if len(overlapping_vars) > 0:
 			affecting_skills.append(s)
 	return affecting_skills
-
+def get_targeting_and_accidentally_affecting_skills(var: str, skills: List[Skill]):
+	targeting_skills = [s for s in skills if var in s.get_targeted_variables()]
+	affecting_skills = [s for s in skills if var in s.get_affected_variables()]
+	accidentally_affecting_skills = [s for s in affecting_skills if s not in targeting_skills]
+	return targeting_skills, accidentally_affecting_skills
 # def implies(a,b):
 # 	"""Returns True if a implies b, else false"""
 # 	#Use z3 to return prove(Not(And(b,Not(a))))

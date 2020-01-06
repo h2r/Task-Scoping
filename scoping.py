@@ -1,7 +1,7 @@
 from typing import List, Dict, Tuple, Union
 import abc, time
 import z3
-# from utils import *
+from utils import condition_str2objects
 from classes import *
 from logic_utils import check_implication, solver_implies_condition, get_var_names, AndList, OrList
 from pyrddl_inspector import prepare_rddl_for_scoper
@@ -97,8 +97,9 @@ def scope(goal, skills, start_condition = None, solver=None):
 		bfs_with_guarantees(discovered,q,solver,skills, used_skills,guarantees)
 		check_guarantees(guarantees,used_skills, discovered, q)
 	discovered_not_guarantees = [c for c in discovered if c not in guarantees]
-	relevant_vars = list(set([x for c in discovered_not_guarantees for x in get_var_names(c)]))
-	return relevant_vars, used_skills
+	relevant_conditions = list(set([x for c in discovered_not_guarantees for x in get_var_names(c)]))
+	relevant_objects = condition_str2objects(relevant_conditions)
+	return relevant_objects, used_skills
 
 def bfs_with_guarantees(discovered,q,solver,skills, used_skills,guarantees):
 	while len(q) > 0:
@@ -214,11 +215,11 @@ def run_scope_on_file(rddl_file_location):
 
 if __name__ == "__main__":
 	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions.rddl"
-	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions_complex.rddl"
+	file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions_complex.rddl"
 	# file_path = "./taxi-rddl-domain/taxi-oo_mdp_composite_01.rddl"
 	# file_path = "button-domains/button_special_button.rddl"
 	# file_path = "button-domains/button_sum_reward.rddl"
 	# file_path = "button-domains/button.rddl"
 	# file_path = "button-domains/button_elif.rddl"
-	file_path = "misc-domains/academic-advising_composite_01.rddl"
+	# file_path = "misc-domains/academic-advising_composite_01.rddl"
 	run_scope_on_file(file_path)

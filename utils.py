@@ -29,7 +29,23 @@ def grounded_att2objects(att_str):
 # 		object_names_emp = grounded_att2objects(att_str)
 # 		assert object_names_true == object_names_emp, str(object_names_emp)
 # 	if not silent: print("")
-
+def condition_str2objects(prop_str_list):
+	if isinstance(prop_str_list, str):
+		prop_str_list = [prop_str_list]
+	objects = []
+	for prop_str in prop_str_list:
+		paren_groups = re.findall("\(([^()]*)\)",prop_str)
+		for p in paren_groups:
+			split_p = p.spgilit(",")
+			objects += split_p
+	objects = list(set(objects))
+	objects.sort()
+	return objects
+# TODO make condition_str2vars().
+def condition_str2objects_test():
+	prop_str = "synth_Or(Not(PASSENGERS_YOU_CARE_FOR(p0)),\nAnd(Not(passenger-in-taxi(p0,t0)),\npassenger-x-curr(p0) == PASSENGER_GOAL_X(p0),passenger-y-curr(p0) == PASSENGER_GOAL_Y(p0)))"
+	objects = condition_str2objects(prop_str)
+	print(objects)
 if __name__ == "__main__":
 	# test_grounded_att2objects("grounded_att2objects passed tests")
-	pass
+	condition_str2objects_test()

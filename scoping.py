@@ -37,6 +37,12 @@ def get_implied_effects(skills: List[Skill], fast_version= False) -> List[Skill]
 	print("Get_implied_effects implication time: {}".format(implication_time))
 	return skills
 
+def move_var_from_implied_to_target(skills: List[Skill], vars: List[str]) -> List[Skill]:
+	"""
+	For any skill which affects, but does not target, a var in vars, split the skill into a version that targets var
+	and a version that does not affect var.
+	"""
+	pass
 
 def triplet_dict_to_triples(skill_dict: Dict[str,Dict[str,List[Union[z3.z3.ExprRef,AndList]]]]) -> Tuple[Union[z3.z3.ExprRef,AndList],str,List[str]]:
 	"""

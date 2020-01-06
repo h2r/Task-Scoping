@@ -36,7 +36,7 @@ def condition_str2objects(prop_str_list):
 	for prop_str in prop_str_list:
 		paren_groups = re.findall("\(([^()]*)\)",prop_str)
 		for p in paren_groups:
-			split_p = p.spgilit(",")
+			split_p = p.split(",")
 			objects += split_p
 	objects = list(set(objects))
 	objects.sort()

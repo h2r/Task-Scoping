@@ -1,0 +1,75 @@
+/////////////////////////////////////////////////////////////////////////////////
+//                                                                             //
+// Simple RDDL domain                                                          //
+//                                                                             //
+/////////////////////////////////////////////////////////////////////////////////
+
+
+domain button-mdp {
+    requirements {
+        reward-deterministic,
+        cpf-deterministic
+    };
+
+    types {
+        button   : object;
+        door     : object;
+    };
+
+    pvariables {
+    //////////////////////////////// States /////////////////////////////////
+        door-open(door)                                    : { state-fluent, bool, default=false };
+
+
+    //////////////////////////////// Actions ////////////////////////////////
+        toggle-button(button)                           : { action-fluent, bool, default = false };
+
+
+    //////////////////////////////// Non-Fluents ////////////////////////////////
+        button-opens-door(button, door)                    : { non-fluent, bool, default=false };
+        //button opens/closes the first door iff the second door is open
+        button-opens-door-conditionally(button, door, door): { non-fluent, bool, default=false };
+        target-door(door)                                  : { non-fluent, bool, default=false };
+    };
+    cdfs {
+        door-open'(?d) = 
+            if ( exists_{?b : button} [toggle-button(?b) & (button-opens-door(?b,?d?) | exists_{?d2: door} [button-opens-door-conditionally(?b,?d,?d2)]) ])
+                then ~door-open(?d)
+            else
+                door-open(?d)          
+    };
+
+    reward =
+          if ( forall_{ ?d : door } [ ~special(?b) | button-on(?b) ] )
+              then 5
+          else -5;
+
+   // action-preconditions {
+   
+   // };
+}
+non-fluents button-mdp_single {
+    domain = button-mdp;
+
+    objects {
+        button               : { b0, b1 };
+    };
+
+    non-fluents {
+        special(b0) = true;
+        special(b1) = false;
+    };
+}
+
+instance button-mdp_inst_mdp_01 {
+    domain = button-mdp;
+    non-fluents = button-mdp_single;
+
+    init-state {
+        button-on(b0);
+    };
+
+    horizon = 20;
+
+    discount = 1.0;
+}

@@ -423,12 +423,12 @@ def convert_to_z3(rddl_model):
 	for action in triplet_dict.keys():
 		for effect in triplet_dict[action]:
 			for precond in triplet_dict[action][effect]:
-				print(precond)
+				# print(precond)
 				#TODO Why do we use solver_constants_only?
 				z3_expr = _compile_expression(*precond,solver_constants_only)
 				new_skill = Skill(z3_expr, action, [effect])
 				skills_triplets.append(new_skill)
-				print("Temp break here!")
+				# print("Temp break here!")
 	return skills_triplets, goal_conditions, necessarily_relevant_pvars, solver
 def _compile_expression(expr: Expression, groundings_from_top: Dict[str,str],solver_constants_only, reward_args=None):
 	etype2compiler = {

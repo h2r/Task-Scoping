@@ -96,6 +96,7 @@ def violates(skill, condition):
 
 
 def scope(goal, skills, start_condition = None, solver=None):
+	# TODO figure out when to run move_var_from_implied_to_target(). After it runs, update the precondions in q as appropriate.
 	if solver is None:
 		solver = z3.Solver()
 		solver.add(start_condition)

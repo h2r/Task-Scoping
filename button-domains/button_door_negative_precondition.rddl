@@ -32,11 +32,21 @@ domain button-mdp {
         target(door)                                  : { non-fluent, bool, default=false };
     };
     cdfs {
+        //This cdf doesn't parse
+        //door-open'(?d) = 
+        //    if ( exists_{?b : button} [toggle-button(?b) & (opens(?b,?d?) | exists_{?d2: door} [opens-conditionally(?b,?d,?d2)]) ])
+        //        then ~door-open(?d)
+        //    else
+        //        door-open(?d); 
+
+
+        //This cdf is too simple to test negated precondition, and also doesn't parse. It's easier to test the parser on this cdf than the above.
         door-open'(?d) = 
-            if ( exists_{?b : button} [toggle-button(?b) & (opens(?b,?d?) | exists_{?d2: door} [opens-conditionally(?b,?d,?d2)]) ])
+            if ( exists_{?b : button} [toggle-button(?b)] )
                 then ~door-open(?d)
             else
-                door-open(?d)          
+                door-open(?d); 
+
     };
 
     reward =
@@ -67,6 +77,7 @@ non-fluents button-mdp_single {
         opens(b1, d1) = false;
         opens(b0, d2) = false;
         opens(b1, d2) = true;
+
         opens-conditionally(b0, d0, d1) = false;
         opens-conditionally(b1, d0, d1) = false;
         opens-conditionally(b0, d0, d2) = false;

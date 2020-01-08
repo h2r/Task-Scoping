@@ -245,10 +245,10 @@ if __name__ == "__main__":
 	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions.rddl"
 	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions_complex.rddl"
 	# file_path = "./taxi-rddl-domain/taxi-oo_mdp_composite_01.rddl"
-	file_path = "button-domains/button_special_button.rddl"
+	# file_path = "button-domains/button_special_button.rddl"
 	# file_path = "button-domains/button_sum_reward.rddl"
 	# file_path = "button-domains/button.rddl"
 	# file_path = "button-domains/button_elif.rddl"
 	# file_path = "misc-domains/academic-advising_composite_01.rddl"
-	# file_path = "button-domains/button_door_negative_precondition.rddl"
+	file_path = "button-domains/button_door_negative_precondition.rddl"
 	run_scope_on_file(file_path)

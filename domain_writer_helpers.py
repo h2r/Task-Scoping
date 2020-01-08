@@ -66,10 +66,25 @@ def taken_no_courses():
 	print(not_taken)
 	print(not_prereq)
 	print(not_required)
+
+def door_opening():
+	buttons = ["b0", "b1"]
+	doors = ["d0", "d1", "d2"]
+	for d in doors[1:]:
+		for b in buttons:
+			print(f"opens({b}, {d}) = false;")
+	for d in doors:
+		for d2 in doors:
+			if d != d2:
+				for b in buttons:
+					print(f"opens-conditionally({b}, {d}, {d2}) = false;")
+	for d in doors:
+		print(f"door-open({d}) = false;")
 if __name__ == "__main__":
 	# min_x, max_x, min_y, max_y = [0,4,0,4]
 	# r = get_rddl_str(min_x,max_x,min_y,max_y)
 	# print(r)
 	# in_taxi_str = get_in_taxi_str(2,1)
 	# print(in_taxi_str)
-	taken_no_courses()
+	# taken_no_courses()
+	door_opening()

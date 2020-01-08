@@ -26,21 +26,21 @@ domain button-mdp {
 
 
     //////////////////////////////// Non-Fluents ////////////////////////////////
-        button-opens-door(button, door)                    : { non-fluent, bool, default=false };
+        opens(button, door)                    : { non-fluent, bool, default=false };
         //button opens/closes the first door iff the second door is open
-        button-opens-door-conditionally(button, door, door): { non-fluent, bool, default=false };
-        target-door(door)                                  : { non-fluent, bool, default=false };
+        opens-conditionally(button, door, door): { non-fluent, bool, default=false };
+        target(door)                                  : { non-fluent, bool, default=false };
     };
     cdfs {
         door-open'(?d) = 
-            if ( exists_{?b : button} [toggle-button(?b) & (button-opens-door(?b,?d?) | exists_{?d2: door} [button-opens-door-conditionally(?b,?d,?d2)]) ])
+            if ( exists_{?b : button} [toggle-button(?b) & (opens(?b,?d?) | exists_{?d2: door} [opens-conditionally(?b,?d,?d2)]) ])
                 then ~door-open(?d)
             else
                 door-open(?d)          
     };
 
     reward =
-          if ( forall_{ ?d : door } [ ~special(?b) | button-on(?b) ] )
+          if ( forall_{ ?d : door } [ target(?d) | door-open(?d) ] )
               then 5
           else -5;
 
@@ -53,11 +53,32 @@ non-fluents button-mdp_single {
 
     objects {
         button               : { b0, b1 };
+        door                 : { d0, d1, d2 };
     };
 
     non-fluents {
-        special(b0) = true;
-        special(b1) = false;
+        target(d0) = true;
+        target(d1) = true;
+        target(d2) = false;
+
+        opens(b0, d0) = true;
+        opens(b1, d0) = false;
+        opens(b0, d1) = false;
+        opens(b1, d1) = false;
+        opens(b0, d2) = false;
+        opens(b1, d2) = true;
+        opens-conditionally(b0, d0, d1) = false;
+        opens-conditionally(b1, d0, d1) = false;
+        opens-conditionally(b0, d0, d2) = false;
+        opens-conditionally(b1, d0, d2) = false;
+        opens-conditionally(b0, d1, d0) = false;
+        opens-conditionally(b1, d1, d0) = false;
+        opens-conditionally(b0, d1, d2) = true;
+        opens-conditionally(b1, d1, d2) = false;
+        opens-conditionally(b0, d2, d0) = false;
+        opens-conditionally(b1, d2, d0) = false;
+        opens-conditionally(b0, d2, d1) = false;
+        opens-conditionally(b1, d2, d1) = false;
     };
 }
 
@@ -66,7 +87,9 @@ instance button-mdp_inst_mdp_01 {
     non-fluents = button-mdp_single;
 
     init-state {
-        button-on(b0);
+        door-open(d0) = false;
+        door-open(d1) = false;
+        door-open(d2) = false;
     };
 
     horizon = 20;

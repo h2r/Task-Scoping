@@ -214,8 +214,10 @@ def scope_rddl_file(input_file_path, output_file_path, irrelevant_objects):
 def test_get_implied_effects():
 	raise NotImplementedError()
 	pass
+
 def scope_rddl_file_test():
 	input_file_path = "./taxi-rddl-domain/taxi-oo_mdp_composite_01.rddl"
+
 def clean_AndLists(skills):
 	"""
 	Removes "True" from AndLists
@@ -225,6 +227,7 @@ def clean_AndLists(skills):
 		if isinstance(precond,AndList):
 			new_AndList = AndList(*[x for x in precond if x is not True])
 			s.precondition = new_AndList
+
 def run_scope_on_file(rddl_file_location):
 	algorithm_sections = ["pyrddl_inspector","clean_AndLists", "get_implied_effects", "scope"]
 	boundary_times = []
@@ -255,6 +258,7 @@ def run_scope_on_file(rddl_file_location):
 	for s in used_skills:
 		print(s)
 	return relevant_vars, used_skills
+
 def domain_tests():
 	"""
 	Checks that scoping works correctly on some sample domains
@@ -292,6 +296,6 @@ if __name__ == "__main__":
 	# file_path = "button-domains/button_door_negative_precondition.rddl"
 	# file_path = "./enum-domains/enum-taxi-deparameterized-move-actions-nishanth.rddl"
 
-	# run_scope_on_file(file_path)
+	run_scope_on_file(file_path)
 
-	domain_tests()
+	# domain_tests()

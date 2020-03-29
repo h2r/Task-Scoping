@@ -76,6 +76,7 @@ def get_affecting_skills(condition, skills):
 	#TODO: rewrite to work with Precondition and the actual data structures
 	affecting_skills = []
 	for s in skills:
+		#TODO make get_var_names pull out the grounded pvars. Currently, it does not.
 		condition_vars =get_var_names(condition)
 		skill_targets = s.get_targeted_variables()
 		overlapping_vars = [v for v in condition_vars if v in skill_targets]
@@ -126,9 +127,9 @@ def scope(goal, skills, start_condition = None, solver=None):
 
 	while len(q) > 0:
 		bfs_with_guarantees(discovered,q,solver,skills, used_skills,guarantees)
-		print(f"bf len(used_skills): {len(used_skills)}")
+		# print(f"bf len(used_skills): {len(used_skills)}")
 		check_guarantees(guarantees,used_skills, discovered, q)
-		print(f"cg len(used_skills): {len(used_skills)}")
+		# print(f"cg len(used_skills): {len(used_skills)}")
 
 	discovered_not_guarantees = [c for c in discovered if c not in guarantees]
 	relevant_conditions = list(set([x for c in discovered_not_guarantees for x in get_var_names(c)]))
@@ -142,7 +143,8 @@ def bfs_with_guarantees(discovered,q,solver,skills, used_skills,guarantees):
 			print("dang")
 		#We are not trying to find a target (Is the start the target??), so we ignore this step
 		#If not is_goal(v)
-		for skill in get_affecting_skills(condition, skills):
+		affecting_skills = get_affecting_skills(condition, skills)
+		for skill in affecting_skills:
 			if skill in used_skills: continue
 			used_skills.append(skill)
 			precondition = skill.get_precondition()
@@ -156,7 +158,8 @@ def bfs_with_guarantees(discovered,q,solver,skills, used_skills,guarantees):
 						print("booooiii")
 					discovered.append(precondition)
 					if type(precondition) is AndList:
-						print(skill)
+						# print(skill)
+						pass
 					if solver_implies_condition(solver,precondition):
 						guarantees.append(precondition)
 					else:
@@ -261,8 +264,8 @@ def domain_tests():
 	paths["taxi"] = "./taxi-rddl-domain/taxi-structured-deparameterized_actions.rddl"
 	paths["taxi_p1_in_taxi"] = "./taxi-rddl-domain/taxi-structured-deparameterized_actions-p1-in-taxi.rddl"
 	correct_objects = OrderedDict()
-	correct_objects["taxi"] = {"t0", "p0"}
-	correct_objects["taxi_p1_in_taxi"] = {"t0", "p0", "p1"}
+	correct_objects["taxi"] = {"t0", "p0", "w0"}
+	correct_objects["taxi_p1_in_taxi"] = {"t0", "p0", "p1", "w0"}
 	successes, failures = [], []
 
 	for domain, path in paths.items():

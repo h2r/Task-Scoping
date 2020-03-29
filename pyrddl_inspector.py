@@ -6,12 +6,13 @@ import z3
 from classes import *
 import instance_building_utils
 from typing import List, Dict, Tuple
-from logic_utils import solver_implies_condition, check_implication, or2, and2, AndList, OrList, get_iff
+from logic_utils import solver_implies_condition, or2, AndList, get_iff, get_var_names, synth2varnames
 # att_name_to_domain_attribute = {}
 all_object_names = {}
 name_to_z3_var = {}
 actions_list = []
 pvar_to_param_types = {}
+# synth2varnames = {}
 #z3.get_var_names(z3 conditoimn)
 #TODO rename reward_args, reward_params. Those are confusing names
 #TODO Find out why we are getting if(button-on(b0),1,grandma(b0)) instead of if(button-on(b0),1,0)
@@ -275,9 +276,10 @@ def make_triplet_dict(rddl_model, type2names):
 								cleaned_action_name = action.split("/")[0]
 								print(cleaned_action_name)
 								if cleaned_action_name == "move_west":
-									print("ruroh")
-									asdfsadfsa = 8
-									print(asdfsadfsa)
+									# print("ruroh")
+									# asdfsadfsa = 8
+									# print(asdfsadfsa)
+									pass
 								action_variable_args = get_pvar_args_strings(cleaned_action_name, condition)
 								grounded_action_str = plugin_objects_to_pvar(cleaned_action_name, action_variable_args,
 																			 groundings_from_top)
@@ -431,6 +433,7 @@ def convert_to_z3(rddl_model):
 				# print("Temp break here!")
 	return skills_triplets, goal_conditions, necessarily_relevant_pvars, solver
 def _compile_expression(expr: Expression, groundings_from_top: Dict[str,str],solver_constants_only, reward_args=None):
+	global synth2varnames
 	etype2compiler = {
 		'constant': _compile_constant_expression,
 		'pvar': _compile_pvariable_expression,
@@ -468,6 +471,7 @@ def _compile_expression(expr: Expression, groundings_from_top: Dict[str,str],sol
 	else: in_condition_old = None
 	new_expr =  compiler_fn(expr,groundings_from_top,solver_constants_only,reward_args)
 	#If we are gathering conditions and we are not yet in a condition
+	# Dictionary mapping from synthetic variable string to the original variable. Needed for get_var_names()
 	if reward_args is not None:
 		# print("Ooga")
 		if in_condition_old == False:
@@ -485,6 +489,7 @@ def _compile_expression(expr: Expression, groundings_from_top: Dict[str,str],sol
 					new_parameter = x
 				else:
 					new_parameter = z3.Bool("synth_{}".format(x))
+					synth2varnames[str(new_parameter)] = get_var_names(x)
 					solver_constants_only.add(get_iff(new_parameter,x))
 				reward_args["synthetic_conditions"].append(new_parameter)
 				reward_args["reward_function_parameters"].append(new_parameter)

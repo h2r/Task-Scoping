@@ -2,11 +2,18 @@ from abc import ABC
 import z3
 
 solver = z3.Solver()
-
+synth2varnames = {}
 def get_var_names(expr):
+	global synth2varnames
 	if isinstance(expr, bool):
 		return []
-	vars = [str(i) for i in z3.z3util.get_vars(expr)]
+	vars = []
+	for i in z3.z3util.get_vars(expr):
+		i = str(i)
+		if i in synth2varnames.keys():
+			vars = vars + synth2varnames[i]
+		else:
+			vars.append(i)
 	return vars
 def solver_implies_condition(solver, precondition):
 	# print("Assertions:")

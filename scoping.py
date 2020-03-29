@@ -56,7 +56,7 @@ def move_var_from_implied_to_target(skills: List[Skill], vars: List[str]) -> Lis
 			for targeting_skill in targeting_skills:
 				if check_implication(targeting_skill.get_precondition(), accidental_skill.get_precondition()):
 					# Add effect to targeting skill
-					targeting_skill.effect.extend(accidental_skill.effect)
+					accidental_skill.effect.extend(targeting_skill.get_targeted_variables())
 					# Update the accidental_skill's precondition to exclude the targeting skill
 					cond = targeting_skill.get_precondition()
 					if isinstance(cond, ConditionList): #TODO turn negated orlist into andlist of negations
@@ -78,14 +78,14 @@ def move_var_from_implied_to_target_test():
 	print("~~~~~Skills~~~~~")
 	for s in skill_triplets:
 		if s.get_action() == "move_north()": print(s)
-	relevant_vars, used_skills = scope(goal_conditions,skill_triplets,solver=solver)
-	print("\n~~~Relevant objects~~~")
-	for x in relevant_vars: print(x)
-	print("\n~~~Relevant skills~~~")
-	for s in used_skills: print(s)
-	used_actions = sorted(list(set([s.get_action() for s in used_skills])))
-	print("\n~~~Relevant Actions~~~")
-	for a in used_actions: print(a)
+	# relevant_vars, used_skills = scope(goal_conditions,skill_triplets,solver=solver)
+	# print("\n~~~Relevant objects~~~")
+	# for x in relevant_vars: print(x)
+	# print("\n~~~Relevant skills~~~")
+	# for s in used_skills: print(s)
+	# used_actions = sorted(list(set([s.get_action() for s in used_skills])))
+	# print("\n~~~Relevant Actions~~~")
+	# for a in used_actions: print(a)
 def triplet_dict_to_triples(skill_dict: Dict[str,Dict[str,List[Union[z3.z3.ExprRef,AndList]]]]) -> Tuple[Union[z3.z3.ExprRef,AndList],str,List[str]]:
 	"""
 	:param skill_dict: [action][effect] -> List[preconditions]
@@ -329,5 +329,5 @@ if __name__ == "__main__":
 
 	# run_scope_on_file(file_path)
 
-	domain_tests()
-	# move_var_from_implied_to_target_test()
+	# domain_tests()
+	move_var_from_implied_to_target_test()

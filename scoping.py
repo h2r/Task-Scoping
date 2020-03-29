@@ -76,7 +76,9 @@ def get_affecting_skills(condition, skills):
 	#TODO: rewrite to work with Precondition and the actual data structures
 	affecting_skills = []
 	for s in skills:
-		overlapping_vars = [v for v in get_var_names(condition) if v in s.get_targeted_variables()]
+		condition_vars =get_var_names(condition)
+		skill_targets = s.get_targeted_variables()
+		overlapping_vars = [v for v in condition_vars if v in skill_targets]
 		if len(overlapping_vars) > 0:
 			affecting_skills.append(s)
 	return affecting_skills

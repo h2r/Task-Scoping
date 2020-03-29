@@ -1,4 +1,5 @@
 from typing import List, Dict, Tuple, Union
+from collections import OrderedDict
 import abc, time
 import z3
 from utils import condition_str2objects
@@ -248,6 +249,30 @@ def run_scope_on_file(rddl_file_location):
 	print("\n~~~Relevant skills~~~:")
 	for s in used_skills:
 		print(s)
+	return relevant_vars, used_skills
+def domain_tests():
+	"""
+	Checks that scoping works correctly on some sample domains
+	TODO check used_skills
+	"""
+	paths = OrderedDict()
+	paths["taxi"] = "./taxi-rddl-domain/taxi-structured-deparameterized_actions.rddl"
+	paths["taxi_p1_in_taxi"] = "./taxi-rddl-domain/taxi-structured-deparameterized_actions-p1-in-taxi.rddl"
+	correct_objects = OrderedDict()
+	correct_objects["taxi"] = {"t0", "p0"}
+	correct_objects["taxi_p1_in_taxi"] = {"t0", "p0", "p1"}
+	successes, failures = [], []
+
+	for domain, path in paths.items():
+		relevant_vars, used_skills = run_scope_on_file(path)
+		if set(relevant_vars) == correct_objects[domain]: successes.append(domain)
+		else: failures.append(domain)
+
+	print("\n\n~~~~~~~~~~~~~~~~~~~\n")
+	print("Successes:")
+	for d in successes: print(d)
+	print("Failures:")
+	for d in failures: print(d)
 
 if __name__ == "__main__":
 	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions.rddl"
@@ -262,4 +287,6 @@ if __name__ == "__main__":
 	# file_path = "button-domains/button_door_negative_precondition.rddl"
 	# file_path = "./enum-domains/enum-taxi-deparameterized-move-actions-nishanth.rddl"
 
-	run_scope_on_file(file_path)
+	# run_scope_on_file(file_path)
+
+	domain_tests()

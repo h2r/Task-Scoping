@@ -163,7 +163,8 @@ def check_guarantees(guarantees,used_skills, discovered, q):
 		for s in used_skills:
 			if violates(s,g):
 				if 'passenger-in-taxi_1_0' in get_var_names(g):
-					print("ruroh")
+					# print("ruroh")
+					pass
 				violated_guarantees.append(g)
 				break  #Break out of inner loop, since we know the gaurantee is violated by some skill
 	for g in violated_guarantees:

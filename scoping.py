@@ -123,7 +123,10 @@ def scope(goal, skills, start_condition = None, solver=None):
 
 	while len(q) > 0:
 		bfs_with_guarantees(discovered,q,solver,skills, used_skills,guarantees)
+		print(f"bf len(used_skills): {len(used_skills)}")
 		check_guarantees(guarantees,used_skills, discovered, q)
+		print(f"cg len(used_skills): {len(used_skills)}")
+
 	discovered_not_guarantees = [c for c in discovered if c not in guarantees]
 	relevant_conditions = list(set([x for c in discovered_not_guarantees for x in get_var_names(c)]))
 	relevant_objects = condition_str2objects(relevant_conditions)
@@ -229,6 +232,7 @@ def run_scope_on_file(rddl_file_location):
 	boundary_times.append(time.time())
 	get_implied_effects(skill_triplets)
 	boundary_times.append(time.time())
+	print("\n~~~~Starting Scope()~~~~\n")
 	relevant_vars, used_skills = scope(goal_conditions,skill_triplets,solver=solver)
 	relevant_vars = relevant_vars + [str(i) for i in necessarily_relevant_pvars]
 	relevant_vars = list(set(relevant_vars))
@@ -246,7 +250,8 @@ def run_scope_on_file(rddl_file_location):
 		print(s)
 
 if __name__ == "__main__":
-	file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions.rddl"
+	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions.rddl"
+	file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions-p1-in-taxi.rddl"
 	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions_complex.rddl"
 	# file_path = "./taxi-rddl-domain/taxi-oo_mdp_composite_01.rddl"
 	# file_path = "button-domains/button_special_button.rddl"

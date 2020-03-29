@@ -3,7 +3,7 @@ from abc import ABC
 import z3
 import itertools
 from instance_building_utils import *
-
+from typing import List
 
 def get_all_groundings(base_str, names, keys):
 	name_lists = [names[k] for k in keys]
@@ -14,7 +14,7 @@ def get_all_groundings(base_str, names, keys):
 	return groundings
 
 class Skill():
-	def __init__(self, precondition, action, effect):
+	def __init__(self, precondition, action, effect: List):
 		"""
 		:param precondition: Precondition object
 		:param action: string

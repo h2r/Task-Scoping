@@ -55,6 +55,9 @@ def move_var_from_implied_to_target(skills: List[Skill], vars: List[str]) -> Lis
 			negated_refined_preconditions = []
 			for targeting_skill in targeting_skills:
 				if check_implication(targeting_skill.get_precondition(), accidental_skill.get_precondition()):
+					# Add effect to targeting skill
+					targeting_skill.effect.extend(accidental_skill.effect)
+					# Update the accidental_skill's precondition to exclude the targeting skill
 					cond = targeting_skill.get_precondition()
 					if isinstance(cond, ConditionList): #TODO turn negated orlist into andlist of negations
 						cond = cond.to_z3()
@@ -62,6 +65,27 @@ def move_var_from_implied_to_target(skills: List[Skill], vars: List[str]) -> Lis
 			accidental_skill.precondition = AndList(accidental_skill.precondition, *negated_refined_preconditions)
 			accidental_skill.implicitly_affected_variables.remove(var)
 
+def move_var_from_implied_to_target_test():
+	# TODO actually test
+	rddl_file_location = "./taxi-rddl-domain/taxi-structured-deparameterized_actions.rddl"
+	goal_conditions, necessarily_relevant_pvars, skill_triplets, solver = prepare_rddl_for_scoper(rddl_file_location)
+	clean_AndLists(skill_triplets)
+	get_implied_effects(skill_triplets)
+	print("~~~~~Skills~~~~~")
+	for s in skill_triplets:
+		if s.get_action() == "move_north()": print(s)
+	move_var_from_implied_to_target(skill_triplets, ['passenger-y-curr(p0)'])
+	print("~~~~~Skills~~~~~")
+	for s in skill_triplets:
+		if s.get_action() == "move_north()": print(s)
+	relevant_vars, used_skills = scope(goal_conditions,skill_triplets,solver=solver)
+	print("\n~~~Relevant objects~~~")
+	for x in relevant_vars: print(x)
+	print("\n~~~Relevant skills~~~")
+	for s in used_skills: print(s)
+	used_actions = sorted(list(set([s.get_action() for s in used_skills])))
+	print("\n~~~Relevant Actions~~~")
+	for a in used_actions: print(a)
 def triplet_dict_to_triples(skill_dict: Dict[str,Dict[str,List[Union[z3.z3.ExprRef,AndList]]]]) -> Tuple[Union[z3.z3.ExprRef,AndList],str,List[str]]:
 	"""
 	:param skill_dict: [action][effect] -> List[preconditions]
@@ -257,7 +281,11 @@ def run_scope_on_file(rddl_file_location):
 	print("\n~~~Relevant skills~~~:")
 	for s in used_skills:
 		print(s)
-	return relevant_vars, used_skills
+
+	used_actions = sorted(list(set([s.get_action() for s in used_skills])))
+	print("\n~~~Relevant Actions~~~")
+	for a in used_actions: print(a)
+	return relevant_vars, used_skills, used_actions
 
 def domain_tests():
 	"""
@@ -270,18 +298,26 @@ def domain_tests():
 	correct_objects = OrderedDict()
 	correct_objects["taxi"] = {"t0", "p0", "w0"}
 	correct_objects["taxi_p1_in_taxi"] = {"t0", "p0", "p1", "w0"}
+	correct_actions = OrderedDict()
+	correct_actions["taxi"] = {"move_north()", "move_west()", "move_south()", "move_east()", "pickup(p0)", "dropoff(p0)"}
+	correct_actions["taxi_p1_in_taxi"] = {"move_north()", "move_west()", "move_south()", "move_east()", "pickup(p0)", "dropoff(p0)", "dropoff(p1)", "pickup(p1)"}
 	successes, failures = [], []
-
+	action_successes = []
+	state_successes = []
 	for domain, path in paths.items():
-		relevant_vars, used_skills = run_scope_on_file(path)
-		if set(relevant_vars) == correct_objects[domain]: successes.append(domain)
+		relevant_vars, used_skills, used_actions = run_scope_on_file(path)
+		if set(relevant_vars) == correct_objects[domain]: state_successes.append(domain)
+		if set(used_actions) == correct_actions[domain]: action_successes.append(domain)
 		else: failures.append(domain)
 
 	print("\n\n~~~~~~~~~~~~~~~~~~~\n")
-	print("Successes:")
-	for d in successes: print(d)
-	print("Failures:")
-	for d in failures: print(d)
+	print("Domain | Object Success | Action success")
+	for d in paths.keys():
+		print(f"{d} | {d in state_successes} | {d in action_successes}")
+	# print("Successes:")
+	# for d in successes: print(d)
+	# print("Failures:")
+	# for d in failures: print(d)
 
 if __name__ == "__main__":
 	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions.rddl"
@@ -298,4 +334,5 @@ if __name__ == "__main__":
 
 	run_scope_on_file(file_path)
 
-	# domain_tests()
+	domain_tests()
+	# move_var_from_implied_to_target_test()

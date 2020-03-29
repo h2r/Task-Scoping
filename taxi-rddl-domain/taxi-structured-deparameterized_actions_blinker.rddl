@@ -26,6 +26,7 @@ domain taxi-oo_mdp {
     // Position variables
         taxi-x(taxi)                   : { state-fluent, int, default=0 };
         taxi-y(taxi)                   : { state-fluent, int, default=0 };
+        taxi-blinker(taxi)             : { state-fluent, bool, default=false };
         passenger-x-curr(passenger)    : { state-fluent, int, default=0 };
         passenger-y-curr(passenger)    : { state-fluent, int, default=0 };
 
@@ -39,6 +40,7 @@ domain taxi-oo_mdp {
         move_west                            : { action-fluent, bool, default = false };
         pickup(passenger)                    : { action-fluent, bool, default = false };
         dropoff(passenger)                   : { action-fluent, bool, default = false };
+        toggle_blinker                       : { action-fluent, bool, default = false };
 
     //////////////////////////////// Non-Fluents ////////////////////////////////
     // Wall location
@@ -81,6 +83,9 @@ domain taxi-oo_mdp {
             if (( move_west ) & ( ~exists_{ ?w : wall } [ ( WALL_X(?w) == taxi-x(?t) - 1 ) & ( WALL_Y(?w) == taxi-y(?t) ) ] ))
                 then taxi-x(?t) - 1
 
+            else if( taxi-blinker(?t) & ( ~exists_{ ?w : wall } [ ( WALL_X(?w) == taxi-x(?t) + 1 ) & ( WALL_Y(?w) == taxi-y(?t) + 1 ) ] ))
+                then taxi-x(?t) + 1
+
             else if (( move_east ) & ( ~exists_{ ?w : wall } [ ( WALL_X(?w) == taxi-x(?t) + 1 ) & ( WALL_Y(?w) == taxi-y(?t) ) ] ))
                 then taxi-x(?t) + 1
 
@@ -99,6 +104,9 @@ domain taxi-oo_mdp {
             if ( exists_{ ?t : taxi } [ passenger-in-taxi( ?p, ?t ) & move_west ] & ( ~exists_{ ?w : wall } [ ( WALL_X(?w) == passenger-x-curr(?p) - 1 ) & ( WALL_Y(?w) == passenger-y-curr(?p) )]))
                 then passenger-x-curr(?p) - 1
 
+            else if ( exists_{ ?t : taxi } [ passenger-in-taxi( ?p, ?t ) ] & ( ~exists_{ ?w : wall } [ ( WALL_X(?w) == passenger-x-curr(?p) + 1 ) & ( WALL_Y(?w) == passenger-y-curr(?p) + 1)]))
+                then passenger-x-curr(?p) + 1
+
             else if ( exists_{?t : taxi} [ passenger-in-taxi( ?p, ?t) & move_east ] & ( ~exists_{ ?w : wall } [ ( WALL_X(?w) == passenger-x-curr(?p) + 1 ) & ( WALL_Y(?w) == passenger-y-curr(?p) )]))
                 then passenger-x-curr(?p) + 1
 
@@ -113,6 +121,14 @@ domain taxi-oo_mdp {
 
             else passenger-y-curr(?p);
 
+        taxi-blinker'(?t) =
+
+          if(toggle_blinker)
+            then ~taxi-blinker(?t)
+
+          else taxi-blinker(?t);
+
+
     };
 
     reward =
@@ -123,7 +139,8 @@ domain taxi-oo_mdp {
     action-preconditions {
     // there can only be one move per turn
           ( forall_{ ?t : taxi } [move_west + move_east + move_south + move_north +
-                                  ( sum_{ ?p : passenger } [pickup(?p) + dropoff(?p)] ) ] <= 1 ) ;
+                                  ( sum_{ ?p : passenger } [pickup(?p) + dropoff(?p)] ) +
+                                  ( sum_{ ?t : taxi } [toggle_blinker(?t)] ) ] <= 1 ) ;
     //    ( forall_{ ?t : taxi} [move_west + move_east + move_southt) + move_north <= 1] ) ;
 
     // don't move outside of the grid
@@ -183,10 +200,11 @@ instance taxi-oo_mdp_inst_mdp__01 {
     init-state {
         taxi-x(t0) = 0;
         taxi-y(t0) = 0;
+        taxi-blinker(t0) = true;
         passenger-x-curr(p0) = 0;
         passenger-y-curr(p0) = 0;
         passenger-in-taxi(p0, t0) = false;
-        passenger-in-taxi(p1, t0) = true;
+        passenger-in-taxi(p1, t0) = false;
     };
 
     horizon = 20;

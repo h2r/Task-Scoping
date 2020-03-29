@@ -233,16 +233,19 @@ def run_scope_on_file(rddl_file_location):
 	relevant_vars = list(set(relevant_vars))
 	boundary_times.append(time.time())
 
-	print("relevant_vars:")
-	for r in relevant_vars:
-		print(r)
 	print("times:")
 	for section_id, section_name in enumerate(algorithm_sections):
 		section_time = boundary_times[section_id+1] - boundary_times[section_id]
 		print("{}: {}".format(section_name,section_time))
+	print("\n~~~Relevant objects~~~")
+	for r in relevant_vars:
+		print(r)
+	print("\n~~~Relevant skills~~~:")
+	for s in used_skills:
+		print(s)
 
 if __name__ == "__main__":
-	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions.rddl"
+	file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions.rddl"
 	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions_complex.rddl"
 	# file_path = "./taxi-rddl-domain/taxi-oo_mdp_composite_01.rddl"
 	# file_path = "button-domains/button_special_button.rddl"
@@ -251,6 +254,6 @@ if __name__ == "__main__":
 	# file_path = "button-domains/button_elif.rddl"
 	# file_path = "misc-domains/academic-advising_composite_01.rddl"
 	# file_path = "button-domains/button_door_negative_precondition.rddl"
-	file_path = "./enum-domains/enum-taxi-deparameterized-move-actions-nishanth.rddl"
+	# file_path = "./enum-domains/enum-taxi-deparameterized-move-actions-nishanth.rddl"
 
 	run_scope_on_file(file_path)

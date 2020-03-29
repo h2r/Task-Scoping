@@ -97,10 +97,10 @@ def triplet_dict_to_triples(skill_dict: Dict[str,Dict[str,List[Union[z3.z3.ExprR
 	return skill_triples
 
 def get_affecting_skills(condition, skills):
-	#TODO: rewrite to work with Precondition and the actual data structures
 	affecting_skills = []
 	for s in skills:
-		#TODO make get_var_names pull out the grounded pvars. Currently, it does not.
+		# if s.get_action() == "dropoff(p0)":
+		# 	dum = 7
 		condition_vars =get_var_names(condition)
 		skill_targets = s.get_targeted_variables()
 		overlapping_vars = [v for v in condition_vars if v in skill_targets]
@@ -265,6 +265,8 @@ def run_scope_on_file(rddl_file_location):
 	boundary_times.append(time.time())
 	get_implied_effects(skill_triplets)
 	boundary_times.append(time.time())
+	# for s in skill_triplets:
+	# 	if s.get_action() == "dropoff(p0)": print(f"xkdc found it:\n{s}")
 	print("\n~~~~Starting Scope()~~~~\n")
 	relevant_vars, used_skills = scope(goal_conditions,skill_triplets,solver=solver)
 	relevant_vars = relevant_vars + [str(i) for i in necessarily_relevant_pvars]
@@ -335,4 +337,4 @@ if __name__ == "__main__":
 	run_scope_on_file(file_path)
 
 	# domain_tests()
-	move_var_from_implied_to_target_test()
+	# move_var_from_implied_to_target_test()

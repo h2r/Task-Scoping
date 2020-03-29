@@ -250,5 +250,7 @@ if __name__ == "__main__":
 	# file_path = "button-domains/button.rddl"
 	# file_path = "button-domains/button_elif.rddl"
 	# file_path = "misc-domains/academic-advising_composite_01.rddl"
-	file_path = "button-domains/button_door_negative_precondition.rddl"
+	# file_path = "button-domains/button_door_negative_precondition.rddl"
+	file_path = "./enum-domains/enum-taxi-deparameterized-move-actions-nishanth.rddl"
+
 	run_scope_on_file(file_path)

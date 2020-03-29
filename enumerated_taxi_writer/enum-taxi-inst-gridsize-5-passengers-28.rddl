@@ -1,0 +1,32 @@
+
+non-fluents taxi-5wide-28pass {
+    domain = taxi-oo_mdp;
+
+    objects {
+        taxi               : { t0 };
+        passenger          : { p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23, p24, p25, p26, p27 };
+    };
+
+    non-fluents {
+        // PASSENGERS
+        PASSENGER_GOAL_X(p0) = @4;
+        PASSENGER_GOAL_Y(p0) = @4;
+        PASSENGERS_YOU_CARE_FOR(p0);
+
+    };
+}
+
+instance taxi-oo_mdp_inst_mdp__28  {
+    domain = taxi-oo_mdp;
+    non-fluents = taxi-5wide-28pass;
+
+
+    init-state {
+        passenger-x-curr(p0) = @0;
+        passenger-y-curr(p0) = @4;
+    };
+
+    horizon = 20;
+
+    discount = 1.0;
+}

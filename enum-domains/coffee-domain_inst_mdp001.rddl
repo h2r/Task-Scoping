@@ -1,0 +1,27 @@
+/////////////////////////////////////////////////////////////////////////////////
+//                                                                             //
+// RDDL MDP version of the Coffe Domain described in original                   //
+// OO-MDP paper by Diuk et al. (2008)                                          //
+// IMPORTANT : This implementation is only intended to work when there is only //
+// a single taxi. Don't instantiate this with more than one taxi.              //
+//                                                                             //
+/////////////////////////////////////////////////////////////////////////////////
+
+
+instance coffee-domain_inst_mdp001 {
+    domain = coffee-fmdp-deterministic;
+
+    objects {
+        robot : {rob};
+    };
+
+
+    init-state {
+//        is-raining;
+        has-umbrella(rob);
+    };
+
+    horizon = 20;
+
+    discount = 1.0;
+}

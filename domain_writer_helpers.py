@@ -1,3 +1,14 @@
+try:
+    import textwrap
+    textwrap.indent
+except AttributeError:  # undefined function (wasn't added until Python 3.3)
+    def indent(text, amount, ch=' '):
+        padding = amount * ch
+        return ''.join(padding+line for line in text.splitlines(True))
+else:
+    def indent(text, amount, ch=' '):
+        return textwrap.indent(text, amount * ch)
+
 def num2str(n):
 	ones = n % 10
 	tens = n - ones
@@ -80,6 +91,60 @@ def door_opening():
 					print(f"opens-conditionally({b}, {d}, {d2}) = false;")
 	for d in doors:
 		print(f"door-open({d}) = false;")
+
+def enumerated_move(numbers = tuple(range(2))):
+
+	def n2s(i): return f"@{i}"
+	def make_action_lines(condition, pvar, obj, step_func):
+		lines = []
+		for i in numbers:
+			i2 = step_func(i)
+			if i2 in numbers:
+				s = f"if (({condition}) & ({pvar}({obj}) == {n2s(i)}))\n\tthen {n2s(i2)}"
+				lines.append(s)
+		result = "\nelse ".join(lines)
+		return result
+	def increment(i): return i + 1
+	def decrement(i): return i - 1
+	def make_taxi_cpfs(): #Too  much code duplication.
+		actions = ["move_west", "move_east"]
+		step_funcs = [decrement, increment]
+		parts = []
+		for i in range(2):
+			parts.append(make_action_lines(actions[i], "taxi-x", "?t", step_funcs[i]))
+		taxi_x_cpf = "taxi-x'(?t) =\n" + indent("\nelse ".join(parts),4) + ";"
+
+		actions = ["move_north", "move_south"]
+		step_funcs = [increment, decrement]
+		parts = []
+		for i in range(2):
+			parts.append(make_action_lines(actions[i], "taxi-y", "?t", step_funcs[i]))
+		taxi_y_cpf = "taxi-y'(?t) =\n" + indent("\nelse ".join(parts),4) + ";"
+		result = taxi_x_cpf + "\n\n" + taxi_y_cpf
+		return result
+	def make_passenger_cpfs():
+		actions = ["move_west", "move_east"]
+		step_funcs = [decrement, increment]
+		parts = []
+		for i in range(2):
+			condition = actions[i] + " & exists_{ ?t : taxi } [ passenger-in-taxi( ?p, ?t ) ]"
+			parts.append(make_action_lines(condition, "passenger-x-curr", "?p", step_funcs[i]))
+		passenger_x_cpf = "passenger-x-curr'(?p) =\n" + indent("\nelse ".join(parts),4) + ";"
+
+		actions = ["move_north", "move_south"]
+		step_funcs = [increment, decrement]
+		parts = []
+		for i in range(2):
+			condition = actions[i] + " & exists_{ ?t : taxi } [ passenger-in-taxi( ?p, ?t ) ]"
+			parts.append(make_action_lines(condition, "passenger-y-curr", "?p", step_funcs[i]))
+		passenger_y_cpf = "passenger-y-curr'(?p) =\n" + indent("\nelse ".join(parts), 4) + ";"
+		result = passenger_x_cpf + "\n\n" + passenger_y_cpf
+		return result
+	taxi_cpfs = make_taxi_cpfs()
+	passenger_cpfs = make_passenger_cpfs()
+	result = indent("\n\n".join([taxi_cpfs,passenger_cpfs]),4)
+	print(result)
+	return result
 if __name__ == "__main__":
 	# min_x, max_x, min_y, max_y = [0,4,0,4]
 	# r = get_rddl_str(min_x,max_x,min_y,max_y)
@@ -87,4 +152,5 @@ if __name__ == "__main__":
 	# in_taxi_str = get_in_taxi_str(2,1)
 	# print(in_taxi_str)
 	# taken_no_courses()
-	door_opening()
+	# door_opening()
+	enumerated_move()

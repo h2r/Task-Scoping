@@ -1,0 +1,179 @@
+/////////////////////////////////////////////////////////////////////////////////
+//                                                                             //
+// RDDL MDP version of the Taxi Domain described in original                   //
+// OO-MDP paper by Diuk et al. (2008)                                          //
+// IMPORTANT : This implementation is only intended to work when there is only //
+// a single taxi. Don't instantiate this with more than one taxi.              //
+//                                                                             //
+/////////////////////////////////////////////////////////////////////////////////
+
+
+domain taxi-oo_mdp {
+    requirements {
+        reward-deterministic,
+        cpf-deterministic,
+        preconditions
+    };
+
+    types {
+        taxi          : object;
+        passenger     : object;
+        number        : { @0, @1 };
+    };
+
+    pvariables {
+    //////////////////////////////// States /////////////////////////////////
+    // Position variables
+        taxi-x(taxi)                   : { state-fluent, number, default = @0 };
+        taxi-y(taxi)                   : { state-fluent, number, default = @0 };
+        passenger-x-curr(passenger)    : { state-fluent, number, default = @0 };
+        passenger-y-curr(passenger)    : { state-fluent, number, default = @0 };
+
+    // Taxi occupied variables
+        passenger-in-taxi(passenger, taxi)          : { state-fluent, bool, default=false };
+
+    //////////////////////////////// Actions ////////////////////////////////
+        move_north                           : { action-fluent, bool, default = false };
+        move_south                           : { action-fluent, bool, default = false };
+        move_east                            : { action-fluent, bool, default = false };
+        move_west                            : { action-fluent, bool, default = false };
+        pickup(passenger)                    : { action-fluent, bool, default = false };
+        dropoff(passenger)                   : { action-fluent, bool, default = false };
+
+    //////////////////////////////// Non-Fluents ////////////////////////////////
+
+    // TAXI_GOAL deterministic
+//        TAXI_GOAL(xpos, ypos)                        : { non-fluent, bool, default = false };
+
+    // Passenger Goal location
+        PASSENGER_GOAL_X(passenger)    : { non-fluent, number, default = @0 };
+        PASSENGER_GOAL_Y(passenger)    : { non-fluent, number, default = @0 };
+
+    // Passengers whom you actually need to drop off (i.e, get reward for)
+        PASSENGERS_YOU_CARE_FOR(passenger)           : {non-fluent, bool, default = false };
+
+
+    };
+
+    cdfs {
+    // Pickup and Dropoff Transition function
+        passenger-in-taxi'(?p, ?t) =
+            // If there is no passenger in the taxi, the taxi is on the passenger and the agent executes pickup, make true
+                // if ( pickup(?p) & ( taxi-x(?t) == passenger-x-curr(?p) ) & ( taxi-y(?t) == passenger-y-curr(?p) ) & ( ~exists_{ ?p1 : passenger } [ passenger-in-taxi( ?p1, ?t ) ] ) )
+            if ( pickup(?p) & ( taxi-x(?t) == passenger-x-curr(?p) ) & ( taxi-y(?t) == passenger-y-curr(?p) ) & ( forall_{ ?p1 : passenger } [ ~passenger-in-taxi( ?p1, ?t ) ] ) )
+                then true
+
+            // If there is this passenger in the taxi and the agent executes the dropoff action, make false
+            else if ( dropoff(?p) & passenger-in-taxi(?p, ?t ) )
+                then false
+
+            // Else, the value of passenger-in-taxi is whatever it used to be
+            else passenger-in-taxi(?p, ?t);
+
+    //  Movement transition functions
+        taxi-x'(?t) =
+            if ((move_west) & (taxi-x(?t) == @1))
+                then @0
+            else if ((move_east) & (taxi-x(?t) == @0))
+                then @1;
+
+        taxi-y'(?t) =
+            if ((move_north) & (taxi-y(?t) == @0))
+                then @1
+            else if ((move_south) & (taxi-y(?t) == @1))
+                then @0;
+
+        passenger-x-curr'(?p) =
+            if ((move_west & exists_{ ?t : taxi } [ passenger-in-taxi( ?p, ?t ) ]) & (passenger-x-curr(?p) == @1))
+                then @0
+            else if ((move_east & exists_{ ?t : taxi } [ passenger-in-taxi( ?p, ?t ) ]) & (passenger-x-curr(?p) == @0))
+                then @1;
+
+        passenger-y-curr'(?p) =
+            if ((move_north & exists_{ ?t : taxi } [ passenger-in-taxi( ?p, ?t ) ]) & (passenger-y-curr(?p) == @0))
+                then @1
+            else if ((move_south & exists_{ ?t : taxi } [ passenger-in-taxi( ?p, ?t ) ]) & (passenger-y-curr(?p) == @1))
+                then @0;
+
+    };
+
+    reward =
+          if ( forall_{ ?p : passenger } [ ~PASSENGERS_YOU_CARE_FOR(?p) | ( forall_{ ?t : taxi} [ ~passenger-in-taxi(?p, ?t) ]   & (passenger-x-curr(?p) == PASSENGER_GOAL_X(?p) & (passenger-y-curr(?p) == PASSENGER_GOAL_Y(?p) ) ) ) ] )
+              then 5
+          else -5;
+
+    action-preconditions {
+    // there can only be one move per turn
+          ( forall_{ ?t : taxi } [move_west + move_east + move_south + move_north +
+                                  ( sum_{ ?p : passenger } [pickup(?p) + dropoff(?p)] ) ] <= 1 ) ;
+    //    ( forall_{ ?t : taxi} [move_west + move_east + move_southt) + move_north <= 1] ) ;
+
+    // don't move outside of the grid
+        forall_{ ?t : taxi } [ move_west => taxi-x(?t) ~= @0 ];
+        forall_{ ?t : taxi } [ move_east => taxi-x(?t) ~= @1 ];
+        forall_{ ?t : taxi } [ move_north => taxi-y(?t) ~= @1) ];
+        forall_{ ?t : taxi } [ move_south => taxi-y(?t) ~= @0 ];
+
+    };
+    state-action-constraints {
+        //Removed now that we use numbers instead of ints
+        // All entities must be in grid. This is implied by above (except for walls), but should be easier to parse when stated explicitly. WOuld this alone imply the former?
+        //forall_{ ?t : taxi } [ taxi-x(?t) > 0 ];
+        //forall_{ ?t : taxi } [ taxi-x(?t) < MAX_X() ];
+        //forall_{ ?t : taxi } [ taxi-y(?t) < MAX_Y() ];
+        //forall_{ ?t : taxi } [ taxi-y(?t) > 0 ];
+
+        //forall_{ ?p : passenger } [ passenger-x-curr(?p) > 0 ];
+        //forall_{ ?p : passenger } [ passenger-x-curr(?p) < MAX_X() ];
+        //forall_{ ?p : passenger } [ passenger-y-curr(?p) < MAX_Y() ];
+        //forall_{ ?p : passenger } [ passenger-y-curr(?p) > 0 ];
+
+        //forall_{ ?w : wall } [ WALL_X(?w) > 0 ];
+        //forall_{ ?w : wall } [ WALL_X(?w) < MAX_X() ];
+        //forall_{ ?w : wall } [ WALL_Y(?w) < MAX_Y() ];
+        //forall_{ ?w : wall } [ WALL_Y(?w) > 0 ];
+    };
+}
+
+non-fluents taxi-2wide-1pass {
+    domain = taxi-oo_mdp;
+
+    objects {
+        taxi               : { t0 };
+        passenger          : { p0, p1 };
+        //wall               : { w0 };
+    };
+
+    non-fluents {
+        // WALLS
+       // WALL_X(w0) = @1;
+       // WALL_Y(w0) = @0;
+
+        // PASSENGERS
+        PASSENGER_GOAL_X(p0) = @1;
+        PASSENGER_GOAL_Y(p0) = @1;
+        PASSENGERS_YOU_CARE_FOR(p0);
+        PASSENGERS_YOU_CARE_FOR(p1) = false;
+
+    };
+}
+
+instance taxi-oo_mdp_inst_mdp__01 {
+    domain = taxi-oo_mdp;
+    non-fluents = taxi-2wide-1pass;
+    
+
+    init-state {
+        taxi-x(t0) = @0;
+        taxi-y(t0) = @0;
+        passenger-x-curr(p0) = @0;
+        passenger-y-curr(p0) = @0;
+        passenger-in-taxi(p0, t0) = false;
+        passenger-in-taxi(p1, t0) = false;
+    };
+
+    horizon = 20;
+
+    discount = 1.0;
+}
+

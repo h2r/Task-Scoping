@@ -51,6 +51,10 @@ def move_var_from_implied_to_target(skills: List[Skill], vars: List[str]) -> Lis
 # 	Naive, probably painfully slow version
 	for var in vars:
 		targeting_skills, accidentally_affecting_skills = get_targeting_and_accidentally_affecting_skills(var, skills)
+		# Accidental skill: A skill that may have unintended side-effects (eg. (no wall, move_north, taxi y ++))
+		# may also affect p0.y for example (if p0 is in the taxi already)
+		# Targeting skills are skills that will always have a certain effect on a variable
+		
 		for accidental_skill in accidentally_affecting_skills:
 			negated_refined_preconditions = []
 			for targeting_skill in targeting_skills:
@@ -102,8 +106,6 @@ def triplet_dict_to_triples(skill_dict: Dict[str,Dict[str,List[Union[z3.z3.ExprR
 def get_affecting_skills(condition, skills):
 	affecting_skills = []
 	for s in skills:
-		# if s.get_action() == "dropoff(p0)":
-		# 	dum = 7
 		condition_vars =get_var_names(condition)
 		skill_targets = s.get_targeted_variables()
 		overlapping_vars = [v for v in condition_vars if v in skill_targets]

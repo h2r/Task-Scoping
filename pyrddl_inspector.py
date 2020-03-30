@@ -5,8 +5,10 @@ import collections
 import z3
 from classes import *
 import instance_building_utils
+import pdb
 from typing import List, Dict, Tuple
 from logic_utils import solver_implies_condition, or2, AndList, get_iff, get_var_names, synth2varnames
+
 # att_name_to_domain_attribute = {}
 all_object_names = {}
 name_to_z3_var = {}
@@ -232,7 +234,6 @@ def make_triplet_dict(rddl_model, type2names):
 	print("actions_list:\n{}".format(actions_list))
 	#Get grounded actions
 
-
 	# print(type(model.domain.cpfs[1]))
 	action_to_effect_to_precond = collections.defaultdict(lambda: collections.defaultdict(list))
 
@@ -254,42 +255,42 @@ def make_triplet_dict(rddl_model, type2names):
 			groundings_from_top = {}
 			for arg_id in range(len(arg_strings_ungrounded)):
 				groundings_from_top[arg_strings_ungrounded[arg_id]] = current_arg_list[arg_id]
+			
 			if (state_variable_cpf.expr.etype[0] == 'control'):
 				condition = state_variable_cpf.expr.args[0]
 				false_case = state_variable_cpf.expr.args[2]
-				if (false_case.etype[0] != 'control'):
-					for action in actions_list:
-						if action in condition.scope:
-							#TODO get rid of code duplication between this and next block of code
-							#Ground the action based on groundings_from_top.
-							cleaned_action_name = action.split("/")[0]
-							action_variable_args = get_pvar_args_strings(cleaned_action_name, condition)
-							grounded_action_str = plugin_objects_to_pvar(cleaned_action_name,action_variable_args,groundings_from_top)
-							condition_grounding_pair = (condition,groundings_from_top)
-							#Add to the dictionary.
-							action_to_effect_to_precond[grounded_action_str][grounded_state_variable].append(condition_grounding_pair)
-				else:
-					while (false_case.etype[0] == 'control'):
-						for action in actions_list:
-							if action in condition.scope:
-								# Ground the action based on groundings_from_top.
-								cleaned_action_name = action.split("/")[0]
-								print(cleaned_action_name)
-								if cleaned_action_name == "move_west":
-									# print("ruroh")
-									# asdfsadfsa = 8
-									# print(asdfsadfsa)
-									pass
-								action_variable_args = get_pvar_args_strings(cleaned_action_name, condition)
-								grounded_action_str = plugin_objects_to_pvar(cleaned_action_name, action_variable_args,
-																			 groundings_from_top)
-								condition_grounding_pair = (condition, groundings_from_top)
-								# Add to the dictionary.
-								action_to_effect_to_precond[grounded_action_str][grounded_state_variable].append(
-									condition_grounding_pair)
+				nested_conds = True
+				once_more = False
 
+				# What's going on in this loop?:
+				# 1. No matter what, the 'for action' loop needs to execute once for the current
+				# condition variable
+				# 2. If this is a nested condition, then the overall while loop needs to execute 
+				# once more than otherwise, so once_more is set to True
+				# 3. Else, if it's not, then there's no more nested conditions to hit and the loop 
+				# can just terminate
+				
+				while(nested_conds):
+					
+					for action in actions_list:
+							if action in condition.scope:
+								#Ground the action based on groundings_from_top.
+								cleaned_action_name = action.split("/")[0]
+								action_variable_args = get_pvar_args_strings(cleaned_action_name, condition)
+								grounded_action_str = plugin_objects_to_pvar(cleaned_action_name,action_variable_args,groundings_from_top)
+								condition_grounding_pair = (condition,groundings_from_top)
+								#Add to the dictionary.
+								action_to_effect_to_precond[grounded_action_str][grounded_state_variable].append(condition_grounding_pair)
+					
+					if (false_case.etype[0] == 'control'):
 						condition = false_case.args[0]
 						false_case = false_case.args[2]
+						once_more = True
+					else:
+						if(once_more):
+							once_more = False
+						else:
+							nested_conds = False
 
 	return action_to_effect_to_precond
 
@@ -423,6 +424,7 @@ def convert_to_z3(rddl_model):
 
 	skills_triplets = []
 	for action in triplet_dict.keys():
+		# This triplet_dict.keys() is just wrong....
 		for effect in triplet_dict[action]:
 			for precond in triplet_dict[action][effect]:
 				# print(precond)
@@ -432,6 +434,7 @@ def convert_to_z3(rddl_model):
 				skills_triplets.append(new_skill)
 				# print("Temp break here!")
 	return skills_triplets, goal_conditions, necessarily_relevant_pvars, solver
+
 def _compile_expression(expr: Expression, groundings_from_top: Dict[str,str],solver_constants_only, reward_args=None):
 	global synth2varnames
 	etype2compiler = {
@@ -619,7 +622,6 @@ def _compile_boolean_expression(expr: Expression, groundings_from_top: Dict[str,
 	return bool_in_z3
 
 
-# Done!
 def _compile_relational_expression(expr: Expression, groundings_from_top: Dict[str,str],solver_constants_only, reward_args=None):
 	etype = expr.etype
 	args = expr.args
@@ -773,15 +775,9 @@ def prepare_rddl_for_scoper(rddl_file_location):
 
 		# parse RDDL
 		model = parser.parse(rddl)  # AST
-	#	test_dict = make_triplet_dict(model)
-		model_states = pull_state_var_dict(model)
-		model_non_fluents = pull_nonfluent_var_dict(model)
-		instance_objects = pull_instance_objects(model)
-		instance_nonfluents = pull_init_nonfluent(model)
-		initial_state = pull_init_state(model)
-		# reward_condition = get_reward_conditions(model)
 
 		skill_triplets, goal_conditions, necessarily_relevant_pvars, solver = convert_to_z3(model)
+
 		return goal_conditions, necessarily_relevant_pvars, skill_triplets, solver
 
 if __name__ == '__main__':

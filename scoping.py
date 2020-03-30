@@ -86,6 +86,7 @@ def move_var_from_implied_to_target_test():
 	# used_actions = sorted(list(set([s.get_action() for s in used_skills])))
 	# print("\n~~~Relevant Actions~~~")
 	# for a in used_actions: print(a)
+
 def triplet_dict_to_triples(skill_dict: Dict[str,Dict[str,List[Union[z3.z3.ExprRef,AndList]]]]) -> Tuple[Union[z3.z3.ExprRef,AndList],str,List[str]]:
 	"""
 	:param skill_dict: [action][effect] -> List[preconditions]
@@ -107,6 +108,7 @@ def get_affecting_skills(condition, skills):
 		if len(overlapping_vars) > 0:
 			affecting_skills.append(s)
 	return affecting_skills
+
 def get_targeting_and_accidentally_affecting_skills(var: str, skills: List[Skill]):
 	targeting_skills = [s for s in skills if var in s.get_targeted_variables()]
 	affecting_skills = [s for s in skills if var in s.get_affected_variables()]
@@ -265,8 +267,7 @@ def run_scope_on_file(rddl_file_location):
 	boundary_times.append(time.time())
 	get_implied_effects(skill_triplets)
 	boundary_times.append(time.time())
-	# for s in skill_triplets:
-	# 	if s.get_action() == "dropoff(p0)": print(f"xkdc found it:\n{s}")
+
 	print("\n~~~~Starting Scope()~~~~\n")
 	relevant_vars, used_skills = scope(goal_conditions,skill_triplets,solver=solver)
 	relevant_vars = relevant_vars + [str(i) for i in necessarily_relevant_pvars]
@@ -323,7 +324,8 @@ def domain_tests():
 
 if __name__ == "__main__":
 	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions.rddl"
-	file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions-p1-in-taxi.rddl"
+	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions-p1-in-taxi.rddl"
+	file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions_blinker.rddl"
 	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions_complex.rddl"
 	# file_path = "./taxi-rddl-domain/taxi-oo_mdp_composite_01.rddl"
 	# file_path = "button-domains/button_special_button.rddl"

@@ -28,16 +28,14 @@ def get_model_from_filepath(rddl_file_location):
 	model = parser.parse(rddl)  # AST
 	return model
 
-
-
 def expr2slashyName(expr):
 	if(expr.args[1] is not None):
 		return "{}/{}".format(expr.args[0],len(expr.args[1]))
 	else:
 		return "{}/{}".format(expr.args[0],0)
+
 def pull_state_var_dict(rddl_model):
 	return rddl_model.domain.state_fluents
-
 
 def pull_nonfluent_var_dict(rddl_model):
 	return rddl_model.domain.non_fluents
@@ -113,6 +111,7 @@ def plugin_objects_to_pvar(pvar_name,pvar_parameters,groundings):
 	object_names = []
 	for p in pvar_parameters:
 		object_names.append(groundings[p])
+
 	return instance_building_utils.g2n_names(pvar_name,object_names)
 
 # def get_possible_groundings(pvar_name, variable_param_strings, known_groundings):

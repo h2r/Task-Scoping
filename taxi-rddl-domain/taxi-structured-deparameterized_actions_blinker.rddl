@@ -123,7 +123,7 @@ domain taxi-oo_mdp {
 
         taxi-blinker'(?t) =
 
-          if(toggle_blinker)
+          if(toggle_blinker(?t))
             then ~taxi-blinker(?t)
 
           else taxi-blinker(?t);
@@ -200,7 +200,7 @@ instance taxi-oo_mdp_inst_mdp__01 {
     init-state {
         taxi-x(t0) = 0;
         taxi-y(t0) = 0;
-        taxi-blinker(t0) = true;
+        taxi-blinker(t0) = false;
         passenger-x-curr(p0) = 0;
         passenger-y-curr(p0) = 0;
         passenger-in-taxi(p0, t0) = false;

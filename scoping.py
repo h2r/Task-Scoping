@@ -68,7 +68,7 @@ def move_var_from_implied_to_target(skills: List[Skill], vars: List[str]) -> Lis
 						cond = cond.to_z3()
 					negated_refined_preconditions.append(z3.Not(cond))
 			accidental_skill.precondition = AndList(accidental_skill.precondition, *negated_refined_preconditions)
-			accidental_skill.effect.append(var)
+			# accidental_skill.effect.append(var)
 			accidental_skill.implicitly_affected_variables.remove(var)
 
 def move_var_from_implied_to_target_test():

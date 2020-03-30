@@ -52,11 +52,12 @@ def move_var_from_implied_to_target(skills: List[Skill], vars: List[str]) -> Lis
 	for var in vars:
 		targeting_skills, accidentally_affecting_skills = get_targeting_and_accidentally_affecting_skills(var, skills)
 		for accidental_skill in accidentally_affecting_skills:
+			accidental_skill.effect.append(var)
 			negated_refined_preconditions = []
 			for targeting_skill in targeting_skills:
 				if check_implication(targeting_skill.get_precondition(), accidental_skill.get_precondition()):
 					# Add effect to targeting skill
-					accidental_skill.effect.extend(targeting_skill.get_targeted_variables())
+					# accidental_skill.effect.extend(targeting_skill.get_targeted_variables())
 					# Update the accidental_skill's precondition to exclude the targeting skill
 					cond = targeting_skill.get_precondition()
 					if isinstance(cond, ConditionList): #TODO turn negated orlist into andlist of negations
@@ -336,7 +337,7 @@ if __name__ == "__main__":
 	# file_path = "button-domains/button_door_negative_precondition.rddl"
 	# file_path = "./enum-domains/enum-taxi-deparameterized-move-actions-nishanth.rddl"
 
-	run_scope_on_file(file_path)
-
+	# run_scope_on_file(file_path)
+	#
 	# domain_tests()
-	# move_var_from_implied_to_target_test()
+	move_var_from_implied_to_target_test()

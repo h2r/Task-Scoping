@@ -86,18 +86,24 @@ def get_pvar_args_strings(pvar_name: str, expr: Expression) -> List[str]:
 	# 	print("westward, ho")
 	# if isinstance(expr.args,int):
 	# 	print("int ya boii")
+
+	# if(pvar_name == "toggle_blinker" or pvar_name == "move_west"):
+	# 	pdb.set_trace()
+
 	for arg_id in range(len(expr.args)):
 		if isinstance(expr.args[arg_id],Expression):
 			if expr.args[arg_id].etype[0] == 'constant': return []
 			x = get_pvar_args_strings(pvar_name,expr.args[arg_id])
 			if x is None:
-				# print("Nani!???")
 				return []
 			if len(x) > 0:
 				return x
 		elif isinstance(expr.args[arg_id],str):
 			if expr.args[arg_id] == pvar_name:
-				return expr.args[arg_id + 1]
+				if(expr.args[arg_id + 1] is None):
+					return []
+				else:
+					return expr.args[arg_id + 1]
 
 	return []
 
@@ -109,8 +115,13 @@ def plugin_objects_to_pvar(pvar_name,pvar_parameters,groundings):
 	:return: pvar applied to the object names. Ex "toggle-button(b0)" (this example assumes g2n has not changed)
 	"""
 	object_names = []
-	for p in pvar_parameters:
-		object_names.append(groundings[p])
+	# if(pvar_name == "move_north"):
+	# 	pdb.set_trace()
+	try:
+		for p in pvar_parameters:
+			object_names.append(groundings[p])
+	except:
+		pdb.set_trace()
 
 	return instance_building_utils.g2n_names(pvar_name,object_names)
 

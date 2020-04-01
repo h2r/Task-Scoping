@@ -123,7 +123,7 @@ domain taxi-oo_mdp {
 
         taxi-blinker'(?t) =
 
-          if(toggle_blinker(?t))
+          if(toggle_blinker)
             then ~taxi-blinker(?t)
 
           else taxi-blinker(?t);
@@ -140,7 +140,7 @@ domain taxi-oo_mdp {
     // there can only be one move per turn
           ( forall_{ ?t : taxi } [move_west + move_east + move_south + move_north +
                                   ( sum_{ ?p : passenger } [pickup(?p) + dropoff(?p)] ) +
-                                  ( sum_{ ?t : taxi } [toggle_blinker(?t)] ) ] <= 1 ) ;
+                                  ( sum_{ ?t : taxi } [toggle_blinker] ) ] <= 1 ) ;
     //    ( forall_{ ?t : taxi} [move_west + move_east + move_southt) + move_north <= 1] ) ;
 
     // don't move outside of the grid
@@ -200,10 +200,10 @@ instance taxi-oo_mdp_inst_mdp__01 {
     init-state {
         taxi-x(t0) = 0;
         taxi-y(t0) = 0;
-        taxi-blinker(t0) = false;
+        taxi-blinker(t0) = true;
         passenger-x-curr(p0) = 0;
         passenger-y-curr(p0) = 0;
-        passenger-in-taxi(p0, t0) = false;
+        passenger-in-taxi(p0, t0) = true;
         passenger-in-taxi(p1, t0) = false;
     };
 

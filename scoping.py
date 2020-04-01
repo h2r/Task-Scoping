@@ -6,6 +6,8 @@ from utils import condition_str2objects
 from classes import *
 from logic_utils import check_implication, solver_implies_condition, get_var_names, AndList, OrList, ConditionList
 from pyrddl_inspector import prepare_rddl_for_scoper
+import pdb
+
 """
 TODO
 Change how we check for guarantee violation. When we add a new skill, we should remove from the solver any conditions that depend on variables the skill affects
@@ -340,7 +342,7 @@ if __name__ == "__main__":
 	# file_path = "button-domains/button_door_negative_precondition.rddl"
 	# file_path = "./enum-domains/enum-taxi-deparameterized-move-actions-nishanth.rddl"
 
-	# run_scope_on_file(file_path)
+	run_scope_on_file(file_path)
 	#
 	# domain_tests()
-	move_var_from_implied_to_target_test()
+	# move_var_from_implied_to_target_test()

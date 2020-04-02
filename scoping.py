@@ -132,6 +132,8 @@ def violates(skill, condition):
 
 
 def scope(goal, skills, start_condition = None, solver=None):
+	"""Runs the Task Scoping algorithm on a given goal, provided skills, a start_condition and a solver (z3)"""
+
 	# TODO figure out when to run move_var_from_implied_to_target(). After it runs, update the precondions in q as appropriate.
 	if solver is None:
 		solver = z3.Solver()
@@ -158,9 +160,11 @@ def scope(goal, skills, start_condition = None, solver=None):
 	#Create solver from start_condition
 
 	while len(q) > 0:
-		bfs_with_guarantees(discovered,q,solver,skills, used_skills,guarantees)
+		bfs_with_guarantees(discovered,q,solver,skills,used_skills,guarantees)
+		pdb.set_trace()
 		# print(f"bf len(used_skills): {len(used_skills)}")
-		check_guarantees(guarantees,used_skills, discovered, q)
+		check_guarantees(guarantees,used_skills, q)
+		pdb.set_trace()
 		# print(f"cg len(used_skills): {len(used_skills)}")
 
 	discovered_not_guarantees = [c for c in discovered if c not in guarantees]
@@ -168,7 +172,27 @@ def scope(goal, skills, start_condition = None, solver=None):
 	relevant_objects = condition_str2objects(relevant_conditions)
 	return relevant_objects, used_skills
 
-def bfs_with_guarantees(discovered,q,solver,skills, used_skills,guarantees):
+def bfs_with_guarantees(discovered,q,solver,skills,used_skills,guarantees):
+	"""
+	This procedure essentially runs a Breadth-First Search that does the following:
+	1. Finds all possible skills affecting every condition mentioned in the list q (all possible DOF's)
+	2. Ensures that every precondition involved with these skills is dealt with
+	So, at the end of this procedure, we should have chcked through all degrees of freedom, 
+	but unfortunately, some of the skills we're using could violate the guarantees we've made.
+	We need to check if this is the case, then unguarantee these conditions and add them to q
+	and rerun this search procedure.
+
+	discovered: A list of conditions we already know about. We keep track of this to accumulate
+	all the various preconditions we might need.
+	q: A list of conditions to be met. Once we've accumulated skills such that all conditions in 
+	q are affected (i.e, all 'degrees of freedom' or 'effect types' are found for every condition
+	in q), this procedure terminates.
+	solver: A z3 solver that was instantiated and populated with domain variavles earlier
+	skills: All CAE triples that've been parsed from the domain's transition dynamics directly
+	used_skills: The list of CAE triples that need to be used
+	guarantees: Conditions that we believe are guaranteed to not be violated throughout any of 
+	our trajectories.
+	"""
 	while len(q) > 0:
 		condition = q.pop()
 		if type(condition) is AndList:
@@ -177,35 +201,45 @@ def bfs_with_guarantees(discovered,q,solver,skills, used_skills,guarantees):
 		#If not is_goal(v)
 		affecting_skills = get_affecting_skills(condition, skills)
 		for skill in affecting_skills:
-			if skill in used_skills: continue
-			used_skills.append(skill)
+			if skill in used_skills: continue # We've already accumulated the degree of freedom for this condition
+			used_skills.append(skill) # Else. add the skill to the list
 			precondition = skill.get_precondition()
 			if type(precondition) is AndList:
 				precondition_list = copy.copy(precondition.args)
 			else:
 				precondition_list = [precondition]
+			# Now, we've accumulated a list of preconditions that need to be met for the above 
+			# skill to ever execute
 			for precondition in precondition_list:
 				if precondition not in discovered:  #Could we do something fancier, like if discovered implies precondition?
-					if str(precondition) == "passenger-in-taxi_1_0":
-						print("booooiii")
 					discovered.append(precondition)
 					if type(precondition) is AndList:
-						# print(skill)
 						pass
+					# Either the solver implies the precondition, or we need to append it to the list
+					# of things we care about? TODO: Not sure why the solver implying the precondition
+					# makes it a guarantee. I'm somewhat unclear what this function even does.
 					if solver_implies_condition(solver,precondition):
 						guarantees.append(precondition)
 					else:
 						q.append(precondition)
 
 
-def check_guarantees(guarantees,used_skills, discovered, q):
+def check_guarantees(guarantees,used_skills,q):
+	"""
+	This procedure essentially checks if our BFS from the above procedure has found any skills that 
+	may violate any of the guarantees we've made. If so, it removes the corresponding guarantee
+	and adds it to q as a new precondition to be checker and guaranteed.
+	:param q: A list of conditions to be met. Once we've accumulated skills such that all conditions in 
+	q are affected (i.e, all 'degrees of freedom' or 'effect types' are found for every condition
+	in q), this procedure terminates.
+	:param used_skills: The list of CAE triples that need to be used
+	:param guarantees: Conditions that we believe are guaranteed to not be violated throughout any of 
+	our trajectories.
+	"""
 	violated_guarantees = []
 	for g in guarantees:
 		for s in used_skills:
 			if violates(s,g):
-				if 'passenger-in-taxi_1_0' in get_var_names(g):
-					# print("ruroh")
-					pass
 				violated_guarantees.append(g)
 				break  #Break out of inner loop, since we know the gaurantee is violated by some skill
 	for g in violated_guarantees:

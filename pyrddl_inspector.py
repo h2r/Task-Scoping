@@ -7,7 +7,7 @@ from classes import *
 import instance_building_utils
 import pdb
 from typing import List, Dict, Tuple
-from logic_utils import solver_implies_condition, OrList, or2, AndList, get_iff, get_var_names, synth2varnames
+from logic_utils import solver_implies_condition, OrList, or2, and2, get_iff, get_var_names, synth2varnames
 
 # att_name_to_domain_attribute = {}
 all_object_names = {}
@@ -188,8 +188,8 @@ def get_reward_conditions(rddl_model, solver=None):
 	if False and (reward_expr.etype[0] == 'control'):
 		condition = reward_expr.args[0]
 		compiled_reward = _compile_expression(condition,dict(),solver)
-		# compiled_reward = AndList()
-		return AndList(compiled_reward)
+		# compiled_reward = and2()
+		return and2(compiled_reward)  #TODO Why are we passing a single arg? Should't we a;ways pass multiple
 	else:
 		#Assume the reward is a sum of sums, or at least has no ifs
 		grounding_dict = dict()
@@ -486,9 +486,9 @@ def _compile_expression(expr: Expression, groundings_from_top: Dict[str,str],sol
 	if reward_args is not None:
 		if in_condition_old == False:
 			#If the new expression is a condition, add it to the list
-			#AndLists are a pain. We should really find a way to decompose conjunctions instead of storing AndLists
+			#and2s are a pain. We should really find a way to decompose conjunctions instead of storing and2s
 			new_conditions = []
-			if isinstance(new_expr,AndList):
+			if isinstance(new_expr,and2):
 				new_conditions = new_expr.args
 			elif isinstance(new_expr,z3.z3.BoolRef):
 				new_conditions = [new_expr]
@@ -509,7 +509,7 @@ def _compile_control_flow_expression(expr: Expression, grounding_dict:Dict[str,s
 	args = expr.args
 	if compiler_subtype == "if":
 		condition = _compile_expression(args[0], grounding_dict, solver_constants_only, reward_args)
-		if isinstance(condition,AndList):
+		if isinstance(condition,and2):
 			condition = condition.to_z3()
 		true_case = _compile_expression(args[1], grounding_dict, solver_constants_only, reward_args)
 		false_case = _compile_expression(args[2], grounding_dict, solver_constants_only, reward_args)
@@ -602,7 +602,7 @@ def _compile_boolean_expression(expr: Expression, groundings_from_top: Dict[str,
 		x = _compile_expression(args[0], groundings_from_top,solver_constants_only, reward_args)
 		if(isinstance(x, list)):
 			if(len(x) > 1):
-				# bool_in_z3 = AndList(*[op(x_elem) for x_elem in x])
+				# bool_in_z3 = and2(*[op(x_elem) for x_elem in x])
 				bool_in_z3 = [op(x_elem) for x_elem in x]
 			else:
 				bool_in_z3 = op(x[0])
@@ -611,8 +611,8 @@ def _compile_boolean_expression(expr: Expression, groundings_from_top: Dict[str,
 
 	else:
 		etype2op = {
-			'^': lambda x, y: AndList(*[i for i in [x, y] if not (i is True)]),
-			'&': lambda x, y: AndList(*[i for i in [x, y] if not (i is True)]),
+			'^': lambda x, y: and2(*[i for i in [x, y] if not (i is True)]),
+			'&': lambda x, y: and2(*[i for i in [x, y] if not (i is True)]),
 			'|': lambda x, y: or2(x, y, solver=solver_constants_only),
 			'=>': lambda x, y: or2(z3.Not(x), y),
 			# '<=>': lambda x, y: or2(z3.And(*[x, y]), z3.And(*[z3.Not(x), z3.Not(y)]))
@@ -718,7 +718,7 @@ def _compile_aggregation_expression(expr: Expression, grounding_dict: Dict[str,s
 		# 'maximum': x.maximum,
 		# 'minimum': x.minimum,
 		'exists': lambda x: or2(*x),
-		'forall': lambda x: AndList(*[i for i in x if not (i is True)])
+		'forall': lambda x: and2(*[i for i in x if not (i is True)])
 	}
 	etype = expr.etype
 	args = expr.args

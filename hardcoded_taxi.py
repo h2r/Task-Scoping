@@ -3,6 +3,7 @@ import z3
 from classes import *
 from scoping import *
 from instance_building_utils import *
+from logic_utils import and2
 
 # TODO add asserts
 # TODO rewrite so that [north, south, east, west] always come in same order to reduce chance of bugs. NSEW seams best, since it groups x,y
@@ -106,10 +107,10 @@ def make_skills(object_counts, g2n, g2v):
 			# taxi_occupance_condition = AndList(*passenger_in_taxi_conditions)
 			taxi_occupance_condition = g2v('passenger-in-taxi', [p_id, 0])
 			#  Combine passenger in taxi Precondition with no_touch conditions
-			move_north_with_passenger_condition = AndList(no_touch_north_condition, taxi_occupance_condition)
-			move_east_with_passenger_condition = AndList(no_touch_east_condition, taxi_occupance_condition)
-			move_south_with_passenger_condition = AndList(no_touch_south_condition, taxi_occupance_condition)
-			move_west_with_passenger_condition = AndList(no_touch_west_condition, taxi_occupance_condition)
+			move_north_with_passenger_condition = and2(no_touch_north_condition, taxi_occupance_condition)
+			move_east_with_passenger_condition = and2(no_touch_east_condition, taxi_occupance_condition)
+			move_south_with_passenger_condition = and2(no_touch_south_condition, taxi_occupance_condition)
+			move_west_with_passenger_condition = and2(no_touch_west_condition, taxi_occupance_condition)
 
 			skill_triples.append(Skill(move_north_with_passenger_condition, "move_north_{}".format(t_id),
 									   [g2n('passenger-y-curr',[p_id])]))

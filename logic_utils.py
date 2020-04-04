@@ -86,21 +86,13 @@ def or2(*x, solver=None):
 			condition = True
 	return condition
 
-def and2(*x, solver=None):
+def and2(*x):
 	"""
-	A wrapper for z3.And meant to handle ConditionLists and simplifications based on the constant conditions
+	If there are multiple args, creates an AndList. Else, returns the original expression
 	"""
-	new_x = []
-	for i in x:
-		if isinstance(i,ConditionList):
-			new_x.append(i.to_z3())
-		else:
-			new_x.append(i)
-	condition = z3.And(*new_x)
-	if solver is not None:
-		if solver_implies_condition(solver, condition):
-			condition = False
-	return condition
+	if len(x) == 0: return True
+	elif len(x) == 1: return x[0]
+	else: return AndList(*x)
 
 class ConditionList(ABC):
 	def __init__(self, *args, name, z3_combinator):

@@ -4,7 +4,7 @@ import abc, time
 import z3
 from utils import condition_str2objects
 from classes import *
-from logic_utils import check_implication, solver_implies_condition, get_var_names, AndList, OrList, ConditionList
+from logic_utils import check_implication, solver_implies_condition, get_var_names, AndList, OrList, ConditionList, and2
 from pyrddl_inspector import prepare_rddl_for_scoper
 import pdb
 
@@ -69,7 +69,7 @@ def move_var_from_implied_to_target(skills: List[Skill], vars: List[str]) -> Lis
 					if isinstance(cond, ConditionList): #TODO turn negated orlist into andlist of negations
 						cond = cond.to_z3()
 					negated_refined_preconditions.append(z3.Not(cond))
-			accidental_skill.precondition = AndList(accidental_skill.precondition, *negated_refined_preconditions)
+			accidental_skill.precondition = and2(accidental_skill.precondition, *negated_refined_preconditions)
 			# accidental_skill.effect.append(var)
 			accidental_skill.implicitly_affected_variables.remove(var)
 
@@ -300,7 +300,7 @@ def clean_AndLists(skills):
 	for s in skills:
 		precond = s.get_precondition()
 		if isinstance(precond,AndList):
-			new_AndList = AndList(*[x for x in precond if x is not True])
+			new_AndList = and2(*[x for x in precond if x is not True])
 			s.precondition = new_AndList
 
 def run_scope_on_file(rddl_file_location):

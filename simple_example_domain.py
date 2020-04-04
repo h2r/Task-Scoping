@@ -3,6 +3,7 @@ import z3
 from classes import *
 from scoping import *
 from instance_building_utils import *
+from logic_utils import and2
 """
 Simple domain. Press button once lights are on.
 """
@@ -24,7 +25,7 @@ g2v = g2v_builder(str2var)
 #Get skills
 skills = []
 #push button skills
-lights_on_condition = AndList(*[g2v('on',[i]) for i in range(object_counts['light'])])
+lights_on_condition = and2(*[g2v('on',[i]) for i in range(object_counts['light'])])
 for b_id in range(object_counts['button']):
 	skills.append(Skill(lights_on_condition, g2n('press', [b_id]), [g2n('pressed', [b_id])]))
 #Turn on light skills
@@ -42,7 +43,7 @@ for b_id in range(object_counts['button']):
 	solver_init_lights_on.add(g2v('pressed',[b_id]) == False)
 
 #Set goal
-all_buttons_pressed_condition = AndList(*[g2v('pressed',[b_id]) for b_id in range(object_counts['button'])])
+all_buttons_pressed_condition = and2(*[g2v('pressed',[b_id]) for b_id in range(object_counts['button'])])
 
 #Scope
 scoped_init_off, _ = scope(all_buttons_pressed_condition,skills,solver=solver_init_lights_off)

@@ -60,10 +60,15 @@ def check_contradicting(a, b, my_solver = None):
 	# Returns True if we can prove a and b are contradictory. False otherwise.
 	# Pass in a solver if you want to use background information to check the contradiction.
 	# You should probably only pass in a solver that contains propositions about constants
+	# We use the name my_solver instead of solver to avoid mucking with the global var.
 	global solver
 	if my_solver is None: my_solver = solver
-	solver.push()
-
+	my_solver.push()
+	my_solver.add(a)
+	my_solver.add(b)
+	result = my_solver.check()
+	my_solver.pop()
+	return result == z3.z3.unsat
 
 
 def get_implies(x,y):

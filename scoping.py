@@ -4,7 +4,8 @@ import abc, time
 import z3
 from utils import condition_str2objects
 from classes import *
-from logic_utils import check_implication, solver_implies_condition, get_var_names, AndList, OrList, ConditionList, and2
+from logic_utils import check_implication, solver_implies_condition, get_var_names, AndList, ConditionList, \
+	and2, check_contradicting
 from pyrddl_inspector import prepare_rddl_for_scoper
 # import pdb
 
@@ -52,6 +53,7 @@ def move_var_from_implied_to_target(skills: List[Skill], vars: List[str]) -> Lis
 	"""
 # 	Naive, probably painfully slow version
 	no_changes = True
+	new_skills = []
 	for var in vars:
 		targeting_skills, accidentally_affecting_skills = get_targeting_and_accidentally_affecting_skills(var, skills)
 		# Accidental skill: A skill that may have unintended side-effects (eg. (no wall, move_north, taxi y ++))
@@ -64,11 +66,13 @@ def move_var_from_implied_to_target(skills: List[Skill], vars: List[str]) -> Lis
 
 			negated_refined_preconditions = []
 			for targeting_skill in targeting_skills_same_action:
-				if not check_implication(targeting_skill.get_precondition(), accidental_skill.get_precondition()):
-					# Flag that we made changes
+				# If the skills can never fire simultaneously, we don't need to change anything
+				if not check_contradicting(targeting_skill.get_precondition(), accidental_skill.get_precondition()):
+					# Flag that we made changes. If we return no_changes=True, scope() knows it has converged
 					no_changes = False
 					print(f"Moving var {var} for action {targeting_skill.get_action()}")
-					# We need three new skills at the end:
+					# We need three new skills at the end: A only, B only, A and B. Wait, do we need all sets of compatible skills? Oof
+					# TODO If A => B, we really only need B, A and B. Implement that
 					# Add effect to targeting skill
 					targeting_skill.effect.extend(accidental_skill.get_targeted_variables())
 					# Update the accidental_skill's precondition to exclude the targeting skill
@@ -79,7 +83,7 @@ def move_var_from_implied_to_target(skills: List[Skill], vars: List[str]) -> Lis
 			accidental_skill.precondition = and2(accidental_skill.precondition, *negated_refined_preconditions)
 			# accidental_skill.effect.append(var)
 			accidental_skill.implicitly_affected_variables.remove(var)
-	return no_changes
+	return no_changes, new_skills
 
 def move_var_from_implied_to_target_test():
 	# TODO actually test

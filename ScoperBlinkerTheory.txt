@@ -1,0 +1,12 @@
+WORKING THEORY FOR WHAT's GOING ON WITH THE SCOPER AND THE BLINKER EXAMPLE!!!!!!
+Somehow, solver_implies_condition for blinker is FALSE....
+
+
+
+Or(And(passenger-in-taxi(p0,t0),
+       taxi-blinker(t0),
+       Not(Or(And(WALL_X(w0) == passenger-x-curr(p0) + 1,
+                  WALL_Y(w0) == passenger-y-curr(p0) + 1)))))
+
+^^ This condition appears for the move_north with blinker on action, and that's why the
+blinker is made relevant!!!!!

@@ -1,5 +1,6 @@
 from abc import ABC
 import z3
+import pdb
 
 solver = z3.Solver()
 synth2varnames = {}
@@ -59,6 +60,7 @@ def get_implies(x,y):
 def get_iff(x,y):
 	both_true = z3.And(x,y)
 	both_false = z3.And(z3.Not(x),z3.Not(y))
+	pdb.set_trace()
 	return z3.Or(both_true,both_false)
 
 def or2(*x, solver=None):
@@ -71,7 +73,14 @@ def or2(*x, solver=None):
 			new_x.append(i.to_z3())
 		else:
 			new_x.append(i)
-	condition = z3.Or(*new_x)
+
+	# Note, the below if_else statement exists solely to deal with Or's that only have 1 
+	# condition in them
+	if(len(new_x) > 1):
+		condition = z3.Or(*new_x)
+	else:
+		condition = new_x[0]
+
 	if solver is not None:
 		if solver_implies_condition(solver, condition):
 			condition = True
@@ -138,16 +147,17 @@ class AndList(ConditionList):
 	def __init__(self, *args):
 		super().__init__(*args, name="AndList", z3_combinator=z3.And)
 
-
 class OrList(ConditionList):
 	def __init__(self, *args):
 		super().__init__(*args, name="OrList", z3_combinator=or2)
+
 def acceptable_z3_condition(x):
 	Z3_HANDLED_TYPES = [z3.z3.ExprRef, bool]
 	for t in Z3_HANDLED_TYPES:
 		if isinstance(x,t):
 			return True
 	return False
+
 def test_AndList():
 	z3_vars = [z3.Bool(str(i)) for i in range(10)]
 	a_correct = z3_vars[1:3]

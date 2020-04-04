@@ -132,7 +132,8 @@ domain taxi-oo_mdp {
     };
 
     reward =
-          if ( forall_{ ?p : passenger } [ ~PASSENGERS_YOU_CARE_FOR(?p) | ( forall_{ ?t : taxi} [ ~passenger-in-taxi(?p, ?t) ]   & (passenger-x-curr(?p) == PASSENGER_GOAL_X(?p) & (passenger-y-curr(?p) == PASSENGER_GOAL_Y(?p) ) ) ) ] )
+//          if ( exists_{ ?p : passenger } [ PASSENGERS_YOU_CARE_FOR(?p) & ( exists_{ ?t : taxi} [ ~passenger-in-taxi(?p, ?t) ]  & (passenger-x-curr(?p) == PASSENGER_GOAL_X(?p) & (passenger-y-curr(?p) == PASSENGER_GOAL_Y(?p) ) ) ) ] )
+          if ( forall_{ ?p : passenger } [ ~PASSENGERS_YOU_CARE_FOR(?p) | ( forall_{ ?t : taxi} [ ~passenger-in-taxi(?p, ?t) ]  & (passenger-x-curr(?p) == PASSENGER_GOAL_X(?p) & (passenger-y-curr(?p) == PASSENGER_GOAL_Y(?p) ) ) ) ] )
               then 5
           else -5;
 

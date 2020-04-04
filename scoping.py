@@ -108,7 +108,7 @@ def triplet_dict_to_triples(skill_dict: Dict[str,Dict[str,List[Union[z3.z3.ExprR
 def get_affecting_skills(condition, skills):
 	affecting_skills = []
 	for s in skills:
-		condition_vars =get_var_names(condition)
+		condition_vars = get_var_names(condition)
 		skill_targets = s.get_targeted_variables()
 		overlapping_vars = [v for v in condition_vars if v in skill_targets]
 		if len(overlapping_vars) > 0:
@@ -133,7 +133,6 @@ def violates(skill, condition):
 
 def scope(goal, skills, start_condition = None, solver=None):
 	"""Runs the Task Scoping algorithm on a given goal, provided skills, a start_condition and a solver (z3)"""
-
 	# TODO figure out when to run move_var_from_implied_to_target(). After it runs, update the precondions in q as appropriate.
 	if solver is None:
 		solver = z3.Solver()
@@ -149,6 +148,7 @@ def scope(goal, skills, start_condition = None, solver=None):
 				guarantees.append(x)
 			else:
 				q.append(x)
+
 	# if type(goal) is AndList:
 	# 	discovered = copy.copy(goal.args)
 	# 	q = copy.copy(goal.args)
@@ -161,10 +161,10 @@ def scope(goal, skills, start_condition = None, solver=None):
 
 	while len(q) > 0:
 		bfs_with_guarantees(discovered,q,solver,skills,used_skills,guarantees)
-		pdb.set_trace()
+		# pdb.set_trace()
 		# print(f"bf len(used_skills): {len(used_skills)}")
-		check_guarantees(guarantees,used_skills, q)
-		pdb.set_trace()
+		check_guarantees(guarantees,used_skills,q)
+		# pdb.set_trace()
 		# print(f"cg len(used_skills): {len(used_skills)}")
 
 	discovered_not_guarantees = [c for c in discovered if c not in guarantees]
@@ -194,13 +194,19 @@ def bfs_with_guarantees(discovered,q,solver,skills,used_skills,guarantees):
 	our trajectories.
 	"""
 	while len(q) > 0:
+		# pdb.set_trace()
 		condition = q.pop()
 		if type(condition) is AndList:
 			print("dang")
 		#We are not trying to find a target (Is the start the target??), so we ignore this step
 		#If not is_goal(v)
+		
 		affecting_skills = get_affecting_skills(condition, skills)
+		
 		for skill in affecting_skills:
+			# if(skill.action == "toggle_blinker()"):
+			# 	pdb.set_trace()
+
 			if skill in used_skills: continue # We've already accumulated the degree of freedom for this condition
 			used_skills.append(skill) # Else. add the skill to the list
 			precondition = skill.get_precondition()
@@ -212,8 +218,8 @@ def bfs_with_guarantees(discovered,q,solver,skills,used_skills,guarantees):
 			# skill to ever execute
 			for precondition in precondition_list:
 				if precondition not in discovered:  #Could we do something fancier, like if discovered implies precondition?
-					discovered.append(precondition)
-					if type(precondition) is AndList:
+					discovered.append(precondition)					
+					if type(precondition) is AndList: # The conditions should already be broken so this can't happen
 						pass
 					# Either the solver implies the precondition, or we need to append it to the list
 					# of things we care about? TODO: Not sure why the solver implying the precondition
@@ -222,6 +228,9 @@ def bfs_with_guarantees(discovered,q,solver,skills,used_skills,guarantees):
 						guarantees.append(precondition)
 					else:
 						q.append(precondition)
+					
+					# if(skill.action == "move_north()"):
+					# 	pdb.set_trace()
 
 
 def check_guarantees(guarantees,used_skills,q):
@@ -299,9 +308,6 @@ def run_scope_on_file(rddl_file_location):
 	boundary_times = []
 	boundary_times.append(time.time())
 	goal_conditions, necessarily_relevant_pvars, skill_triplets, solver = prepare_rddl_for_scoper(rddl_file_location)
-	# print("all skills:")
-	# for s in skill_triplets: print(s)
-	# print("Goal:\n".format(compiled_reward))
 	boundary_times.append(time.time())
 	clean_AndLists(skill_triplets)
 	boundary_times.append(time.time())

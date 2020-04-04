@@ -7,7 +7,7 @@ from classes import *
 import instance_building_utils
 import pdb
 from typing import List, Dict, Tuple
-from logic_utils import solver_implies_condition, or2, AndList, get_iff, get_var_names, synth2varnames
+from logic_utils import solver_implies_condition, OrList, or2, AndList, get_iff, get_var_names, synth2varnames
 
 # att_name_to_domain_attribute = {}
 all_object_names = {}
@@ -184,6 +184,7 @@ def get_reward_conditions(rddl_model, solver=None):
 	:return: list of conditions mentioned in z3 reward function, list of pvars mentioned in the reward function outside of conditions, z3 func representing reward function
 	"""
 	reward_expr = rddl_model.domain.reward
+
 	if False and (reward_expr.etype[0] == 'control'):
 		condition = reward_expr.args[0]
 		compiled_reward = _compile_expression(condition,dict(),solver)
@@ -191,7 +192,6 @@ def get_reward_conditions(rddl_model, solver=None):
 		return AndList(compiled_reward)
 	else:
 		#Assume the reward is a sum of sums, or at least has no ifs
-
 		grounding_dict = dict()
 		reward_params = []
 		reward_args = {
@@ -203,7 +203,7 @@ def get_reward_conditions(rddl_model, solver=None):
 		}
 		#TODO figure out why button-on(bi) is being put in unscopable_pvars and conditions_list/synthetic_conditions, so is duplicated in reward_function_parameters
 		compiled_reward = _compile_expression(reward_expr,grounding_dict,solver,reward_args=reward_args)
-		print("Conditions in reward:")
+		
 		for c in reward_args["conditions_list"]: print(c)
 		#We need to separate pvars that occur only in conditions from pvars that occur outside of conditions.
 		#We can do this by passing in an unconditions_pvars list to _compile_expression
@@ -318,7 +318,6 @@ def convert_to_z3(rddl_model):
 	model_nonfluents = pull_nonfluent_var_dict(rddl_model)
 	domain_objects = pull_instance_objects(rddl_model)
 
-
 	all_object_names = {}
 	for dom_obj in domain_objects:
 		all_object_names[dom_obj[0]] = dom_obj[1]
@@ -414,8 +413,6 @@ def convert_to_z3(rddl_model):
 
 	# Initialize a z3 solver to be returned when it contains the necessary z3 instantiation of z3 instances
 
-
-
 	# Give the passenger, etc. their init values and push them into the solver
 	# for init_val in init_state:
 	# 	solver.add(ground2var(init_val[0][0], init_val[0][1]) == init_val[1])
@@ -437,12 +434,12 @@ def convert_to_z3(rddl_model):
 		# This triplet_dict.keys() is just wrong....
 		for effect in triplet_dict[action]:
 			for precond in triplet_dict[action][effect]:
-				# print(precond)
 				#TODO Why do we use solver_constants_only?
+				# if(action == "move_west()"):
+				# 	pdb.set_trace()
 				z3_expr = _compile_expression(*precond,solver_constants_only)
 				new_skill = Skill(z3_expr, action, [effect])
 				skills_triplets.append(new_skill)
-				# print("Temp break here!")
 	return skills_triplets, goal_conditions, necessarily_relevant_pvars, solver
 
 def _compile_expression(expr: Expression, groundings_from_top: Dict[str,str],solver_constants_only, reward_args=None):
@@ -460,7 +457,7 @@ def _compile_expression(expr: Expression, groundings_from_top: Dict[str,str],sol
 		'control': _compile_control_flow_expression,
 		'aggregation': _compile_aggregation_expression
 	}
-
+	
 	etype = expr.etype
 	compiler_type, compiler_subtype = etype
 	if compiler_type not in etype2compiler.keys():
@@ -474,7 +471,8 @@ def _compile_expression(expr: Expression, groundings_from_top: Dict[str,str],sol
 		#it is modified, so this should be safe. If there is a bug, it's probably here.
 		reward_args = copy.copy(reward_args)
 		in_condition_old = reward_args["in_condition"]
-		#If the compiler_type is one of the following, then the result will be a condition, so we set in_condition=True
+		
+		# If the compiler_type is one of the following, then the result will be a condition, so we set in_condition=True
 		# Some pvars or constants are also conditions, but in those cases there will be no sub-conditions, so we don't need to set in_condition
 		# that doesn't seem worth the extra code
 
@@ -486,7 +484,6 @@ def _compile_expression(expr: Expression, groundings_from_top: Dict[str,str],sol
 	#If we are gathering conditions and we are not yet in a condition
 	# Dictionary mapping from synthetic variable string to the original variable. Needed for get_var_names()
 	if reward_args is not None:
-		# print("Ooga")
 		if in_condition_old == False:
 			#If the new expression is a condition, add it to the list
 			#AndLists are a pain. We should really find a way to decompose conjunctions instead of storing AndLists
@@ -618,7 +615,7 @@ def _compile_boolean_expression(expr: Expression, groundings_from_top: Dict[str,
 			'&': lambda x, y: AndList(*[i for i in [x, y] if not (i is True)]),
 			'|': lambda x, y: or2(x, y, solver=solver_constants_only),
 			'=>': lambda x, y: or2(z3.Not(x), y),
-			'<=>': lambda x, y: or2(z3.And(*[x, y]), z3.And(*[z3.Not(x), z3.Not(y)]))
+			# '<=>': lambda x, y: or2(z3.And(*[x, y]), z3.And(*[z3.Not(x), z3.Not(y)]))
 		}
 
 		if etype[1] not in etype2op:
@@ -714,8 +711,6 @@ def _compile_random_variable_expression(self,
 		# return sample
 
 def _compile_aggregation_expression(expr: Expression, grounding_dict: Dict[str,str],solver_constants_only, reward_args=None):
-	# These functions in the values of the dict are incorrect, make sure to make them better. I have no clue
-	# how to do this...
 	etype2aggr = {
 		'sum': lambda x: z3.Sum(x),
 		# 'prod': x.prod,
@@ -732,6 +727,7 @@ def _compile_aggregation_expression(expr: Expression, grounding_dict: Dict[str,s
 	expr2compile = args[-1]
 	compiled_expressions = []
 	aggr = etype2aggr[etype[1]]
+
 	#Get all groundings of new params
 	possible_objects_by_param = []
 	new_params_names = []
@@ -760,6 +756,7 @@ def _compile_aggregation_expression(expr: Expression, grounding_dict: Dict[str,s
 			else:
 				numberized_compiled_expressions.append(c)
 		compiled_expressions = numberized_compiled_expressions
+
 	#Apply aggregator
 	return aggr(compiled_expressions)
 

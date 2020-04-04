@@ -44,15 +44,27 @@ def check_implication(antecedent, consequent):
 	if isinstance(consequent,AndList):
 		consequent = consequent.to_z3()
 	global solver
+	# We need to push and pop!
+	solver.push()
 	solver.add(antecedent)
 	solver.add(z3.Not(consequent))
 	result = solver.check()
+	solver.pop()
 	if result == z3.z3.unsat:
 		return True
 	else:
 		if result == z3.z3.unknown:
 			print("Unknown implication for precondition: {} => {}".format(antecedent,consequent))
 		return False
+def check_contradicting(a, b, my_solver = None):
+	# Returns True if we can prove a and b are contradictory. False otherwise.
+	# Pass in a solver if you want to use background information to check the contradiction.
+	# You should probably only pass in a solver that contains propositions about constants
+	global solver
+	if my_solver is None: my_solver = solver
+	solver.push()
+
+
 
 def get_implies(x,y):
 	return ((not x) or y)

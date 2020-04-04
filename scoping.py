@@ -51,6 +51,7 @@ def move_var_from_implied_to_target(skills: List[Skill], vars: List[str]) -> Lis
 	Speed up by storing poset structure? This is probably going to be real slow
 	"""
 # 	Naive, probably painfully slow version
+	no_changes = True
 	for var in vars:
 		targeting_skills, accidentally_affecting_skills = get_targeting_and_accidentally_affecting_skills(var, skills)
 		# Accidental skill: A skill that may have unintended side-effects (eg. (no wall, move_north, taxi y ++))
@@ -58,10 +59,16 @@ def move_var_from_implied_to_target(skills: List[Skill], vars: List[str]) -> Lis
 		# Targeting skills are skills that will always have a certain effect on a variable
 		
 		for accidental_skill in accidentally_affecting_skills:
+			action = accidental_skill.get_action()
+			targeting_skills_same_action = [t for t in targeting_skills if t.get_action() == action]
+
 			negated_refined_preconditions = []
-			for targeting_skill in targeting_skills:
-				if targeting_skill.get_action() == accidental_skill.get_action() and \
-						check_implication(targeting_skill.get_precondition(), accidental_skill.get_precondition()):
+			for targeting_skill in targeting_skills_same_action:
+				if not check_implication(targeting_skill.get_precondition(), accidental_skill.get_precondition()):
+					# Flag that we made changes
+					no_changes = False
+					print(f"Moving var {var} for action {targeting_skill.get_action()}")
+					# We need three new skills at the end:
 					# Add effect to targeting skill
 					targeting_skill.effect.extend(accidental_skill.get_targeted_variables())
 					# Update the accidental_skill's precondition to exclude the targeting skill
@@ -72,6 +79,7 @@ def move_var_from_implied_to_target(skills: List[Skill], vars: List[str]) -> Lis
 			accidental_skill.precondition = and2(accidental_skill.precondition, *negated_refined_preconditions)
 			# accidental_skill.effect.append(var)
 			accidental_skill.implicitly_affected_variables.remove(var)
+	return no_changes
 
 def move_var_from_implied_to_target_test():
 	# TODO actually test
@@ -130,10 +138,21 @@ def violates(skill, condition):
 	common_vars = [v for v in skill.get_affected_variables() if v in get_var_names(condition)]
 	return len(common_vars) > 0
 
+def scope(goal, skills, start_condition = None, solver=None, move_vars = False):
+	converged = False
+	while not converged:
+		relevant_objects, used_skills = _scope(goal, skills, start_condition, solver)
+		if move_vars:
+			print("~~~Trying to move vars~~~")
+			converged = move_var_from_implied_to_target(used_skills, relevant_objects)
+		else:
+			converged = True
+	return relevant_objects, used_skills
 
-def scope(goal, skills, start_condition = None, solver=None):
+def _scope(goal, skills, start_condition = None, solver=None):
 	"""Runs the Task Scoping algorithm on a given goal, provided skills, a start_condition and a solver (z3)"""
-	# TODO figure out when to run move_var_from_implied_to_target(). After it runs, update the precondions in q as appropriate.
+	# TODO Run move_vars after scoping and repeat until convergence. Come up with convergence test.
+	#Create solver from start_condition
 	if solver is None:
 		solver = z3.Solver()
 		solver.add(start_condition)
@@ -157,8 +176,6 @@ def scope(goal, skills, start_condition = None, solver=None):
 		q = [goal]
 
 	used_skills = []
-	#Create solver from start_condition
-
 	while len(q) > 0:
 		bfs_with_guarantees(discovered,q,solver,skills,used_skills,guarantees)
 		# pdb.set_trace()
@@ -304,7 +321,8 @@ def clean_AndLists(skills):
 			new_AndList = and2(*[x for x in precond if x is not True])
 			s.precondition = new_AndList
 
-def run_scope_on_file(rddl_file_location):
+def run_scope_on_file(rddl_file_location, **kwargs):
+	"""kwargs get passed to scope()"""
 	algorithm_sections = ["pyrddl_inspector","clean_AndLists", "get_implied_effects", "scope"]
 	boundary_times = []
 	boundary_times.append(time.time())
@@ -316,7 +334,7 @@ def run_scope_on_file(rddl_file_location):
 	boundary_times.append(time.time())
 
 	print("\n~~~~Starting Scope()~~~~\n")
-	relevant_vars, used_skills = scope(goal_conditions,skill_triplets,solver=solver)
+	relevant_vars, used_skills = scope(goal_conditions,skill_triplets,solver=solver, **kwargs)
 	relevant_vars = relevant_vars + [str(i) for i in necessarily_relevant_pvars]
 	relevant_vars = list(set(relevant_vars))
 	boundary_times.append(time.time())
@@ -370,9 +388,9 @@ def domain_tests():
 	# for d in failures: print(d)
 
 if __name__ == "__main__":
-	file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions.rddl"
+	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions.rddl"
 	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions-p1-in-taxi.rddl"
-	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions_blinker.rddl"
+	file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions_blinker.rddl"
 	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions_complex.rddl"
 	# file_path = "./taxi-rddl-domain/taxi-oo_mdp_composite_01.rddl"
 	# file_path = "button-domains/button_special_button.rddl"
@@ -383,7 +401,8 @@ if __name__ == "__main__":
 	# file_path = "button-domains/button_door_negative_precondition.rddl"
 	# file_path = "./enum-domains/enum-taxi-deparameterized-move-actions-nishanth.rddl"
 
-	run_scope_on_file(file_path)
+	# run_scope_on_file(file_path)
+	run_scope_on_file(file_path, move_vars = True)
 	#
 	# domain_tests()
 	# move_var_from_implied_to_target_test()

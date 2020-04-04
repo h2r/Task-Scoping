@@ -58,33 +58,38 @@ def get_implies(x,y):
 	return ((not x) or y)
 
 def get_iff(x,y):
-	both_true = z3.And(x,y)
-	both_false = z3.And(z3.Not(x),z3.Not(y))
-	pdb.set_trace()
-	return z3.Or(both_true,both_false)
+	both_true = and2(x,y)
+	both_false = and2(z3.Not(x),z3.Not(y))
+	# pdb.set_trace()
+	try:
+		return or2(both_true,both_false)
+	except Exception as e: print(f"{type(both_true)}, {type(both_false)}")
 
 def or2(*x, solver=None):
 	"""
 	A wrapper for z3.Or meant to handle ConditionLists and simplifications based on the constant conditions
 	"""
-	new_x = []
-	for i in x:
-		if isinstance(i,ConditionList):
-			new_x.append(i.to_z3())
-		else:
-			new_x.append(i)
-
-	# Note, the below if_else statement exists solely to deal with Or's that only have 1 
-	# condition in them
-	if(len(new_x) > 1):
-		condition = z3.Or(*new_x)
+	if len(x) == 0: return False
+	elif len(x) == 1: return x[0]
 	else:
-		condition = new_x[0]
-
-	if solver is not None:
-		if solver_implies_condition(solver, condition):
-			condition = True
-	return condition
+		new_x = []
+		for i in x:
+			if isinstance(i,ConditionList):
+				new_x.append(i.to_z3())
+			else:
+				new_x.append(i)
+		return z3.Or(*new_x)
+		# Note, the below if_else statement exists solely to deal with Or's that only have 1
+		# condition in them
+		# if(len(new_x) > 1):
+		# 	condition = z3.Or(*new_x)
+		# else:
+		# 	condition = new_x[0]
+		#
+		# if solver is not None:
+		# 	if solver_implies_condition(solver, condition):
+		# 		condition = True
+		# return condition
 
 def and2(*x):
 	"""
@@ -92,7 +97,13 @@ def and2(*x):
 	"""
 	if len(x) == 0: return True
 	elif len(x) == 1: return x[0]
-	else: return AndList(*x)
+	else:
+		return AndList(*x)
+
+def not2(x):
+	if isinstance(x,ConditionList):
+		x = x.to_z3()
+	return z3.Not(x)
 
 class ConditionList(ABC):
 	def __init__(self, *args, name, z3_combinator):

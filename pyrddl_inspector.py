@@ -7,7 +7,7 @@ from classes import *
 import instance_building_utils
 import pdb
 from typing import List, Dict, Tuple
-from logic_utils import solver_implies_condition, OrList, or2, and2, get_iff, get_var_names, synth2varnames
+from logic_utils import solver_implies_condition, OrList, or2, and2, get_iff, get_var_names, synth2varnames, AndList, not2
 
 # att_name_to_domain_attribute = {}
 all_object_names = {}
@@ -121,7 +121,8 @@ def plugin_objects_to_pvar(pvar_name,pvar_parameters,groundings):
 		for p in pvar_parameters:
 			object_names.append(groundings[p])
 	except:
-		pdb.set_trace()
+		# pdb.set_trace()
+		pass
 
 	return instance_building_utils.g2n_names(pvar_name,object_names)
 
@@ -488,7 +489,7 @@ def _compile_expression(expr: Expression, groundings_from_top: Dict[str,str],sol
 			#If the new expression is a condition, add it to the list
 			#and2s are a pain. We should really find a way to decompose conjunctions instead of storing and2s
 			new_conditions = []
-			if isinstance(new_expr,and2):
+			if isinstance(new_expr,AndList):
 				new_conditions = new_expr.args
 			elif isinstance(new_expr,z3.z3.BoolRef):
 				new_conditions = [new_expr]
@@ -509,7 +510,7 @@ def _compile_control_flow_expression(expr: Expression, grounding_dict:Dict[str,s
 	args = expr.args
 	if compiler_subtype == "if":
 		condition = _compile_expression(args[0], grounding_dict, solver_constants_only, reward_args)
-		if isinstance(condition,and2):
+		if isinstance(condition,AndList):
 			condition = condition.to_z3()
 		true_case = _compile_expression(args[1], grounding_dict, solver_constants_only, reward_args)
 		false_case = _compile_expression(args[2], grounding_dict, solver_constants_only, reward_args)
@@ -592,7 +593,7 @@ def _compile_boolean_expression(expr: Expression, groundings_from_top: Dict[str,
 
 	if len(args) == 1:
 		etype2op = {
-			'~': lambda x: z3.Not(x)
+			'~': lambda x: not2(x)
 		}
 
 		if etype[1] not in etype2op:

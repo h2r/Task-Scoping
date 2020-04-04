@@ -6,7 +6,7 @@ from utils import condition_str2objects
 from classes import *
 from logic_utils import check_implication, solver_implies_condition, get_var_names, AndList, OrList, ConditionList, and2
 from pyrddl_inspector import prepare_rddl_for_scoper
-import pdb
+# import pdb
 
 """
 TODO
@@ -369,9 +369,9 @@ def domain_tests():
 	# for d in failures: print(d)
 
 if __name__ == "__main__":
-	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions.rddl"
+	file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions.rddl"
 	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions-p1-in-taxi.rddl"
-	file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions_blinker.rddl"
+	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions_blinker.rddl"
 	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions_complex.rddl"
 	# file_path = "./taxi-rddl-domain/taxi-oo_mdp_composite_01.rddl"
 	# file_path = "button-domains/button_special_button.rddl"

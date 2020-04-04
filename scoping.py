@@ -164,6 +164,7 @@ def scope(goal, skills, start_condition = None, solver=None):
 		# pdb.set_trace()
 		# print(f"bf len(used_skills): {len(used_skills)}")
 		check_guarantees(guarantees,used_skills,q)
+		# used_skills = list(set(used_skills))
 		# pdb.set_trace()
 		# print(f"cg len(used_skills): {len(used_skills)}")
 

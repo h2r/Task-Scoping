@@ -39,7 +39,11 @@ class Skill():
 		return "({},{},{})".format(self.get_precondition(),self.get_action(),self.get_targeted_variables())
 	def __str__(self):
 		return self.__repr__()
-
+	# def __eq__(self, other):
+	# 	return self.get_action() == other.get_action() and self.get_precondition() == other.get_precondition() \
+	# 		   and self.get_targeted_variables() == other.get_targeted_variables() and self.get_affected_variables() == other.get_affected_variables()
+	# def __hash__(self):
+	# 	return self.__repr__()
 class Precondition():
 	"""
 	A Precondition is a first order expression that defines a set of states in a domain

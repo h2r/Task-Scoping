@@ -78,7 +78,11 @@ def or2(*x, solver=None):
 				new_x.append(i.to_z3())
 			else:
 				new_x.append(i)
-		return z3.Or(*new_x)
+		condition = z3.Or(*new_x)
+		if solver is not None:
+			if solver_implies_condition(solver, condition):
+				condition = True
+		return condition
 		# Note, the below if_else statement exists solely to deal with Or's that only have 1
 		# condition in them
 		# if(len(new_x) > 1):

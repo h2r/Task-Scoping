@@ -335,7 +335,7 @@ def convert_to_z3(rddl_model):
 	#TODO when and why do I use each of these?
 	# A solver that contains all information about the start state. Used by the scoping algorithm
 	solver = z3.Solver()
-	#A solver that contains only constant assertions. Used for ...
+	# A solver that contains only constant assertions. Used for ...
 	solver_constants_only = z3.Solver()
 	init_nonfluents = pull_init_nonfluent(rddl_model)
 	init_state = pull_init_state(rddl_model)

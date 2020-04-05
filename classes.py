@@ -41,7 +41,7 @@ class Skill():
 		return self.__repr__()
 	def __eq__(self, other):
 		return self.get_action() == other.get_action() and self.get_precondition() is other.get_precondition() \
-			   and self.get_targeted_variables() == other.get_targeted_variables() and self.get_affected_variables() == other.get_affected_variables()
+			   and self.get_targeted_variables() == other.get_targeted_variables() # and self.get_affected_variables() == other.get_affected_variables()
 	# def __hash__(self):
 	# 	return self.__repr__()
 class Precondition():

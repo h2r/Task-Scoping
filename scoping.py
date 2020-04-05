@@ -7,13 +7,12 @@ from classes import *
 from logic_utils import check_implication, solver_implies_condition, get_var_names, AndList, ConditionList, \
 	and2, check_contradicting
 from pyrddl_inspector import prepare_rddl_for_scoper
-# import pdb
+import pdb
 
 """
 TODO
 Change how we check for guarantee violation. When we add a new skill, we should remove from the solver any conditions that depend on variables the skill affects
 ~"""
-
 
 def get_implied_effects(skills: List[Skill], fast_version= False) -> List[Skill]:
 	"""
@@ -28,8 +27,9 @@ def get_implied_effects(skills: List[Skill], fast_version= False) -> List[Skill]
 	implication_time = 0
 	if not fast_version:
 		for (s0,s1) in itertools.product(skills,skills):
-			if s0.get_action() == s1.get_action():
+			if ((s0.get_action() == s1.get_action()) and (s0 != s1)):
 				implication_start = time.time()
+				# pdb.set_trace()
 				if check_implication(s0.get_precondition(), s1.get_precondition()):
 					s0.implicitly_affected_variables.extend(s1.get_targeted_variables())
 				implication_time += time.time() - implication_start
@@ -56,6 +56,7 @@ def move_var_from_implied_to_target(skills: List[Skill], vars: List[str]) -> Lis
 	new_skills = []
 	for var in vars:
 		targeting_skills, accidentally_affecting_skills = get_targeting_and_accidentally_affecting_skills(var, skills)
+
 		# Accidental skill: A skill that may have unintended side-effects (eg. (no wall, move_north, taxi y ++))
 		# may also affect p0.y for example (if p0 is in the taxi already)
 		# Targeting skills are skills that will always have a certain effect on a variable
@@ -132,10 +133,7 @@ def get_targeting_and_accidentally_affecting_skills(var: str, skills: List[Skill
 	affecting_skills = [s for s in skills if var in s.get_affected_variables()]
 	accidentally_affecting_skills = [s for s in affecting_skills if s not in targeting_skills]
 	return targeting_skills, accidentally_affecting_skills
-# def implies(a,b):
-# 	"""Returns True if a implies b, else false"""
-# 	#Use z3 to return prove(Not(And(b,Not(a))))
-# 	pass
+
 
 def violates(skill, condition):
 	"""Returns True if executing the skill can lead to a violation of Precondition"""
@@ -406,7 +404,7 @@ if __name__ == "__main__":
 	# file_path = "./enum-domains/enum-taxi-deparameterized-move-actions-nishanth.rddl"
 
 	# run_scope_on_file(file_path)
-	run_scope_on_file(file_path, move_vars = True)
+	# run_scope_on_file(file_path, move_vars = True)
 	#
 	# domain_tests()
-	# move_var_from_implied_to_target_test()
+	move_var_from_implied_to_target_test()

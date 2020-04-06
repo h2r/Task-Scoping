@@ -29,7 +29,6 @@ def get_implied_effects(skills: List[Skill], fast_version= False) -> List[Skill]
 		for (s0,s1) in itertools.product(skills,skills):
 			if ((s0.get_action() == s1.get_action()) and (s0 != s1)):
 				implication_start = time.time()
-				# pdb.set_trace()
 				if check_implication(s0.get_precondition(), s1.get_precondition()):
 					s0.implicitly_affected_variables.extend(s1.get_targeted_variables())
 				implication_time += time.time() - implication_start
@@ -53,7 +52,6 @@ def move_var_from_implied_to_target(skills: List[Skill], vars: List[str]) -> Lis
 	"""
 # 	Naive, probably painfully slow version
 	no_changes = True
-	new_skills = []
 	for var in vars:
 		targeting_skills, accidentally_affecting_skills = get_targeting_and_accidentally_affecting_skills(var, skills)
 
@@ -65,26 +63,26 @@ def move_var_from_implied_to_target(skills: List[Skill], vars: List[str]) -> Lis
 			action = accidental_skill.get_action()
 			targeting_skills_same_action = [t for t in targeting_skills if t.get_action() == action]
 
-			negated_refined_preconditions = []
+			refined_preconditions = []
 			for targeting_skill in targeting_skills_same_action:
 				# If the skills can never fire simultaneously, we don't need to change anything
 				if not check_contradicting(targeting_skill.get_precondition(), accidental_skill.get_precondition()):
 					# Flag that we made changes. If we return no_changes=True, scope() knows it has converged
 					no_changes = False
 					print(f"Moving var {var} for action {targeting_skill.get_action()}")
-					# We need three new skills at the end: A only, B only, A and B. Wait, do we need all sets of compatible skills? Oof
-					# TODO If A => B, we really only need B, A and B. Implement that
-					# Add effect to targeting skill
-					targeting_skill.effect.extend(accidental_skill.get_targeted_variables())
-					# Update the accidental_skill's precondition to exclude the targeting skill
+					# If A => B, we really only need B, A and B.
+					# pdb.set_trace()
+					# This is the skill A and B
+					accidental_skill.effect.extend(targeting_skill.get_targeted_variables())
+					# Update the accidental skill (A and B)'s precondition to exclude the targeting skill
 					cond = targeting_skill.get_precondition()
-					if isinstance(cond, ConditionList): #TODO turn negated orlist into andlist of negations
-						cond = cond.to_z3()
-					negated_refined_preconditions.append(z3.Not(cond))
-			accidental_skill.precondition = and2(accidental_skill.precondition, *negated_refined_preconditions)
-			# accidental_skill.effect.append(var)
+					if(cond not in accidental_skill.get_precondition()):
+						if isinstance(cond, ConditionList): #TODO turn negated orlist into andlist of negations
+							cond = cond.to_z3()
+						refined_preconditions.append(cond)
+			accidental_skill.precondition = and2(accidental_skill.precondition, *refined_preconditions)
 			accidental_skill.implicitly_affected_variables.remove(var)
-	return no_changes, new_skills
+	return no_changes
 
 def move_var_from_implied_to_target_test():
 	# TODO actually test
@@ -94,11 +92,11 @@ def move_var_from_implied_to_target_test():
 	get_implied_effects(skill_triplets)
 	print("~~~~~Skills~~~~~")
 	for s in skill_triplets:
-		if s.get_action() == "move_north()": print(s)
-	move_var_from_implied_to_target(skill_triplets, ['passenger-y-curr(p0)'])
+		if s.get_action() == "move_south()": print(s)
+	move_var_from_implied_to_target(skill_triplets, ['taxi-y(t0)'])
 	print("~~~~~Skills~~~~~")
 	for s in skill_triplets:
-		if s.get_action() == "move_north()": print(s)
+		if s.get_action() == "move_south()": print(s)
 	# relevant_vars, used_skills = scope(goal_conditions,skill_triplets,solver=solver)
 	# print("\n~~~Relevant objects~~~")
 	# for x in relevant_vars: print(x)

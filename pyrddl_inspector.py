@@ -431,16 +431,19 @@ def convert_to_z3(rddl_model):
 	triplet_dict = make_triplet_dict(rddl_model, all_object_names)
 
 	skills_triplets = []
+	action_effect_precond_list = []
 	for action in triplet_dict.keys():
-		# This triplet_dict.keys() is just wrong....
 		for effect in triplet_dict[action]:
 			for precond in triplet_dict[action][effect]:
-				#TODO Why do we use solver_constants_only?
-				# if(action == "move_west()"):
-				# 	pdb.set_trace()
-				z3_expr = _compile_expression(*precond,solver_constants_only)
-				new_skill = Skill(z3_expr, action, [effect])
-				skills_triplets.append(new_skill)
+				# solver_constants_only used here because we don't want the initial condition 
+				# to be assumed true when we compile actions
+				if((action, effect, precond) not in action_effect_precond_list):
+					action_effect_precond_list.append((action,effect,precond))
+					z3_expr = _compile_expression(*precond,solver_constants_only)
+					new_skill = Skill(z3_expr, action, [effect])
+					# pdb.set_trace()
+					skills_triplets.append(new_skill)
+
 	return skills_triplets, goal_conditions, necessarily_relevant_pvars, solver
 
 def _compile_expression(expr: Expression, groundings_from_top: Dict[str,str],solver_constants_only, reward_args=None):

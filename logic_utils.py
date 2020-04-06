@@ -56,6 +56,7 @@ def check_implication(antecedent, consequent):
 		if result == z3.z3.unknown:
 			print("Unknown implication for precondition: {} => {}".format(antecedent,consequent))
 		return False
+
 def check_contradicting(a, b, my_solver = None):
 	# Returns True if we can prove a and b are contradictory. False otherwise.
 	# Pass in a solver if you want to use background information to check the contradiction.
@@ -63,13 +64,16 @@ def check_contradicting(a, b, my_solver = None):
 	# We use the name my_solver instead of solver to avoid mucking with the global var.
 	global solver
 	if my_solver is None: my_solver = solver
+	if isinstance(a,AndList):
+		a = a.to_z3()
+	if isinstance(b,AndList):
+		b = b.to_z3()
 	my_solver.push()
 	my_solver.add(a)
 	my_solver.add(b)
 	result = my_solver.check()
 	my_solver.pop()
 	return result == z3.z3.unsat
-
 
 def get_implies(x,y):
 	return ((not x) or y)

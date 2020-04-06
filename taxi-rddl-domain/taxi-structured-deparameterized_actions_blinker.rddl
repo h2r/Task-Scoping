@@ -104,19 +104,19 @@ domain taxi-oo_mdp {
             if ( exists_{ ?t : taxi } [ passenger-in-taxi( ?p, ?t ) & move_west ] & ( ~exists_{ ?w : wall } [ ( WALL_X(?w) == passenger-x-curr(?p) - 1 ) & ( WALL_Y(?w) == passenger-y-curr(?p) )]))
                 then passenger-x-curr(?p) - 1
 
-            else if ( move_north & exists_{ ?t : taxi } [ passenger-in-taxi( ?p, ?t ) & taxi-blinker(?t) ] & ( ~exists_{ ?w : wall } [ ( WALL_X(?w) == passenger-x-curr(?p) + 1 ) & ( WALL_Y(?w) == passenger-y-curr(?p) + 1)]))
+            else if ( move_north & exists_{ ?t : taxi, ?w : wall } [ passenger-in-taxi( ?p, ?t ) & taxi-blinker(?t) & ~(( WALL_X(?w) == passenger-x-curr(?p) + 1 ) & ( WALL_Y(?w) == passenger-y-curr(?p) + 1))])
                 then passenger-x-curr(?p) + 1
 
-            else if ( exists_{?t : taxi} [ passenger-in-taxi( ?p, ?t) & move_east ] & ( ~exists_{ ?w : wall } [ ( WALL_X(?w) == passenger-x-curr(?p) + 1 ) & ( WALL_Y(?w) == passenger-y-curr(?p) )]))
+            else if ( exists_{?t : taxi, ?w : wall} [ passenger-in-taxi( ?p, ?t) & move_east & ~(( WALL_X(?w) == passenger-x-curr(?p) + 1 ) & ( WALL_Y(?w) == passenger-y-curr(?p)))])
                 then passenger-x-curr(?p) + 1
 
             else passenger-x-curr(?p);
 
          passenger-y-curr'(?p) =
-            if ( exists_{?t : taxi} [ passenger-in-taxi( ?p, ?t) & move_north ] & ( ~exists_{ ?w : wall } [ ( WALL_X(?w) == passenger-x-curr(?p) ) & ( WALL_Y(?w) == passenger-y-curr(?p) + 1 )]))
+            if ( exists_{?t : taxi, ?w : wall} [ passenger-in-taxi( ?p, ?t) & move_north & ~(( WALL_X(?w) == passenger-x-curr(?p) ) & ( WALL_Y(?w) == passenger-y-curr(?p) + 1 ))])
                 then passenger-y-curr(?p) + 1
 
-            else if ( exists_{?t : taxi} [ passenger-in-taxi( ?p, ?t) & move_south ] & ( ~exists_{ ?w : wall } [ ( WALL_X(?w) == passenger-x-curr(?p) ) & ( WALL_Y(?w) == passenger-y-curr(?p) - 1 )]))
+            else if ( exists_{?t : taxi, ?w : wall} [ passenger-in-taxi( ?p, ?t) & move_south & ~(( WALL_X(?w) == passenger-x-curr(?p) ) & ( WALL_Y(?w) == passenger-y-curr(?p) - 1 ))])
                 then passenger-y-curr(?p) - 1
 
             else passenger-y-curr(?p);
@@ -127,7 +127,6 @@ domain taxi-oo_mdp {
             then ~taxi-blinker(?t)
 
           else taxi-blinker(?t);
-
 
     };
 

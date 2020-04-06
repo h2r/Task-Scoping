@@ -71,7 +71,6 @@ def move_var_from_implied_to_target(skills: List[Skill], vars: List[str]) -> Lis
 					no_changes = False
 					print(f"Moving var {var} for action {targeting_skill.get_action()}")
 					# If A => B, we really only need B, A and B.
-					# pdb.set_trace()
 					# This is the skill A and B
 					accidental_skill.effect.extend(targeting_skill.get_targeted_variables())
 					# Update the accidental skill (A and B)'s precondition to exclude the targeting skill
@@ -132,7 +131,6 @@ def get_targeting_and_accidentally_affecting_skills(var: str, skills: List[Skill
 	accidentally_affecting_skills = [s for s in affecting_skills if s not in targeting_skills]
 	return targeting_skills, accidentally_affecting_skills
 
-
 def violates(skill, condition):
 	"""Returns True if executing the skill can lead to a violation of Precondition"""
 	common_vars = [v for v in skill.get_affected_variables() if v in get_var_names(condition)]
@@ -141,17 +139,17 @@ def violates(skill, condition):
 def scope(goal, skills, start_condition = None, solver=None, move_vars = False):
 	converged = False
 	while not converged:
-		relevant_objects, used_skills = _scope(goal, skills, start_condition, solver)
+		relevant_pvars, relevant_objects, used_skills = _scope(goal, skills, start_condition, solver)
+		# pdb.set_trace()
 		if move_vars:
 			print("~~~Trying to move vars~~~")
-			converged = move_var_from_implied_to_target(used_skills, relevant_objects)
+			converged = move_var_from_implied_to_target(used_skills, relevant_pvars)
 		else:
 			converged = True
 	return relevant_objects, used_skills
 
 def _scope(goal, skills, start_condition = None, solver=None):
 	"""Runs the Task Scoping algorithm on a given goal, provided skills, a start_condition and a solver (z3)"""
-	# TODO Run move_vars after scoping and repeat until convergence. Come up with convergence test.
 	#Create solver from start_condition
 	if solver is None:
 		solver = z3.Solver()
@@ -186,9 +184,9 @@ def _scope(goal, skills, start_condition = None, solver=None):
 		# print(f"cg len(used_skills): {len(used_skills)}")
 
 	discovered_not_guarantees = [c for c in discovered if c not in guarantees]
-	relevant_conditions = list(set([x for c in discovered_not_guarantees for x in get_var_names(c)]))
-	relevant_objects = condition_str2objects(relevant_conditions)
-	return relevant_objects, used_skills
+	relevant_pvars = list(set([x for c in discovered_not_guarantees for x in get_var_names(c)]))
+	relevant_objects = condition_str2objects(relevant_pvars)
+	return relevant_pvars, relevant_objects, used_skills
 
 def bfs_with_guarantees(discovered,q,solver,skills,used_skills,guarantees):
 	"""
@@ -388,9 +386,9 @@ def domain_tests():
 	# for d in failures: print(d)
 
 if __name__ == "__main__":
-	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions.rddl"
+	file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions.rddl"
 	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions-p1-in-taxi.rddl"
-	file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions_blinker.rddl"
+	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions_blinker.rddl"
 	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions_complex.rddl"
 	# file_path = "./taxi-rddl-domain/taxi-oo_mdp_composite_01.rddl"
 	# file_path = "button-domains/button_special_button.rddl"
@@ -402,7 +400,7 @@ if __name__ == "__main__":
 	# file_path = "./enum-domains/enum-taxi-deparameterized-move-actions-nishanth.rddl"
 
 	# run_scope_on_file(file_path)
-	# run_scope_on_file(file_path, move_vars = True)
+	run_scope_on_file(file_path, move_vars = True)
 	#
 	# domain_tests()
-	move_var_from_implied_to_target_test()
+	# move_var_from_implied_to_target_test()

@@ -75,6 +75,10 @@ def move_var_from_implied_to_target(skills: List[Skill], vars: List[str]) -> Lis
 					accidental_skill.effect.extend(targeting_skill.get_targeted_variables())
 					# Update the accidental skill (A and B)'s precondition to exclude the targeting skill
 					cond = targeting_skill.get_precondition()
+					
+					if isinstance(cond,AndList): # We can't use the 'in' below if cond is an AndList
+						cond = cond.to_z3()
+					
 					if(cond not in accidental_skill.get_precondition()):
 						if isinstance(cond, ConditionList): #TODO turn negated orlist into andlist of negations
 							cond = cond.to_z3()
@@ -138,6 +142,7 @@ def violates(skill, condition):
 
 def scope(goal, skills, start_condition = None, solver=None, move_vars = False):
 	converged = False
+	# pdb.set_trace()
 	while not converged:
 		relevant_pvars, relevant_objects, used_skills = _scope(goal, skills, start_condition, solver)
 		# pdb.set_trace()
@@ -386,9 +391,9 @@ def domain_tests():
 	# for d in failures: print(d)
 
 if __name__ == "__main__":
-	file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions.rddl"
+	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions.rddl"
 	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions-p1-in-taxi.rddl"
-	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions_blinker.rddl"
+	file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions_blinker.rddl"
 	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions_complex.rddl"
 	# file_path = "./taxi-rddl-domain/taxi-oo_mdp_composite_01.rddl"
 	# file_path = "button-domains/button_special_button.rddl"

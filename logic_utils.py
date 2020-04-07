@@ -57,22 +57,21 @@ def check_implication(antecedent, consequent):
 			print("Unknown implication for precondition: {} => {}".format(antecedent,consequent))
 		return False
 
-def check_contradicting(a, b, my_solver = None):
+def provably_contradicting(*args, my_solver = None):
 	# Returns True if we can prove a and b are contradictory. False otherwise.
 	# Pass in a solver if you want to use background information to check the contradiction.
 	# You should probably only pass in a solver that contains propositions about constants
 	# We use the name my_solver instead of solver to avoid mucking with the global var.
 	global solver
 	if my_solver is None: my_solver = solver
-	if isinstance(a,AndList):
-		a = a.to_z3()
-	if isinstance(b,AndList):
-		b = b.to_z3()
 	my_solver.push()
-	my_solver.add(a)
-	my_solver.add(b)
+	for x in args:
+		if isinstance(x,ConditionList):
+			x = x.to_z3()
+		my_solver.add(x)
 	result = my_solver.check()
 	my_solver.pop()
+	# If it is sat, or unknown, return False
 	return result == z3.z3.unsat
 
 def get_implies(x,y):

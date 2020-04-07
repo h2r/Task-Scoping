@@ -46,6 +46,17 @@ def condition_str2objects_test():
 	prop_str = "synth_Or(Not(PASSENGERS_YOU_CARE_FOR(p0)),\nAnd(Not(passenger-in-taxi(p0,t0)),\npassenger-x-curr(p0) == PASSENGER_GOAL_X(p0),passenger-y-curr(p0) == PASSENGER_GOAL_Y(p0)))"
 	objects = condition_str2objects(prop_str)
 	print(objects)
+def get_all_bitstrings(n: int):
+	if n == 1:
+		return [[0], [1]]
+	else:
+		l = get_all_bitstrings(n-1)
+		l2 = []
+		for x in l:
+			l2.append(x + [0])
+			l2.append(x + [1])
+		return l2
 if __name__ == "__main__":
 	# test_grounded_att2objects("grounded_att2objects passed tests")
-	condition_str2objects_test()
+	# condition_str2objects_test()
+	print(get_all_bitstrings(3))

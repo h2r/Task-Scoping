@@ -4,7 +4,6 @@ import z3
 import itertools
 from instance_building_utils import *
 from typing import List
-
 def get_all_groundings(base_str, names, keys):
 	name_lists = [names[k] for k in keys]
 	object_name_sequence_list = itertools.product(*name_lists)
@@ -42,8 +41,8 @@ class Skill():
 	def __eq__(self, other):
 		return self.get_action() == other.get_action() and self.get_precondition() is other.get_precondition() \
 			   and self.get_targeted_variables() == other.get_targeted_variables() # and self.get_affected_variables() == other.get_affected_variables()
-	# def __hash__(self):
-	# 	return self.__repr__()
+	def __hash__(self):
+		return hash(self.__repr__())
 class Precondition():
 	"""
 	A Precondition is a first order expression that defines a set of states in a domain

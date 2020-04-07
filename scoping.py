@@ -2,10 +2,10 @@ from typing import List, Dict, Tuple, Union
 from collections import OrderedDict
 import abc, time
 import z3
-from utils import condition_str2objects
+from utils import condition_str2objects, get_all_bitstrings
 from classes import *
 from logic_utils import check_implication, solver_implies_condition, get_var_names, AndList, ConditionList, \
-	and2, check_contradicting
+	and2, provably_contradicting, not2, and2, or2
 from pyrddl_inspector import prepare_rddl_for_scoper
 import pdb
 
@@ -39,53 +39,105 @@ def get_implied_effects(skills: List[Skill], fast_version= False) -> List[Skill]
 		pass
 	print("Get_implied_effects implication time: {}".format(implication_time))
 	return skills
+def move_var_from_implied_to_target_classic(skills: List[Skill], vars: List[str]) -> List[Skill]:
+    """
+    For any skill which affects, but does not target, a var in vars, split the skill into a version that targets var
+    and a version that does not affect var.
+    """
+    """
+    Pseudocode: For each skill s that accidentally affects var, find the skills with stronger preconditions that target x.
+        Conjoin s.prec with AND(NOT(si.prec))
+    Speed up by storing poset structure? This is probably going to be real slow
+    """
+    # 	Naive, probably painfully slow version
+    no_changes = True
+    for var in vars:
+        targeting_skills, accidentally_affecting_skills = get_targeting_and_accidentally_affecting_skills(var, skills)
 
-def move_var_from_implied_to_target(skills: List[Skill], vars: List[str]) -> List[Skill]:
+        # Accidental skill: A skill that may have unintended side-effects (eg. (no wall, move_north, taxi y ++))
+        # may also affect p0.y for example (if p0 is in the taxi already)
+        # Targeting skills are skills that will always have a certain effect on a variable
+
+        for accidental_skill in accidentally_affecting_skills:
+            action = accidental_skill.get_action()
+            targeting_skills_same_action = [t for t in targeting_skills if t.get_action() == action]
+
+            refined_preconditions = []
+            for targeting_skill in targeting_skills_same_action:
+                # If the skills can never fire simultaneously, we don't need to change anything
+                if not provably_contradicting(targeting_skill.get_precondition(), accidental_skill.get_precondition()):
+                    # Flag that we made changes. If we return no_changes=True, scope() knows it has converged
+                    no_changes = False
+                    print(f"Moving var {var} for action {targeting_skill.get_action()}")
+                    # If A => B, we really only need B, A and B.
+                    # This is the skill A and B
+                    accidental_skill.effect.extend(targeting_skill.get_targeted_variables())
+                    # Update the accidental skill (A and B)'s precondition to exclude the targeting skill
+                    cond = targeting_skill.get_precondition()
+
+                    if isinstance(cond, AndList):  # We can't use the 'in' below if cond is an AndList
+                        cond = cond.to_z3()
+
+                    if (cond not in accidental_skill.get_precondition()):
+                        if isinstance(cond, ConditionList):  # TODO turn negated orlist into andlist of negations
+                            cond = cond.to_z3()
+                        refined_preconditions.append(cond)
+            accidental_skill.precondition = and2(accidental_skill.precondition, *refined_preconditions)
+            accidental_skill.implicitly_affected_variables.remove(var)
+    return no_changes
+
+def move_var_from_implied_to_target(skills: List[Skill], vars: List[str]):
 	"""
-	For any skill which affects, but does not target, a var in vars, split the skill into a version that targets var
-	and a version that does not affect var.
+	Returns: all_skills, repartitioned_skills, no_change
 	"""
-	"""
-	Pseudocode: For each skill s that accidentally affects var, find the skills with stronger preconditions that target x.
-		Conjoin s.prec with AND(NOT(si.prec))
-	Speed up by storing poset structure? This is probably going to be real slow
-	"""
-# 	Naive, probably painfully slow version
+	# TODO make this work
 	no_changes = True
-	for var in vars:
-		targeting_skills, accidentally_affecting_skills = get_targeting_and_accidentally_affecting_skills(var, skills)
+	# Get targeting skills
+	targeting_skills = []
+	for v in vars:
+		targeting_skills.extend(get_skills_affecting_pvar(v,skills))
+	# 	Remove duplicate skills
+	targeting_skills = list(set(targeting_skills))  #Does this work without hash?
+	other_skills = [s for s in skills if s not in targeting_skills]
 
-		# Accidental skill: A skill that may have unintended side-effects (eg. (no wall, move_north, taxi y ++))
-		# may also affect p0.y for example (if p0 is in the taxi already)
-		# Targeting skills are skills that will always have a certain effect on a variable
-		
-		for accidental_skill in accidentally_affecting_skills:
-			action = accidental_skill.get_action()
-			targeting_skills_same_action = [t for t in targeting_skills if t.get_action() == action]
+	# Partition skills by action, because skills can only happen simultaneously if they share the same action
+	action2skills = {}
+	for s in targeting_skills:
+		action = s.get_action()
+		if action not in action2skills.keys():
+			action2skills[action] = [s]
+		else:
+			action2skills[action].append(s)
+	repartitioned_skills = []
+	for action, skills_a in action2skills.items():
+	# 	Iterate over all possible combinations of these skills. 0 means not triggered, 1 means triggered
+		n = len(skills_a)
+		choices = get_all_bitstrings(n)
+		for c in choices:
+			conditions = []
+			effects = []
+			# Add each skill, or its negation
+			for i in range(n):
+				# We are activating this skill, so add its precondition must be true, and its effects happen
+				if c[i]:
+					conditions.append(skills_a[i].get_precondition())
+					effects.extend(skills_a[i].get_targeted_variables())
+				# We are not activating this skill, so its precondition must be false, and we do not get its effects
+				else:
+					conditions.append(not2(skills_a[i].get_precondition()))
+			# Remove duplicate effects
+			effects = list(set(effects))
 
-			refined_preconditions = []
-			for targeting_skill in targeting_skills_same_action:
-				# If the skills can never fire simultaneously, we don't need to change anything
-				if not check_contradicting(targeting_skill.get_precondition(), accidental_skill.get_precondition()):
-					# Flag that we made changes. If we return no_changes=True, scope() knows it has converged
+			# If we can't prove this combination of skills is impossible, add it as a new skill
+			if not provably_contradicting(*conditions):
+				condition = and2(*conditions)
+				repartitioned_skills.append(Skill(condition, action, effects))
+		# 		If this new skill corresponds to more than one original skill, we made a change
+				if sum(c) > 1:
 					no_changes = False
-					print(f"Moving var {var} for action {targeting_skill.get_action()}")
-					# If A => B, we really only need B, A and B.
-					# This is the skill A and B
-					accidental_skill.effect.extend(targeting_skill.get_targeted_variables())
-					# Update the accidental skill (A and B)'s precondition to exclude the targeting skill
-					cond = targeting_skill.get_precondition()
-					
-					if isinstance(cond,AndList): # We can't use the 'in' below if cond is an AndList
-						cond = cond.to_z3()
-					
-					if(cond not in accidental_skill.get_precondition()):
-						if isinstance(cond, ConditionList): #TODO turn negated orlist into andlist of negations
-							cond = cond.to_z3()
-						refined_preconditions.append(cond)
-			accidental_skill.precondition = and2(accidental_skill.precondition, *refined_preconditions)
-			accidental_skill.implicitly_affected_variables.remove(var)
-	return no_changes
+		all_skills = other_skills + repartitioned_skills
+		get_implied_effects(all_skills)
+	return all_skills, repartitioned_skills, no_changes
 
 def move_var_from_implied_to_target_test():
 	# TODO actually test
@@ -96,7 +148,7 @@ def move_var_from_implied_to_target_test():
 	print("~~~~~Skills~~~~~")
 	for s in skill_triplets:
 		if s.get_action() == "move_south()": print(s)
-	move_var_from_implied_to_target(skill_triplets, ['taxi-y(t0)'])
+	skill_triplets, no_change = move_var_from_implied_to_target(skill_triplets, ['taxi-y(t0)'])
 	print("~~~~~Skills~~~~~")
 	for s in skill_triplets:
 		if s.get_action() == "move_south()": print(s)
@@ -119,7 +171,11 @@ def triplet_dict_to_triples(skill_dict: Dict[str,Dict[str,List[Union[z3.z3.ExprR
 			skill_triples.append(Skill(precondition, action, [effect]))
 	return skill_triples
 
-def get_affecting_skills(condition, skills):
+
+def get_skills_affecting_condition(condition, skills):
+	"""
+	:return: skills that target any of condition's pvars
+	"""
 	affecting_skills = []
 	for s in skills:
 		condition_vars = get_var_names(condition)
@@ -129,9 +185,18 @@ def get_affecting_skills(condition, skills):
 			affecting_skills.append(s)
 	return affecting_skills
 
+def get_skills_targeting_pvar(var: str, skills: List[Skill]):
+	return [s for s in skills if var in s.get_targeted_variables()]
+
+def get_skills_affecting_pvar(var: str, skills: List[Skill]):
+	return [s for s in skills if var in s.get_affected_variables()]
+
 def get_targeting_and_accidentally_affecting_skills(var: str, skills: List[Skill]):
-	targeting_skills = [s for s in skills if var in s.get_targeted_variables()]
-	affecting_skills = [s for s in skills if var in s.get_affected_variables()]
+	"""
+	:return: skills that target, and skills that accidentally affect, the pvar
+	"""
+	targeting_skills = get_skills_targeting_pvar(var, skills)
+	affecting_skills = get_skills_affecting_pvar(var, skills)
 	accidentally_affecting_skills = [s for s in affecting_skills if s not in targeting_skills]
 	return targeting_skills, accidentally_affecting_skills
 
@@ -145,10 +210,14 @@ def scope(goal, skills, start_condition = None, solver=None, move_vars = False):
 	# pdb.set_trace()
 	while not converged:
 		relevant_pvars, relevant_objects, used_skills = _scope(goal, skills, start_condition, solver)
+		# print("~~~~relevant_pvars~~~~")
+		# print(type(relevant_pvars[0]))
+		# print(relevant_pvars[0])
 		# pdb.set_trace()
 		if move_vars:
 			print("~~~Trying to move vars~~~")
-			converged = move_var_from_implied_to_target(used_skills, relevant_pvars)
+			# skills, repartitioned_skills, converged = move_var_from_implied_to_target(used_skills, relevant_pvars)
+			converged = move_var_from_implied_to_target_classic(used_skills, relevant_pvars)
 		else:
 			converged = True
 	return relevant_objects, used_skills
@@ -222,7 +291,7 @@ def bfs_with_guarantees(discovered,q,solver,skills,used_skills,guarantees):
 		#We are not trying to find a target (Is the start the target??), so we ignore this step
 		#If not is_goal(v)
 		
-		affecting_skills = get_affecting_skills(condition, skills)
+		affecting_skills = get_skills_affecting_condition(condition, skills)
 		
 		for skill in affecting_skills:
 			# if(skill.action == "toggle_blinker()"):

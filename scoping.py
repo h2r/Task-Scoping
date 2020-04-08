@@ -216,10 +216,13 @@ def scope(goal, skills, start_condition = None, solver=None, move_vars = False):
 		# pdb.set_trace()
 		if move_vars:
 			print("~~~Trying to move vars~~~")
-			# skills, repartitioned_skills, converged = move_var_from_implied_to_target(used_skills, relevant_pvars)
-			converged = move_var_from_implied_to_target_classic(used_skills, relevant_pvars)
+			skills, repartitioned_skills, converged = move_var_from_implied_to_target(used_skills, relevant_pvars)
+			# converged = move_var_from_implied_to_target_classic(used_skills, relevant_pvars)
 		else:
 			converged = True
+		for s in skills:
+			if(s.get_action() == "move_north()"):print(s)
+		# pdb.set_trace()
 	return relevant_objects, used_skills
 
 def _scope(goal, skills, start_condition = None, solver=None):

@@ -39,6 +39,7 @@ def get_implied_effects(skills: List[Skill], fast_version= False) -> List[Skill]
 		pass
 	print("Get_implied_effects implication time: {}".format(implication_time))
 	return skills
+
 def move_var_from_implied_to_target_classic(skills: List[Skill], vars: List[str]) -> List[Skill]:
     """
     For any skill which affects, but does not target, a var in vars, split the skill into a version that targets var
@@ -90,14 +91,14 @@ def move_var_from_implied_to_target(skills: List[Skill], vars: List[str]):
 	"""
 	Returns: all_skills, repartitioned_skills, no_change
 	"""
-	# TODO make this work
 	no_changes = True
 	# Get targeting skills
 	targeting_skills = []
 	for v in vars:
-		targeting_skills.extend(get_skills_affecting_pvar(v,skills))
+		targeting_skills.extend(get_skills_targeting_pvar(v,skills))
 	# 	Remove duplicate skills
 	targeting_skills = list(set(targeting_skills))  #Does this work without hash?
+	# pdb.set_trace()
 	other_skills = [s for s in skills if s not in targeting_skills]
 
 	# Partition skills by action, because skills can only happen simultaneously if they share the same action
@@ -114,27 +115,30 @@ def move_var_from_implied_to_target(skills: List[Skill], vars: List[str]):
 		n = len(skills_a)
 		choices = get_all_bitstrings(n)
 		for c in choices:
-			conditions = []
-			effects = []
-			# Add each skill, or its negation
-			for i in range(n):
-				# We are activating this skill, so add its precondition must be true, and its effects happen
-				if c[i]:
-					conditions.append(skills_a[i].get_precondition())
-					effects.extend(skills_a[i].get_targeted_variables())
-				# We are not activating this skill, so its precondition must be false, and we do not get its effects
-				else:
-					conditions.append(not2(skills_a[i].get_precondition()))
-			# Remove duplicate effects
-			effects = list(set(effects))
+			if(sum(c) == 0):
+				continue
+			else:
+				conditions = []
+				effects = []
+				# Add each skill, or its negation
+				for i in range(n):
+					# We are activating this skill, so add its precondition must be true, and its effects happen
+					if c[i]:
+						conditions.append(skills_a[i].get_precondition())
+						effects.extend(skills_a[i].get_targeted_variables())
+					# We are not activating this skill, so its precondition must be false, and we do not get its effects
+					else:
+						conditions.append(not2(skills_a[i].get_precondition()))
+				# Remove duplicate effects
+				effects = list(set(effects))
 
-			# If we can't prove this combination of skills is impossible, add it as a new skill
-			if not provably_contradicting(*conditions):
-				condition = and2(*conditions)
-				repartitioned_skills.append(Skill(condition, action, effects))
-		# 		If this new skill corresponds to more than one original skill, we made a change
-				if sum(c) > 1:
-					no_changes = False
+				# If we can't prove this combination of skills is impossible, add it as a new skill
+				if not provably_contradicting(*conditions):
+					condition = and2(*conditions)
+					repartitioned_skills.append(Skill(condition, action, effects))
+				# If this new skill corresponds to more than one original skill, we made a change
+					if sum(c) > 1:
+						no_changes = False
 		all_skills = other_skills + repartitioned_skills
 		get_implied_effects(all_skills)
 	return all_skills, repartitioned_skills, no_changes
@@ -177,8 +181,8 @@ def get_skills_affecting_condition(condition, skills):
 	:return: skills that target any of condition's pvars
 	"""
 	affecting_skills = []
+	condition_vars = get_var_names(condition)
 	for s in skills:
-		condition_vars = get_var_names(condition)
 		skill_targets = s.get_targeted_variables()
 		overlapping_vars = [v for v in condition_vars if v in skill_targets]
 		if len(overlapping_vars) > 0:
@@ -216,7 +220,7 @@ def scope(goal, skills, start_condition = None, solver=None, move_vars = False):
 		# pdb.set_trace()
 		if move_vars:
 			print("~~~Trying to move vars~~~")
-			skills, repartitioned_skills, converged = move_var_from_implied_to_target(used_skills, relevant_pvars)
+			skills, repartitioned_skills, converged = move_var_from_implied_to_target(skills, relevant_pvars)
 			# converged = move_var_from_implied_to_target_classic(used_skills, relevant_pvars)
 		else:
 			converged = True
@@ -253,6 +257,8 @@ def _scope(goal, skills, start_condition = None, solver=None):
 	used_skills = []
 	while len(q) > 0:
 		bfs_with_guarantees(discovered,q,solver,skills,used_skills,guarantees)
+		for s in used_skills:
+			if(s.get_action() == "move_north()"):print(s)
 		# pdb.set_trace()
 		# print(f"bf len(used_skills): {len(used_skills)}")
 		check_guarantees(guarantees,used_skills,q)
@@ -289,8 +295,13 @@ def bfs_with_guarantees(discovered,q,solver,skills,used_skills,guarantees):
 	while len(q) > 0:
 		# pdb.set_trace()
 		condition = q.pop()
+
+		# if("p1" in str(condition)):
+		# 	pdb.set_trace()
+
 		if type(condition) is AndList:
 			print("dang")
+
 		#We are not trying to find a target (Is the start the target??), so we ignore this step
 		#If not is_goal(v)
 		
@@ -303,6 +314,7 @@ def bfs_with_guarantees(discovered,q,solver,skills,used_skills,guarantees):
 			if skill in used_skills: continue # We've already accumulated the degree of freedom for this condition
 			used_skills.append(skill) # Else. add the skill to the list
 			precondition = skill.get_precondition()
+
 			if type(precondition) is AndList:
 				precondition_list = copy.copy(precondition.args)
 			else:
@@ -320,6 +332,8 @@ def bfs_with_guarantees(discovered,q,solver,skills,used_skills,guarantees):
 					if solver_implies_condition(solver,precondition):
 						guarantees.append(precondition)
 					else:
+						# if("p1" in str(precondition)):
+						# 	pdb.set_trace()
 						q.append(precondition)
 					
 					# if(skill.action == "move_north()"):

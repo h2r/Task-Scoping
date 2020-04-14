@@ -5,18 +5,32 @@ import pdb
 from typing import List, Dict, Tuple
 from logic_utils import solver_implies_condition, OrList, or2, and2, get_iff, get_var_names, synth2varnames, AndList, not2
 
+# All pvars_over_objects
+p0_intaxi = z3.Bool('passenger-in-taxi(p0,t0)')
+p1_intaxi = z3.Bool('passenger-in-taxi(p1,t0)')
+taxi_y = z3.Int('taxi-y(t0)')
+p0_y = z3.Int('passenger-y-curr(p0)')
+p1_y = z3.Int('passenger-y-curr(p1)')
+
 # This function returns goal_conditions, necessarily_relevant_pvars, skill_triplets, solver
 # that are necessary for the scoping algorithm
 def prepare_1D_taxi():
-    pass
+    skill_dict = make_skills()
+    goal = make_goal_cond()
+    solver, _ = make_solvers()
+    return skill_dict, goal, [], solver
+
+def make_goal_cond():
+    goal = AndList(*[z3.Not(p0_intaxi), (p0_y == 3)])
+    return goal
+
+def make_solvers():
+    init_state_solver = z3.Solver()
+    solver_constants_only = z3.Solver()
+    init_state_solver.add(*[z3.Not(p0_intaxi), z3.Not(p0_intaxi), (taxi_y == 0), (p0_y == 1), (p1_y == 2)])
+    return (init_state_solver, solver_constants_only) 
 
 def make_skills():
-    # All pvars_over_objects
-    p0_intaxi = z3.Bool('passenger-in-taxi(p0,t0)')
-    p1_intaxi = z3.Bool('passenger-in-taxi(p1,t0)')
-    taxi_y = z3.Int('taxi-y(t0)')
-    p0_y = z3.Int('passenger-y-curr(p0)')
-    p1_y = z3.Int('passenger-y-curr(p1)')
 
     pvar_to_effect_types = {}
 
@@ -89,5 +103,3 @@ def make_skills():
     pvar_to_effect_types[p1_y] = [[s3], [s6]]
 
     return pvar_to_effect_types
-
-print(make_skills())

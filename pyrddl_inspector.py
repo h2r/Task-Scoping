@@ -446,7 +446,6 @@ def convert_to_z3(rddl_model):
 					skills_triplets.append(new_skill)
 
 	pdb.set_trace()
-
 	return skills_triplets, goal_conditions, necessarily_relevant_pvars, solver
 
 def _compile_expression(expr: Expression, groundings_from_top: Dict[str,str],solver_constants_only, reward_args=None):

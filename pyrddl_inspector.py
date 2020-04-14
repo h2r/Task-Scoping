@@ -440,9 +440,12 @@ def convert_to_z3(rddl_model):
 				if((action, effect, precond) not in action_effect_precond_list):
 					action_effect_precond_list.append((action,effect,precond))
 					z3_expr = _compile_expression(*precond,solver_constants_only)
+					if(action == "pickup(p0)"):
+						pdb.set_trace()
 					new_skill = Skill(z3_expr, action, [effect])
-					# pdb.set_trace()
 					skills_triplets.append(new_skill)
+
+	pdb.set_trace()
 
 	return skills_triplets, goal_conditions, necessarily_relevant_pvars, solver
 
@@ -463,6 +466,7 @@ def _compile_expression(expr: Expression, groundings_from_top: Dict[str,str],sol
 	}
 	
 	etype = expr.etype
+
 	compiler_type, compiler_subtype = etype
 	if compiler_type not in etype2compiler.keys():
 		raise ValueError('Expression type unknown: {}'.format(etype))
@@ -484,7 +488,8 @@ def _compile_expression(expr: Expression, groundings_from_top: Dict[str,str],sol
 		if compiler_type in condition_compiler_types and compiler_subtype != 'sum':
 			reward_args["in_condition"] = True
 	else: in_condition_old = None
-	new_expr =  compiler_fn(expr,groundings_from_top,solver_constants_only,reward_args)
+	new_expr = compiler_fn(expr,groundings_from_top,solver_constants_only,reward_args)
+
 	#If we are gathering conditions and we are not yet in a condition
 	# Dictionary mapping from synthetic variable string to the original variable. Needed for get_var_names()
 	if reward_args is not None:
@@ -583,8 +588,8 @@ def _compile_pvariable_expression(expr: Expression, grounding_dict: Dict[str, st
 		object_names = [grounding_dict[x] for x in variable_param_strings]
 		z3_var = name_to_z3_var[instance_building_utils.g2n_names(pvar_name,object_names)]
 		if reward_args is not None and not reward_args["in_condition"]:
-			#If it is a bool, it is a condition and will be processed by the parent _compile_expression
-			#Otherwise, it is unscopable and we must deal with it here
+			# If it is a bool, it is a condition and will be processed by the parent _compile_expression
+			# Otherwise, it is unscopable and we must deal with it here
 			if not isinstance(z3_var,z3.BoolRef):
 				reward_args["unscopable_pvars"].append(z3_var)
 				reward_args["reward_function_parameters"].append(z3_var)

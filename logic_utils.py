@@ -6,6 +6,7 @@ solver = z3.Solver()
 synth2varnames = {}
 def get_var_names(expr):
 	global synth2varnames
+
 	if isinstance(expr, bool):
 		return []
 	vars = []
@@ -15,7 +16,15 @@ def get_var_names(expr):
 			vars = vars + synth2varnames[i]
 		else:
 			vars.append(i)
-	return vars
+	return sorted(list(set(vars)))
+
+def get_var_names_multi(expressions):
+	"""Gets var names for a list of expressions"""
+	pvars = []
+	for e in expressions:
+		pvars.extend(get_var_names(e))
+	pvars = sorted(list(set(pvars)))
+
 def solver_implies_condition(solver, precondition):
 	# print("Assertions:")
 	# for a in solver.assertions(): print(a)

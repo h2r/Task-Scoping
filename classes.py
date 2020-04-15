@@ -83,6 +83,12 @@ class DomainAction(UngroundedThing):
 		# self.arguments = arguments
 
 
+def get_all_effected_vars(skills: List[Skill]):
+	pvars = []
+	for s in skills:
+		pvars.extend(s.get_targeted_variables())
+	return sorted(list(set(pvars)))
+
 if __name__ == "__main__":
 	test_AndList()
 	test_ConditionList()

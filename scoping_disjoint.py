@@ -4,8 +4,8 @@ import abc, time
 import z3
 from utils import condition_str2objects, get_all_bitstrings
 from classes import *
-from logic_utils import check_implication, solver_implies_condition, get_var_names, AndList, ConditionList, \
-	and2, provably_contradicting, not2, and2, or2
+from logic_utils import check_implication, solver_implies_condition, get_var_names, get_var_names_multi, \
+	AndList, ConditionList,	and2, provably_contradicting, not2, and2, or2
 from pyrddl_inspector import prepare_rddl_for_scoper
 import pdb
 from typing import Collection
@@ -20,6 +20,7 @@ def get_quotient_skills(skills: Collection[Skill], denominator: Collection[str],
 	:param skills: collection of concrete skills
 	:param denominator: collection of pvars we are going to quotient out
 	:param solver: solver to use when taking disjunction of preconditions. Used to simplify some disjunctions.
+		Should only contain expressions that are always true, ie nonfluents.
 	:return: collection of abstract skills. AKA the quotient list of skills: skills/denominator
 	"""
 	# Maps a pair of an action and sorted tuple of pvars to the list of preconditions that, under that action,
@@ -129,23 +130,27 @@ def violates(skill, condition):
 	return len(common_vars) > 0
 
 
-def scope(goal, skills, start_condition=None, solver=None, move_vars=False):
+def scope(goal, skills, start_condition=None, solver=None):
 	converged = False
 	# pdb.set_trace()
+	all_pvars = get_all_effected_vars(skills)
+	# Get irrelevant pvars so we can do initial quotienting
+	relevant_pvars = []
+	if not hasattr(goal,"__iter__"):
+		goal = [goal]
+	for x in goal:
+		if not solver_implies_condition(solver, x):
+			relevant_pvars.append(x)
+	irrelevant_pvars = [x for x in all_pvars if x not in relevant_pvars]
+	quotient_skills = get_quotient_skills(skills, denominator=irrelevant_pvars)
 	while not converged:
-		relevant_pvars, relevant_objects, used_skills = _scope(goal, skills, start_condition, solver)
-		# print("~~~~relevant_pvars~~~~")
-		# print(type(relevant_pvars[0]))
-		# print(relevant_pvars[0])
-		# pdb.set_trace()
-		if move_vars:
-			print("~~~Trying to move vars~~~")
-			skills, repartitioned_skills, converged = move_var_from_implied_to_target(skills, relevant_pvars)
-		# converged = move_var_from_implied_to_target_classic(used_skills, relevant_pvars)
-		else:
+		relevant_pvars_old = relevant_pvars
+		relevant_pvars, relevant_objects, used_skills = _scope(goal, quotient_skills, start_condition, solver)
+		irrelevant_pvars = [x for x in all_pvars if x not in relevant_pvars]
+		if relevant_pvars_old == relevant_pvars:
 			converged = True
-		for s in skills:
-			if (s.get_action() == "move_north()"): print(s)
+		else:
+			quotient_skills = get_quotient_skills(skills, denominator=irrelevant_pvars)
 	# pdb.set_trace()
 	return relevant_objects, used_skills
 

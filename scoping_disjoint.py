@@ -14,23 +14,32 @@ TODO later
 Change how we check for guarantee violation. When we add a new skill, we should remove from the solver any conditions that depend on variables the skill affects
 ~"""
 
-def get_quotient_skills(skills: Collection[Skill], denominator: Collection[str]) -> Collection[Skill]:
+def get_quotient_skills(skills: Collection[Skill], denominator: Collection[str], solver: z3.Solver = None) \
+		-> Collection[Skill]:
 	"""
 	:param skills: collection of concrete skills
 	:param denominator: collection of pvars we are going to quotient out
+	:param solver: solver to use when taking disjunction of preconditions. Used to simplify some disjunctions.
 	:return: collection of abstract skills. AKA the quotient list of skills: skills/denominator
 	"""
-	# Maps a pair of an action and sorted tuple of pvars to the list of skills targeting that var.
+	# Maps a pair of an action and sorted tuple of pvars to the list of preconditions that, under that action,
+	# have those effects
 	pvars2skills = {}
 	for s in skills:
 		effects = tuple(sorted([v for v in s.get_targeted_variables() if v not in denominator]))
 		k = (s.get_action(), effects)
 		if k not in pvars2skills.keys():
 			pvars2skills[k] = []
-		pvars2skills[k].append(s)
-	new_skills = []
-	for k, v in pvars2skills.items():
-		pass
+		pvars2skills[k].append(s.get_precondition())
+	new_skills: List[Skill] = []
+	for (action, effects), conds in pvars2skills.items():
+		new_cond = or2(conds, solver)
+		new_skill = Skill(new_cond, action, effects)
+		# Since we are using disjoint preconditions, we don't need to process the implicit effects
+		new_skill.implicit_effects_processed = True
+		new_skills.append(new_skill)
+	return new_skills
+
 
 def get_implied_effects(skills: List[Skill], fast_version=False) -> List[Skill]:
 	"""

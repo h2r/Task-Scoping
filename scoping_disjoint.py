@@ -20,7 +20,17 @@ def get_quotient_skills(skills: Collection[Skill], denominator: Collection[str])
 	:param denominator: collection of pvars we are going to quotient out
 	:return: collection of abstract skills. AKA the quotient list of skills: skills/denominator
 	"""
-	pass
+	# Maps a pair of an action and sorted tuple of pvars to the list of skills targeting that var.
+	pvars2skills = {}
+	for s in skills:
+		effects = tuple(sorted([v for v in s.get_targeted_variables() if v not in denominator]))
+		k = (s.get_action(), effects)
+		if k not in pvars2skills.keys():
+			pvars2skills[k] = []
+		pvars2skills[k].append(s)
+	new_skills = []
+	for k, v in pvars2skills.items():
+		pass
 
 def get_implied_effects(skills: List[Skill], fast_version=False) -> List[Skill]:
 	"""

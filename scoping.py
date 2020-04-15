@@ -176,7 +176,7 @@ def triplet_dict_to_triples(skill_dict: Dict[str,Dict[str,List[Union[z3.z3.ExprR
 	return skill_triples
 
 
-def get_skills_affecting_condition(condition, skills):
+def get_skills_targeting_condition(condition, skills):
 	"""
 	:return: skills that target any of condition's pvars
 	"""
@@ -305,7 +305,7 @@ def bfs_with_guarantees(discovered,q,solver,skills,used_skills,guarantees):
 		#We are not trying to find a target (Is the start the target??), so we ignore this step
 		#If not is_goal(v)
 		
-		affecting_skills = get_skills_affecting_condition(condition, skills)
+		affecting_skills = get_skills_targeting_condition(condition, skills)
 		
 		for skill in affecting_skills:
 			# if(skill.action == "toggle_blinker()"):

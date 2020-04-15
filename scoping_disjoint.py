@@ -14,7 +14,7 @@ TODO later
 Change how we check for guarantee violation. When we add a new skill, we should remove from the solver any conditions that depend on variables the skill affects
 ~"""
 
-def get_quotient_skills(skills: Collection[Skill], denominator: Collection[str]):
+def get_quotient_skills(skills: Collection[Skill], denominator: Collection[str]) -> Collection[Skill]:
 	"""
 	:param skills: collection of concrete skills
 	:param denominator: collection of pvars we are going to quotient out

@@ -18,6 +18,7 @@ def prepare_1D_taxi():
     skills_list, skill_dict = make_skills()
     goal = make_goal_cond()
     solver, _ = make_solvers()
+
     return skills_list, skill_dict, goal, [], solver
 
 def make_goal_cond():
@@ -27,7 +28,7 @@ def make_goal_cond():
 def make_solvers():
     init_state_solver = z3.Solver()
     solver_constants_only = z3.Solver()
-    init_state_solver.add(*[z3.Not(p0_intaxi), z3.Not(p0_intaxi), (taxi_y == 0), (p0_y == 1), (p1_y == 2)])
+    init_state_solver.add(*[z3.Not(p0_intaxi), z3.Not(p1_intaxi), (taxi_y == 0), (p0_y == 1), (p1_y == 2)])
     return (init_state_solver, solver_constants_only) 
 
 def make_skills():

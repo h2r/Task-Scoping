@@ -33,7 +33,7 @@ class Skill():
 	def get_affected_variables(self):
 		if not self.implicit_effects_processed:
 			raise ValueError("Implicit effects of this skill not yet processed")
-		return self.effect + self.implicitly_affected_variables
+		return tuple(list(self.effect) + list(self.implicitly_affected_variables))
 	def __repr__(self):
 		return "({},{},{})".format(self.get_precondition(),self.get_action(),self.get_targeted_variables())
 	def __str__(self):

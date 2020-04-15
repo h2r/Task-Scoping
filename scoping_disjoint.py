@@ -131,6 +131,9 @@ def violates(skill, condition):
 
 
 def scope(goal, skills, start_condition=None, solver=None):
+	if solver is None:
+		solver = z3.Solver()
+		solver.add(start_condition)
 	converged = False
 	# pdb.set_trace()
 	all_pvars = get_all_effected_vars(skills)
@@ -140,7 +143,8 @@ def scope(goal, skills, start_condition=None, solver=None):
 		goal = [goal]
 	for x in goal:
 		if not solver_implies_condition(solver, x):
-			relevant_pvars.append(x)
+			# goal_pvars = get_var_names(x)
+			relevant_pvars.append(get_var_names(x))
 	irrelevant_pvars = [x for x in all_pvars if x not in relevant_pvars]
 	quotient_skills = get_quotient_skills(skills, denominator=irrelevant_pvars)
 	while not converged:

@@ -15,10 +15,10 @@ p1_y = z3.Int('passenger-y-curr(p1)')
 # This function returns goal_conditions, necessarily_relevant_pvars, skill_triplets, solver
 # that are necessary for the scoping algorithm
 def prepare_1D_taxi():
-    skill_dict = make_skills()
+    skills_list, skill_dict = make_skills()
     goal = make_goal_cond()
     solver, _ = make_solvers()
-    return skill_dict, goal, [], solver
+    return skills_list, skill_dict, goal, [], solver
 
 def make_goal_cond():
     goal = AndList(*[z3.Not(p0_intaxi), (p0_y == 3)])
@@ -102,4 +102,6 @@ def make_skills():
     pvar_to_effect_types[p0_y] = [[s2], [s5]]
     pvar_to_effect_types[p1_y] = [[s3], [s6]]
 
-    return pvar_to_effect_types
+    all_skills = [s1, s2, s3, s4, s5, s6, s7, s8, s9, s10]
+
+    return (all_skills, pvar_to_effect_types)

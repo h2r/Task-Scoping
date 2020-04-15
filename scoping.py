@@ -10,7 +10,7 @@ from pyrddl_inspector import prepare_rddl_for_scoper
 import pdb
 
 """
-TODO
+TODO later
 Change how we check for guarantee violation. When we add a new skill, we should remove from the solver any conditions that depend on variables the skill affects
 ~"""
 

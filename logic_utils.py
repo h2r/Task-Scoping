@@ -107,7 +107,12 @@ def or2(*x, solver=None):
 				new_x.append(i.to_z3())
 			else:
 				new_x.append(i)
-		condition = z3.Or(*new_x)
+		try:
+			condition = z3.Or(*new_x)
+		except z3.z3types.Z3Exception as e:
+			print("Busted in or2")
+			for x in new_x: print(f"{x}: {type(x)}")
+			raise e
 		if solver is not None:
 			if solver_implies_condition(solver, condition):
 				condition = True

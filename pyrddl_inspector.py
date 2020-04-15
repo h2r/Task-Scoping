@@ -441,11 +441,15 @@ def convert_to_z3(rddl_model):
 					action_effect_precond_list.append((action,effect,precond))
 					z3_expr = _compile_expression(*precond,solver_constants_only)
 					if(action == "pickup(p0)"):
-						pdb.set_trace()
+						pass
+						# print("~~~")
+						# print(type(effect))
+						# print("~~~")
+						# pdb.set_trace()
 					new_skill = Skill(z3_expr, action, [effect])
 					skills_triplets.append(new_skill)
 
-	pdb.set_trace()
+	# pdb.set_trace()
 	return skills_triplets, goal_conditions, necessarily_relevant_pvars, solver
 
 def _compile_expression(expr: Expression, groundings_from_top: Dict[str,str],solver_constants_only, reward_args=None):

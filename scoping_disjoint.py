@@ -34,7 +34,7 @@ def get_quotient_skills(skills: Collection[Skill], denominator: Collection[str],
 		pvars2skills[k].append(s.get_precondition())
 	new_skills: List[Skill] = []
 	for (action, effects), conds in pvars2skills.items():
-		new_cond = or2(conds, solver)
+		new_cond = or2(*conds, solver=solver)
 		new_skill = Skill(new_cond, action, effects)
 		# Since we are using disjoint preconditions, we don't need to process the implicit effects
 		new_skill.implicit_effects_processed = True

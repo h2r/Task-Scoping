@@ -86,6 +86,20 @@ def split_conjunction():
 	for k, v in exceptions.items():
 		print(f"{k}: {v}")
 
+def split_into_conjunctions():
+	atoms = [z3.Bool(str(i)) for i in range(4)]
+	first2 = z3.And(*atoms[:2])
+	last2 = z3.And(*atoms[2:])
+	first2OrLast2 = z3.Or(first2, last2)
+	g = z3.Goal()
+	g.add(first2OrLast2)
+	r = z3.Tactic('split-clause')(g)
+	print(first2OrLast2)
+	print(r[0].as_expr())
+	for x in r:
+		print(x.as_expr())
+
 
 if __name__ == "__main__":
-	split_conjunction()
+	# split_conjunction()
+	split_into_conjunctions()

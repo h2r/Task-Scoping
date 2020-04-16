@@ -260,10 +260,12 @@ def acceptable_z3_condition(x):
 			return True
 	return False
 
-def get_atoms(expr: Union[bool,z3.ExprRef, ConditionList]) -> List[z3.ExprRef]:
+def get_atoms(expr: Union[bool,z3.ExprRef, z3.Goal, ConditionList]) -> List[z3.ExprRef]:
 	if isinstance(expr, bool): return []
 	if isinstance(expr, ConditionList):
 		expr = expr.to_z3()
+	if isinstance(expr, z3.Goal):
+		expr = expr.as_expr()
 	atoms = []
 	children = expr.children()
 	# An expression is an atom iff it has no children

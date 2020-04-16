@@ -1,4 +1,5 @@
 from abc import ABC
+import copy
 import z3
 import pdb
 
@@ -94,6 +95,61 @@ def get_iff(x,y):
 		return or2(both_true,both_false)
 	except Exception as e: print(f"{type(both_true)}, {type(both_false)}")
 
+def simplify_before_ors(cond1, cond2):
+	"""
+	From boolean algebra, we know: a*b + a*b' = a*(b + b') = a*(1) = a
+	This function applies that to a list of conditions to be or'ed
+	cond1 and cond2 must both be AndLists that have no contradictions inherent in them!
+	(i.e: no having both A and z3.Not(A) in the same list)
+	"""
+	if(isinstance(cond1, AndList) and isinstance(cond2, AndList)):
+		if(len(cond1.args) != len(cond2.args)):
+			return [cond1, cond2]
+		else:
+			positive_cond_list = set()
+			negative_cond_list = set()
+			for condA in cond1:
+				if(condA.decl().name() == str(condA)):
+					positive_cond_list.add(str(condA))
+				elif(condA.decl().name() == 'not'):
+					negative_cond_list.add(str(condA.arg(0)))
+			for condB in cond2:
+				if(condB.decl().name() == str(condB)):
+					positive_cond_list.add(str(condB))
+				elif(condB.decl().name() == 'not'):
+					negative_cond_list.add(str(condB.arg(0)))
+
+			to_purge = []
+			for po_cond in positive_cond_list:
+				if(po_cond in negative_cond_list):
+					to_purge.append(po_cond)
+
+			new_cond1 = []
+			new_cond2 = []
+			for condA in cond1:
+				keep_elem = True
+				for purgee in to_purge:
+					if(purgee in str(condA)):
+						keep_elem = False
+				if(keep_elem):
+					new_cond1.append(condA)
+
+			for condB in cond2:
+				keep_elem = True
+				for purgee in to_purge:
+					if(purgee in str(condB)):
+						keep_elem = False
+				if(keep_elem):
+					new_cond2.append(condB)
+
+			if(new_cond1 == new_cond2):
+				return [AndList(*new_cond1)]
+			else:
+				return [AndList(*new_cond1), AndList(*new_cond2)]
+			
+	else:
+		return [cond1, cond2]
+
 def or2(*x, solver=None):
 	"""
 	A wrapper for z3.Or meant to handle ConditionLists and simplifications based on the constant conditions
@@ -117,6 +173,7 @@ def or2(*x, solver=None):
 			if solver_implies_condition(solver, condition):
 				condition = True
 		return condition
+
 		# Note, the below if_else statement exists solely to deal with Or's that only have 1
 		# condition in them
 		# if(len(new_x) > 1):
@@ -232,4 +289,9 @@ def split_conjunction_test():
 	print(x_and_y)
 
 if __name__ == "__main__":
+	# p0 = z3.Bool('passenger-in-taxi(p0)')
+	# p1 = z3.Bool('passenger-in-taxi(p1)')
+	# c1 = AndList(*[z3.Not(p0),z3.Not(p1)])
+	# c2 = AndList(*[z3.Not(p0),p1])
+	# print(simplify_before_ors(c1, c2))
 	pass

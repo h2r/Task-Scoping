@@ -5,7 +5,7 @@ import z3
 from utils import condition_str2objects, get_all_bitstrings
 from classes import *
 from logic_utils import check_implication, solver_implies_condition, get_var_names, get_var_names_multi, \
-	AndList, ConditionList,	and2, provably_contradicting, not2, and2, or2
+	AndList, ConditionList,	and2, provably_contradicting, not2, and2, or2, simplify_before_ors
 from pyrddl_inspector import prepare_rddl_for_scoper
 import pdb
 from typing import Collection
@@ -28,13 +28,27 @@ def get_quotient_skills(skills: Collection[Skill], denominator: Collection[str],
 	pvars2skills = {}
 	for s in skills:
 		effects = tuple(sorted([v for v in s.get_targeted_variables() if v not in denominator]))
+		# pdb.set_trace()
 		k = (s.get_action(), effects)
 		if k not in pvars2skills.keys():
 			pvars2skills[k] = []
 		pvars2skills[k].append(s.get_precondition())
 	new_skills: List[Skill] = []
+	
 	for (action, effects), conds in pvars2skills.items():
-		new_cond = or2(*conds, solver=solver)
+		if(len(conds) == 0):
+			new_cond = or2(*conds, solver=solver)
+		elif(len(conds) == 1):
+			new_cond = conds[0]
+		elif(len(conds) == 2):
+			simp_conds = simplify_before_ors(conds[0], conds[1])
+			if(len(simp_conds) == 1):
+				new_cond = simp_conds[0]
+			elif(len(simp_conds) == 2):
+				new_cond = or2(*simp_conds, solver=solver)
+		else:
+			raise ValueError('We are trying to merge skills where there are more than 2 combined preconds. Code for this not-yet implemented')
+
 		new_skill = Skill(new_cond, action, effects)
 		# Since we are using disjoint preconditions, we don't need to process the implicit effects
 		new_skill.implicit_effects_processed = True
@@ -135,27 +149,29 @@ def scope(goal, skills, start_condition=None, solver=None):
 		solver = z3.Solver()
 		solver.add(start_condition)
 	converged = False
-	# pdb.set_trace()
 	all_pvars = get_all_effected_vars(skills)
+	
 	# Get irrelevant pvars so we can do initial quotienting
 	relevant_pvars = []
 	if not hasattr(goal,"__iter__"):
 		goal = [goal]
 	for x in goal:
 		if not solver_implies_condition(solver, x):
-			# goal_pvars = get_var_names(x)
-			relevant_pvars.append(get_var_names(x))
+			relevant_pvars += get_var_names(x)
 	irrelevant_pvars = [x for x in all_pvars if x not in relevant_pvars]
+	
 	quotient_skills = get_quotient_skills(skills, denominator=irrelevant_pvars)
-	while not converged:
+
+	while not converged:	
 		relevant_pvars_old = relevant_pvars
 		relevant_pvars, relevant_objects, used_skills = _scope(goal, quotient_skills, start_condition, solver)
 		irrelevant_pvars = [x for x in all_pvars if x not in relevant_pvars]
+		# pdb.set_trace()
 		if relevant_pvars_old == relevant_pvars:
 			converged = True
 		else:
 			quotient_skills = get_quotient_skills(skills, denominator=irrelevant_pvars)
-	# pdb.set_trace()
+			# pdb.set_trace()
 	return relevant_objects, used_skills
 
 
@@ -381,44 +397,6 @@ def run_scope_on_file(rddl_file_location, **kwargs):
 	return relevant_vars, used_skills, used_actions
 
 
-def domain_tests():
-	"""
-	Checks that scoping works correctly on some sample domains
-	TODO check used_skills
-	"""
-	paths = OrderedDict()
-	paths["taxi"] = "./taxi-rddl-domain/taxi-structured-deparameterized_actions.rddl"
-	paths["taxi_p1_in_taxi"] = "./taxi-rddl-domain/taxi-structured-deparameterized_actions-p1-in-taxi.rddl"
-	correct_objects = OrderedDict()
-	correct_objects["taxi"] = {"t0", "p0", "w0"}
-	correct_objects["taxi_p1_in_taxi"] = {"t0", "p0", "p1", "w0"}
-	correct_actions = OrderedDict()
-	correct_actions["taxi"] = {"move_north()", "move_west()", "move_south()", "move_east()", "pickup(p0)",
-							   "dropoff(p0)"}
-	correct_actions["taxi_p1_in_taxi"] = {"move_north()", "move_west()", "move_south()", "move_east()", "pickup(p0)",
-										  "dropoff(p0)", "dropoff(p1)", "pickup(p1)"}
-	successes, failures = [], []
-	action_successes = []
-	state_successes = []
-	for domain, path in paths.items():
-		relevant_vars, used_skills, used_actions = run_scope_on_file(path)
-		if set(relevant_vars) == correct_objects[domain]: state_successes.append(domain)
-		if set(used_actions) == correct_actions[domain]:
-			action_successes.append(domain)
-		else:
-			failures.append(domain)
-
-	print("\n\n~~~~~~~~~~~~~~~~~~~\n")
-	print("Domain | Object Success | Action success")
-	for d in paths.keys():
-		print(f"{d} | {d in state_successes} | {d in action_successes}")
-
-
-# print("Successes:")
-# for d in successes: print(d)
-# print("Failures:")
-# for d in failures: print(d)
-
 if __name__ == "__main__":
 	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions.rddl"
 	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions-p1-in-taxi.rddl"
@@ -435,6 +413,3 @@ if __name__ == "__main__":
 
 	# run_scope_on_file(file_path)
 	run_scope_on_file(file_path, move_vars=True)
-#
-# domain_tests()
-# move_var_from_implied_to_target_test()

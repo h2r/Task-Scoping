@@ -9,9 +9,8 @@ def test_quotient():
 	for s in mn_skills: print(s)
 	irrelevant_pvars = ["passenger-y-curr(p1)"]
 	mn_quotient = get_quotient_skills(mn_skills, denominator=irrelevant_pvars)
-	print(f"Ignoring {irrelevant_pvars}:")
-	print()
-	print("Changed Skills")
+	# print(f"\nIgnoring {irrelevant_pvars}:\n")
+	print(f"\nSkills modulo effects on {irrelevant_pvars}:\n")
 	for s in mn_quotient: print(s)
 
 def test_scoping():
@@ -25,4 +24,5 @@ def test_scoping():
 	for s in used_skills: print(s)
 
 if __name__ == "__main__":
-	test_scoping()
+	# test_scoping()
+	test_quotient()

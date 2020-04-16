@@ -1,16 +1,91 @@
 import z3
+from logic_utils import get_var_names, get_atoms
+tactic_names = ['ackermannize_bv', 'subpaving', 'horn', 'horn-simplify', 'nlsat', 'qfnra-nlsat', 'nlqsat', 'qe-light',
+				'qe-sat', 'qe', 'qsat', 'qe2', 'qe_rec', 'psat', 'sat', 'sat-preprocess', 'ctx-solver-simplify', 'smt',
+				'psmt', 'unit-subsume-simplify', 'aig', 'add-bounds', 'card2bv', 'degree-shift', 'diff-neq', 'eq2bv',
+				'factor', 'fix-dl-var', 'fm', 'lia2card', 'lia2pb', 'nla2bv', 'normalize-bounds', 'pb2bv',
+				'propagate-ineqs', 'purify-arith', 'recover-01', 'bit-blast', 'bv1-blast', 'bv_bound_chk',
+				'propagate-bv-bounds', 'propagate-bv-bounds-new', 'reduce-bv-size', 'bvarray2uf', 'dt2bv',
+				'elim-small-bv', 'max-bv-sharing', 'blast-term-ite', 'cofactor-term-ite', 'collect-statistics',
+				'ctx-simplify', 'der', 'distribute-forall', 'dom-simplify', 'elim-term-ite', 'elim-uncnstr',
+				'injectivity', 'snf', 'nnf', 'occf', 'pb-preprocess', 'propagate-values', 'reduce-args',
+				'reduce-invertible', 'simplify', 'elim-and', 'solve-eqs', 'special-relations', 'split-clause',
+				'symmetry-reduce', 'tseitin-cnf', 'tseitin-cnf-core', 'qffd', 'pqffd', 'smtfd', 'fpa2bv', 'qffp',
+				'qffpbv', 'qffplra', 'default', 'sine-filter', 'qfbv-sls', 'nra', 'qfaufbv', 'qfauflia', 'qfbv',
+				'qfidl', 'qflia', 'qflra', 'qfnia', 'qfnra', 'qfuf', 'qfufbv', 'qfufbv_ackr', 'ufnia', 'uflra',
+				'auflia', 'auflira', 'aufnira', 'lra', 'lia', 'lira', 'skip', 'fail', 'fail-if-undecided',
+				'macro-finder', 'quasi-macros', 'ufbv-rewriter', 'bv', 'ufbv']
 
-p0_intaxi = z3.Bool('passenger-in-taxi(p0,t0)')
-p1_intaxi = z3.Bool('passenger-in-taxi(p1,t0)')
-taxi_y = z3.Int('taxi-y(t0)')
-p0_y = z3.Int('passenger-y-curr(p0)')
-p1_y = z3.Int('passenger-y-curr(p1)')
 
-tempty = z3.And(z3.Not(p0_intaxi),z3.Not(p1_intaxi))
-p0out = z3.Or(tempty, z3.And(z3.Not(p0_intaxi),p1_intaxi))
-print(p0out)
-print("\n")
-x = z3.simplify(p0out)
-print(x)
-print()
-print(z3.simplify(z3.Or(True,p0_intaxi)))
+
+def simplify_test():
+	"""We want to simplify Or(And(A,B),And(A,Not(B))) to A"""
+	A = z3.Bool('A')
+	B = z3.Bool('B')
+	both = z3.And(A,B)
+	Aonly = z3.And(A,z3.Not(B))
+	Acomp = z3.Or(both,Aonly)
+
+	print(Acomp)
+	g = z3.Goal()
+	g.add(Acomp)
+	print(g)
+	boring_output = '[[Or(And(A, B), And(A, Not(B)))]]'
+	boring_tactics = []
+	interesting_tactics = []
+	exceptions = {}
+	for tn in tactic_names:
+		t = z3.Tactic(tn)
+		try:
+			s = str(t(g))
+		except Exception as e:
+			exceptions[tn] = e
+		if s == boring_output:
+			boring_tactics.append(tn)
+		else:
+			print(f"{tn}:\n{s}\n")
+			interesting_tactics.append(tn)
+	print(f"Boring tactics:\n{', '.join(boring_tactics)}")
+	print(f"\nInteresting tactics:\n{', '.join(interesting_tactics)}")
+	print(f"\nExceptions: ")
+	for k,v in exceptions.items():
+		print(f"{k}: {v}")
+
+	successful_tactics = ['ctx-solver-simplify', 'aig']
+
+def split_conjunction():
+	A = z3.Bool('A')
+	B = z3.Bool('B')
+	both = z3.And(A,B)
+	Aonly = z3.And(A,z3.Not(B))
+	Acomp = z3.Or(both,Aonly)
+	print(str(both))
+	g = z3.Goal()
+	g.add(both)
+	print(str(g))
+	print(g.as_expr())
+
+	boring_output = '[[A, B]]'
+	boring_tactics = []
+	interesting_tactics = []
+	exceptions = {}
+	for tn in tactic_names:
+		t = z3.Tactic(tn)
+		try:
+			s = str(t(g))
+		except Exception as e:
+			exceptions[tn] = e
+		if s == boring_output:
+			boring_tactics.append(tn)
+		else:
+			print(f"{tn}:\n{s}\n")
+			interesting_tactics.append(tn)
+	print(f"Boring tactics:\n{', '.join(boring_tactics)}")
+	print(f"\nInteresting tactics:\n{', '.join(interesting_tactics)}")
+	print(f"\nExceptions: ")
+	for k, v in exceptions.items():
+		print(f"{k}: {v}")
+
+
+if __name__ == "__main__":
+	split_conjunction()

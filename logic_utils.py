@@ -2,9 +2,13 @@ from abc import ABC
 import copy
 import z3
 import pdb
+from typing import Union, List
 
 solver = z3.Solver()
 synth2varnames = {}
+
+
+
 def get_var_names(expr):
 	global synth2varnames
 
@@ -256,6 +260,30 @@ def acceptable_z3_condition(x):
 			return True
 	return False
 
+def get_atoms(expr: Union[bool,z3.ExprRef, ConditionList]) -> List[z3.ExprRef]:
+	if isinstance(expr, bool): return []
+	if isinstance(expr, ConditionList):
+		expr = expr.to_z3()
+	atoms = []
+	children = expr.children()
+	# An expression is an atom iff it has no children
+	if len(children) == 0:
+		atoms = [expr]
+	else:
+		atoms = []
+		for c in children:
+			atoms.extend(get_atoms(c))
+	return atoms
+
+def get_atoms_test():
+	A = z3.Bool('A')
+	B = z3.Bool('B')
+	both = z3.And(A,B)
+	Aonly = z3.And(A,z3.Not(B))
+	Acomp = z3.Or(both,Aonly)
+	assert set(get_atoms(both)) == {A,B}, set(get_atoms(both))
+	assert set(get_atoms(Aonly)) == {A,B}, set(get_atoms(Aonly))
+
 def test_AndList():
 	z3_vars = [z3.Bool(str(i)) for i in range(10)]
 	a_correct = z3_vars[1:3]
@@ -294,4 +322,4 @@ if __name__ == "__main__":
 	# c1 = AndList(*[z3.Not(p0),z3.Not(p1)])
 	# c2 = AndList(*[z3.Not(p0),p1])
 	# print(simplify_before_ors(c1, c2))
-	pass
+	get_atoms_test()

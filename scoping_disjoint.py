@@ -172,7 +172,7 @@ def scope(goal, skills, start_condition=None, solver=None):
 		else:
 			quotient_skills = get_quotient_skills(skills, denominator=irrelevant_pvars)
 			# pdb.set_trace()
-	return relevant_objects, used_skills
+	return relevant_pvars, relevant_objects, used_skills
 
 
 def _scope(goal, skills, start_condition=None, solver=None):

@@ -101,5 +101,5 @@ def split_into_conjunctions():
 
 
 if __name__ == "__main__":
-	# split_conjunction()
-	split_into_conjunctions()
+	split_conjunction()
+	# split_into_conjunctions()

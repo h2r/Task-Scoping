@@ -87,6 +87,8 @@ def get_all_effected_vars(skills: List[Skill]):
 	pvars = []
 	for s in skills:
 		pvars.extend(s.get_targeted_variables())
+	# cast to string if they are z3 vars. I'd rather deal with z3 vars the whole time, but don't know how.
+	pvars = [str(s) for s in pvars]
 	return sorted(list(set(pvars)))
 
 if __name__ == "__main__":

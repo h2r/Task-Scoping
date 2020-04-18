@@ -1,5 +1,6 @@
 from hardcoded_1Dtaxi import prepare_1D_taxi
 from scoping_disjoint import scope, get_quotient_skills
+from hardcoded_taxi2 import prepare_taxi_domain
 
 def test_quotient():
 	skills_list, skill_dict, goal, _, solver = prepare_1D_taxi()
@@ -16,13 +17,25 @@ def test_quotient():
 def test_scoping():
 	skills_list, _, goal, _, solver = prepare_1D_taxi()
 	for s in skills_list: s.effect = [str(x) for x in s.effect]
-	relevant_objects, used_skills = scope(goal, skills_list, start_condition=None, solver=solver)
+	relevant_pvars, relevant_objects, used_skills = scope(goal, skills_list, start_condition=None, solver=solver)
 	print("~~~~~")
 	print("Relevant objects")
 	for o in relevant_objects: print(o)
 	print("Relevant skills")
 	for s in used_skills: print(s)
 
+def test_scoping2():
+	goals, skills, start_condition, pvars = prepare_taxi_domain()
+	for s in skills: s.effect = [str(x) for x in s.effect]
+	relevant_pvars, relevant_objects, used_skills = scope(goals, skills, start_condition)
+	print("~~~All Skills~~~")
+	for s in skills: print(s)
+	print("~~~Relevant skills~~~")
+	for s in used_skills: print(s)
+	print("~~~Relevant Objects")
+	for o in relevant_objects: print(o)
+
 if __name__ == "__main__":
 	# test_scoping()
-	test_quotient()
+	# test_quotient()
+	test_scoping2()

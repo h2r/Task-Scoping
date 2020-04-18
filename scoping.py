@@ -4,7 +4,7 @@ import abc, time
 import z3
 from utils import condition_str2objects, get_all_bitstrings
 from classes import *
-from logic_utils import check_implication, solver_implies_condition, get_var_names, AndList, ConditionList, \
+from utils import check_implication, solver_implies_condition, get_var_names, AndList, ConditionList, \
 	and2, provably_contradicting, not2, and2, or2
 from pyrddl_inspector import prepare_rddl_for_scoper
 import pdb
@@ -315,8 +315,11 @@ def bfs_with_guarantees(discovered,q,solver,skills,used_skills,guarantees):
 			used_skills.append(skill) # Else. add the skill to the list
 			precondition = skill.get_precondition()
 
-			if type(precondition) is AndList:
+			if isinstance(precondition, AndList):
+				raise TypeError(f"AndList: {precondition}")
 				precondition_list = copy.copy(precondition.args)
+			elif z3.is_expr(precondition) and precondition.decl().name() == 'and':
+				precondition_list = precondition.children()
 			else:
 				precondition_list = [precondition]
 			# Now, we've accumulated a list of preconditions that need to be met for the above 
@@ -325,7 +328,7 @@ def bfs_with_guarantees(discovered,q,solver,skills,used_skills,guarantees):
 				if precondition not in discovered:  #Could we do something fancier, like if discovered implies precondition?
 					discovered.append(precondition)					
 					if type(precondition) is AndList: # The conditions should already be broken so this can't happen
-						pass
+						raise TypeError(f"AndList: {precondition}")
 					# Either the solver implies the precondition, or we need to append it to the list
 					# of things we care about? TODO: Not sure why the solver implying the precondition
 					# makes it a guarantee. I'm somewhat unclear what this function even does.

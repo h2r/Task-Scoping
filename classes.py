@@ -92,5 +92,4 @@ def get_all_effected_vars(skills: List[Skill]):
 	return sorted(list(set(pvars)))
 
 if __name__ == "__main__":
-	test_AndList()
-	test_ConditionList()
+	pass

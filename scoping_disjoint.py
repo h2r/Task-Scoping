@@ -2,10 +2,10 @@ from typing import List, Dict, Tuple, Union
 from collections import OrderedDict
 import abc, time
 import z3
-from utils import condition_str2objects, get_all_bitstrings
 from classes import *
-from logic_utils import check_implication, solver_implies_condition, get_var_names, get_var_names_multi, \
-	AndList, ConditionList,	and2, provably_contradicting, not2, and2, or2, simplify_before_ors
+from utils import check_implication, solver_implies_condition, get_var_names, get_var_names_multi, \
+	AndList, ConditionList,	and2, provably_contradicting, not2, and2, or2, \
+	simplify_before_ors, condition_str2objects
 from pyrddl_inspector import prepare_rddl_for_scoper
 import pdb
 from typing import Collection
@@ -14,7 +14,7 @@ TODO later
 Change how we check for guarantee violation. When we add a new skill, we should remove from the solver any conditions that depend on variables the skill affects
 ~"""
 
-def get_quotient_skills(skills: Collection[Skill], denominator: Collection[str], solver: z3.Solver = None) \
+def get_quotient_skills(skills: Collection[Skill], denominator: Collection[str], solver: z3.Solver = None, use_jank_merge = False) \
 		-> Collection[Skill]:
 	"""
 	:param skills: collection of concrete skills
@@ -34,77 +34,42 @@ def get_quotient_skills(skills: Collection[Skill], denominator: Collection[str],
 			pvars2skills[k] = []
 		pvars2skills[k].append(s.get_precondition())
 	new_skills: List[Skill] = []
-	
-	for (action, effects), conds in pvars2skills.items():
-		if(len(conds) == 0):
-			new_cond = or2(*conds, solver=solver)
-		elif(len(conds) == 1):
-			new_cond = conds[0]
-		elif(len(conds) == 2):
-			simp_conds = simplify_before_ors(conds[0], conds[1])
-			if(len(simp_conds) == 1):
-				new_cond = simp_conds[0]
-			elif(len(simp_conds) == 2):
-				new_cond = or2(*simp_conds, solver=solver)
-		else:
-			raise ValueError('We are trying to merge skills where there are more than 2 combined preconds. Code for this not-yet implemented')
 
+	for (action, effects), conds in pvars2skills.items():
+		if use_jank_merge: new_cond = jank_merge(conds, solver)
+		else: new_cond = clean_merge(conds, solver)
 		new_skill = Skill(new_cond, action, effects)
 		# Since we are using disjoint preconditions, we don't need to process the implicit effects
 		new_skill.implicit_effects_processed = True
 		new_skills.append(new_skill)
 	return new_skills
 
+def clean_merge(conds, solver, tactic='ctx-solver-simplify'):
+	# TODO take care of conditionlists earlier
+	disj = or2(*conds)
+	if isinstance(disj, ConditionList): disj = disj.to_z3()
+	g = z3.Goal()
+	g.add(disj)
+	disj_simp =  z3.Tactic(tactic)(g).as_expr()
+	if disj_simp.decl().name() == 'and':
+		disj_simp = and2(*disj_simp.children())
+	return disj_simp
 
-def get_implied_effects(skills: List[Skill], fast_version=False) -> List[Skill]:
-	"""
-	Update each skill with the variables implicity affected by it. Ex. Moving with a passenger in the taxi explicitly moves the passenger, implicitly moves the taxi
-	Note: This would be faster if we had a partial ordering of skills. We could then start at the root skills (no implied effects), see their effects on their children, etc,
-	using get_all_affected_variables() instead of get_targeted_variables()
-	Alternatively/additionally, we could put this into cython (would it help? itertools.product should be fast already)
-	:param skills:
-	:return:
-	"""
-	solver = z3.Solver()
-	implication_time = 0
-	if not fast_version:
-		for (s0, s1) in itertools.product(skills, skills):
-			if ((s0.get_action() == s1.get_action()) and (s0 != s1)):
-				implication_start = time.time()
-				if check_implication(s0.get_precondition(), s1.get_precondition()):
-					s0.implicitly_affected_variables.extend(s1.get_targeted_variables())
-				implication_time += time.time() - implication_start
-		for s in skills:
-			s.implicitly_affected_variables = list(set(s.implicitly_affected_variables))
-			s.implicit_effects_processed = True
-	if fast_version:
-		pass
-	print("Get_implied_effects implication time: {}".format(implication_time))
-	return skills
-
-
-
-
-# relevant_vars, used_skills = scope(goal_conditions,skill_triplets,solver=solver)
-# print("\n~~~Relevant objects~~~")
-# for x in relevant_vars: print(x)
-# print("\n~~~Relevant skills~~~")
-# for s in used_skills: print(s)
-# used_actions = sorted(list(set([s.get_action() for s in used_skills])))
-# print("\n~~~Relevant Actions~~~")
-# for a in used_actions: print(a)
-
-def triplet_dict_to_triples(skill_dict: Dict[str, Dict[str, List[Union[z3.z3.ExprRef, AndList]]]]) -> Tuple[
-	Union[z3.z3.ExprRef, AndList], str, List[str]]:
-	"""
-	:param skill_dict: [action][effect] -> List[preconditions]
-	"""
-	skill_triples = []
-	for action in skill_dict.keys():
-		for effect, precondition in skill_dict[action].items():
-			skill_triples.append(Skill(precondition, action, [effect]))
-	return skill_triples
-
+def jank_merge(conds, solver):
+	if (len(conds) == 0):
+		new_cond = or2(*conds, solver=solver)
+	elif (len(conds) == 1):
+		new_cond = conds[0]
+	elif (len(conds) == 2):
+		simp_conds = simplify_before_ors(conds[0], conds[1])
+		if (len(simp_conds) == 1):
+			new_cond = simp_conds[0]
+		elif (len(simp_conds) == 2):
+			new_cond = or2(*simp_conds, solver=solver)
+	else:
+		raise ValueError(
+			'We are trying to merge skills where there are more than 2 combined preconds. Code for this not-yet implemented')
+	return new_cond
 
 def get_skills_targeting_condition(condition, skills):
 	"""
@@ -262,8 +227,11 @@ def bfs_with_guarantees(discovered, q, solver, skills, used_skills, guarantees):
 			used_skills.append(skill)  # Else. add the skill to the list
 			precondition = skill.get_precondition()
 
-			if type(precondition) is AndList:
+			if isinstance(precondition, AndList):
+				raise TypeError(f"AndList: {precondition}")
 				precondition_list = copy.copy(precondition.args)
+			elif z3.is_expr(precondition) and precondition.decl().name() == 'and':
+				precondition_list = precondition.children()
 			else:
 				precondition_list = [precondition]
 			# Now, we've accumulated a list of preconditions that need to be met for the above
@@ -272,7 +240,7 @@ def bfs_with_guarantees(discovered, q, solver, skills, used_skills, guarantees):
 				if precondition not in discovered:  # Could we do something fancier, like if discovered implies precondition?
 					discovered.append(precondition)
 					if type(precondition) is AndList:  # The conditions should already be broken so this can't happen
-						pass
+						raise TypeError(f"AndList: {precondition}")
 					# Either the solver implies the precondition, or we need to append it to the list
 					# of things we care about? TODO: Not sure why the solver implying the precondition
 					# makes it a guarantee. I'm somewhat unclear what this function even does.
@@ -341,75 +309,5 @@ def scope_rddl_file(input_file_path, output_file_path, irrelevant_objects):
 	with open(output_file_path, 'w') as f:
 		f.writelines(output_lines)
 
-
-def test_get_implied_effects():
-	raise NotImplementedError()
-	pass
-
-
-def scope_rddl_file_test():
-	input_file_path = "./taxi-rddl-domain/taxi-oo_mdp_composite_01.rddl"
-
-
-def clean_AndLists(skills):
-	"""
-	Removes "True" from AndLists
-	"""
-	for s in skills:
-		precond = s.get_precondition()
-		if isinstance(precond, AndList):
-			new_AndList = and2(*[x for x in precond if x is not True])
-			s.precondition = new_AndList
-
-
-def run_scope_on_file(rddl_file_location, **kwargs):
-	"""kwargs get passed to scope()"""
-	algorithm_sections = ["pyrddl_inspector", "clean_AndLists", "get_implied_effects", "scope"]
-	boundary_times = []
-	boundary_times.append(time.time())
-	goal_conditions, necessarily_relevant_pvars, skill_triplets, solver = prepare_rddl_for_scoper(rddl_file_location)
-	boundary_times.append(time.time())
-	clean_AndLists(skill_triplets)
-	boundary_times.append(time.time())
-	get_implied_effects(skill_triplets)
-	boundary_times.append(time.time())
-
-	print("\n~~~~Starting Scope()~~~~\n")
-	relevant_vars, used_skills = scope(goal_conditions, skill_triplets, solver=solver, **kwargs)
-	relevant_vars = relevant_vars + [str(i) for i in necessarily_relevant_pvars]
-	relevant_vars = list(set(relevant_vars))
-	boundary_times.append(time.time())
-
-	print("times:")
-	for section_id, section_name in enumerate(algorithm_sections):
-		section_time = boundary_times[section_id + 1] - boundary_times[section_id]
-		print("{}: {}".format(section_name, section_time))
-	print("\n~~~Relevant objects~~~")
-	for r in relevant_vars:
-		print(r)
-	print("\n~~~Relevant skills~~~:")
-	for s in used_skills:
-		print(s)
-
-	used_actions = sorted(list(set([s.get_action() for s in used_skills])))
-	print("\n~~~Relevant Actions~~~")
-	for a in used_actions: print(a)
-	return relevant_vars, used_skills, used_actions
-
-
 if __name__ == "__main__":
-	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions.rddl"
-	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions-p1-in-taxi.rddl"
-	file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions_blinker.rddl"
-	# file_path = "./taxi-rddl-domain/taxi-structured-deparameterized_actions_complex.rddl"
-	# file_path = "./taxi-rddl-domain/taxi-oo_mdp_composite_01.rddl"
-	# file_path = "button-domains/button_special_button.rddl"
-	# file_path = "button-domains/button_sum_reward.rddl"
-	# file_path = "button-domains/button.rddl"
-	# file_path = "button-domains/button_elif.rddl"
-	# file_path = "misc-domains/academic-advising_composite_01.rddl"
-	# file_path = "button-domains/button_door_negative_precondition.rddl"
-	# file_path = "./enum-domains/enum-taxi-deparameterized-move-actions-nishanth.rddl"
-
-	# run_scope_on_file(file_path)
-	run_scope_on_file(file_path, move_vars=True)
+	pass

@@ -1,10 +1,7 @@
 import z3
 from classes import *
-import instance_building_utils
 import pdb
-from typing import List, Dict, Tuple
-from logic_utils import solver_implies_condition, OrList, or2, and2, get_iff, get_var_names, synth2varnames, AndList, not2
-from collections import namedtuple
+from typing import List
 from typing import NamedTuple
 
 class Passenger(NamedTuple):

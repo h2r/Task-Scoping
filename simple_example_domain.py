@@ -3,7 +3,7 @@ import z3
 from classes import *
 from scoping import *
 from instance_building_utils import *
-from logic_utils import and2
+from utils import and2
 """
 Simple domain. Press button once lights are on.
 """

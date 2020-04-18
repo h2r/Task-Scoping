@@ -3,7 +3,7 @@ from classes import *
 import instance_building_utils
 import pdb
 from typing import List, Dict, Tuple
-from logic_utils import solver_implies_condition, OrList, or2, and2, get_iff, get_var_names, synth2varnames, AndList, not2
+from utils import solver_implies_condition, OrList, or2, and2, get_iff, get_var_names, synth2varnames, AndList, not2
 
 # All pvars_over_objects
 p0_intaxi = z3.Bool('passenger-in-taxi(p0,t0)')

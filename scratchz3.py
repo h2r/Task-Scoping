@@ -1,5 +1,5 @@
 import z3
-from logic_utils import get_var_names, get_atoms
+from utils import get_var_names, get_atoms
 tactic_names = ['ackermannize_bv', 'subpaving', 'horn', 'horn-simplify', 'nlsat', 'qfnra-nlsat', 'nlqsat', 'qe-light',
 				'qe-sat', 'qe', 'qsat', 'qe2', 'qe_rec', 'psat', 'sat', 'sat-preprocess', 'ctx-solver-simplify', 'smt',
 				'psmt', 'unit-subsume-simplify', 'aig', 'add-bounds', 'card2bv', 'degree-shift', 'diff-neq', 'eq2bv',
@@ -101,5 +101,5 @@ def split_into_conjunctions():
 
 
 if __name__ == "__main__":
-	split_conjunction()
-	# split_into_conjunctions()
+	# split_conjunction()
+	split_into_conjunctions()

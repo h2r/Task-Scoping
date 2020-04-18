@@ -1,6 +1,7 @@
 from hardcoded_1Dtaxi import prepare_1D_taxi
 from scoping_disjoint import scope, get_quotient_skills
 from hardcoded_taxi2 import prepare_taxi_domain
+from utils import condition_str2objects, get_var_names, get_all_objects
 
 def test_quotient():
 	skills_list, skill_dict, goal, _, solver = prepare_1D_taxi()
@@ -14,10 +15,15 @@ def test_quotient():
 	print(f"\nSkills modulo effects on {irrelevant_pvars}:\n")
 	for s in mn_quotient: print(s)
 
+
 def test_scoping():
 	skills_list, _, goal, _, solver = prepare_1D_taxi()
 	for s in skills_list: s.effect = [str(x) for x in s.effect]
 	relevant_pvars, relevant_objects, used_skills = scope(goal, skills_list, start_condition=None, solver=solver)
+	print("~~~~~")
+	print("All Objects")
+	all_objects = get_all_objects(skills_list)
+	for o in all_objects: print(o)
 	print("~~~~~")
 	print("Relevant objects")
 	for o in relevant_objects: print(o)
@@ -36,6 +42,6 @@ def test_scoping2():
 	for o in relevant_objects: print(o)
 
 if __name__ == "__main__":
-	# test_scoping()
+	test_scoping()
 	# test_quotient()
-	test_scoping2()
+	# test_scoping2()

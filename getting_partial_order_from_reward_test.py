@@ -1,5 +1,5 @@
 import z3
-from logic_utils import solver_implies_condition, get_iff
+from utils import solver_implies_condition, get_iff
 from pyrddl_inspector import get_goal_conditions_from_reward
 # print(result)
 

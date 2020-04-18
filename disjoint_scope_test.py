@@ -38,10 +38,14 @@ def test_scoping2():
 	for s in skills: print(s)
 	print("~~~Relevant skills~~~")
 	for s in used_skills: print(s)
+	print("All Objects")
+	all_objects = get_all_objects(skills)
+	for o in all_objects: print(o)
+	print("~~~~~")
 	print("~~~Relevant Objects")
 	for o in relevant_objects: print(o)
 
 if __name__ == "__main__":
-	test_scoping()
+	# test_scoping()
 	# test_quotient()
-	# test_scoping2()
+	test_scoping2()

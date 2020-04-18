@@ -44,7 +44,7 @@ def get_quotient_skills(skills: Collection[Skill], denominator: Collection[str],
 		new_skills.append(new_skill)
 	return new_skills
 
-def clean_merge(conds, solver, tactic='ctx-solver-simplify'):
+def clean_merge(conds, solver, tactic='aig'):
 	# TODO take care of conditionlists earlier
 	disj = or2(*conds)
 	if isinstance(disj, ConditionList): disj = disj.to_z3()

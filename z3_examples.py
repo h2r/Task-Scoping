@@ -60,11 +60,28 @@ def adding_bools_example():
 def expr_sorts():
 	b0 = z3.Bool('b0')
 	print(b0.sort() == z3.BoolSort())
+def foo():
+	f = Function('f', IntSort(), IntSort(), IntSort())
+	x, y = Ints('x y')
+	print(ForAll([x, y], f(x, y) == 0))
+	print(Exists(x, f(x, x) >= 0))
 
+	print(" ")
+	f = Function('f', IntSort(), IntSort(), IntSort())
+	x, y = Ints('x y')
+	f = ForAll([x, y], f(x, y) == 0)
+	print(f.body())
+	v1 = f.body().arg(0).arg(0)
+	print(v1)
+	print(eq(v1, Var(1, IntSort())))
+
+def sets_example():
+	is_passenger = Function('is_passenger', Int)
 if __name__ == "__main__":
 	# split_clause_ex()
 	# is_condition()
 	# ast_v_var_example()
 	# boolref_check()
 	# adding_bools_example()
-	expr_sorts()
+	# expr_sorts()
+	foo()

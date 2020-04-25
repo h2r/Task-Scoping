@@ -2,6 +2,7 @@ import z3
 from classes import Skill
 from utils import get_atoms, get_possible_values
 import itertools
+from collections import OrderedDict
 
 n_passengers = 3
 Passenger, passengers = z3.EnumSort("Passenger", [f"p{i}" for i in range(n_passengers)])
@@ -67,3 +68,27 @@ for x in possible_passengers:
 gnd_effects = north_w_p_not_1.get_targeted_variables(grounded=True)
 print("grounded_effects: ")
 for e in gnd_effects: print(e)
+print("~~~")
+
+"""
+instead of lists of pvars/conditions, we use dicts from pvar/condition to groundings. We operate at the key level
+Should we have a pvar/condition w groundings class? Or use namedtuples? I'd like to pass around z3 objects directly,
+don't want to repeat the AndList debacle, but keeping a list of grounding objects seems cleaner than
+saying "and p = p0 or p = p1". I don't know how expensive that is for z3.
+It makes sense to store a dict mapping from pvars to relevant groundings, more concise than concrete list.
+But doing this with conditions feels odd. Maybe keep conditions in z3, since they need to be evaluated anyway.
+Could come up with syntactic sugar for modifying the domain of conditions. Is it better to say who is excluded from 
+domain, or who is included? Excluded feels cleaner. If there is only one option, replace generic with that option.
+We'll need to test how generic and concrete play together
+
+Need we worry about how constants from different expressions interact? Can we use the same p always? I think so,
+but need to make sure.
+"""
+
+print(north_w_p)
+# excluded_ps = [passengers[1:]]
+q = OrderedDict()
+q[passenger_y] = [passengers[:2]]
+pvar = passenger_y
+grounding_args = [[passengers[i]] for i in range(2)]
+north_w_p.precondition()

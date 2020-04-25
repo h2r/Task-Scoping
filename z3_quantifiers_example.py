@@ -1,7 +1,7 @@
 import z3
 from classes import Skill
 from utils import get_atoms, get_possible_values
-
+import itertools
 
 n_passengers = 3
 Passenger, passengers = z3.EnumSort("Passenger", [f"p{i}" for i in range(n_passengers)])
@@ -47,11 +47,23 @@ print(north_w_p)
 # passenger_y(p).children()
 
 north_w_p_not_1 = Skill(z3.And(in_taxi(p,t),p!=passengers[1]), "move_north()", [taxi_y(t), passenger_y(p)])
+assert north_w_p_not_1.get_targeted_variables()[1].decl() == passenger_y
 print(north_w_p_not_1)
 # tgt_objects = get_atoms(*north_w_p_not_1.get_targeted_variables())
 # print(f"tgt_objects: {tgt_objects}")
 # pcnd_objects = get_atoms(north_w_p_not_1.get_precondition())
 # print(f"pcnd_objects: {pcnd_objects}")
-print(get_possible_values([north_w_p_not_1.get_precondition()], p))
-
-
+possible_passengers = get_possible_values([north_w_p_not_1.get_precondition()], p)
+print(possible_passengers)
+possible_taxis = get_possible_values([north_w_p_not_1.get_precondition()], t)
+print(possible_taxis)
+possible_grounding_args = itertools.product(possible_passengers, possible_taxis)
+for x in possible_grounding_args: print(in_taxi(*x))
+print(f"Generic pvar: {north_w_p_not_1.get_targeted_variables()[1]}")
+print("Grounded pvar:")
+for x in possible_passengers:
+	pvar_gnd = north_w_p_not_1.get_targeted_variables()[1].decl()(x)
+	print(pvar_gnd)
+gnd_effects = north_w_p_not_1.get_targeted_variables(grounded=True)
+print("grounded_effects: ")
+for e in gnd_effects: print(e)

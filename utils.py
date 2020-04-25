@@ -365,6 +365,9 @@ def acceptable_z3_condition(x):
 
 def get_possible_values(expr_list, obj, solver = None):
 	# https://stackoverflow.com/questions/13395391/z3-finding-all-satisfying-models
+	# 			TODO make get_possible_values take list of consts.
+	if z3.is_expr(expr_list):
+		expr_list = [expr_list]
 	if solver is None: solver = z3.Solver()
 	solver.push()
 	solver.add(*expr_list)

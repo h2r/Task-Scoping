@@ -1,9 +1,11 @@
 import copy
 from abc import ABC
+from collections import OrderedDict
 import z3
 import itertools
 from instance_building_utils import *
 from typing import List
+from utils import get_possible_values, get_atoms
 def get_all_groundings(base_str, names, keys):
 	name_lists = [names[k] for k in keys]
 	object_name_sequence_list = itertools.product(*name_lists)
@@ -28,8 +30,33 @@ class Skill():
 		return self.precondition
 	def get_action(self):
 		return self.action
-	def get_targeted_variables(self):
-		return self.effect
+	def get_targeted_variables(self, grounded = False):
+		# Is it safe to check possible values for tgt objects independently? It should be sound, but give up
+			#some potential scoping - if we check independently, we get a product space that may be larger than we
+			# need, but is certainly not smaller. We care about effects bc they force us to backchain, so adding
+			#more vars to the effect set can, at worst, make us include skills we don't need.
+		if not grounded:
+			return self.effect
+		if grounded:
+			pvar2groundings = OrderedDict()
+			for pvar in self.effect:
+				# pvar is something like "passenger-y-curr".
+				# We can apply it to a z3 obj to get "passenger-y-curr(p0)"
+				pvar_func = pvar.decl()
+				# consts will be things like p (generic passenger).
+				consts = get_atoms(pvar)
+				const2vals = OrderedDict()
+				# We'll check the values each const can have. Ex. p can have value p0 or p1
+				for o in consts:
+					const2vals[o] = get_possible_values(self.get_precondition(), o)
+				val_combos = itertools.product(*const2vals.values())
+				# pvar2groundings[pvar] = [pvar_func(*grounding_args) for grounding_args in val_combos]
+				pvar2groundings[pvar] = []
+				for grounding_args in val_combos:
+					print(grounding_args[0])
+					pvar2groundings[pvar].append(pvar_func(*grounding_args))
+			return [i for x in pvar2groundings.values() for i in x]
+
 	def get_affected_variables(self):
 		if not self.implicit_effects_processed:
 			raise ValueError("Implicit effects of this skill not yet processed")
@@ -43,6 +70,12 @@ class Skill():
 			   and self.get_targeted_variables() == other.get_targeted_variables() # and self.get_affected_variables() == other.get_affected_variables()
 	def __hash__(self):
 		return hash(self.__repr__())
+
+def split_skill_on_obj_vals(skill: Skill, obj, vals):
+	# TODO implement
+	raise NotImplementedError()
+	pass
+
 class Precondition():
 	"""
 	A Precondition is a first order expression that defines a set of states in a domain

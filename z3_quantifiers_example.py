@@ -1,7 +1,9 @@
 import z3
+from classes import Skill
+from utils import get_atoms, get_possible_values
 
 
-n_passengers = 2
+n_passengers = 3
 Passenger, passengers = z3.EnumSort("Passenger", [f"p{i}" for i in range(n_passengers)])
 p = z3.Const("p", Passenger)
 assert type(p) == z3.z3.DatatypeRef
@@ -23,7 +25,8 @@ t = z3.Const("t", Taxi)
 # print(type(z3.IntSort()))
 # z3.Const()
 for pi in passengers: print(pi)
-passenger_x = z3.Function("passenger-y-curr", Passenger, z3.IntSort())
+passenger_y = z3.Function("passenger-y-curr", Passenger, z3.IntSort())
+taxi_y = z3.Function("taxi-y-curr", Taxi, z3.IntSort())
 in_taxi = z3.Function("passenger-in-taxi", Passenger, Taxi, z3.BoolSort())
 
 print(in_taxi(passengers[0], taxis[0]))
@@ -35,4 +38,20 @@ print(errbody_inside)
 
 taxi_empty = z3.ForAll([p,t], z3.Not(in_taxi(p,t)))
 print(taxi_empty)
+
+
+north_w_p = Skill(in_taxi(p, t), "move_north()", [taxi_y(t), passenger_y(p)])
+print(north_w_p)
+
+# print(north_w_p.get_targeted_variables())
+# passenger_y(p).children()
+
+north_w_p_not_1 = Skill(z3.And(in_taxi(p,t),p!=passengers[1]), "move_north()", [taxi_y(t), passenger_y(p)])
+print(north_w_p_not_1)
+# tgt_objects = get_atoms(*north_w_p_not_1.get_targeted_variables())
+# print(f"tgt_objects: {tgt_objects}")
+# pcnd_objects = get_atoms(north_w_p_not_1.get_precondition())
+# print(f"pcnd_objects: {pcnd_objects}")
+print(get_possible_values([north_w_p_not_1.get_precondition()], p))
+
 

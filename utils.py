@@ -108,6 +108,7 @@ def get_all_objects(skills):
 	all_objects = sorted(list(set(all_objects)))
 	return all_objects
 
+
 def solver_implies_condition(solver, precondition):
 	# print("Assertions:")
 	# for a in solver.assertions(): print(a)
@@ -362,22 +363,35 @@ def acceptable_z3_condition(x):
 			return True
 	return False
 
+def get_possible_values(expr_list, obj, solver = None):
+	# https://stackoverflow.com/questions/13395391/z3-finding-all-satisfying-models
+	if solver is None: solver = z3.Solver()
+	solver.push()
+	solver.add(*expr_list)
+	vals = []
+	while solver.check() == z3.sat:
+		v = solver.model()[obj]
+		vals.append(v)
+		solver.add(obj != v)
+	return vals
 
-def get_atoms(expr: Union[bool, z3.ExprRef, z3.Goal, ConditionList]) -> List[z3.ExprRef]:
-	if isinstance(expr, bool): return []
-	if isinstance(expr, ConditionList):
-		expr = expr.to_z3()
-	if isinstance(expr, z3.Goal):
-		expr = expr.as_expr()
+def get_atoms(*args: Union[bool, z3.ExprRef, z3.Goal, ConditionList]) -> List[z3.ExprRef]:
+	#TODO remove duplicates
 	atoms = []
-	children = expr.children()
-	# An expression is an atom iff it has no children
-	if len(children) == 0:
-		atoms = [expr]
-	else:
-		atoms = []
-		for c in children:
-			atoms.extend(get_atoms(c))
+	for expr in args:
+		if isinstance(expr, bool): return []
+		if isinstance(expr, ConditionList):
+			expr = expr.to_z3()
+		if isinstance(expr, z3.Goal):
+			expr = expr.as_expr()
+		children = expr.children()
+		# An expression is an atom iff it has no children
+		if len(children) == 0:
+			atoms.append(expr)
+		else:
+			# atoms = []
+			for c in children:
+				atoms.extend(get_atoms(c))
 	return atoms
 
 

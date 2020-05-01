@@ -79,7 +79,7 @@ def make_movement_skills(passengers: List[Passenger], taxi: Taxi, action_name, v
 
 
 def make_initial_condition(passengers: List[Passenger], taxi: Taxi):
-	cond = z3.And(*[z3.Not(p.intaxi) for p in passengers])
+	cond = z3.And(*([z3.Not(p.intaxi) for p in passengers] + [taxi.blinker]))
 	return cond
 
 

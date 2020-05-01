@@ -1,0 +1,8 @@
+1. Find not implied conditions from the goal
+2. Add these to relevant set. Quotient based on this set.
+3. Find the preconditions of all the skills that have any effects
+see which of them is implied and add to guarantees and discovered accordingly
+(as we're currently doing)
+4. run check_guarantees on this list of guarantees and the concrete skills [technically
+we only need to run on the trivially relevant skills]
+5. rerun the quotient and keep looping till set of relevant variales doesn't change.

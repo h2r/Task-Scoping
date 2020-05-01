@@ -168,14 +168,7 @@ def _scope(goal, skills, start_condition=None, solver=None):
 	used_skills = []
 	while len(q) > 0:
 		bfs_with_guarantees(discovered, q, solver, skills, used_skills, guarantees)
-		for s in used_skills:
-			if (s.get_action() == "move_north()"): print(s)
-		# pdb.set_trace()
-		# print(f"bf len(used_skills): {len(used_skills)}")
 		check_guarantees(guarantees, used_skills, q)
-	# used_skills = list(set(used_skills))
-	# pdb.set_trace()
-	# print(f"cg len(used_skills): {len(used_skills)}")
 
 	discovered_not_guarantees = [c for c in discovered if c not in guarantees]
 	relevant_pvars = list(set([x for c in discovered_not_guarantees for x in get_var_names(c)]))

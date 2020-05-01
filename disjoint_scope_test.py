@@ -1,9 +1,10 @@
 from hardcoded_1Dtaxi import prepare_1D_taxi
-from scoping_disjoint import scope, get_quotient_skills
+from scoping_disjoint_simplified import scope, get_quotient_skills
 from hardcoded_taxi2 import prepare_taxi_domain
 from utils import condition_str2objects, get_var_names, get_all_objects, get_diff_and_int, str_iter
 from hardcoded_blinker import prepare_taxi_domain as prepare_blinker_domain
 from hardcoded_domains import make_domain
+import pdb
 
 def test_quotient():
 	skills_list, skill_dict, goal, _, solver = prepare_1D_taxi()
@@ -49,6 +50,7 @@ def test_scoping2():
 
 def test_blinker():
 	goals, skills, start_condition, pvars = prepare_blinker_domain(n_passegners=2, blinker=True, goal=(None,7))
+	# pdb.set_trace()
 	for s in skills: s.effect = [str(x) for x in s.effect]
 	relevant_pvars, relevant_objects, used_skills = scope(goals, skills, start_condition)
 	print("\n~~~All Skills~~~")
@@ -100,5 +102,5 @@ if __name__ == "__main__":
 	# test_scoping()
 	# test_quotient()
 	# test_scoping2()
-	# test_blinker()
-	test_scoping3()
+	test_blinker()
+	# test_scoping3()

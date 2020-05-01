@@ -33,6 +33,7 @@ def make_domain(causal_link = True, broken_causal_link = True, trivially_relevan
 		sv_rel.extend([R,R1])
 		skills_rel.append(Skill(R, "R-G", [G]))
 		skills_rel.append(Skill(R1, "R1-R", [R]))
+		skills_rel.append(Skill(R1, "R1-BCL", [BCL]))
 	if need_on_and_off:
 		B = z3.Bool('B') #Affects r when True, r1 when false. Relevant.
 		sv_rel.append(B)

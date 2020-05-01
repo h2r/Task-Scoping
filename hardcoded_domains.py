@@ -39,6 +39,7 @@ def make_domain(causal_link = True, broken_causal_link = True, trivially_relevan
 		sv_rel.append(B)
 		skills_rel.append(Skill(B, "B-R", [R]))
 		skills_rel.append(Skill(z3.Not(B), "(~B)-R1", [R1]))
+		initial_condition.append(B)
 	if trivially_relevant:
 		IR = z3.Bool('IR')  # Trivially irrelevant
 		sv_ir.append(IR)

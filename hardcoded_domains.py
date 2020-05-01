@@ -17,7 +17,7 @@ def make_domain(causal_link = True, broken_causal_link = True, trivially_relevan
 		CL = z3.Bool('CL') #causal link. Irrelevant
 		CL1 = z3.Bool('CL1') #Affects causal link. Irrelevant.
 		sv_ir.extend([CL,CL1])
-		skills_ir.append(Skill(CL, 'CL-G', [G]))
+		skills_rel.append(Skill(CL, 'CL-G', [G]))
 		skills_ir.append(Skill(CL1, "CL1-CL", [CL]))
 		initial_condition.append(CL)
 	if broken_causal_link:

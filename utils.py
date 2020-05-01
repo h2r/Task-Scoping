@@ -442,6 +442,14 @@ def split_conjunction_test():
 	y = z3.Bool('y')
 	x_and_y = z3.And(x, y)
 	print(x_and_y)
+
+def get_diff_and_int(a,b):
+	a_only = [x for x in a if x not in b]
+	intersection = [x for x in a if x in b]
+	b_only = [x for x in b if x not in intersection]
+	return a_only, intersection, b_only
+def str_iter(itr):
+	return [str(x) for x in itr]
 if __name__ == "__main__":
 	# test_grounded_att2objects("grounded_att2objects passed tests")
 	# condition_str2objects_test()

@@ -68,6 +68,8 @@ def test_blinker():
 def test_scoping3():
 	G, skills_rel, skills_ir, initial_condition, sv_rel, sv_ir = make_domain(causal_link = True, broken_causal_link = True, trivially_relevant = True,
 				trivially_irrelevant = True, need_on_and_off = True)
+	print(f"Initial Condition: {initial_condition}")
+	print(f"Goal: {G}")
 	skills = skills_rel + skills_ir
 	sv = sv_rel + sv_ir
 	relevant_pvars, relevant_objects, used_skills = scope(G, skills, initial_condition)
@@ -85,15 +87,6 @@ def test_scoping3():
 	for s in skills_false_ir: print(s)
 	print(f"\nFalsely relevant:")
 	for s in skills_false_rel: print(s)
-	#Why does it think (CL,    CL-G,    ('G',)) is relevant? It clearly knows CL is not.
-
-	# print("Relevant skills:")
-	# for s in skills_rel: print(s)
-	# print("~~~~Results~~~~")
-	# print("Relevant Skills:")
-	# for s in used_skills: print(s)
-	#
-
 
 
 
@@ -102,5 +95,5 @@ if __name__ == "__main__":
 	# test_scoping()
 	# test_quotient()
 	# test_scoping2()
-	test_blinker()
-	# test_scoping3()
+	# test_blinker()
+	test_scoping3()

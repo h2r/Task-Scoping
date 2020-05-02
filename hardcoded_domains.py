@@ -51,3 +51,6 @@ def make_domain(causal_link = True, broken_causal_link = True, trivially_relevan
 	initial_condition = z3.And(*initial_condition)
 	return G, skills_rel, skills_ir, initial_condition, sv_rel, sv_ir
 
+if __name__ == "__main__":
+	G, skills_rel, skills_ir, initial_condition, sv_rel, sv_ir = make_domain()
+	print(initial_condition)

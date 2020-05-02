@@ -1,5 +1,5 @@
 import z3
-from utils import get_var_names, get_atoms
+from utils import expr2pvar_names_single, get_atoms
 tactic_names = ['ackermannize_bv', 'subpaving', 'horn', 'horn-simplify', 'nlsat', 'qfnra-nlsat', 'nlqsat', 'qe-light',
 				'qe-sat', 'qe', 'qsat', 'qe2', 'qe_rec', 'psat', 'sat', 'sat-preprocess', 'ctx-solver-simplify', 'smt',
 				'psmt', 'unit-subsume-simplify', 'aig', 'add-bounds', 'card2bv', 'degree-shift', 'diff-neq', 'eq2bv',

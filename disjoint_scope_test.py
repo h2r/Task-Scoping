@@ -1,7 +1,7 @@
 from hardcoded_1Dtaxi import prepare_1D_taxi
-from scoping_disjoint_simplified import scope, get_quotient_skills
+from scoping_disjoint_simplified import scope, get_quotient_skills, Scoper
 from hardcoded_taxi2 import prepare_taxi_domain
-from utils import condition_str2objects, get_var_names, get_all_objects, get_diff_and_int, str_iter
+from utils import condition_str2objects, expr2pvar_names_single, get_all_objects, get_diff_and_int, str_iter
 from hardcoded_blinker import prepare_taxi_domain as prepare_blinker_domain
 from hardcoded_domains import make_domain
 import pdb
@@ -72,7 +72,9 @@ def test_scoping3():
 	print(f"Goal: {G}")
 	skills = skills_rel + skills_ir
 	sv = sv_rel + sv_ir
-	relevant_pvars, relevant_objects, used_skills = scope(G, skills, initial_condition)
+	scoper = Scoper(G, skills, initial_condition)
+	relevant_pvars, relevant_objects, used_skills = scoper.scope()
+	# relevant_pvars, relevant_objects, used_skills = scope(G, skills, initial_condition)
 	sv_false_ir,  sv_correct_rel, sv_false_rel = get_diff_and_int(str_iter(sv_rel), str_iter(relevant_pvars))
 	print("~~~~~Pvars~~~~~")
 	print(f"Correctly relevant: {sv_correct_rel}")

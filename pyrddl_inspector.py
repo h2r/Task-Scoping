@@ -7,7 +7,7 @@ from classes import *
 import instance_building_utils
 import pdb
 from typing import List, Dict, Tuple
-from utils import solver_implies_condition, OrList, or2, and2, get_iff, get_var_names, synth2varnames, AndList, not2
+from utils import solver_implies_condition, OrList, or2, and2, get_iff, expr2pvar_names_single, synth2varnames, AndList, not2
 
 # att_name_to_domain_attribute = {}
 all_object_names = {}
@@ -511,7 +511,7 @@ def _compile_expression(expr: Expression, groundings_from_top: Dict[str,str],sol
 					new_parameter = x
 				else:
 					new_parameter = z3.Bool("synth_{}".format(x))
-					synth2varnames[str(new_parameter)] = get_var_names(x)
+					synth2varnames[str(new_parameter)] = expr2pvar_names_single(x)
 					solver_constants_only.add(get_iff(new_parameter,x))
 				reward_args["synthetic_conditions"].append(new_parameter)
 				reward_args["reward_function_parameters"].append(new_parameter)

@@ -3,14 +3,14 @@ from collections import OrderedDict
 import abc, time
 import z3
 from classes import *
-from utils import check_implication, solver_implies_condition, get_var_names, get_var_names_multi, \
+from utils import check_implication, solver_implies_condition, expr2pvar_names_single, expr2pvar_names, \
 	AndList, ConditionList, and2, provably_contradicting, not2, and2, or2, \
-	simplify_before_ors, condition_str2objects
+	simplify_before_ors, condition_str2objects, split_conj
 from pyrddl_inspector import prepare_rddl_for_scoper
 import pdb
 from typing import Collection
 
-
+# TODO For quotient skills, we could set accidentally effected vars to the effects we removed.
 def get_quotient_skills(skills: Collection[Skill], denominator: Collection[str], solver: z3.Solver = None,
 						use_jank_merge=False) \
 		-> Collection[Skill]:
@@ -23,9 +23,11 @@ def get_quotient_skills(skills: Collection[Skill], denominator: Collection[str],
 	"""
 	# Maps a pair of an action and sorted tuple of pvars to the list of preconditions that, under that action,
 	# have those effects
+	denominator = [str(x) for x in denominator]
 	pvars2skills = {}
 	for s in skills:
-		effects = tuple(sorted([v for v in s.get_targeted_variables() if v not in denominator]))
+		tgt_vars = s.get_targeted_variables()
+		effects = tuple(sorted([v for v in tgt_vars if v not in denominator]))
 		# pdb.set_trace()
 		k = (s.get_action(), effects)
 		if k not in pvars2skills.keys():
@@ -79,7 +81,7 @@ def get_skills_targeting_condition(condition, skills):
 	:return: skills that target any of condition's pvars
 	"""
 	affecting_skills = []
-	condition_vars = get_var_names(condition)
+	condition_vars = expr2pvar_names_single(condition)
 	for s in skills:
 		skill_targets = s.get_targeted_variables()
 		overlapping_vars = [v for v in condition_vars if v in skill_targets]
@@ -97,9 +99,21 @@ def get_skills_targeting_pvar(var: Union[str, List[str]], skills: List[Skill]):
 	return list(set(tgt_skills))
 
 
-def get_skills_affecting_pvar(var: str, skills: List[Skill]):
-	return [s for s in skills if var in s.get_explicit_affected_variables()]
+def get_skills_affecting_pvar(var: Union[str, List[str]], skills: List[Skill]):
+	if isinstance(var, str):
+		var = [var]
+	skills_ret = []
+	for v in var:
+		skills_ret.extend([s for s in skills if var in s.get_affected_variables()])
+	return list(set(skills_ret))
 
+def get_skills_targeting_condition(expr: Union[z3.ExprRef, List[z3.ExprRef]], skills: List[Skill]):
+	pvars = expr2pvar_names(expr)
+	return get_skills_targeting_pvar(pvars)
+
+def get_skills_affecting_condition(expr: Union[z3.ExprRef, List[z3.ExprRef]], skills: List[Skill]):
+	pvars = expr2pvar_names(expr)
+	return get_skills_affecting_pvar(pvars)
 
 def get_targeting_and_accidentally_affecting_skills(var: str, skills: List[Skill]):
 	"""
@@ -113,9 +127,81 @@ def get_targeting_and_accidentally_affecting_skills(var: str, skills: List[Skill
 
 def violates(skill, condition):
 	"""Returns True if executing the skill can lead to a violation of Precondition"""
-	common_vars = [v for v in skill.get_explicit_affected_variables() if v in get_var_names(condition)]
+	common_vars = [v for v in skill.get_explicit_affected_variables() if v in expr2pvar_names_single(condition)]
 	return len(common_vars) > 0
 
+class Scoper():
+	def __init__(self, goal, skills, start_condition = None, solver = None):
+		if solver is None:
+			solver = z3.Solver()
+			solver.add(start_condition)
+		if isinstance(goal, AndList):
+			raise TypeError("Stop using AndLists")
+		elif z3.is_expr(goal) and goal.decl().name() == 'and':
+			goal_list = goal.children()
+		else:
+			goal_list = [goal]
+		self.goal_list = goal_list
+		self.solver = solver
+		self.orig_skills = skills
+		# self.discovered_conds = []
+		self.causal_links = []
+		self.broken_causal_links = []
+		self.pvars = get_atoms(*[x.get_precondition() for x in self.orig_skills])
+		self.relevant_pvars = []
+	# def process_goal(self):
+	# 	for g in self.goal_list:
+	# 		# self.discovered_conds.append(g)
+	# 		if solver_implies_condition(self.solver, g):
+	# 			self.causal_links.append(g)
+	def scope(self):
+		converged = False
+		while not converged:
+			relevant_pvars_old = self.relevant_pvars
+			self.causal_links, self.broken_causal_links = [], []
+			self.backchain()
+			converged = (set(self.relevant_pvars) == set(relevant_pvars_old))
+		return self.relevant_pvars, self.relevant_objects, self.relevant_skills
+	def backchain(self):
+		skills_cl = self.threatening_skills
+		conds = list(set(self.goal_list + [c for s in self.relevant_skills for c in s.get_precondition(split=True)]))
+		initially_true_conds = [c for c in conds if solver_implies_condition(self.solver, c)]
+
+		for c in initially_true_conds:
+			if len(get_skills_affecting_condition(c, skills_cl)) == 0:
+				self.causal_links.append(c)
+			else:
+				self.broken_causal_links.append(c)
+				# self.relevant_pvars += [v for v in get_atoms(c) if v not in self.relevant_pvars]
+		for c in conds:
+			if c not in self.causal_links:
+				self.relevant_pvars += [v for v in get_atoms(c) if v not in self.relevant_pvars]
+	# TODO only recalculate these properties when they change. Can use timestamps.
+	@property
+	def relevant_skills(self):
+		skills = get_quotient_skills(self.orig_skills, self.irrelevant_pvars)
+		skills = get_skills_targeting_pvar(self.relevant_pvars, skills)
+		return skills
+	@property
+	def threatening_skills(self):
+		# skills = get_quotient_skills(self.orig_skills, self.trivially_irrelevant_pvars)
+		skills = self.orig_skills
+		skills = get_skills_affecting_pvar(self.relevant_pvars, skills)
+		return skills
+	# @property
+	# def discovered_pvars(self):
+	# 	# return expr2pvar_names(self.discovered_conds)
+	# 	return get_atoms(*self.discovered_conds)
+	# @property
+	# def trivially_irrelevant_pvars(self): return [x for x in self.pvars if x not in self.discovered_pvars]
+	# def update_relevant_pvars(self):
+	# 	self.relevant_pvars.extend(expr2pvar_names([x for x in self.discovered_conds if x not in self.causal_links]))
+	# 	return self.relevant_pvars
+	@property
+	def irrelevant_pvars(self):	return [x for x in self.pvars if x not in self.relevant_pvars]
+	@property
+	def relevant_objects(self):
+		return condition_str2objects([str(x) for x in self.relevant_pvars])
 
 def scope(goal, skills, start_condition=None, solver=None):
 	# Create solver from start_condition
@@ -131,7 +217,7 @@ def scope(goal, skills, start_condition=None, solver=None):
 		goal = [goal]
 	for x in goal:
 		if not solver_implies_condition(solver, x):
-			relevant_pvars += get_var_names(x)
+			relevant_pvars += expr2pvar_names_single(x)
 	irrelevant_pvars = [x for x in all_pvars if x not in relevant_pvars]
 
 	quotient_skills = get_quotient_skills(skills, denominator=irrelevant_pvars)
@@ -169,13 +255,13 @@ def _scope(discovered, guarantees, orig_skills, goal, skills, start_condition=No
 	one_step_bfs(discovered, solver, skills, used_skills, guarantees)
 
 	discovered_not_guarantees = [c for c in discovered if c not in guarantees]
-	relevant_pvars = list(set([x for c in discovered_not_guarantees for x in get_var_names(c)]))
+	relevant_pvars = list(set([x for c in discovered_not_guarantees for x in expr2pvar_names_single(c)]))
 	effecting_original_skills = get_skills_targeting_pvar(relevant_pvars, orig_skills)
 	# check_guarantees(guarantees, effecting_original_skills)
 	check_guarantees(guarantees, orig_skills)
 
 	discovered_not_guarantees = [c for c in discovered if c not in guarantees]
-	relevant_pvars = list(set([x for c in discovered_not_guarantees for x in get_var_names(c)]))
+	relevant_pvars = list(set([x for c in discovered_not_guarantees for x in expr2pvar_names_single(c)]))
 	relevant_objects = condition_str2objects(relevant_pvars)
 	return relevant_pvars, relevant_objects, used_skills, discovered, guarantees
 

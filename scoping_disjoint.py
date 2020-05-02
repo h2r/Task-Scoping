@@ -3,7 +3,7 @@ from collections import OrderedDict
 import abc, time
 import z3
 from classes import *
-from utils import check_implication, solver_implies_condition, get_var_names, get_var_names_multi, \
+from utils import check_implication, solver_implies_condition, expr2pvar_names_single, expr2pvar_names, \
 	AndList, ConditionList,	and2, provably_contradicting, not2, and2, or2, \
 	simplify_before_ors, condition_str2objects
 from pyrddl_inspector import prepare_rddl_for_scoper
@@ -76,7 +76,7 @@ def get_skills_targeting_condition(condition, skills):
 	:return: skills that target any of condition's pvars
 	"""
 	affecting_skills = []
-	condition_vars = get_var_names(condition)
+	condition_vars = expr2pvar_names_single(condition)
 	for s in skills:
 		skill_targets = s.get_targeted_variables()
 		overlapping_vars = [v for v in condition_vars if v in skill_targets]
@@ -105,7 +105,7 @@ def get_targeting_and_accidentally_affecting_skills(var: str, skills: List[Skill
 
 def violates(skill, condition):
 	"""Returns True if executing the skill can lead to a violation of Precondition"""
-	common_vars = [v for v in skill.get_affected_variables() if v in get_var_names(condition)]
+	common_vars = [v for v in skill.get_affected_variables() if v in expr2pvar_names_single(condition)]
 	return len(common_vars) > 0
 
 
@@ -122,7 +122,7 @@ def scope(goal, skills, start_condition=None, solver=None):
 		goal = [goal]
 	for x in goal:
 		if not solver_implies_condition(solver, x):
-			relevant_pvars += get_var_names(x)
+			relevant_pvars += expr2pvar_names_single(x)
 	irrelevant_pvars = [x for x in all_pvars if x not in relevant_pvars]
 	
 	quotient_skills = get_quotient_skills(skills, denominator=irrelevant_pvars)
@@ -171,7 +171,7 @@ def _scope(goal, skills, start_condition=None, solver=None):
 		check_guarantees(guarantees, used_skills, q)
 
 	discovered_not_guarantees = [c for c in discovered if c not in guarantees]
-	relevant_pvars = list(set([x for c in discovered_not_guarantees for x in get_var_names(c)]))
+	relevant_pvars = list(set([x for c in discovered_not_guarantees for x in expr2pvar_names_single(c)]))
 	relevant_objects = condition_str2objects(relevant_pvars)
 	return relevant_pvars, relevant_objects, used_skills
 

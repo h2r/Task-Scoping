@@ -4,7 +4,7 @@ import abc, time
 import z3
 from utils import condition_str2objects, get_all_bitstrings
 from classes import *
-from utils import check_implication, solver_implies_condition, get_var_names, AndList, ConditionList, \
+from utils import check_implication, solver_implies_condition, expr2pvar_names_single, AndList, ConditionList, \
 	and2, provably_contradicting, not2, and2, or2
 from pyrddl_inspector import prepare_rddl_for_scoper
 import pdb
@@ -181,7 +181,7 @@ def get_skills_targeting_condition(condition, skills):
 	:return: skills that target any of condition's pvars
 	"""
 	affecting_skills = []
-	condition_vars = get_var_names(condition)
+	condition_vars = expr2pvar_names_single(condition)
 	for s in skills:
 		skill_targets = s.get_targeted_variables()
 		overlapping_vars = [v for v in condition_vars if v in skill_targets]
@@ -206,7 +206,7 @@ def get_targeting_and_accidentally_affecting_skills(var: str, skills: List[Skill
 
 def violates(skill, condition):
 	"""Returns True if executing the skill can lead to a violation of Precondition"""
-	common_vars = [v for v in skill.get_affected_variables() if v in get_var_names(condition)]
+	common_vars = [v for v in skill.get_affected_variables() if v in expr2pvar_names_single(condition)]
 	return len(common_vars) > 0
 
 def scope(goal, skills, start_condition = None, solver=None, move_vars = False):
@@ -267,7 +267,7 @@ def _scope(goal, skills, start_condition = None, solver=None):
 		# print(f"cg len(used_skills): {len(used_skills)}")
 
 	discovered_not_guarantees = [c for c in discovered if c not in guarantees]
-	relevant_pvars = list(set([x for c in discovered_not_guarantees for x in get_var_names(c)]))
+	relevant_pvars = list(set([x for c in discovered_not_guarantees for x in expr2pvar_names_single(c)]))
 	relevant_objects = condition_str2objects(relevant_pvars)
 	return relevant_pvars, relevant_objects, used_skills
 

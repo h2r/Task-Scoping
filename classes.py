@@ -5,7 +5,7 @@ import z3
 import itertools
 from instance_building_utils import *
 from typing import List
-from utils import get_possible_values, get_atoms
+from utils import get_possible_values, get_atoms, split_conj
 def get_all_groundings(base_str, names, keys):
 	name_lists = [names[k] for k in keys]
 	object_name_sequence_list = itertools.product(*name_lists)
@@ -26,8 +26,11 @@ class Skill():
 		self.effect = effect
 		self.implicitly_affected_variables = []
 		self.implicit_effects_processed = False
-	def get_precondition(self):
-		return self.precondition
+	def get_precondition(self, split = False):
+		if split:
+			return split_conj(self.precondition)
+		else:
+			return self.precondition
 	def get_action(self):
 		return self.action
 	def get_targeted_variables(self, grounded = False):

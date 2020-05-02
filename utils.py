@@ -1,6 +1,7 @@
 import z3
 import re
 from abc import ABC
+from collections.abc import Iterable
 import copy
 import pdb
 from typing import Union, List
@@ -24,6 +25,17 @@ def grounded_att2objects(att_str):
 	if len(split_str) > 1:
 		return split_str[1:]
 	else: return []
+
+def split_conj(expr):
+	if isinstance(expr, bool):
+		return expr
+	elif z3.is_expr(expr):
+		if expr.decl().name() == 'and':
+			return expr.children()
+		else:
+			return [expr]
+	else:
+		raise TypeError(f"Can't split type {type(expr)}")
 #
 #
 #
@@ -72,7 +84,7 @@ def get_all_bitstrings(n: int):
 		return l2
 
 
-def get_var_names(expr):
+def expr2pvar_names_single(expr):
 	global synth2varnames
 	if isinstance(expr, ConditionList):
 		expr = expr.to_z3()
@@ -93,20 +105,24 @@ def get_var_names(expr):
 	return sorted(list(set(vars)))
 
 
-def get_var_names_multi(expressions):
+def expr2pvar_names(expressions):
 	"""Gets var names for a list of expressions"""
+	if not isinstance(expressions, Iterable):
+		expressions = [expressions]
 	pvars = []
 	for e in expressions:
-		pvars.extend(get_var_names(e))
+		pvars.extend(expr2pvar_names_single(e))
 	pvars = sorted(list(set(pvars)))
+	return pvars
 
 def get_all_objects(skills):
 	all_pvars = []
-	for s in skills: all_pvars.extend(get_var_names(s.get_precondition()))
+	for s in skills: all_pvars.extend(expr2pvar_names_single(s.get_precondition()))
 	all_objects = []
 	for x in all_pvars: all_objects.extend(condition_str2objects(x))
 	all_objects = sorted(list(set(all_objects)))
 	return all_objects
+
 
 
 def solver_implies_condition(solver, precondition):
@@ -429,19 +445,6 @@ def test_ConditionList():
 	and0_z3 = and0.to_z3()
 	print(and0)
 	print(and0_z3)
-
-
-def split_conjunction(x):
-	"""Not implemented. Thought I could do something with sexpr, but that might just be equivalent to str(), and I'm not sure how to get references to the composite conditions from it.
-	I thought we had some issue with not being able to see pieces of a composite expression, but I rememvber now the issue was decomposing the ast itself, not the string"""
-	pass
-
-
-def split_conjunction_test():
-	x = z3.Bool('x')
-	y = z3.Bool('y')
-	x_and_y = z3.And(x, y)
-	print(x_and_y)
 
 def get_diff_and_int(a,b):
 	a_only = [x for x in a if x not in b]

@@ -43,7 +43,8 @@ def get_quotient_skills(skills: Collection[Skill], denominator: Collection[str],
 		new_skill = Skill(new_cond, action, effects)
 		# Since we are using disjoint preconditions, we don't need to process the implicit effects
 		new_skill.implicit_effects_processed = True
-		new_skills.append(new_skill)
+		if new_skill.effect != ():
+			new_skills.append(new_skill)
 	return new_skills
 
 
@@ -91,6 +92,8 @@ def get_skills_targeting_condition(condition, skills):
 
 
 def get_skills_targeting_pvar(var: Union[str, List[str]], skills: List[Skill]):
+	if z3.is_expr(var):
+		var = [str(var)]
 	if isinstance(var, str):
 		var = [var]
 	tgt_skills = []
@@ -148,6 +151,7 @@ class Scoper():
 		self.causal_links = []
 		self.broken_causal_links = []
 		self.pvars = get_atoms(*[x.get_precondition() for x in self.orig_skills])
+		self.pvars = [str(x) for x in self.pvars]
 		self.relevant_pvars = []
 	# def process_goal(self):
 	# 	for g in self.goal_list:
@@ -175,7 +179,8 @@ class Scoper():
 				# self.relevant_pvars += [v for v in get_atoms(c) if v not in self.relevant_pvars]
 		for c in conds:
 			if c not in self.causal_links:
-				self.relevant_pvars += [v for v in get_atoms(c) if v not in self.relevant_pvars]
+				pvars = [str(x) for x in get_atoms(c)]
+				self.relevant_pvars += [v for v in pvars if v not in self.relevant_pvars]
 	# TODO only recalculate these properties when they change. Can use timestamps.
 	@property
 	def relevant_skills(self):

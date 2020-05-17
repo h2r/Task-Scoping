@@ -7,7 +7,7 @@ import pdb
 
 def test_blinker():
 	# Won't work until we fix EffectTypes in hardcoded_blinker.py
-	goals, skills, start_condition, pvars = prepare_blinker_domain(n_passegners=2, blinker=True, goal=(None,7))
+	goals, skills, start_condition, pvars = prepare_blinker_domain(n_passegners=2, blinker=True, goal=(3,7))
 	# pdb.set_trace()
 	relevant_pvars, used_skills = scope(goals, skills, start_condition)
 	print("\n~~~All Skills~~~")

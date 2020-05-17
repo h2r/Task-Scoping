@@ -77,7 +77,7 @@ def merge_skills(skills: Iterable[Skill], relevant_pvars: Iterable[z3.ExprRef]):
 	hashed_skills = OrderedDict()
 	# Move irrelevant pvars to side effects and group skills by actions and effect types
 	for s in skills:
-		s.move_irrelevant2side_effects(relevant_pvars)
+		s = s.move_irrelevant2side_effects(relevant_pvars)
 		k = (s.action, s.effects)
 		if k not in hashed_skills.keys(): hashed_skills[k] = []
 		hashed_skills[k].append(s)

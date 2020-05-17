@@ -15,8 +15,10 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 	# We make a dummy goal and dummy final skill a la LCP because it simplifies the beginning of the algorithm.
 	# We will remove the dummy goal and skill before returning the final results
 	dummy_goal = z3.Bool("dummy_goal") #TODO make sure this var does not already exist
+	dummy_goal_et = EffectType(dummy_goal,0)
+
 	# dummy_goal = z3.And(*goals)
-	dummy_final_skill = Skill(z3.And(*goals), "DummyFinalSkill",EffectType(dummy_goal,0))
+	dummy_final_skill = Skill(z3.And(*goals), "DummyFinalSkill",dummy_goal_et)
 	skills = skills + [dummy_final_skill]
 	pvars_rel = [dummy_goal]
 	converged = False
@@ -47,5 +49,5 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 		pvars_rel = pvars_rel_new
 		solver.pop()
 	pvars_rel.remove(dummy_goal)
-	skills_rel.remove(dummy_final_skill)
+	skills_rel = [x for x in skills_rel if dummy_goal_et not in x.effects]
 	return pvars_rel, skills_rel

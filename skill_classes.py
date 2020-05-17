@@ -64,7 +64,7 @@ class Skill(): #Skills are Immutable
 				raise ValueError(f"Skill has relevant pvar in side effects:\n{self}")
 
 		new_effects = []
-		new_side_effects = copy.copy(self.side_effects)
+		new_side_effects = list(copy.copy(self.side_effects))
 		for e in self.effects:
 			if e.pvar in relevant_pvars:
 				new_effects.append(e)

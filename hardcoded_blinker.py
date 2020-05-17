@@ -3,7 +3,8 @@ from skill_classes import EffectType, Skill
 import pdb
 from typing import List
 from typing import NamedTuple
-
+# TODO incorporate EffectTypes
+# TODO add pickup/dropoff
 
 class Passenger(NamedTuple):
 	name: int
@@ -48,12 +49,12 @@ def make_movement_skills(passengers: List[Passenger], taxi: Taxi, action_name, v
 	skills = []
 	# 	Empty Taxi
 	cond = z3.And(*[z3.Not(p.intaxi) for p in passengers])
-	effect = [getattr(taxi, var_affected)]
+	effect = [EffectType(getattr(taxi, var_affected),0)]
 	if blinker:
 		cond_b_off = z3.And(cond, z3.Not(taxi.blinker))
 		cond_b_on = z3.And(cond, taxi.blinker)
 		effect_b_off = effect
-		effect_b_on = effect + [getattr(taxi, blinker_affects)]
+		effect_b_on = effect + [EffectType(getattr(taxi, blinker_affects),0)]
 		skills.append(Skill(cond_b_off, action_name, effect_b_off))
 		skills.append(Skill(cond_b_on, action_name, effect_b_on))
 	else:
@@ -65,12 +66,12 @@ def make_movement_skills(passengers: List[Passenger], taxi: Taxi, action_name, v
 			if i1 != i:
 				conds.append(z3.Not(p1.intaxi))
 		cond = z3.And(*conds)
-		effect = [getattr(taxi, var_affected), getattr(p, var_affected)]
+		effect = [EffectType(getattr(taxi, var_affected),0), EffectType(getattr(p, var_affected),0)]
 		if blinker:
 			cond_b_off = z3.And(cond, z3.Not(taxi.blinker))
 			cond_b_on = z3.And(cond, taxi.blinker)
 			effect_b_off = effect
-			effect_b_on = effect + [getattr(taxi, blinker_affects), getattr(p, blinker_affects)]
+			effect_b_on = effect + [EffectType(getattr(taxi, blinker_affects),0), EffectType(getattr(p, blinker_affects),0)]
 			skills.append(Skill(cond_b_off, action_name, effect_b_off))
 			skills.append(Skill(cond_b_on, action_name, effect_b_on))
 		else:

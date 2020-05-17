@@ -6,9 +6,9 @@ from skill_classes import merge_skills
 import pdb
 
 def test_blinker():
+	# Won't work until we fix EffectTypes in hardcoded_blinker.py
 	goals, skills, start_condition, pvars = prepare_blinker_domain(n_passegners=2, blinker=True, goal=(None,7))
 	# pdb.set_trace()
-	for s in skills: s.effect = [str(x) for x in s.effect]
 	relevant_pvars, used_skills = scope(goals, skills, start_condition)
 	print("\n~~~All Skills~~~")
 	for s in skills: print(str(s) + "\n")
@@ -19,7 +19,7 @@ def test_blinker():
 	for o in all_objects: print(o)
 	relevant_objects = []
 	for p in relevant_pvars:
-		relevant_objects.extend(condition_str2objects(p))
+		relevant_objects.extend(condition_str2objects(str(p)))
 	relevant_objects = sorted(list(set(relevant_objects)))
 	print("\n~~~Relevant Objects~~~")
 	for o in relevant_objects: print(o)

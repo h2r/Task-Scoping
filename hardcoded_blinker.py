@@ -1,5 +1,5 @@
 import z3
-from classes import *
+from skill_classes import EffectType, Skill
 import pdb
 from typing import List
 from typing import NamedTuple

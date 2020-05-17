@@ -14,13 +14,16 @@ def get_causal_links(start_condition, skills):
 		if len(threatened_pvars) == 0: causal_links.append(c)
 	return causal_links
 
-def get_unlinked_pvars(skills, solver, dummy_goal):
+def get_unlinked_pvars(skills, causal_links, dummy_goal, solver):
+	solver.push()
+	solver.add(*causal_links)
 	pvars_rel_new = [dummy_goal]
 	for s in skills:
 		for prec in split_conj(s.precondition):
 			if not solver_implies_condition(solver, prec):
 				pvars_rel_new.extend(get_atoms(prec))
 	pvars_rel_new = sorted(list(set(pvars_rel_new)), key=lambda x: str(x))
+	solver.pop()
 	return pvars_rel_new
 
 def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill]
@@ -29,15 +32,15 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 	if isinstance(start_condition, z3.ExprRef):	start_condition = split_conj(start_condition)
 	solver = z3.Solver()
 	solver.push()
+
 	# We make a dummy goal and dummy final skill a la LCP because it simplifies the beginning of the algorithm.
 	# We will remove the dummy goal and skill before returning the final results
 	dummy_goal = z3.Bool("dummy_goal") #TODO make sure this var does not already exist
 	dummy_goal_et = EffectType(dummy_goal,0)
-
-	# dummy_goal = z3.And(*goals)
 	dummy_final_skill = Skill(z3.And(*goals), "DummyFinalSkill",dummy_goal_et)
 	skills = skills + [dummy_final_skill]
 	pvars_rel = [dummy_goal]
+
 	converged = False
 	while not converged:
 		# Get quotient skills
@@ -45,18 +48,15 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 
 		# Get causal links
 		causal_links = get_causal_links(start_condition, skills_rel)
-		solver.push()
-		solver.add(*causal_links)
 
 		# Get pvars not guaranteed by causal links
-		pvars_rel_new = get_unlinked_pvars(skills_rel, solver, dummy_goal)
+		pvars_rel_new = get_unlinked_pvars(skills_rel, causal_links, dummy_goal, solver)
 
 		# Check convergence
-		if pvars_rel_new == pvars_rel:
-			converged = True
+		converged = (pvars_rel == pvars_rel_new)
 
 		pvars_rel = pvars_rel_new
-		solver.pop() #Reset solver
+
 	# Remove the dummy pvar and skill
 	pvars_rel.remove(dummy_goal)
 	skills_rel = [x for x in skills_rel if dummy_goal_et not in x.effects]

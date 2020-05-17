@@ -1,5 +1,6 @@
 from typing import List, Dict, Tuple, Union
 from collections import OrderedDict
+from collections.abc import Iterable
 import abc, time
 import z3
 from classes import *
@@ -9,6 +10,7 @@ from utils import check_implication, solver_implies_condition, expr2pvar_names_s
 from pyrddl_inspector import prepare_rddl_for_scoper
 import pdb
 from typing import Collection
+import warnings
 
 # TODO For quotient skills, we could set accidentally effected vars to the effects we removed.
 def get_quotient_skills(skills: Collection[Skill], denominator: Collection[str], solver: z3.Solver = None,
@@ -77,15 +79,26 @@ def jank_merge(conds, solver):
 	return new_cond
 
 
-def get_skills_targeting_condition(condition, skills):
+def get_skills_targeting_condition(condition, skills: List[Skill]):
 	"""
 	:return: skills that target any of condition's pvars
 	"""
+	"""
+	How can I write this so that pvars are extracted from the condition in a way compatible with skill effects?
+	I an extract pvar, and cast to str if skills are pvar
+	"""
 	affecting_skills = []
-	condition_vars = expr2pvar_names_single(condition)
+	# condition_vars = expr2pvar_names_single(condition)
+	condition_vars = get_atoms(condition)
+	condition_vars_as_str = [str(x) for x in condition_vars]  #If this doesn't work, try expr2pvar_names, which deals with synthvars
 	for s in skills:
 		skill_targets = s.get_targeted_variables()
-		overlapping_vars = [v for v in condition_vars if v in skill_targets]
+		if len(skill_targets) == 0: continue
+		# If the skill effects are str, use the str list. Else, use the z3 pvar list
+		if isinstance(skill_targets[0], str):
+			war
+		cv = condition_vars_as_str if isinstance(skill_targets[0], str) else condition_vars
+		overlapping_vars = [v for v in cv if v in skill_targets]
 		if len(overlapping_vars) > 0:
 			affecting_skills.append(s)
 	return affecting_skills

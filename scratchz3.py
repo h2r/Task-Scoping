@@ -100,6 +100,18 @@ def split_into_conjunctions():
 		print(x.as_expr())
 
 
+def var_names():
+	x = z3.Bool('x')
+	x2 = z3.Bool('x')
+	# y = z3.Bool('y')
+	# print(z3.solve(x != y))
+	# z3 treats x and x2 as identical, but python does not
+	print(z3.solve(x != x2))
+	print([i for i in [x] if i in [x2]])
+	print(x is x2)
+	y = z3.Const('y', x.sort())
+
 if __name__ == "__main__":
 	# split_conjunction()
-	split_into_conjunctions()
+	# split_into_conjunctions()
+	var_names()

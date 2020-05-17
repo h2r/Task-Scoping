@@ -84,7 +84,7 @@ def get_all_bitstrings(n: int):
 		return l2
 
 
-def expr2pvar_names_single(expr):
+def expr2pvar_names_single(expr):  #Do we still have synthvars?
 	global synth2varnames
 	if isinstance(expr, ConditionList):
 		expr = expr.to_z3()

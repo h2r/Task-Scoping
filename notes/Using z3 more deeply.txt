@@ -1,2 +1,0 @@
-Split conjunction to find which part is unsat: https://stackoverflow.com/questions/13270696/how-to-use-z3-split-clauses-of-unsat-cores-try-to-find-out-unsat-core-again
-	This would let us replace AndLists

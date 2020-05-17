@@ -1,5 +1,0 @@
-Make function that quotients skills based on irrelevant variables
-
-Make quotient skill class (not needed for lazy version)
-
-Modify scope() to quotient out irrelevant vars, run scope, if not converged, quotient concrete skills with new irrelevant skills

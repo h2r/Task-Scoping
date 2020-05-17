@@ -1,3 +1,0 @@
-#Tested on python 3.7
-z3-solver
-pyrddl

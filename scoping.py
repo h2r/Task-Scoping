@@ -1,4 +1,3 @@
-import copy
 from itertools import chain
 from typing import Iterable, Union
 import z3

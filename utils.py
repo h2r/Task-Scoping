@@ -175,29 +175,6 @@ def provably_contradicting(*args, my_solver=None):
 	# If it is sat, or unknown, return False
 	return result == z3.z3.unsat
 
-# Why do we have this?
-def get_implies(x, y):
-	return ((not x) or y)
-
-
-def get_iff(x, y):
-	both_true = z3.And(x, y)
-	both_false = z3.And(z3.Not(x), z3.Not(y))
-	# pdb.set_trace()
-	try:
-		return z3.Or(both_true, both_false)
-	except Exception as e:
-		print(f"{type(both_true)}, {type(both_false)}")
-
-
-
-def acceptable_z3_condition(x):
-	Z3_HANDLED_TYPES = [z3.z3.ExprRef, bool]
-	for t in Z3_HANDLED_TYPES:
-		if isinstance(x, t):
-			return True
-	return False
-
 def get_possible_values(expr_list, obj, solver = None):
 	# https://stackoverflow.com/questions/13395391/z3-finding-all-satisfying-models
 	# 			TODO make get_possible_values take list of consts.

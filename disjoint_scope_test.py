@@ -1,8 +1,7 @@
-from utils import condition_str2objects, expr2pvar_names_single, get_all_objects, get_diff_and_int, str_iter
+from utils import condition_str2objects, get_all_objects
 from hardcoded_blinker import prepare_taxi_domain as prepare_blinker_domain
 from scoping import scope
 from hardcoded_domains import make_domain
-from skill_classes import merge_skills
 import pdb
 
 def test_blinker():

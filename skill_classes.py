@@ -9,7 +9,7 @@ class EffectType():  #EffectTypes are Immutable
 	def __init__(self, pvar: z3.ExprRef, index: int):
 		self.pvar, self.index = pvar, index
 	def __eq__(self, other):
-		return self.pvar == other.pvar and self.index == other.index
+		return z3.eq(self.pvar, other.pvar) and self.index == other.index
 	def __lt__(self, other):
 		if self.pvar > other.pvar: return False
 		if self.pvar == other.pvar and self.index >= other.index: return False
@@ -66,6 +66,15 @@ def merge_skills(skills: Iterable[Skill], relevant_pvars: Iterable[z3.ExprRef]):
 	return new_skills
 
 
+def test_effect_type_eq():
+	pvar0 = z3.Bool("p0")
+	pvar1 = z3.Bool("p1")
+	et0 = EffectType(pvar0, 0)
+	et0_1 = EffectType(pvar0,0)
+	print((et0 == et0_1) == True)
+	et1 = EffectType(pvar1, 0)
+	print((et0 == et1) == False)
+
 def test_merge_skills():
 	pvars = [z3.Bool(f"b{i}") for i in range(2)]
 	ets = [EffectType(p,0) for p in pvars]
@@ -75,6 +84,8 @@ def test_merge_skills():
 	merged = merge_skills([s0,s1], [pvars[0]])
 	for m in merged:
 		print(m)
-
+	merged_correct = [Skill(True, "action", [ets[0]])]
+	print(f"\nCorrect: {merged_correct == merged}")
 if __name__ == "__main__":
-	test_merge_skills()
+	# test_merge_skills()
+	test_effect_type_eq()

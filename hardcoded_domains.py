@@ -1,5 +1,6 @@
 import z3
 from skill_classes import EffectType, Skill
+from utils import solver_implies_condition
 import pdb
 from typing import List
 from typing import NamedTuple
@@ -33,8 +34,8 @@ def make_domain(causal_link = True, broken_causal_link = True, trivially_relevan
 		R1 = z3.Bool('R1') #Affects r. Relevant
 		sv_rel.extend([R,R1])
 		skills_rel.append(Skill(R, "R-G", (EffectType(G,0),)))
-		skills_rel.append(Skill(R1, "R1-R", (EffectType(R,0),)))
-		skills_rel.append(Skill(R1, "R1-BCL", (EffectType(BCL,0),)))
+		skills_rel.append(Skill(R1, "R1-R", (EffectType(R,0),EffectType(BCL,0))))
+		# skills_rel.append(Skill(R1, "R1-BCL", (EffectType(BCL,0),)))
 	if need_on_and_off:
 		B = z3.Bool('B') #Affects r when True, r1 when false. Relevant.
 		sv_rel.append(B)
@@ -50,3 +51,6 @@ def make_domain(causal_link = True, broken_causal_link = True, trivially_relevan
 if __name__ == "__main__":
 	G, skills_rel, skills_ir, initial_condition, sv_rel, sv_ir = make_domain()
 	print(initial_condition)
+	solver = z3.Solver()
+	solver.add(initial_condition)
+	print(solver_implies_condition(solver, z3.Bool("CL")))

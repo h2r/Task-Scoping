@@ -44,7 +44,7 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 		skills_rel = merge_skills(skills, pvars_rel)
 
 		# Get causal links
-		causal_links = get_causal_links(start_condition, skills)
+		causal_links = get_causal_links(start_condition, skills_rel)
 		solver.push()
 		solver.add(*causal_links)
 

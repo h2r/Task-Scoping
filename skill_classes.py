@@ -127,6 +127,7 @@ def test_skill_eq():
 	print(s0 != s1)
 
 def test_merge_skills():
+	# TODO this is a bad example bc preconditions are not disjoint.
 	pvars = [z3.Bool(f"b{i}") for i in range(2)]
 	ets = OrderedDict()
 	for p_id, i in product(range(len(pvars)), [0,1]):
@@ -135,7 +136,7 @@ def test_merge_skills():
 
 	# ets = [EffectType(p,0) for p in pvars]
 	# sboth = Skill(pvars[0], "action_both", ets)
-	s0 = Skill(pvars[0], "action", [ets[(0,0)]])
+	s0 = Skill(pvars[0], "action", [ets[(0,0)], ets[(1,0)]])
 	s1 = Skill(z3.Not(pvars[0]), "action", [ets[(0,0)]])
 	s2 = Skill(pvars[1], "action", [ets[(0,1)]])
 	# s2 =
@@ -143,12 +144,12 @@ def test_merge_skills():
 	for m in merged:
 		print(m)
 		print("")
-	merged_correct = sorted([Skill(True, "action", [ets[(0,0)]]), s2])
+	merged_correct = sorted([Skill(True, "action", [ets[(0,0)]], [ets[(1,0)]]), s2])
 	print(f"\nCorrect: {merged_correct == merged}")
 
 
 if __name__ == "__main__":
-	# test_merge_skills()
+	test_merge_skills()
 	# test_effect_type_eq()
 	# test_skill_eq()
-	test_effect_type_hash()
+	# test_effect_type_hash()

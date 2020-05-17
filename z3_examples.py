@@ -77,6 +77,11 @@ def foo():
 
 def sets_example():
 	is_passenger = Function('is_passenger', Int)
+
+def sorting_exprrefs():
+	bools = [z3.Bool(f"b{i}") for i in range(3)]
+	ints = [z3.Int(f"i{i}") for i in range(3)]
+	print(sorted(list(set(ints))))
 if __name__ == "__main__":
 	# split_clause_ex()
 	# is_condition()
@@ -84,4 +89,5 @@ if __name__ == "__main__":
 	# boolref_check()
 	# adding_bools_example()
 	# expr_sorts()
-	foo()
+	# foo()
+	sorting_exprrefs()

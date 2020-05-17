@@ -11,8 +11,9 @@ class EffectType():  #EffectTypes are Immutable
 	def __eq__(self, other):
 		return z3.eq(self.pvar, other.pvar) and self.index == other.index
 	def __lt__(self, other):
-		if self.pvar > other.pvar: return False
-		if self.pvar == other.pvar and self.index >= other.index: return False
+		# TODO incorporate pvar type into sort.
+		if str(self.pvar) > str(other.pvar): return False
+		if str(self.pvar) == str(other.pvar) and self.index >= other.index: return False
 		return True
 	def __repr__(self):
 		return f"ET({self.pvar},{self.index})"
@@ -91,14 +92,27 @@ def merge_skills(skills: Iterable[Skill], relevant_pvars: Iterable[z3.ExprRef]):
 
 
 def test_effect_type_eq():
-	pvar0 = z3.Bool("p0")
-	pvar1 = z3.Bool("p1")
+	pvar0 = z3.Bool("b0")
+	pvar1 = z3.Bool("b1")
+	pvar2 = z3.Int("i0")
 	et0 = EffectType(pvar0, 0)
 	et0_1 = EffectType(pvar0,0)
 	print((et0 == et0_1) == True)
 	et1 = EffectType(pvar1, 0)
 	print((et0 == et1) == False)
+	et2 = EffectType(pvar2,0)
+	print((et2 != et0))
 
+def test_effect_type_hash():
+	pvar0 = z3.Bool("b0")
+	pvar1 = z3.Bool("b1")
+	pvar2 = z3.Int("i0")
+	et0 = EffectType(pvar0, 0)
+	et0_1 = EffectType(pvar0,0)
+	et1 = EffectType(pvar1, 0)
+	et2 = EffectType(pvar2,0)
+	s = list(set([et0,et0_1,et1,et2]))
+	print(s)
 def test_skill_eq():
 	pvars = [z3.Bool(f"b{i}") for i in range(2)]
 	ets = OrderedDict()
@@ -131,7 +145,10 @@ def test_merge_skills():
 		print("")
 	merged_correct = sorted([Skill(True, "action", [ets[(0,0)]]), s2])
 	print(f"\nCorrect: {merged_correct == merged}")
+
+
 if __name__ == "__main__":
-	test_merge_skills()
+	# test_merge_skills()
 	# test_effect_type_eq()
 	# test_skill_eq()
+	test_effect_type_hash()

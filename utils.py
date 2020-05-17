@@ -113,7 +113,7 @@ def expr2pvar_names(expressions):
 
 def get_all_objects(skills):
 	all_pvars = []
-	for s in skills: all_pvars.extend(expr2pvar_names_single(s.get_precondition()))
+	for s in skills: all_pvars.extend(expr2pvar_names_single(s.precondition))
 	all_objects = []
 	for x in all_pvars: all_objects.extend(condition_str2objects(x))
 	all_objects = sorted(list(set(all_objects)))

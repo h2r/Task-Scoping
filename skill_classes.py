@@ -23,12 +23,22 @@ class Skill(): #Skills are Immutable
 	def __init__(self, precondition: z3.ExprRef, action: str, effects: Iterable[EffectType]
 				 , side_effects: Iterable[EffectType] = None):
 		if side_effects is None: side_effects = ()
+		# z3 doesn't like vanilla python bools, so we convert those to the z3-equivalent. This makes it so you can
+		# pass in True or False as a precondition without ex. Skill.__eq__ throwing an error
+		if isinstance(precondition,bool): precondition = z3.BoolVal(precondition)
 		self.precondition, self.action = precondition, action
 		self.effects: Tuple[EffectType] = tuple(sorted(set(effects)))
 		self.side_effects: Tuple[EffectType] = tuple(sorted(set(side_effects)))
 	@property
 	def all_effects(self) -> Tuple[EffectType]:
 		return tuple(set(self.effects + self.side_effects))
+	def __eq__(self, other):
+		if not isinstance(other, Skill): return False
+		same_prec = z3.eq(self.precondition,other.precondition)
+		same_action = (self.action == other.action)
+		same_effects = self.effects == other.effects
+		same_side_effets = self.side_effects == other.side_effects
+		return  same_prec and same_action and same_effects and same_side_effets
 	def __repr__(self):
 		s = f"Precondition: {self.precondition}\nAction: {self.action}\nEffects: {self.effects}" \
 			f"\nSide Effects: {self.side_effects}"
@@ -75,6 +85,15 @@ def test_effect_type_eq():
 	et1 = EffectType(pvar1, 0)
 	print((et0 == et1) == False)
 
+def test_skill_eq():
+	pvars = [z3.Bool(f"b{i}") for i in range(2)]
+	ets = [EffectType(p,0) for p in pvars]
+	s0 = Skill(True, "action", [ets[0]])
+	s0_copy = Skill(True, "action", [ets[0]])
+	print(s0==s0_copy)
+	s1 = Skill(pvars[1], "action", [ets[0]])
+	print(s0 != s1)
+
 def test_merge_skills():
 	pvars = [z3.Bool(f"b{i}") for i in range(2)]
 	ets = [EffectType(p,0) for p in pvars]
@@ -84,8 +103,9 @@ def test_merge_skills():
 	merged = merge_skills([s0,s1], [pvars[0]])
 	for m in merged:
 		print(m)
-	merged_correct = [Skill(True, "action", [ets[0]])]
+	merged_correct = [Skill(z3.BoolVal(True), "action", [ets[0]])]
 	print(f"\nCorrect: {merged_correct == merged}")
 if __name__ == "__main__":
 	# test_merge_skills()
-	test_effect_type_eq()
+	# test_effect_type_eq()
+	test_skill_eq()

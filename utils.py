@@ -190,7 +190,7 @@ def get_possible_values(expr_list, obj, solver = None):
 		solver.add(obj != v)
 	return vals
 
-def get_atoms(*args: Union[bool, z3.ExprRef, z3.Goal]) -> List[z3.ExprRef]:
+def get_atoms(*args: Union[bool, z3.ExprRef, z3.Goal], remove_constants = True) -> List[z3.ExprRef]:
 	#TODO remove duplicates
 	atoms = []
 	for expr in args:
@@ -205,6 +205,12 @@ def get_atoms(*args: Union[bool, z3.ExprRef, z3.Goal]) -> List[z3.ExprRef]:
 			# atoms = []
 			for c in children:
 				atoms.extend(get_atoms(c))
+	if remove_constants:
+		atoms_filtered = []
+		for a in atoms:
+			if not isinstance(a, z3.IntNumRef):
+				atoms_filtered.append(a)
+		atoms = atoms_filtered
 	return atoms
 
 

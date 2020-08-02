@@ -1,0 +1,137 @@
+Created by PLY version 3.11 (http://www.dabeaz.com/ply)
+
+Grammar
+
+Rule 0     S' -> pddl
+Rule 1     pddl -> domain
+Rule 2     pddl -> problem
+Rule 3     domain -> LPAREN DEFINE_KEY domain_def require_def types_def predicates_def action_def_lst RPAREN
+Rule 4     problem -> LPAREN DEFINE_KEY problem_def domain_def objects_def init_def goal_def RPAREN
+Rule 5     domain_def -> LPAREN DOMAIN_KEY NAME RPAREN
+Rule 6     problem_def -> LPAREN PROBLEM_KEY NAME RPAREN
+Rule 7     objects_def -> LPAREN OBJECTS_KEY typed_constants_lst RPAREN
+Rule 8     init_def -> LPAREN INIT_KEY LPAREN AND_KEY ground_predicates_lst RPAREN RPAREN
+Rule 9     init_def -> LPAREN INIT_KEY ground_predicates_lst RPAREN
+Rule 10    goal_def -> LPAREN GOAL_KEY LPAREN AND_KEY ground_predicates_lst RPAREN RPAREN
+Rule 11    require_def -> LPAREN REQUIREMENTS_KEY require_key_lst RPAREN
+Rule 12    require_key_lst -> require_key require_key_lst
+Rule 13    require_key_lst -> require_key
+Rule 14    require_key -> STRIPS_KEY
+Rule 15    require_key -> EQUALITY_KEY
+Rule 16    require_key -> TYPING_KEY
+Rule 17    require_key -> PROBABILISTIC_EFFECTS_KEY
+Rule 18    require_key -> FLUENTS_KEY
+Rule 19    types_def -> LPAREN TYPES_KEY names_lst RPAREN
+Rule 20    predicates_def -> LPAREN PREDICATES_KEY predicate_def_lst RPAREN
+Rule 21    predicate_def_lst -> predicate_def predicate_def_lst
+Rule 22    predicate_def_lst -> predicate_def
+Rule 23    predicate_def -> LPAREN NAME typed_variables_lst RPAREN
+Rule 24    predicate_def -> LPAREN NAME RPAREN
+Rule 25    action_def_lst -> action_def action_def_lst
+Rule 26    action_def_lst -> action_def
+Rule 27    action_def -> LPAREN ACTION_KEY NAME parameters_def action_def_body RPAREN
+Rule 28    parameters_def -> PARAMETERS_KEY LPAREN typed_variables_lst RPAREN
+Rule 29    parameters_def -> PARAMETERS_KEY LPAREN RPAREN
+Rule 30    action_def_body -> precond_def effects_def
+Rule 31    precond_def -> PRECONDITION_KEY LPAREN AND_KEY literals_lst RPAREN
+Rule 32    precond_def -> PRECONDITION_KEY literal
+Rule 33    effects_def -> EFFECT_KEY LPAREN AND_KEY effects_lst RPAREN
+Rule 34    effects_def -> EFFECT_KEY effect
+Rule 35    effects_lst -> effect effects_lst
+Rule 36    effects_lst -> effect
+Rule 37    effect -> literal
+Rule 38    effect -> LPAREN PROBABILISTIC_KEY PROBABILITY literal RPAREN
+Rule 39    literals_lst -> literal literals_lst
+Rule 40    literals_lst -> literal
+Rule 41    literal -> LPAREN NOT_KEY predicate RPAREN
+Rule 42    literal -> predicate
+Rule 43    ground_predicates_lst -> ground_predicate ground_predicates_lst
+Rule 44    ground_predicates_lst -> ground_predicate
+Rule 45    predicate -> LPAREN NAME variables_lst RPAREN
+Rule 46    predicate -> LPAREN EQUALS VARIABLE VARIABLE RPAREN
+Rule 47    predicate -> LPAREN NAME RPAREN
+Rule 48    ground_predicate -> LPAREN NAME constants_lst RPAREN
+Rule 49    ground_predicate -> LPAREN NAME RPAREN
+Rule 50    typed_constants_lst -> constants_lst HYPHEN type typed_constants_lst
+Rule 51    typed_constants_lst -> constants_lst HYPHEN type
+Rule 52    typed_variables_lst -> variables_lst HYPHEN type typed_variables_lst
+Rule 53    typed_variables_lst -> variables_lst HYPHEN type
+Rule 54    constants_lst -> constant constants_lst
+Rule 55    constants_lst -> constant
+Rule 56    variables_lst -> VARIABLE variables_lst
+Rule 57    variables_lst -> VARIABLE
+Rule 58    names_lst -> NAME names_lst
+Rule 59    names_lst -> NAME
+Rule 60    type -> NAME
+Rule 61    constant -> NAME
+
+Terminals, with rules where they appear
+
+ACTION_KEY           : 27
+AND_KEY              : 8 10 31 33
+DEFINE_KEY           : 3 4
+DOMAIN_KEY           : 5
+EFFECT_KEY           : 33 34
+EQUALITY_KEY         : 15
+EQUALS               : 46
+GOAL_KEY             : 10
+HYPHEN               : 50 51 52 53
+INIT_KEY             : 8 9
+LPAREN               : 3 4 5 6 7 8 8 9 10 10 11 19 20 23 24 27 28 29 31 33 38 41 45 46 47 48 49
+NAME                 : 5 6 23 24 27 45 47 48 49 58 59 60 61
+NOT_KEY              : 41
+OBJECTS_KEY          : 7
+PARAMETERS_KEY       : 28 29
+PRECONDITION_KEY     : 31 32
+PREDICATES_KEY       : 20
+PROBABILISTIC_EFFECTS_KEY : 17
+PROBABILISTIC_KEY    : 38
+PROBABILITY          : 38
+PROBLEM_KEY          : 6
+REQUIREMENTS_KEY     : 11
+RPAREN               : 3 4 5 6 7 8 8 9 10 10 11 19 20 23 24 27 28 29 31 33 38 41 45 46 47 48 49
+STRIPS_KEY           : 14
+TYPES_KEY            : 19
+TYPING_KEY           : 16
+VARIABLE             : 46 46 56 57
+error                : 
+
+Nonterminals, with rules where they appear
+
+FLUENTS_KEY          : 18
+action_def           : 25 26
+action_def_body      : 27
+action_def_lst       : 3 25
+constant             : 54 55
+constants_lst        : 48 50 51 54
+domain               : 1
+domain_def           : 3 4
+effect               : 34 35 36
+effects_def          : 30
+effects_lst          : 33 35
+goal_def             : 4
+ground_predicate     : 43 44
+ground_predicates_lst : 8 9 10 43
+init_def             : 4
+literal              : 32 37 38 39 40
+literals_lst         : 31 39
+names_lst            : 19 58
+objects_def          : 4
+parameters_def       : 27
+pddl                 : 0
+precond_def          : 30
+predicate            : 41 42
+predicate_def        : 21 22
+predicate_def_lst    : 20 21
+predicates_def       : 3
+problem              : 2
+problem_def          : 4
+require_def          : 3
+require_key          : 12 13
+require_key_lst      : 11 12
+type                 : 50 51 52 53
+typed_constants_lst  : 7 50
+typed_variables_lst  : 23 28 52
+types_def            : 3
+variables_lst        : 45 52 53 56
+

@@ -5,9 +5,10 @@ import re
 from collections import OrderedDict
 from itertools import chain
 from action import Action
-
+import copy
 class PDDL_Parser:
-
+    # TODO convert type hierarchy to ordered dict (parent: [children])
+    
     SUPPORTED_REQUIREMENTS = [':strips', ':negative-preconditions', ':typing']
 
     # ------------------------------------------
@@ -16,11 +17,11 @@ class PDDL_Parser:
     def scan_tokens(self, filename):
         with open(filename,'r') as f:
             # Remove single line comments
-            str = re.sub(r';.*$', '', f.read(), flags=re.MULTILINE).lower()
+            my_str = re.sub(r';.*$', '', f.read(), flags=re.MULTILINE).lower()
         # Tokenize
         stack = []
         list = []
-        for t in re.findall(r'[()]|[^\s()]+', str):
+        for t in re.findall(r'[()]|[^\s()]+', my_str):
             if t == '(':
                 stack.append(list)
                 list = []
@@ -43,7 +44,7 @@ class PDDL_Parser:
     def scan_tokens_w_types(self, filename):
         with open(filename,'r') as f:
             # Remove single line comments
-            str = re.sub(r';.*$', '', f.read(), flags=re.MULTILINE).lower()
+            my_str = re.sub(r';.*$', '', f.read(), flags=re.MULTILINE).lower()
         # Tokenize
         stack = []
         list = []
@@ -51,7 +52,7 @@ class PDDL_Parser:
         # Workaround: Handle the :type elsewhere, and insert into the list
         in_type = False
         type_start = None
-        for t in re.findall(r'[()]|[^\s()]+', str):
+        for t in re.findall(r'[()]|[^\s()]+', my_str):
             if t == ":types":
                 in_type = True
                 type_start = len(stack)
@@ -74,7 +75,7 @@ class PDDL_Parser:
         if len(list) != 1:
             raise Exception('Malformed expression')
         # Handle :types
-        types_str = types_str = re.findall(':types ([^()]*)', str, flags=(re.DOTALL | re.MULTILINE))[0]
+        types_str = re.findall(':types ([^()]*)', str, flags=(re.DOTALL | re.MULTILINE))[0]
         if type_start is not None:
             list[0].insert(type_start, types_str)
         return list[0]
@@ -107,11 +108,12 @@ class PDDL_Parser:
                 elif t == ':functions':
                     self.parse_functions(group)
                 elif t == ':types':
-                    self.types = group
+                    # self.types = group
                     # This parser does the right thing when passed the entires types string
                     # The token scanner with types doens't currenlty work, so for now we just set types to the
                     # group list
                     # self.parse_types(group)
+                    self.domain2types(domain_filename)
                 elif t == ':action':
                     self.parse_action(group)
                 else: print(str(t) + ' is not recognized in domain')
@@ -175,6 +177,24 @@ class PDDL_Parser:
 
     def parse_types(self, group):
         types_lines = group.replace("\t","").split("\n"); print(types_lines)
+        # [(subtype, parentype)]
+        type_hierarchy = []
+        for l in types_lines:
+            l_split = l.split(" - ")
+            subtypes = l_split[0].split(" ")
+            base_type = l_split[-1]
+            for st in subtypes:
+                type_hierarchy.append((st, base_type))
+        for tp in type_hierarchy: print(tp)
+        self.type_hierarchy = type_hierarchy
+        # A sorted list of any string that appears in type_hierarchy
+        self.types = sorted(list(set(chain(*type_hierarchy))))
+
+    def domain2types(self, domain_filename):
+        with open(domain_filename, "r") as f:
+            domain_str = f.read()
+        types_str = re.findall(':types ([^()]*)', domain_str, flags=(re.DOTALL | re.MULTILINE))[0]
+        types_lines = types_str.replace("\t","").split("\n"); print(types_lines)
         # [(subtype, parentype)]
         type_hierarchy = []
         for l in types_lines:
@@ -294,7 +314,45 @@ class PDDL_Parser:
                 neg.append(predicate[-1])
             else:
                 pos.append(predicate)
+    def get_deepest_subtypes(self, base):
+        if isinstance(base, str): base = [base]
+        descendants = get_descendants(self.type_hierarchy, base)
 
+def get_children(hierarchy, base):
+    """
+    :param hierarchy: [(child, parent)]
+    :base: [parents]
+    Note: a parent is one of it's own children
+    """
+    children = []
+    for child, parent in hierarchy:
+        if parent in base:
+            children.append(child)
+    return sorted(list(set(children)))
+
+def get_descendants(hierarchy, base):
+    """
+    :param hierarchy: [(child, parent)]
+    :base: [parents]
+    Note: a parent is one of it's own children
+    """
+    descendants = sorted(base)
+    descendants_old = copy.copy(descendants)
+    descendants = sorted(list(set(get_children(hierarchy, descendants))))
+    while descendants != descendants_old:
+        print("descendants:")
+        print(descendants)
+        print("descendants_old:")
+        print(descendants_old)
+        descendants_old = copy.copy(descendants)
+        descendants = sorted(list(set(get_children(hierarchy, descendants))))
+    return descendants
+
+def get_deepest_descendants(hierarchy, base):
+    descendants = get_descendants(hierarchy, base)
+    all_nodes = sorted(list(set(chain(*hierarchy))))
+    # TODO redo
+    deepest_descendants = [x for x in descendants]
 # ==========================================
 # Main
 # ==========================================

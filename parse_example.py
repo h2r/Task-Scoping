@@ -18,7 +18,7 @@ def print_parse(domain, problem):
 	parser.parse_problem(problem)
 	print('Domain name: ' + parser.domain_name)
 	print(f'~~~Types~~~')
-
+	for t in parser.types: print(t)
 	print(f'~~~Predicates~~~')
 	for nm, args in parser.predicates.items():
 		print(f"{nm}({args}")

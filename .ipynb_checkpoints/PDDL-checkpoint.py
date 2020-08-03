@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 # Four spaces as indentation [no tabs]
-# Original version: https://github.com/pucrs-automated-planning/pddl-parser/blob/master/PDDL.py
+# https://github.com/pucrs-automated-planning/pddl-parser/blob/master/PDDL.py
 import re
-from collections import OrderedDict
-from itertools import chain
 from action import Action
 
 class PDDL_Parser:
@@ -13,6 +11,7 @@ class PDDL_Parser:
     # ------------------------------------------
     # Tokens
     # ------------------------------------------
+
     def scan_tokens(self, filename):
         with open(filename,'r') as f:
             # Remove single line comments
@@ -39,46 +38,6 @@ class PDDL_Parser:
             raise Exception('Malformed expression')
         return list[0]
 
-    # This version handles types correctly, except it currently doesn't
-    def scan_tokens_w_types(self, filename):
-        with open(filename,'r') as f:
-            # Remove single line comments
-            str = re.sub(r';.*$', '', f.read(), flags=re.MULTILINE).lower()
-        # Tokenize
-        stack = []
-        list = []
-        # The :types statement uses newlines as syntax. This regex ignores newlines.
-        # Workaround: Handle the :type elsewhere, and insert into the list
-        in_type = False
-        type_start = None
-        for t in re.findall(r'[()]|[^\s()]+', str):
-            if t == ":types":
-                in_type = True
-                type_start = len(stack)
-            if t == '(':
-                stack.append(list)
-                list = []
-            elif t == ')':
-                in_type = False
-                if stack:
-                    l = list
-                    list = stack.pop()
-                    list.append(l)
-                else:
-                    raise Exception('Missing open parentheses')
-            else:
-                if not in_type:
-                    list.append(t)
-        if stack:
-            raise Exception('Missing close parentheses')
-        if len(list) != 1:
-            raise Exception('Malformed expression')
-        # Handle :types
-        types_str = types_str = re.findall(':types ([^()]*)', str, flags=(re.DOTALL | re.MULTILINE))[0]
-        if type_start is not None:
-            list[0].insert(type_start, types_str)
-        return list[0]
-
     #-----------------------------------------------
     # Parse domain
     #-----------------------------------------------
@@ -90,8 +49,8 @@ class PDDL_Parser:
             self.requirements = []
             self.types = []
             self.actions = []
-            self.predicates = OrderedDict()
-            self.functions = OrderedDict()
+            self.predicates = {}
+            self.functions = {}
             while tokens:
                 group = tokens.pop(0)
                 t = group.pop(0)
@@ -108,10 +67,6 @@ class PDDL_Parser:
                     self.parse_functions(group)
                 elif t == ':types':
                     self.types = group
-                    # This parser does the right thing when passed the entires types string
-                    # The token scanner with types doens't currenlty work, so for now we just set types to the
-                    # group list
-                    # self.parse_types(group)
                 elif t == ':action':
                     self.parse_action(group)
                 else: print(str(t) + ' is not recognized in domain')
@@ -127,7 +82,7 @@ class PDDL_Parser:
             predicate_name = pred.pop(0)
             if predicate_name in self.predicates:
                 raise Exception('Predicate ' + predicate_name + ' redefined')
-            arguments = OrderedDict()
+            arguments = {}
             untyped_variables = []
             while pred:
                 t = pred.pop(0)
@@ -152,7 +107,7 @@ class PDDL_Parser:
             function_name = fun.pop(0)
             if function_name in self.functions:
                 raise Exception('Function ' + function_name + ' redefined')
-            arguments = OrderedDict()
+            arguments = {}
             untyped_variables = []
             while fun:
                 t = fun.pop(0)
@@ -167,26 +122,6 @@ class PDDL_Parser:
             while untyped_variables:
                 arguments[untyped_variables.pop(0)] = 'object'
             self.functions[function_name] = arguments
-
-
-    #-----------------------------------------------
-    # Parse types
-    #-----------------------------------------------
-
-    def parse_types(self, group):
-        types_lines = group.replace("\t","").split("\n"); print(types_lines)
-        # [(subtype, parentype)]
-        type_hierarchy = []
-        for l in types_lines:
-            l_split = l.split(" - ")
-            subtypes = l_split[0].split(" ")
-            base_type = l_split[-1]
-            for st in subtypes:
-                type_hierarchy.append((st, base_type))
-        for tp in type_hierarchy: print(tp)
-        self.type_hierarchy = type_hierarchy
-        # A sorted list of any string that appears in type_hierarchy
-        self.types = sorted(list(set(chain(*type_hierarchy))))
 
     #-----------------------------------------------
     # Parse action

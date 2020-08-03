@@ -12,29 +12,15 @@ import sys, pprint
 def print_parse(domain, problem):
 	parser = PDDL_Parser()
 	print('----------------------------')
+	# pprint.pprint(parser.scan_tokens(domain))
+	print('----------------------------')
 	# pprint.pprint(parser.scan_tokens(problem))
 	print('----------------------------')
 	parser.parse_domain(domain)
 	parser.parse_problem(problem)
 	print('Domain name: ' + parser.domain_name)
-	print(f'~~~Types~~~')
-
-	print(f'~~~Predicates~~~')
-	for nm, args in parser.predicates.items():
-		print(f"{nm}({args}")
-	#     print("")
-	print('----------------------------')
-	print(f'~~~Functions~~~')
-	for nm, args in parser.functions.items():
-		print(f"{nm}({args}")
-	#     print("")
-	print('----------------------------')
-	print('~~~Actions~~~')
 	for act in parser.actions:
 		print(act)
-		# print("effect types:")
-		# for ef in action2EffectTypes(act): print(f"\t{ef}")
-		print("\n")
 	print('----------------------------')
 	print('Problem name: ' + parser.problem_name)
 	print('Objects: ' + str(parser.objects))

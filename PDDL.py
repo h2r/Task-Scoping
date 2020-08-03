@@ -8,7 +8,7 @@ from action import Action
 import copy
 class PDDL_Parser:
     # TODO convert type hierarchy to ordered dict (parent: [children])
-    
+
     SUPPORTED_REQUIREMENTS = [':strips', ':negative-preconditions', ':typing']
 
     # ------------------------------------------
@@ -178,17 +178,27 @@ class PDDL_Parser:
     def parse_types(self, group):
         types_lines = group.replace("\t","").split("\n"); print(types_lines)
         # [(subtype, parentype)]
-        type_hierarchy = []
+        type_hierarchy = OrderedDict()
+        # child_pa = []
         for l in types_lines:
             l_split = l.split(" - ")
             subtypes = l_split[0].split(" ")
             base_type = l_split[-1]
             for st in subtypes:
-                type_hierarchy.append((st, base_type))
-        for tp in type_hierarchy: print(tp)
-        self.type_hierarchy = type_hierarchy
-        # A sorted list of any string that appears in type_hierarchy
-        self.types = sorted(list(set(chain(*type_hierarchy))))
+                if base_type not in type_hierarchy.keys():
+                    type_hierarchy[base_type] = []
+                type_hierarchy[base_type].append(st)
+                # type_hierarchy.append((st, base_type))
+        # for tp in type_hierarchy: print(tp)
+        for k, v in type_hierarchy.items():
+            type_hierarchy[k] = sorted(v)
+        # Sort type hierarchy (should probably sort by depth instead of alphabet)
+        type_hierarchy_sorted = OrderedDict()
+        for k in sorted(type_hierarchy.keys()):
+            type_hierarchy_sorted[k] = type_hierarchy[k]
+        type_hierarchy = type_hierarchy_sorted
+        self.type_hierarchy = type_hierarchy_sorted
+        self.types = list(type_hierarchy.keys())
 
     def domain2types(self, domain_filename):
         with open(domain_filename, "r") as f:
@@ -196,17 +206,29 @@ class PDDL_Parser:
         types_str = re.findall(':types ([^()]*)', domain_str, flags=(re.DOTALL | re.MULTILINE))[0]
         types_lines = types_str.replace("\t","").split("\n"); print(types_lines)
         # [(subtype, parentype)]
-        type_hierarchy = []
+        type_hierarchy = OrderedDict()
+        # child_pa = []
         for l in types_lines:
             l_split = l.split(" - ")
             subtypes = l_split[0].split(" ")
             base_type = l_split[-1]
             for st in subtypes:
-                type_hierarchy.append((st, base_type))
-        for tp in type_hierarchy: print(tp)
-        self.type_hierarchy = type_hierarchy
-        # A sorted list of any string that appears in type_hierarchy
-        self.types = sorted(list(set(chain(*type_hierarchy))))
+                if base_type not in type_hierarchy.keys():
+                    type_hierarchy[base_type] = []
+                if st not in type_hierarchy.keys():
+                    type_hierarchy[st] = []
+                type_hierarchy[base_type].append(st)
+                # type_hierarchy.append((st, base_type))
+        # for tp in type_hierarchy: print(tp)
+        for k, v in type_hierarchy.items():
+            type_hierarchy[k] = sorted(v)
+        # Sort type hierarchy (should probably sort by depth instead of alphabet)
+        type_hierarchy_sorted = OrderedDict()
+        for k in sorted(type_hierarchy.keys()):
+            type_hierarchy_sorted[k] = type_hierarchy[k]
+        type_hierarchy = type_hierarchy_sorted
+        self.type_hierarchy = type_hierarchy_sorted
+        self.types = list(type_hierarchy.keys())
 
     #-----------------------------------------------
     # Parse action
@@ -314,45 +336,50 @@ class PDDL_Parser:
                 neg.append(predicate[-1])
             else:
                 pos.append(predicate)
-    def get_deepest_subtypes(self, base):
-        if isinstance(base, str): base = [base]
-        descendants = get_descendants(self.type_hierarchy, base)
+    def get_subtypes(self, ancestors):
+        """Note: a type is its own subtype"""
+        if isinstance(ancestors, str):
+            ancestor = [ancestors]
+        return get_descendants(self.type_hierarchy, ancestors)
+    def get_deepest_subtypes(self, ancestors):
+        descendants = self.get_descendants(ancestors)
+        deepest_subtypes = [x for x in descendants if len(self.type_hierarchy[x]) == 0]
+        return deepest_subtypes
 
-def get_children(hierarchy, base):
+def get_children(hierarchy, parents):
     """
-    :param hierarchy: [(child, parent)]
-    :base: [parents]
+    :param hierarchy: dict mapping parent to children
+    :parents: [parents]
     Note: a parent is one of it's own children
     """
-    children = []
-    for child, parent in hierarchy:
-        if parent in base:
-            children.append(child)
+    children = copy.copy(parents)
+    for p in parents:
+        children.extend(hierarchy[p])
     return sorted(list(set(children)))
 
-def get_descendants(hierarchy, base):
+def get_descendants(hierarchy, ancestors):
     """
-    :param hierarchy: [(child, parent)]
-    :base: [parents]
-    Note: a parent is one of it's own children
+    :param hierarchy: dict mapping parent to children
+    :ancestors: [ancestors]
+    Note: an ancestor is one of it's own descendants
     """
-    descendants = sorted(base)
+    descendants = sorted(ancestors)
     descendants_old = copy.copy(descendants)
     descendants = sorted(list(set(get_children(hierarchy, descendants))))
     while descendants != descendants_old:
-        print("descendants:")
-        print(descendants)
-        print("descendants_old:")
-        print(descendants_old)
+        # print("descendants:")
+        # print(descendants)
+        # print("descendants_old:")
+        # print(descendants_old)
         descendants_old = copy.copy(descendants)
         descendants = sorted(list(set(get_children(hierarchy, descendants))))
     return descendants
-
-def get_deepest_descendants(hierarchy, base):
-    descendants = get_descendants(hierarchy, base)
-    all_nodes = sorted(list(set(chain(*hierarchy))))
-    # TODO redo
-    deepest_descendants = [x for x in descendants]
+#
+# def get_deepest_descendants(hierarchy, base):
+#     descendants = get_descendants(hierarchy, base)
+#     all_nodes = sorted(list(set(chain(*hierarchy))))
+#     # TODO redo
+#     deepest_descendants = [x for x in descendants]
 # ==========================================
 # Main
 # ==========================================

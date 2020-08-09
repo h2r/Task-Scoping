@@ -1,7 +1,7 @@
 from itertools import chain
 from typing import Iterable, Union
 import z3
-from skill_classes import merge_skills, Skill, EffectType
+from skill_classes import merge_skills, Skill, EffectType, SkillPDDL, EffectTypePDDL
 from utils import split_conj, get_atoms, solver_implies_condition
 
 
@@ -22,6 +22,11 @@ def get_unlinked_pvars(skills, causal_links, dummy_goal, solver):
 		for prec in split_conj(s.precondition):
 			if not solver_implies_condition(solver, prec):
 				pvars_rel_new.extend(get_atoms(prec))
+		# params are pvars that influence the effects of the skill. Ex. if a skill has effect (person.y += person.leg_length),
+		# then leg_length is a parameter. params are different from preconditions in that a param can not be implied
+		# by the start condition, so we always consider them unlinked. 
+		if isinstance(s, SkillPDDL):
+			pvars_rel_new.extend(s.params)
 	pvars_rel_new = sorted(list(set(pvars_rel_new)), key=lambda x: str(x))
 	solver.pop()
 	return pvars_rel_new

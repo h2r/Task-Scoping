@@ -72,6 +72,7 @@ class Skill(): #Skills are Immutable
 				new_side_effects.append(e)
 		return Skill(self.precondition, self.action, new_effects, new_side_effects)
 
+
 def merge_skills(skills: Iterable[Skill], relevant_pvars: Iterable[z3.ExprRef]):
 	new_skills = []
 	hashed_skills = OrderedDict()

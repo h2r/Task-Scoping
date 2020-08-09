@@ -3,7 +3,7 @@
 # Original version: https://github.com/pucrs-automated-planning/pddl-parser/blob/master/PDDL.py
 import re
 from collections import OrderedDict
-from itertools import chain
+from itertools import chain, product
 from action import Action
 import copy
 class PDDL_Parser:
@@ -340,15 +340,58 @@ class PDDL_Parser:
                 neg.append(predicate[-1])
             else:
                 pos.append(predicate)
+    #-----------------------------------------------
+    # Get subtypes
+    #-----------------------------------------------
     def get_subtypes(self, ancestors):
         """Note: a type is its own subtype"""
         if isinstance(ancestors, str):
             ancestor = [ancestors]
         return get_descendants(self.type_hierarchy, ancestors)
-    def get_deepest_subtypes(self, ancestors):
-        descendants = self.get_descendants(ancestors)
-        deepest_subtypes = [x for x in descendants if len(self.type_hierarchy[x]) == 0]
-        return deepest_subtypes
+    #-----------------------------------------------
+    # Get objects belonging to type
+    #-----------------------------------------------
+    def get_objects_of_type(self, my_types, subtypes = True):
+        """
+        :param my_types: type of object to get, or an iterable of types
+        :param subtypes: If true, also get objects that are subtypes of my_types. 
+        """
+        if isinstance(my_types, str):
+            my_types = [my_types]
+        if subtypes: my_types = self.get_subtypes(my_types)
+        valid_objects = []
+        for t in my_types:
+            if t in self.objects.keys():
+                valid_objects.extend(self.objects[t])
+        return valid_objects
+    
+    def get_action_groundings(self, a):
+        grounding_dicts = product_dict(**OrderedDict([(varnm, self.get_objects_of_type(vartype)) for (varnm, vartype) in a.parameters]))
+        grounded_actions = []
+        for x in grounding_dicts:
+            att_names = ["name", "parameters", "positive_preconditions", "negative_preconditions", "add_effects", "del_effects"]
+            grounded_atts = OrderedDict([(s, nested_list_replace(getattr(a,s), x)) for s in att_names])
+            grounded_action = Action(**grounded_atts)
+            grounded_actions.append(grounded_action)
+        return grounded_actions
+#     def get_deepest_subtypes(self, ancestors):
+#         descendants = self.get_descendants(ancestors)
+#         deepest_subtypes = [x for x in descendants if len(self.type_hierarchy[x]) == 0]
+#         return deepest_subtypes
+
+def product_dict(**kwargs):
+    keys = kwargs.keys()
+    vals = kwargs.values()
+    for instance in product(*vals):
+        yield dict(zip(keys, instance))
+        
+def nested_list_replace(arr, replacements):
+    if isinstance(arr, str):
+        return replacements.get(arr,arr)
+    elif isinstance(arr, list):
+        return [nested_list_replace(x, replacements) for x in arr]
+    else:
+        raise TypeError(f"Unsupported type: {type(arr)}")
 
 def get_children(hierarchy, parents):
     """
@@ -378,6 +421,7 @@ def get_descendants(hierarchy, ancestors):
         descendants_old = copy.copy(descendants)
         descendants = sorted(list(set(get_children(hierarchy, descendants))))
     return descendants
+
 #
 # def get_deepest_descendants(hierarchy, base):
 #     descendants = get_descendants(hierarchy, base)

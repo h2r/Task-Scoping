@@ -1,25 +1,27 @@
 #!/usr/bin/env python
 # Four spaces as indentation [no tabs]
-# https://github.com/pucrs-automated-planning/pddl-parser/blob/master/PDDL.py
+# Original version: https://github.com/pucrs-automated-planning/pddl-parser/blob/master/PDDL.py
 import re
+from collections import OrderedDict
+from itertools import chain, product
 from action import Action
-
+import copy
 class PDDL_Parser:
+    # TODO convert type hierarchy to ordered dict (parent: [children])
 
     SUPPORTED_REQUIREMENTS = [':strips', ':negative-preconditions', ':typing']
 
     # ------------------------------------------
     # Tokens
     # ------------------------------------------
-
     def scan_tokens(self, filename):
         with open(filename,'r') as f:
             # Remove single line comments
-            str = re.sub(r';.*$', '', f.read(), flags=re.MULTILINE).lower()
+            my_str = re.sub(r';.*$', '', f.read(), flags=re.MULTILINE).lower()
         # Tokenize
         stack = []
         list = []
-        for t in re.findall(r'[()]|[^\s()]+', str):
+        for t in re.findall(r'[()]|[^\s()]+', my_str):
             if t == '(':
                 stack.append(list)
                 list = []
@@ -38,6 +40,46 @@ class PDDL_Parser:
             raise Exception('Malformed expression')
         return list[0]
 
+    # This version handles types correctly, except it currently doesn't
+    def scan_tokens_w_types(self, filename):
+        with open(filename,'r') as f:
+            # Remove single line comments
+            my_str = re.sub(r';.*$', '', f.read(), flags=re.MULTILINE).lower()
+        # Tokenize
+        stack = []
+        list = []
+        # The :types statement uses newlines as syntax. This regex ignores newlines.
+        # Workaround: Handle the :type elsewhere, and insert into the list
+        in_type = False
+        type_start = None
+        for t in re.findall(r'[()]|[^\s()]+', my_str):
+            if t == ":types":
+                in_type = True
+                type_start = len(stack)
+            if t == '(':
+                stack.append(list)
+                list = []
+            elif t == ')':
+                in_type = False
+                if stack:
+                    l = list
+                    list = stack.pop()
+                    list.append(l)
+                else:
+                    raise Exception('Missing open parentheses')
+            else:
+                if not in_type:
+                    list.append(t)
+        if stack:
+            raise Exception('Missing close parentheses')
+        if len(list) != 1:
+            raise Exception('Malformed expression')
+        # Handle :types
+        types_str = re.findall(':types ([^()]*)', str, flags=(re.DOTALL | re.MULTILINE))[0]
+        if type_start is not None:
+            list[0].insert(type_start, types_str)
+        return list[0]
+
     #-----------------------------------------------
     # Parse domain
     #-----------------------------------------------
@@ -49,8 +91,8 @@ class PDDL_Parser:
             self.requirements = []
             self.types = []
             self.actions = []
-            self.predicates = {}
-            self.functions = {}
+            self.predicates = OrderedDict()
+            self.functions = OrderedDict()
             while tokens:
                 group = tokens.pop(0)
                 t = group.pop(0)
@@ -66,7 +108,12 @@ class PDDL_Parser:
                 elif t == ':functions':
                     self.parse_functions(group)
                 elif t == ':types':
-                    self.types = group
+                    # self.types = group
+                    # This parser does the right thing when passed the entires types string
+                    # The token scanner with types doens't currenlty work, so for now we just set types to the
+                    # group list
+                    # self.parse_types(group)
+                    self.domain2types(domain_filename)
                 elif t == ':action':
                     self.parse_action(group)
                 else: print(str(t) + ' is not recognized in domain')
@@ -82,7 +129,7 @@ class PDDL_Parser:
             predicate_name = pred.pop(0)
             if predicate_name in self.predicates:
                 raise Exception('Predicate ' + predicate_name + ' redefined')
-            arguments = {}
+            arguments = OrderedDict()
             untyped_variables = []
             while pred:
                 t = pred.pop(0)
@@ -107,7 +154,7 @@ class PDDL_Parser:
             function_name = fun.pop(0)
             if function_name in self.functions:
                 raise Exception('Function ' + function_name + ' redefined')
-            arguments = {}
+            arguments = OrderedDict()
             untyped_variables = []
             while fun:
                 t = fun.pop(0)
@@ -122,6 +169,66 @@ class PDDL_Parser:
             while untyped_variables:
                 arguments[untyped_variables.pop(0)] = 'object'
             self.functions[function_name] = arguments
+
+
+    #-----------------------------------------------
+    # Parse types
+    #-----------------------------------------------
+
+    def parse_types(self, group):
+        types_lines = group.replace("\t","").split("\n"); print(types_lines)
+        # [(subtype, parentype)]
+        type_hierarchy = OrderedDict()
+        # child_pa = []
+        for l in types_lines:
+            l_split = l.split(" - ")
+            subtypes = l_split[0].split(" ")
+            base_type = l_split[-1]
+            for st in subtypes:
+                if base_type not in type_hierarchy.keys():
+                    type_hierarchy[base_type] = []
+                type_hierarchy[base_type].append(st)
+                # type_hierarchy.append((st, base_type))
+        # for tp in type_hierarchy: print(tp)
+        for k, v in type_hierarchy.items():
+            type_hierarchy[k] = sorted(v)
+        # Sort type hierarchy (should probably sort by depth instead of alphabet)
+        type_hierarchy_sorted = OrderedDict()
+        for k in sorted(type_hierarchy.keys()):
+            type_hierarchy_sorted[k] = type_hierarchy[k]
+        type_hierarchy = type_hierarchy_sorted
+        self.type_hierarchy = type_hierarchy_sorted
+        self.types = list(type_hierarchy.keys())
+
+    def domain2types(self, domain_filename):
+        with open(domain_filename, "r") as f:
+            domain_str = f.read()
+        types_str = re.findall(':types ([^()]*)', domain_str, flags=(re.DOTALL | re.MULTILINE))[0]
+        types_lines = types_str.replace("\t","").split("\n"); print(types_lines)
+        # [(subtype, parentype)]
+        type_hierarchy = OrderedDict()
+        # child_pa = []
+        for l in types_lines:
+            l_split = l.split(" - ")
+            subtypes = l_split[0].split(" ")
+            base_type = l_split[-1]
+            for st in subtypes:
+                if base_type not in type_hierarchy.keys():
+                    type_hierarchy[base_type] = []
+                if st not in type_hierarchy.keys():
+                    type_hierarchy[st] = []
+                type_hierarchy[base_type].append(st)
+                # type_hierarchy.append((st, base_type))
+        # for tp in type_hierarchy: print(tp)
+        for k, v in type_hierarchy.items():
+            type_hierarchy[k] = sorted(v)
+        # Sort type hierarchy (should probably sort by depth instead of alphabet)
+        type_hierarchy_sorted = OrderedDict()
+        for k in sorted(type_hierarchy.keys()):
+            type_hierarchy_sorted[k] = type_hierarchy[k]
+        type_hierarchy = type_hierarchy_sorted
+        self.type_hierarchy = type_hierarchy_sorted
+        self.types = list(type_hierarchy.keys())
 
     #-----------------------------------------------
     # Parse action
@@ -194,7 +301,11 @@ class PDDL_Parser:
                     while group:
                         if group[0] == '-':
                             group.pop(0)
-                            self.objects[group.pop(0)] = object_list
+                            curr_object_type = group.pop(0)
+                            if(self.objects.get(curr_object_type) is None):
+                                self.objects[curr_object_type] = object_list
+                            else:
+                                self.objects[curr_object_type] += object_list
                             object_list = []
                         else:
                             object_list.append(group.pop(0))
@@ -229,7 +340,94 @@ class PDDL_Parser:
                 neg.append(predicate[-1])
             else:
                 pos.append(predicate)
+    #-----------------------------------------------
+    # Get subtypes
+    #-----------------------------------------------
+    def get_subtypes(self, ancestors):
+        """Note: a type is its own subtype"""
+        if isinstance(ancestors, str):
+            ancestor = [ancestors]
+        return get_descendants(self.type_hierarchy, ancestors)
+    #-----------------------------------------------
+    # Get objects belonging to type
+    #-----------------------------------------------
+    def get_objects_of_type(self, my_types, subtypes = True):
+        """
+        :param my_types: type of object to get, or an iterable of types
+        :param subtypes: If true, also get objects that are subtypes of my_types. 
+        """
+        if isinstance(my_types, str):
+            my_types = [my_types]
+        if subtypes: my_types = self.get_subtypes(my_types)
+        valid_objects = []
+        for t in my_types:
+            if t in self.objects.keys():
+                valid_objects.extend(self.objects[t])
+        return valid_objects
+    
+    def get_action_groundings(self, a):
+        grounding_dicts = product_dict(**OrderedDict([(varnm, self.get_objects_of_type(vartype)) for (varnm, vartype) in a.parameters]))
+        grounded_actions = []
+        for x in grounding_dicts:
+            att_names = ["name", "parameters", "positive_preconditions", "negative_preconditions", "add_effects", "del_effects"]
+            grounded_atts = OrderedDict([(s, nested_list_replace(getattr(a,s), x)) for s in att_names])
+            grounded_action = Action(**grounded_atts)
+            grounded_actions.append(grounded_action)
+        return grounded_actions
+#     def get_deepest_subtypes(self, ancestors):
+#         descendants = self.get_descendants(ancestors)
+#         deepest_subtypes = [x for x in descendants if len(self.type_hierarchy[x]) == 0]
+#         return deepest_subtypes
 
+def product_dict(**kwargs):
+    keys = kwargs.keys()
+    vals = kwargs.values()
+    for instance in product(*vals):
+        yield dict(zip(keys, instance))
+        
+def nested_list_replace(arr, replacements):
+    if isinstance(arr, str):
+        return replacements.get(arr,arr)
+    elif isinstance(arr, list):
+        return [nested_list_replace(x, replacements) for x in arr]
+    else:
+        raise TypeError(f"Unsupported type: {type(arr)}")
+
+def get_children(hierarchy, parents):
+    """
+    :param hierarchy: dict mapping parent to children
+    :parents: [parents]
+    Note: a parent is one of it's own children
+    """
+    children = copy.copy(parents)
+    for p in parents:
+        children.extend(hierarchy[p])
+    return sorted(list(set(children)))
+
+def get_descendants(hierarchy, ancestors):
+    """
+    :param hierarchy: dict mapping parent to children
+    :ancestors: [ancestors]
+    Note: an ancestor is one of it's own descendants
+    """
+    descendants = sorted(ancestors)
+    descendants_old = copy.copy(descendants)
+    descendants = sorted(list(set(get_children(hierarchy, descendants))))
+    while descendants != descendants_old:
+        # print("descendants:")
+        # print(descendants)
+        # print("descendants_old:")
+        # print(descendants_old)
+        descendants_old = copy.copy(descendants)
+        descendants = sorted(list(set(get_children(hierarchy, descendants))))
+    return descendants
+
+#
+# def get_deepest_descendants(hierarchy, base):
+#     descendants = get_descendants(hierarchy, base)
+#     all_nodes = sorted(list(set(chain(*hierarchy))))
+#     # TODO redo
+#     deepest_descendants = [x for x in descendants]
 # ==========================================
 # Main
 # ==========================================

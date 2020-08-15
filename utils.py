@@ -230,7 +230,17 @@ def get_diff_and_int(a,b):
 	return a_only, intersection, b_only
 def str_iter(itr):
 	return [str(x) for x in itr]
+
+def flatten(arr, exclusions = (str,)):
+    new_arr = []
+    for x in arr:
+        if isinstance(x,Iterable) and not isinstance(x,exclusions):
+            new_arr.extend(flatten(x))
+        else:
+            new_arr.append(x)
+    return new_arr
 if __name__ == "__main__":
 	# test_grounded_att2objects("grounded_att2objects passed tests")
 	# condition_str2objects_test()
 	print(get_all_bitstrings(3))
+

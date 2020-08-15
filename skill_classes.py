@@ -3,7 +3,7 @@ from itertools import chain, product
 from collections import OrderedDict
 import z3
 import copy
-from utils import simplify_disjunction
+from utils import simplify_disjunction, flatten
 
 class EffectTypePDDL():  #EffectTypes are Immutable
 	def __init__(self, pvar: z3.ExprRef, index: str):
@@ -38,7 +38,7 @@ class EffectType():  #EffectTypes are Immutable
 		return hash((hash(self.pvar), hash(self.index), hash(self.params)))
 
 class SkillPDDL(): #Skills are Immutable
-	def __init__(self, precondition: z3.ExprRef, action: str, effects: Union[Iterable[EffectTypePDDL], EffectTypePDDL]
+	def __init__(self, precondition: z3.ExprRef, action: Union[str, List[str], Tuple[str]], effects: Union[Iterable[EffectTypePDDL], EffectTypePDDL]
 				 , side_effects: Union[Iterable[EffectTypePDDL], EffectTypePDDL] = None):
 		if side_effects is None: side_effects = ()
 		elif isinstance(side_effects, EffectType): side_effects = (side_effects,)
@@ -46,7 +46,7 @@ class SkillPDDL(): #Skills are Immutable
 		# z3 doesn't like vanilla python bools, so we convert those to the z3-equivalent. This makes it so you can
 		# pass in True or False as a precondition without ex. Skill.__eq__ throwing an error
 		if isinstance(precondition,bool): precondition = z3.BoolVal(precondition)
-		self.precondition, self.action = precondition, action
+		self.precondition, self.action = precondition, copy.copy(action) #Copy in case we are passed a list
 		self.effects: Tuple[EffectType] = tuple(sorted(set(effects)))
 		self.side_effects: Tuple[EffectType] = tuple(sorted(set(side_effects)))
 	@property
@@ -144,6 +144,26 @@ class Skill(): #Skills are Immutable
 				new_side_effects.append(e)
 		return Skill(self.precondition, self.action, new_effects, new_side_effects)
 
+def merge_skills_pddl(skills: Iterable[SkillPDDL], relevant_pvars: Iterable[z3.ExprRef]):
+	new_skills = []
+	hashed_skills = OrderedDict()
+	# Move irrelevant pvars to side effects and group skills by actions and effect types
+	for s in skills:
+		s = s.move_irrelevant2side_effects(relevant_pvars)
+		k = (s.effects)
+		if k not in hashed_skills.keys(): hashed_skills[k] = []
+		hashed_skills[k].append(s)
+	# Merge skills that share a key
+	for (effects), sks in hashed_skills.items():
+		# Skip empty effects
+		if len(effects) == 0: continue
+		side_effects = chain(*[s.side_effects for s in sks])
+		precondition = simplify_disjunction([s.precondition for s in sks])
+		# Actions is the list of actions that appeared in any of the parent skills
+		actions = sorted(list(set(flatten([s.action for s in sks]))))
+		if len(actions) == 1: actions = actions[0]
+		new_skills.append(SkillPDDL(precondition, actions, effects, side_effects))
+	return sorted(new_skills)
 
 def merge_skills(skills: Iterable[Skill], relevant_pvars: Iterable[z3.ExprRef]):
 	new_skills = []

@@ -47,6 +47,7 @@ class SkillPDDL(): #Skills are Immutable
 		# pass in True or False as a precondition without ex. Skill.__eq__ throwing an error
 		if isinstance(precondition,bool): precondition = z3.BoolVal(precondition)
 		self.precondition, self.action = precondition, copy.copy(action) #Copy in case we are passed a list
+		if isinstance(effects, EffectTypePDDL): effects = [effects]
 		self.effects: Tuple[EffectType] = tuple(sorted(set(effects)))
 		self.side_effects: Tuple[EffectType] = tuple(sorted(set(side_effects)))
 	@property
@@ -233,7 +234,9 @@ def test_merge_skills():
 	s1 = Skill(z3.Not(pvars[0]), "action", [ets[(0,0)]])
 	s2 = Skill(pvars[1], "action", [ets[(0,1)]])
 	# s2 =
-	merged = merge_skills([s0,s1, s2], [pvars[0]])
+	# merged = merge_skills([s0,s1, s2], [pvars[0]])
+	merged = merge_skills_pddl([s0,s1, s2], [pvars[0]])
+
 	for m in merged:
 		print(m)
 		print("")

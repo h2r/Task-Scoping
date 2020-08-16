@@ -1,7 +1,7 @@
 from itertools import chain
 from typing import Iterable, Union
 import z3
-from skill_classes import merge_skills, Skill, EffectType, SkillPDDL, EffectTypePDDL
+from skill_classes import merge_skills, Skill, EffectType, SkillPDDL, EffectTypePDDL, merge_skills_pddl
 from utils import split_conj, get_atoms, solver_implies_condition
 
 
@@ -41,15 +41,17 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 	# We make a dummy goal and dummy final skill a la LCP because it simplifies the beginning of the algorithm.
 	# We will remove the dummy goal and skill before returning the final results
 	dummy_goal = z3.Bool("dummy_goal") #TODO make sure this var does not already exist
-	dummy_goal_et = EffectType(dummy_goal,0)
-	dummy_final_skill = Skill(z3.And(*goals), "DummyFinalSkill",dummy_goal_et)
+	dummy_goal_et = EffectTypePDDL(dummy_goal,0)
+	dummy_final_skill = SkillPDDL(z3.And(*goals), "DummyFinalSkill",dummy_goal_et)
 	skills = skills + [dummy_final_skill]
 	pvars_rel = [dummy_goal]
 
 	converged = False
 	while not converged:
 		# Get quotient skills
-		skills_rel = merge_skills(skills, pvars_rel)
+		# skills_rel = merge_skills(skills, pvars_rel)
+		skills_rel = merge_skills_pddl(skills, pvars_rel)
+
 
 		# Get causal links
 		causal_links = get_causal_links(start_condition, skills_rel)

@@ -3,7 +3,7 @@ from itertools import chain, product
 from collections import OrderedDict
 import z3
 import copy
-from utils import simplify_disjunction
+from utils import simplify_disjunction, flatten
 
 class EffectType():  #EffectTypes are Immutable
 	def __init__(self, pvar: z3.ExprRef, index: int):
@@ -19,6 +19,78 @@ class EffectType():  #EffectTypes are Immutable
 		return f"ET({self.pvar},{self.index})"
 	def __hash__(self):
 		return hash((hash(self.pvar), hash(self.index)))
+
+class EffectTypePDDL():  #EffectTypes are Immutable
+	def __init__(self, pvar: z3.ExprRef, index, params: Iterable= None):
+		self.pvar, self.index = pvar, index
+		self.params = params if params is not None else tuple()
+	def __eq__(self, other):
+		return z3.eq(self.pvar, other.pvar) and self.index == other.index and self.params == other.params
+	def __lt__(self, other):
+		# TODO incorporate pvar type into sort.
+		if str(self.pvar) > str(other.pvar): return False
+		if str(self.pvar) == str(other.pvar) and self.index >= other.index: return False
+		if str(self.pvar) == str(other.pvar) and self.index >= other.index and str(self.params) >= str(other.params): return False
+		return True
+	def __repr__(self):
+		return f"ET({self.pvar},{self.index},{self.params})"
+	def __hash__(self):
+		return hash((hash(self.pvar), hash(self.index), hash(self.params)))
+
+class SkillPDDL(): #Skills are Immutable
+	def __init__(self, precondition: z3.ExprRef, action: Union[str, List[str], Tuple[str]], effects: Union[Iterable[EffectTypePDDL], EffectTypePDDL]
+				 , side_effects: Union[Iterable[EffectTypePDDL], EffectTypePDDL] = None):
+		if side_effects is None: side_effects = ()
+		elif isinstance(side_effects, EffectType): side_effects = (side_effects,)
+		if isinstance(effects, EffectType): effects = (effects,)
+		# z3 doesn't like vanilla python bools, so we convert those to the z3-equivalent. This makes it so you can
+		# pass in True or False as a precondition without ex. Skill.__eq__ throwing an error
+		if isinstance(precondition,bool): precondition = z3.BoolVal(precondition)
+		self.precondition, self.action = precondition, copy.copy(action) #Copy in case we are passed a list
+		self.effects: Tuple[EffectType] = tuple(sorted(set(effects)))
+		self.side_effects: Tuple[EffectType] = tuple(sorted(set(side_effects)))
+	@property
+	def all_effects(self) -> Tuple[EffectType]:
+		return tuple(set(self.effects + self.side_effects))
+	def __eq__(self, other):
+		if not isinstance(other, Skill): return False
+		same_prec = z3.eq(self.precondition,other.precondition)
+		same_action = (self.action == other.action)
+		same_effects = self.effects == other.effects
+		same_side_effets = self.side_effects == other.side_effects
+		return  same_prec and same_action and same_effects and same_side_effets
+	def __repr__(self):
+		s = f"Precondition: {self.precondition}\nAction: {self.action}\nEffects: {self.effects}" \
+			f"\nSide Effects: {self.side_effects}"
+		return s
+	def __hash__(self):
+		part_hashes = []
+		for x in [self.precondition, self.action, self.effects, self.side_effects]:
+			part_hashes.append(hash(x))
+		return hash(tuple(part_hashes))
+	def __lt__(self, other):
+		# NOTE: This sort is arbitrary. We are defining it just to get a canonical ordering.
+		return str(self) < str(other)
+		# if self.action < other.action: return True
+		# elif self.action > other.action: return False
+	def move_irrelevant2side_effects(self, relevant_pvars):
+		"""Returns a new skill with irrelevant pvars moved to side effects"""
+		# Check that no relevant vars are in side effects
+		for e in self.side_effects:
+			if e.pvar in relevant_pvars:
+				raise ValueError(f"Skill has relevant pvar in side effects:\n{self}")
+
+		new_effects = []
+		new_side_effects = list(copy.copy(self.side_effects))
+		for e in self.effects:
+			if e.pvar in relevant_pvars:
+				new_effects.append(e)
+			else:
+				new_side_effects.append(e)
+		return Skill(self.precondition, self.action, new_effects, new_side_effects)
+	@property
+	def params(self):
+		return tuple(chain(*[x.params for x in self.effects]))
 
 class Skill(): #Skills are Immutable
 	def __init__(self, precondition: z3.ExprRef, action: str, effects: Union[Iterable[EffectType], EffectType]
@@ -71,6 +143,27 @@ class Skill(): #Skills are Immutable
 			else:
 				new_side_effects.append(e)
 		return Skill(self.precondition, self.action, new_effects, new_side_effects)
+
+def merge_skills_pddl(skills: Iterable[SkillPDDL], relevant_pvars: Iterable[z3.ExprRef]):
+	new_skills = []
+	hashed_skills = OrderedDict()
+	# Move irrelevant pvars to side effects and group skills by actions and effect types
+	for s in skills:
+		s = s.move_irrelevant2side_effects(relevant_pvars)
+		k = (s.effects)
+		if k not in hashed_skills.keys(): hashed_skills[k] = []
+		hashed_skills[k].append(s)
+	# Merge skills that share a key
+	for (effects), sks in hashed_skills.items():
+		# Skip empty effects
+		if len(effects) == 0: continue
+		side_effects = chain(*[s.side_effects for s in sks])
+		precondition = simplify_disjunction([s.precondition for s in sks])
+		# Actions is the list of actions that appeared in any of the parent skills
+		actions = sorted(list(set(flatten([s.action for s in sks]))))
+		if len(actions) == 1: actions = actions[0]
+		new_skills.append(SkillPDDL(precondition, actions, effects, side_effects))
+	return sorted(new_skills)
 
 def merge_skills(skills: Iterable[Skill], relevant_pvars: Iterable[z3.ExprRef]):
 	new_skills = []

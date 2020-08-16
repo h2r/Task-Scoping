@@ -5,8 +5,8 @@ import z3
 import copy
 from utils import simplify_disjunction, flatten
 
-class EffectTypePDDL():  #EffectTypes are Immutable
-	def __init__(self, pvar: z3.ExprRef, index: str):
+class EffectType():  #EffectTypes are Immutable
+	def __init__(self, pvar: z3.ExprRef, index: int):
 		self.pvar, self.index = pvar, index
 	def __eq__(self, other):
 		return z3.eq(self.pvar, other.pvar) and self.index == other.index
@@ -20,8 +20,8 @@ class EffectTypePDDL():  #EffectTypes are Immutable
 	def __hash__(self):
 		return hash((hash(self.pvar), hash(self.index)))
 
-class EffectType():  #EffectTypes are Immutable
-	def __init__(self, pvar: z3.ExprRef, index: int, params: Iterable[str] = None):
+class EffectTypePDDL():  #EffectTypes are Immutable
+	def __init__(self, pvar: z3.ExprRef, index, params: Iterable= None):
 		self.pvar, self.index = pvar, index
 		self.params = params if params is not None else tuple()
 	def __eq__(self, other):

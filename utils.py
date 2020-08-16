@@ -5,6 +5,7 @@ from collections.abc import Iterable
 import copy
 import pdb
 from typing import Union, List
+from itertools import product, chain
 
 solver = z3.Solver()
 synth2varnames = {}
@@ -239,6 +240,22 @@ def flatten(arr, exclusions = (str,)):
         else:
             new_arr.append(x)
     return new_arr
+
+
+def product_dict(**kwargs):
+    keys = kwargs.keys()
+    vals = kwargs.values()
+    for instance in product(*vals):
+        yield dict(zip(keys, instance))
+        
+def nested_list_replace(arr, replacements):
+    if isinstance(arr, str):
+        return replacements.get(arr,arr)
+    elif isinstance(arr, list):
+        return [nested_list_replace(x, replacements) for x in arr]
+    else:
+        raise TypeError(f"Unsupported type: {type(arr)}")
+
 if __name__ == "__main__":
 	# test_grounded_att2objects("grounded_att2objects passed tests")
 	# condition_str2objects_test()

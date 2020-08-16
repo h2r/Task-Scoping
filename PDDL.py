@@ -6,6 +6,7 @@ from collections import OrderedDict
 from itertools import chain, product
 from action import Action
 import copy
+from utils import product_dict, nested_list_replace
 class PDDL_Parser:
     # TODO convert type hierarchy to ordered dict (parent: [children])
 
@@ -364,7 +365,6 @@ class PDDL_Parser:
             if t in self.objects.keys():
                 valid_objects.extend(self.objects[t])
         return valid_objects
-    
     def get_action_groundings(self, a):
         grounding_dicts = product_dict(**OrderedDict([(varnm, self.get_objects_of_type(vartype)) for (varnm, vartype) in a.parameters]))
         grounded_actions = []
@@ -379,19 +379,7 @@ class PDDL_Parser:
 #         deepest_subtypes = [x for x in descendants if len(self.type_hierarchy[x]) == 0]
 #         return deepest_subtypes
 
-def product_dict(**kwargs):
-    keys = kwargs.keys()
-    vals = kwargs.values()
-    for instance in product(*vals):
-        yield dict(zip(keys, instance))
-        
-def nested_list_replace(arr, replacements):
-    if isinstance(arr, str):
-        return replacements.get(arr,arr)
-    elif isinstance(arr, list):
-        return [nested_list_replace(x, replacements) for x in arr]
-    else:
-        raise TypeError(f"Unsupported type: {type(arr)}")
+
 
 def get_children(hierarchy, parents):
     """

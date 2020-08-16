@@ -160,6 +160,7 @@ if __name__ == '__main__':
         print(p)
     print("~~~~~Relevant skills~~~~~")
     print("\n\n".join([str(s) for s in rel_skills]))
+    print(len(skill_list), len(rel_skills))
     # print(rel_pvars)
     # print(rel_skills)
 

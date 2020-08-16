@@ -88,7 +88,7 @@ class SkillPDDL(): #Skills are Immutable
 				new_effects.append(e)
 			else:
 				new_side_effects.append(e)
-		return Skill(self.precondition, self.action, new_effects, new_side_effects)
+		return SkillPDDL(self.precondition, self.action, new_effects, new_side_effects)
 	@property
 	def params(self):
 		return tuple(chain(*[x.params for x in self.effects]))

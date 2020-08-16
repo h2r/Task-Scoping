@@ -8,6 +8,7 @@ import itertools
 import z3
 from skill_classes import EffectTypePDDL, SkillPDDL
 from utils import product_dict, nested_list_replace, get_atoms
+from scoping import scope
 
 str2operator = {
     "<": lambda a, b: a < b,
@@ -146,4 +147,6 @@ if __name__ == '__main__':
     # This below block converts all the domain's initial conditions to z3
     init_cond_list = [compile_expression(init_cond, str2var_dict) for init_cond in parser.state]
 
-    
+    # Run the scoper on the constructed goal, skills and initial condition!!!
+    scope(goals=goal_cond, skills=skill_list, start_condition=init_cond_list)
+

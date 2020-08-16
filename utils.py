@@ -195,7 +195,7 @@ def get_atoms(*args: Union[bool, z3.ExprRef, z3.Goal], remove_constants = True) 
 	#TODO remove duplicates
 	atoms = []
 	for expr in args:
-		if isinstance(expr, bool): return []
+		if isinstance(expr, (bool, int)): return []
 		if isinstance(expr, z3.Goal):
 			expr = expr.as_expr()
 		children = expr.children()

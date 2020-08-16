@@ -29,8 +29,8 @@ class EffectTypePDDL():  #EffectTypes are Immutable
 	def __lt__(self, other):
 		# TODO incorporate pvar type into sort.
 		if str(self.pvar) > str(other.pvar): return False
-		if str(self.pvar) == str(other.pvar) and self.index >= other.index: return False
-		if str(self.pvar) == str(other.pvar) and self.index >= other.index and str(self.params) >= str(other.params): return False
+		if str(self.pvar) == str(other.pvar) and str(self.index) >= str(other.index): return False
+		if str(self.pvar) == str(other.pvar) and str(self.index) >= str(other.index) and str(self.params) >= str(other.params): return False
 		return True
 	def __repr__(self):
 		return f"ET({self.pvar},{self.index},{self.params})"

@@ -177,7 +177,7 @@ class PDDL_Parser:
     #-----------------------------------------------
 
     def parse_types(self, group):
-        types_lines = group.replace("\t","").split("\n"); print(types_lines)
+        types_lines = group.replace("\t","").split("\n")
         # [(subtype, parentype)]
         type_hierarchy = OrderedDict()
         # child_pa = []
@@ -205,7 +205,7 @@ class PDDL_Parser:
         with open(domain_filename, "r") as f:
             domain_str = f.read()
         types_str = re.findall(':types ([^()]*)', domain_str, flags=(re.DOTALL | re.MULTILINE))[0]
-        types_lines = types_str.replace("\t","").split("\n"); print(types_lines)
+        types_lines = types_str.replace("\t","").split("\n")
         # [(subtype, parentype)]
         type_hierarchy = OrderedDict()
         # child_pa = []

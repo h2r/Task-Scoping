@@ -1,7 +1,7 @@
 ;; Nishanth J. Kumar (nkumar12@cs.brown.edu)
 (define (domain multipasstaxi)
 (:requirements :typing :fluents :negative-preconditions)
-;(:requirements :typing)
+; (:requirements :typing)
 
 (:types passenger taxi - object)
 (:predicates (passenger-in-taxi ?p - passenger ?t - taxi) )

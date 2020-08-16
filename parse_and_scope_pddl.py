@@ -35,7 +35,7 @@ def list_is_flat(l):
     return True
 
 def action2precondition(a: Action, str_var_dict) -> z3.BoolRef:
-    clauses = [compile_expression(p, str_var_dict) for p in a.positive_preconditions] + [z3.Not(compile_expression(p), str_var_dict) for p in a.negative_preconditions]
+    clauses = [compile_expression(p, str_var_dict) for p in a.positive_preconditions] + [z3.Not(compile_expression(p, str_var_dict)) for p in a.negative_preconditions]
     return z3.And(*clauses)
 
 def z3_identical(a, b):
@@ -111,10 +111,13 @@ def action2effect_types(a: Action, str_var_dict) -> List[EffectTypePDDL]:
 
 
 if __name__ == '__main__':
-    zeno_dom = "examples/zeno/zeno.pddl"
-    zeno_prob = "examples/zeno/pb1.pddl"
+    # zeno_dom = "examples/zeno/zeno.pddl"
+    # zeno_prob = "examples/zeno/pb1.pddl"
+    # domain, problem = zeno_dom, zeno_prob
 
-    domain, problem = zeno_dom, zeno_prob
+    taxi_dom = "examples/taxi-numeric/taxi-domain.pddl"
+    taxi_prob = "examples/taxi-numeric/prob01.pddl"
+    domain, problem = taxi_dom, taxi_prob
 
     parser = PDDL_Parser()
     parser.parse_domain(domain)
@@ -147,6 +150,8 @@ if __name__ == '__main__':
     # This below block converts all the domain's initial conditions to z3
     init_cond_list = [compile_expression(init_cond, str2var_dict) for init_cond in parser.state]
 
-    # Run the scoper on the constructed goal, skills and initial condition!!!
-    scope(goals=goal_cond, skills=skill_list, start_condition=init_cond_list)
+    # Run the scoper on the constructed goal, skills and initial condition
+    rel_pvars, rel_skills = scope(goals=goal_cond, skills=skill_list, start_condition=init_cond_list)
+    print(rel_pvars)
+    # print(rel_skills)
 

@@ -155,6 +155,11 @@ if __name__ == '__main__':
 
     # Run the scoper on the constructed goal, skills and initial condition
     rel_pvars, rel_skills = scope(goals=goal_cond, skills=skill_list, start_condition=init_cond_list)
-    print(rel_pvars)
+    print("~~~~~Relevant pvars~~~~~")
+    for p in rel_pvars:
+        print(p)
+    print("~~~~~Relevant skills~~~~~")
+    print("\n\n".join([str(s) for s in rel_skills]))
+    # print(rel_pvars)
     # print(rel_skills)
 

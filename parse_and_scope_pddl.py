@@ -34,7 +34,7 @@ def list_is_flat(l):
     return True
 
 def action2precondition(a: Action, str_var_dict) -> z3.BoolRef:
-    clauses = [compile_expression(p, str_var_dict) for p in a.positive_preconditions] + [z3.Not(compile_expression(p)) for p in a.negative_preconditions]
+    clauses = [compile_expression(p, str_var_dict) for p in a.positive_preconditions] + [z3.Not(compile_expression(p), str_var_dict) for p in a.negative_preconditions]
     return z3.And(*clauses)
 
 def z3_identical(a, b):
@@ -143,4 +143,7 @@ if __name__ == '__main__':
     goal_list += [z3.Not(compile_expression(neg_goal_expr, str2var_dict)) for neg_goal_expr in parser.negative_goals]
     goal_cond = z3.And(*goal_list)
 
-    # (TODO) This below block converts all the domain's initial conditions to z3
+    # This below block converts all the domain's initial conditions to z3
+    init_cond_list = [compile_expression(init_cond, str2var_dict) for init_cond in parser.state]
+
+    

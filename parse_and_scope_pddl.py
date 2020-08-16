@@ -23,7 +23,7 @@ str2operator = {
     "increase": lambda a, b: a + b,
     "decrease": lambda a, b: a - b,
     "assign": lambda a, b: b
-}
+    }
 
 def list2var_str(x):
     return x[0] + "(" + ", ".join(x[1:]) + ")"
@@ -75,6 +75,9 @@ def compile_expression(expr, str_var_dict):
     elif isinstance(expr, list):
         if list_is_flat(expr):
             return str_var_dict[list2var_str(expr)]
+        elif len(expr) == 2:
+            if expr[0] == "not":
+                return z3.Not(compile_expression(expr[1], str_var_dict))
         else:
             assert len(expr) == 3, f"Don't understand how to compile: {expr}"
             operator = str2operator[expr[0]]
@@ -116,7 +119,7 @@ if __name__ == '__main__':
     # domain, problem = zeno_dom, zeno_prob
 
     taxi_dom = "examples/taxi-numeric/taxi-domain.pddl"
-    taxi_prob = "examples/taxi-numeric/prob01.pddl"
+    taxi_prob = "examples/taxi-numeric/prob02.pddl"
     domain, problem = taxi_dom, taxi_prob
 
     parser = PDDL_Parser()

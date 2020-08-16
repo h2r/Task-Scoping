@@ -58,6 +58,10 @@ def make_z3_atoms(things_dict, z3_class, str2var = None):
     return str2var
 
 def compile_expression(expr, str_var_dict):
+    """ 
+    :param expr - a (potentially nested) list of strings
+    :param str_var_dict - a dictionary mapping strings representing pvars to their corresponding z3 objects
+    """
     if isinstance(expr, int):
         return expr
     elif isinstance(expr, str):
@@ -134,4 +138,9 @@ if __name__ == '__main__':
             skill = SkillPDDL(precond, grounded_action.name, effect_types)
             skill_list.append(skill)
 
-            
+    # This below block converts all the domain's goals to z3
+    goal_list = [compile_expression(pos_goal_expr, str2var_dict) for pos_goal_expr in parser.positive_goals]
+    goal_list += [z3.Not(compile_expression(neg_goal_expr, str2var_dict)) for neg_goal_expr in parser.negative_goals]
+    goal_cond = z3.And(*goal_list)
+
+    # (TODO) This below block converts all the domain's initial conditions to z3

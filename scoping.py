@@ -49,9 +49,7 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 	converged = False
 	while not converged:
 		# Get quotient skills
-		# skills_rel = merge_skills(skills, pvars_rel)
 		skills_rel = merge_skills_pddl(skills, pvars_rel)
-
 
 		# Get causal links
 		causal_links = get_causal_links(start_condition, skills_rel)
@@ -63,6 +61,8 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 		converged = (pvars_rel == pvars_rel_new)
 
 		pvars_rel = pvars_rel_new
+
+		# from IPython import embed; embed()
 
 	# Remove the dummy pvar and skill
 	pvars_rel.remove(dummy_goal)

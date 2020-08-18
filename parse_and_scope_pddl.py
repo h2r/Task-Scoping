@@ -118,8 +118,8 @@ if __name__ == '__main__':
     # zeno_prob = "examples/zeno/pb1.pddl"
     # domain, problem = zeno_dom, zeno_prob
 
-    taxi_dom = "examples/taxi-numeric/taxi-domain.pddl"
-    taxi_prob = "examples/taxi-numeric/prob02.pddl"
+    taxi_dom = "examples/infinite-taxi-numeric/taxi-domain.pddl"
+    taxi_prob = "examples/infinite-taxi-numeric/prob02.pddl"
     domain, problem = taxi_dom, taxi_prob
 
     parser = PDDL_Parser()
@@ -155,12 +155,11 @@ if __name__ == '__main__':
 
     # Run the scoper on the constructed goal, skills and initial condition
     rel_pvars, rel_skills = scope(goals=goal_cond, skills=skill_list, start_condition=init_cond_list)
+      
     print("~~~~~Relevant pvars~~~~~")
     for p in rel_pvars:
         print(p)
-    print("~~~~~Relevant skills~~~~~")
-    print("\n\n".join([str(s) for s in rel_skills]))
-    print(len(skill_list), len(rel_skills))
+ 
     # print(rel_pvars)
     # print(rel_skills)
 

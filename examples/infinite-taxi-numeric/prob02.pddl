@@ -41,8 +41,8 @@
     (= (passenger-y abbeel) 0)
 )
 (:goal (and
-    (= (passenger-y curly) 10)
-	(= (passenger-x curly) 8)
+    (= (passenger-y curly) 5)
+	(= (passenger-x curly) 5)
     (not (passenger-in-taxi curly t0))
 	
     )

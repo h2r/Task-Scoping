@@ -17,6 +17,8 @@ class EffectType():  #EffectTypes are Immutable
 		return True
 	def __repr__(self):
 		return f"ET({self.pvar},{self.index})"
+	def __str__(self):
+		return self.__repr__()
 	def __hash__(self):
 		return hash((hash(self.pvar), hash(self.index)))
 
@@ -34,6 +36,8 @@ class EffectTypePDDL():  #EffectTypes are Immutable
 		return True
 	def __repr__(self):
 		return f"ET({self.pvar},{self.index},{self.params})"
+	def __str__(self):
+		return self.__repr__()
 	def __hash__(self):
 		return hash((hash(self.pvar), hash(self.index), hash(self.params)))
 
@@ -64,6 +68,8 @@ class SkillPDDL(): #Skills are Immutable
 		s = f"Precondition: {self.precondition}\nAction: {self.action}\nEffects: {self.effects}" \
 			f"\nSide Effects: {self.side_effects}"
 		return s
+	def __str__(self):
+		return self.__repr__()
 	def __hash__(self):
 		part_hashes = []
 		for x in [self.precondition, self.action, self.effects, self.side_effects]:
@@ -119,6 +125,8 @@ class Skill(): #Skills are Immutable
 		s = f"Precondition: {self.precondition}\nAction: {self.action}\nEffects: {self.effects}" \
 			f"\nSide Effects: {self.side_effects}"
 		return s
+	def __str__(self):
+		return self.__repr__()
 	def __hash__(self):
 		part_hashes = []
 		for x in [self.precondition, self.action, self.effects, self.side_effects]:

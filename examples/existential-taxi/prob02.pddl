@@ -1,5 +1,5 @@
 (define (problem TAXINUMERIC-2)
-(:domain multipasstaxi)
+(:domain universal_multipasstaxi)
 (:objects
 	curly smoov - passenger
 

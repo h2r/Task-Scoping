@@ -366,6 +366,8 @@ class PDDL_Parser:
                 valid_objects.extend(self.objects[t])
         return valid_objects
     def get_action_groundings(self, a):
+        # We handle quantifier grounding when converting to z3 expressions
+        # Ground non-quantiifed vars in all possible ways
         grounding_dicts = product_dict(**OrderedDict([(varnm, self.get_objects_of_type(vartype)) for (varnm, vartype) in a.parameters]))
         grounded_actions = []
         for x in grounding_dicts:

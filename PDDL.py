@@ -347,7 +347,7 @@ class PDDL_Parser:
     def get_subtypes(self, ancestors):
         """Note: a type is its own subtype"""
         if isinstance(ancestors, str):
-            ancestor = [ancestors]
+            ancestors = [ancestors]
         return get_descendants(self.type_hierarchy, ancestors)
     #-----------------------------------------------
     # Get objects belonging to type

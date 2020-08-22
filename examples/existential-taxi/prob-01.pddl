@@ -11,11 +11,9 @@
     (= (passenger-y curly) 3)
 )
 (:goal (and
-    (= (passenger-y curly) 5)
-	(= (passenger-x curly) 5)
+    (= (passenger-y curly) 10000)
+	(= (passenger-x curly) 9000)
     (not (passenger-in-taxi curly t0))	
     )
     )
-;(:metric  minimize (total-fuel-used) )
-
 )

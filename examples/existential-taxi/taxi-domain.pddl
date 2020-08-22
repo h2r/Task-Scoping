@@ -2,7 +2,6 @@
 
 (define (domain universal_multipasstaxi)
 (:requirements :equality :typing :fluents :negative-preconditions :universal-preconditions :existential-preconditions)
-; (:requirements :typing)
 
 (:types passenger taxi - object)
 (:predicates (passenger-in-taxi ?p - passenger ?t - taxi))

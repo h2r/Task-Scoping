@@ -166,16 +166,6 @@ def action2effect_types(a: Action, str_var_dict) -> List[EffectTypePDDL]:
     
 
 
-def str_grounded_actions2skills(str_grounded_actions, str2var_dict):
-    skill_list = []
-    for action_class in str_grounded_actions:
-        for grounded_action in action_class:
-            precond = action2precondition(grounded_action, str2var_dict)
-            effect_types = action2effect_types(grounded_action, str2var_dict)
-            skill = SkillPDDL(precond, grounded_action.name, effect_types)
-            skill_list.append(skill)
-    return skill_list
-
 if __name__ == "__main__":
     domain, problem = "./examples/existential-taxi/taxi-domain.pddl", "./examples/existential-taxi/prob02.pddl"
     parser = PDDL_Parser_z3()

@@ -1,7 +1,7 @@
 ;; Domain constructed by: Nishanth J. Kumar (nkumar12@cs.brown.edu)
 
 (define (domain universal_multipasstaxi)
-(:requirements :typing :fluents :negative-preconditions :universal-preconditions)
+(:requirements :equality :typing :fluents :negative-preconditions :universal-preconditions :existential-preconditions)
 ; (:requirements :typing)
 
 (:types passenger taxi - object)
@@ -57,25 +57,29 @@
 
 (:action move-north-pass
  :parameters (?t - taxi ?p - passenger)
- :precondition (passenger-in-taxi ?p ?t)
+ :precondition (and (passenger-in-taxi ?p ?t)
+                    (not (exists (?pb - passenger) (and (not (= ?pb ?p)) (passenger-in-taxi ?pb ?t)))))
  :effect (and (increase (taxi-y ?t) 1)
               (increase (passenger-y ?p) 1)))
 
 (:action move-south-pass
  :parameters (?t - taxi ?p - passenger)
- :precondition (passenger-in-taxi ?p ?t)
+ :precondition (and (passenger-in-taxi ?p ?t)
+                    (not (exists (?pb - passenger) (and (not (= ?pb ?p)) (passenger-in-taxi ?pb ?t)))))
  :effect (and (decrease (taxi-y ?t) 1)
               (decrease (passenger-y ?p) 1)))
 
 (:action move-east-pass
  :parameters (?t - taxi ?p - passenger)
- :precondition (passenger-in-taxi ?p ?t)
+ :precondition (and (passenger-in-taxi ?p ?t)
+                    (not (exists (?pb - passenger) (and (not (= ?pb ?p)) (passenger-in-taxi ?pb ?t)))))
  :effect (and (increase (taxi-x ?t) 1)
               (increase (passenger-x ?p) 1)))
 
 (:action move-west-pass
  :parameters (?t - taxi ?p - passenger)
- :precondition (passenger-in-taxi ?p ?t)
+ :precondition (and (passenger-in-taxi ?p ?t)
+                    (not (exists (?pb - passenger) (and (not (= ?pb ?p)) (passenger-in-taxi ?pb ?t)))))
  :effect (and (decrease (taxi-x ?t) 1)
               (decrease (passenger-x ?p) 1)))
 

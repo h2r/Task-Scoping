@@ -1,5 +1,10 @@
 ;; Domain constructed by: Nishanth J. Kumar (nkumar12@cs.brown.edu)
 
+; IMPORTANT: Haven't specified a way for the agent to die or pick stuff up
+; yet. This can totally be hacked around using different actions with preconditions
+; differing in whether there's lava/pick-uppable items ahead
+
+(define (domain minecraft-contrived)
 (:requirements :typing :fluents :negative-preconditions :universal-preconditions :existential-preconditions)
 
 (:types dirt-block redstone-block glass-block - block
@@ -15,8 +20,8 @@
 
 (:predicates (block-present ?b - block)
              (apple-present ?ap - apple)
+             (orchid-present ?orc - orchid-flower)
              (daisy-present ?df - daisy-flower)
-             (orchid-present ?or - orchid-flower)
              (potato-present ?po - potato)
              (rabbit-present ?ra - rabbit)
              (rabbit-cooked ?ra - rabbit)
@@ -59,18 +64,42 @@
 ; Right now, I've only implemented agent-z (haven't done "or" condition yet)
 (:action move-north
  :parameters (?ag - agent)
- :precondition (and (agent-alive(?ag)
+ :precondition (and (agent-alive ?ag)
                     (not (exists (?bl - block) (and (= (bl-x ?bl) (agent-x ?ag))
                                                     (= (bl-y ?bl) (+ (agent-y ?ag) 1))
-                                                    (= (bl-z ?bl) (+ (agent-z ?ag) 1)))))))
-:effect (increase (agent-y ?ag) 1)
+                                                    (= (bl-z ?bl) (+ (agent-z ?ag) 1))))))
+ :effect (and (increase (agent-y ?ag) 1))
 )
 
 (:action move-south
  :parameters (?ag - agent)
- :precondition (and (agent-alive(?ag)
+ :precondition (and (agent-alive ?ag)
                     (not (exists (?bl - block) (and (= (bl-x ?bl) (agent-x ?ag))
                                                     (= (bl-y ?bl) (- (agent-y ?ag) 1))
-                                                    (= (bl-z ?bl) (+ (agent-z ?ag) 1)))))))
-:effect (decrease (agent-y ?ag) 1)
+                                                    (= (bl-z ?bl) (+ (agent-z ?ag) 1))))))
+ :effect (and (decrease (agent-y ?ag) 1))
+)
+
+(:action move-east
+ :parameters (?ag - agent)
+ :precondition (and (agent-alive ?ag)
+                    (not (exists (?bl - block) (and (= (bl-x ?bl) (+ (agent-x ?ag) 1))
+                                                    (= (bl-y ?bl) (agent-y ?ag))
+                                                    (= (bl-z ?bl) (+ (agent-z ?ag) 1))))))
+ :effect (and (increase (agent-x ?ag) 1))
+)
+
+(:action move-west
+ :parameters (?ag - agent)
+ :precondition (and (agent-alive ?ag)
+                    (not (exists (?bl - block) (and (= (bl-x ?bl) (- (agent-x ?ag) 1))
+                                                    (= (bl-y ?bl) (agent-y ?ag))
+                                                    (= (bl-z ?bl) (+ (agent-z ?ag) 1))))))
+ :effect (and (decrease (agent-x ?ag) 1))
+)
+
+(:action hit-block
+ :parameters (?b - block) 
+)
+
 )

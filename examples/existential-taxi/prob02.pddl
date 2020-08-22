@@ -40,12 +40,13 @@
     ; (= (passenger-y levine) 0)
     ; (= (passenger-x abbeel) 0)
     ; (= (passenger-y abbeel) 0)
-    (= (passenger-count t0) 0)
+    ; (= (passenger-count t0) 0)
 )
 (:goal (and
     (= (passenger-y curly) 1050)
 	(= (passenger-x curly) 830)
     (not (passenger-in-taxi curly t0))
+    
 	
     )
     )

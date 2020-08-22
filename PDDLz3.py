@@ -23,7 +23,7 @@ class PDDL_Parser_z3(PDDL_Parser):
                 str2var[s] = grounded_predicate
         return str2var
     
-    def make_str2var_dict(self): #TODO make method of parser class
+    def make_str2var_dict(self):
         str2var_dict = OrderedDict()
         str2var_dict = self.make_z3_atoms(self.predicates, z3.Bool, str2var_dict)
         str2var_dict = self.make_z3_atoms(self.functions, z3.Int, str2var_dict)
@@ -46,6 +46,15 @@ class PDDL_Parser_z3(PDDL_Parser):
         str_grounded_actions = [self.get_action_groundings(a) for a in self.actions]
         skill_list = self.str_grounded_actions2skills(str_grounded_actions, str2var_dict)
         return skill_list
+    def get_goal_cond(self):
+        str2var_dict = self.make_str2var_dict()
+        goal_list = [compile_expression(pos_goal_expr, str2var_dict, self) for pos_goal_expr in self.positive_goals]
+        goal_list += [z3.Not(compile_expression(neg_goal_expr, str2var_dict, self)) for neg_goal_expr in self.negative_goals]
+        goal_cond = z3.And(*goal_list)
+        return goal_cond
+    def get_init_cond_list(self):
+        str2var_dict = self.make_str2var_dict()
+        return [compile_expression(init_cond, str2var_dict, self) for init_cond in self.state]
 
 str2operator = {
     "<": lambda a, b: a < b,

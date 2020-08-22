@@ -1,5 +1,6 @@
 from action import Action
-from PDDL import PDDL_Parser
+# from PDDL import PDDL_Parser
+from PDDLz3 import PDDL_Parser_z3
 import sys, pprint
 from collections import OrderedDict
 from typing import List, Tuple, Dict, Iterable
@@ -118,40 +119,46 @@ if __name__ == '__main__':
     # zeno_prob = "examples/zeno/pb1.pddl"
     # domain, problem = zeno_dom, zeno_prob
 
-    taxi_dom = "examples/infinite-taxi-numeric/taxi-domain.pddl"
-    taxi_prob = "examples/infinite-taxi-numeric/prob02.pddl"
+    # taxi_dom = "examples/infinite-taxi-numeric/taxi-domain.pddl"
+    # taxi_prob = "examples/infinite-taxi-numeric/prob02.pddl"
+
+    taxi_dom, taxi_prob = "./examples/existential-taxi/taxi-domain.pddl", "./examples/existential-taxi/prob02.pddl"
+
     domain, problem = taxi_dom, taxi_prob
 
-    parser = PDDL_Parser()
+    parser = PDDL_Parser_z3()
     parser.parse_domain(domain)
     parser.parse_problem(problem)
 
-    # str2var_dict after this contains a mapping of 
-    # str -> z3 var
-    str2var_dict = OrderedDict()
-    str2var_dict = make_z3_atoms(parser.predicates, z3.Bool, str2var_dict)
-    str2var_dict = make_z3_atoms(parser.functions, z3.Int, str2var_dict)
+    # # str2var_dict after this contains a mapping of 
+    # # str -> z3 var
+    # str2var_dict = OrderedDict()
+    # str2var_dict = make_z3_atoms(parser.predicates, z3.Bool, str2var_dict)
+    # str2var_dict = make_z3_atoms(parser.functions, z3.Int, str2var_dict)
 
-    # str_grounded_actions now contains a list of all possible actions grounded to 
-    # all possible objects 
-    str_grounded_actions = [parser.get_action_groundings(a) for a in parser.actions]
+    # # str_grounded_actions now contains a list of all possible actions grounded to 
+    # # all possible objects 
+    # str_grounded_actions = [parser.get_action_groundings(a) for a in parser.actions]
 
-    # This below block creates all skills (CAE Triples) for the domain!
-    skill_list = []
-    for action_class in str_grounded_actions:
-        for grounded_action in action_class:
-            precond = action2precondition(grounded_action, str2var_dict)
-            effect_types = action2effect_types(grounded_action, str2var_dict)
-            skill = SkillPDDL(precond, grounded_action.name, effect_types)
-            skill_list.append(skill)
+    # # This below block creates all skills (CAE Triples) for the domain!
+    # skill_list = []
+    # for action_class in str_grounded_actions:
+    #     for grounded_action in action_class:
+    #         precond = action2precondition(grounded_action, str2var_dict)
+    #         effect_types = action2effect_types(grounded_action, str2var_dict)
+    #         skill = SkillPDDL(precond, grounded_action.name, effect_types)
+    #         skill_list.append(skill)
+    skill_list = parser.get_skills()
 
     # This below block converts all the domain's goals to z3
-    goal_list = [compile_expression(pos_goal_expr, str2var_dict) for pos_goal_expr in parser.positive_goals]
-    goal_list += [z3.Not(compile_expression(neg_goal_expr, str2var_dict)) for neg_goal_expr in parser.negative_goals]
-    goal_cond = z3.And(*goal_list)
+    # goal_list = [compile_expression(pos_goal_expr, str2var_dict) for pos_goal_expr in parser.positive_goals]
+    # goal_list += [z3.Not(compile_expression(neg_goal_expr, str2var_dict)) for neg_goal_expr in parser.negative_goals]
+    # goal_cond = z3.And(*goal_list)
+    goal_cond = parser.get_goal_cond()
 
     # This below block converts all the domain's initial conditions to z3
-    init_cond_list = [compile_expression(init_cond, str2var_dict) for init_cond in parser.state]
+    # init_cond_list = [compile_expression(init_cond, str2var_dict) for init_cond in parser.state]
+    init_cond_list = parser.get_init_cond_list()
 
     # Run the scoper on the constructed goal, skills and initial condition
     rel_pvars, rel_skills = scope(goals=goal_cond, skills=skill_list, start_condition=init_cond_list)

@@ -35,6 +35,8 @@ def remove_objects(input_path, output_path, objects):
                 if len(objs) > 0:
                     l_new = " ".join(objs) + " - " + obj_type
                     scoped_lines.append(l_new)
+            else:
+                scoped_lines.append(";" + l)
 
     with open(output_path, "w")  as f:
         f.write("\n".join(scoped_lines))

@@ -17,9 +17,25 @@ def remove_objects(input_path, output_path, objects):
     with open(input_path, "r") as f:
         instance_lines = f.read().splitlines()
     scoped_lines = []
+    in_objects_flag = False
     for l in instance_lines:
+        if in_objects_flag == True:
+            if len(l) > 0 and l[0] == ")":
+                in_objects_flag = False
+        if "(:objects" in l:
+            in_objects_flag = True
+        
         if not any(o in l for o in objects):
             scoped_lines.append(l)
+        else:
+            if in_objects_flag:
+                split_l = l.split(" ")
+                obj_type = split_l[-1]
+                objs = [o for o in split_l[:-2] if o not in objects]
+                if len(objs) > 0:
+                    l_new = " ".join(objs) + " - " + obj_type
+                    scoped_lines.append(l_new)
+
     with open(output_path, "w")  as f:
         f.write("\n".join(scoped_lines))
 

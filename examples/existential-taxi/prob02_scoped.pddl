@@ -1,7 +1,9 @@
 (define (problem TAXINUMERIC-2)
 (:domain universal_multipasstaxi)
 (:objects
+	curly - passenger
 
+	; curly littman isbell tellex konidaris kaelbling perez levine abbeel - passenger
 	; curly - passenger
     t0 - taxi
 )

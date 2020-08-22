@@ -21,6 +21,8 @@ str2operator = {
     "+": lambda a, b: a + b,
     "/": lambda a, b: a / b,
     "-": lambda a, b: a - b,
+    "and": lambda a, b: z3.And(a,b),
+    "or": lambda a, b: z3.Or(a,b),
     "increase": lambda a, b: a + b,
     "decrease": lambda a, b: a - b,
     "assign": lambda a, b: b

@@ -66,6 +66,8 @@ str2operator = {
     "+": lambda a, b: a + b,
     "/": lambda a, b: a / b,
     "-": lambda a, b: a - b,
+    "and": lambda a, b: z3.And(a,b),
+    "or": lambda a, b: z3.Or(a,b),
     "increase": lambda a, b: a + b,
     "decrease": lambda a, b: a - b,
     "assign": lambda a, b: b
@@ -107,7 +109,11 @@ def compile_expression(expr, str_var_dict, parser=None):
     elif isinstance(expr, list):
         # A flat list corresponds to a pvar
         if list_is_flat(expr):
-            return str_var_dict[list2var_str(expr)]
+            # check equality
+            if expr[0] == "=":
+                return expr[1] == expr[2]
+            else:
+                return str_var_dict[list2var_str(expr)]
         elif len(expr) == 2:
             # The only length 2 expression we can compile is ['not', [subexpression]]
             if expr[0] == "not":

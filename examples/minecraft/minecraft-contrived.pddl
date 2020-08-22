@@ -1,21 +1,19 @@
 ;; Domain constructed by: Nishanth J. Kumar (nkumar12@cs.brown.edu)
 
-(:requirements :typing :fluents :negative-preconditions :universal-preconditions)
+(:requirements :typing :fluents :negative-preconditions :universal-preconditions :existential-preconditions)
 
-(:types agent 
-        glass-block 
+(:types dirt-block redstone-block glass-block - block
+        agent 
         apple 
         potato 
         rabbit 
         diamond-axe 
-        orchid-flower 
-        dirt-block 
+        orchid-flower
         daisy-flower 
-        redstone-block 
+        block
         lava - object)
 
-(:predicates (gb-present ?gb - glass-block)
-             (db-present ?db - dirt-block)
+(:predicates (block-present ?b - block)
              (apple-present ?ap - apple)
              (daisy-present ?df - daisy-flower)
              (orchid-present ?or - orchid-flower)
@@ -36,14 +34,12 @@
             (agent-num-raw-rabbits ?ag - agent)
             (agent-num-cooked-rabbits ?ag - agent)
 
-            (gb-x ?gb - glass-block)
-            (gb-y ?gb - glass-block)
-            (gb-z ?gb - glass-block)
+            (bl-x ?bl - block)
+            (bl-y ?bl - block)
+            (bl-z ?bl - block)
+
             (gb-hits ?gb - glass-block)
 
-            (db-x ?db - dirt-block)  
-            (db-y ?db - dirt-block)
-            (db-z ?db - dirt-block)
             (db-hits ?db - dirt-block)
 
             (apple-x ?ap - apple)
@@ -59,8 +55,22 @@
             (rabbit-z ?ra - rabbit)
 )
 
+; Note: There actually cannot be a block at agent-z, agent-z + 1 or agent-z + 2 for any of the move actions
+; Right now, I've only implemented agent-z (haven't done "or" condition yet)
 (:action move-north
  :parameters (?ag - agent)
  :precondition (and (agent-alive(?ag)
-                    ()))
+                    (not (exists (?bl - block) (and (= (bl-x ?bl) (agent-x ?ag))
+                                                    (= (bl-y ?bl) (+ (agent-y ?ag) 1))
+                                                    (= (bl-z ?bl) (+ (agent-z ?ag) 1)))))))
+:effect (increase (agent-y ?ag) 1)
+)
+
+(:action move-south
+ :parameters (?ag - agent)
+ :precondition (and (agent-alive(?ag)
+                    (not (exists (?bl - block) (and (= (bl-x ?bl) (agent-x ?ag))
+                                                    (= (bl-y ?bl) (- (agent-y ?ag) 1))
+                                                    (= (bl-z ?bl) (+ (agent-z ?ag) 1)))))))
+:effect (decrease (agent-y ?ag) 1)
 )

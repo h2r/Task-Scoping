@@ -10,7 +10,7 @@ from utils import product_dict, nested_list_replace
 class PDDL_Parser:
     # TODO convert type hierarchy to ordered dict (parent: [children])
 
-    SUPPORTED_REQUIREMENTS = [':strips', ':negative-preconditions', ':typing', ':fluents', ':universal-preconditions']
+    SUPPORTED_REQUIREMENTS = [':strips', ':negative-preconditions', ':typing', ':fluents', ':universal-preconditions', ':existential-preconditions']
 
     # ------------------------------------------
     # Tokens

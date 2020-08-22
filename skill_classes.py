@@ -65,7 +65,7 @@ class SkillPDDL(): #Skills are Immutable
 		same_side_effets = self.side_effects == other.side_effects
 		return  same_prec and same_action and same_effects and same_side_effets
 	def __repr__(self):
-		s = f"Precondition: {self.precondition}\nAction: {self.action}\nEffects: {self.effects}" \
+		s = f"{self.action}\nPrecondition: {self.precondition}\nEffects: {self.effects}" \
 			f"\nSide Effects: {self.side_effects}"
 		return s
 	def __str__(self):
@@ -156,6 +156,8 @@ class Skill(): #Skills are Immutable
 def merge_skills_pddl(skills: Iterable[SkillPDDL], relevant_pvars: Iterable[z3.ExprRef]):
 	new_skills = []
 	hashed_skills = OrderedDict()
+	if "taxi-x(t0)" in map(str,relevant_pvars):
+		print("taxi time")
 	# Move irrelevant pvars to side effects and group skills by actions and effect types
 	for s in skills:
 		s = s.move_irrelevant2side_effects(relevant_pvars)

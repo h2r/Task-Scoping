@@ -39,7 +39,7 @@
  :precondition (forall (?pn - passenger)
                         (not (passenger-in-taxi ?pn ?t))
                     )
- :effect (and (decrease (taxi-x ?t) 1)))
+ :effect (and (decrease (taxi-y ?t) 1)))
 
 (:action move-east
  :parameters (?t - taxi)
@@ -53,7 +53,7 @@
  :precondition (forall (?pn - passenger)
                         (not (passenger-in-taxi ?pn ?t))
                     )
- :effect (and (decrease (taxi-y ?t) 1)))
+ :effect (and (decrease (taxi-x ?t) 1)))
 
 (:action move-north-pass
  :parameters (?t - taxi ?p - passenger)

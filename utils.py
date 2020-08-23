@@ -68,7 +68,7 @@ def condition_str2objects(prop_str_list):
 	return objects
 # TODO make condition_str2vars().
 def condition_str2objects_test():
-	prop_str = "synth_Or(Not(PASSENGERS_YOU_CARE_FOR(p0)),\nAnd(Not(passenger-in-taxi(p0,t0)),\npassenger-x-curr(p0) == PASSENGER_GOAL_X(p0),passenger-y-curr(p0) == PASSENGER_GOAL_Y(p0)))"
+	prop_str = "synth_Or(Not(PASSENGERS_YOU_CARE_FOR(p0)),\nAnd(Not(in-taxi(p0,t0)),\npass-x-curr(p0) == PASSENGER_GOAL_X(p0),pass-y-curr(p0) == PASSENGER_GOAL_Y(p0)))"
 	objects = condition_str2objects(prop_str)
 	print(objects)
 def get_all_bitstrings(n: int):

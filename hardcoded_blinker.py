@@ -25,9 +25,9 @@ def make_passengers(n=2):
 	passengers = []
 	for i in range(n):
 		name = f'p{i}'
-		intaxi = z3.Bool(f'passenger-in-taxi({name},t0)')
-		x = z3.Int(f'passenger-x-curr({name})')
-		y = z3.Int(f'passenger-y-curr({name})')
+		intaxi = z3.Bool(f'in-taxi({name},t0)')
+		x = z3.Int(f'pass-x-curr({name})')
+		y = z3.Int(f'pass-y-curr({name})')
 		p = Passenger(name, x, y, intaxi)
 		passengers.append(p)
 	return passengers

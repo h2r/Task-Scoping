@@ -123,7 +123,7 @@ def compile_expression(expr, str_var_dict, parser=None):
         else:
             assert len(expr) == 3, f"Don't understand how to compile: {expr}"
             # Handle quantifiers. It is a bit odd that we ground quantifiers here, not during grounding
-                # Example quantifier: ['forall', ['?pn', '-', 'passenger'], ['not', ['passenger-in-taxi', '?pn', '?t']]]]
+                # Example quantifier: ['forall', ['?pn', '-', 'passenger'], ['not', ['in-taxi', '?pn', '?t']]]]
             if expr[0] in ["forall", "exists"]:
                 quantifier, quantified_var, subexpr = expr
                 varnm, vartype = quantified_var[0], quantified_var[2]

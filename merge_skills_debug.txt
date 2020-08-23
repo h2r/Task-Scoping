@@ -1,23 +1,23 @@
 OR(
-	And(And(Not(passenger-in-taxi(curly, t0)),
-        Not(passenger-in-taxi(smoov, t0)),
-        Not(passenger-in-taxi(littman, t0)),
-        Not(passenger-in-taxi(isbell, t0)))),
-	And(passenger-in-taxi(smoov, t0),
-    Not(Or(And(Not(False), passenger-in-taxi(curly, t0)),
-           And(Not(True), passenger-in-taxi(smoov, t0)),
-           And(Not(False), passenger-in-taxi(littman, t0)),
-           And(Not(False), passenger-in-taxi(isbell, t0))))),
-	And(passenger-in-taxi(littman, t0),
-    Not(Or(And(Not(False), passenger-in-taxi(curly, t0)),
-           And(Not(False), passenger-in-taxi(smoov, t0)),
-           And(Not(True), passenger-in-taxi(littman, t0)),
-           And(Not(False), passenger-in-taxi(isbell, t0))))),
-	And(passenger-in-taxi(isbell, t0),
-    Not(Or(And(Not(False), passenger-in-taxi(curly, t0)),
-           And(Not(False), passenger-in-taxi(smoov, t0)),
-           And(Not(False), passenger-in-taxi(littman, t0)),
-           And(Not(True), passenger-in-taxi(isbell, t0)))))
+	And(And(Not(in-taxi(curly, t0)),
+        Not(in-taxi(smoov, t0)),
+        Not(in-taxi(littman, t0)),
+        Not(in-taxi(isbell, t0)))),
+	And(in-taxi(smoov, t0),
+    Not(Or(And(Not(False), in-taxi(curly, t0)),
+           And(Not(True), in-taxi(smoov, t0)),
+           And(Not(False), in-taxi(littman, t0)),
+           And(Not(False), in-taxi(isbell, t0))))),
+	And(in-taxi(littman, t0),
+    Not(Or(And(Not(False), in-taxi(curly, t0)),
+           And(Not(False), in-taxi(smoov, t0)),
+           And(Not(True), in-taxi(littman, t0)),
+           And(Not(False), in-taxi(isbell, t0))))),
+	And(in-taxi(isbell, t0),
+    Not(Or(And(Not(False), in-taxi(curly, t0)),
+           And(Not(False), in-taxi(smoov, t0)),
+           And(Not(False), in-taxi(littman, t0)),
+           And(Not(True), in-taxi(isbell, t0)))))
 )
 
 Hand simplified to 
@@ -32,28 +32,28 @@ code 'simplified' to
 Or(
 	Not(
 		Or(
-			Not(passenger-in-taxi(isbell, t0)),
-			Or(passenger-in-taxi(littman, t0),
-			Or(passenger-in-taxi(curly, t0),
-			passenger-in-taxi(smoov, t0)))
+			Not(in-taxi(isbell, t0)),
+			Or(in-taxi(littman, t0),
+			Or(in-taxi(curly, t0),
+			in-taxi(smoov, t0)))
 		)
 	),
 	Or(
 		Not(
-			Or(Not(passenger-in-taxi(littman, t0)),
-			Or(passenger-in-taxi(isbell, t0),
-			Or(passenger-in-taxi(curly, t0),
-			passenger-in-taxi(smoov, t0))))
+			Or(Not(in-taxi(littman, t0)),
+			Or(in-taxi(isbell, t0),
+			Or(in-taxi(curly, t0),
+			in-taxi(smoov, t0))))
 		),
 		Or(
 			Not(
 				Or(
-					passenger-in-taxi(isbell, t0),
+					in-taxi(isbell, t0),
 					Or(
-						passenger-in-taxi(littman, t0),
+						in-taxi(littman, t0),
 						Or(
-							passenger-in-taxi(curly, t0),
-							passenger-in-taxi(smoov, t0)
+							in-taxi(curly, t0),
+							in-taxi(smoov, t0)
 						)
 					)
 				)
@@ -61,11 +61,11 @@ Or(
 
 			,Not(
 				Or(
-					Not(passenger-in-taxi(smoov, t0)),
+					Not(in-taxi(smoov, t0)),
 					Or(
-						passenger-in-taxi(isbell, t0),
-						Or(passenger-in-taxi(curly, t0),
-						passenger-in-taxi(littman, t0))
+						in-taxi(isbell, t0),
+						Or(in-taxi(curly, t0),
+						in-taxi(littman, t0))
 					)
 				)
 			)

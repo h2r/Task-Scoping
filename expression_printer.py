@@ -72,10 +72,10 @@ def parse_operators(s):
         ret.append((op, arg))
     return ret
 
-s = """And(And(Not(passenger-in-taxi(curly, t0)),
-        Not(passenger-in-taxi(smoov, t0)),
-        Not(passenger-in-taxi(littman, t0)),
-        Not(passenger-in-taxi(isbell, t0))))"""
+s = """And(And(Not(in-taxi(curly, t0)),
+        Not(in-taxi(smoov, t0)),
+        Not(in-taxi(littman, t0)),
+        Not(in-taxi(isbell, t0))))"""
 s = collapse_whitespace(s)
 
 parse_operators(s)

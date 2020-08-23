@@ -94,7 +94,7 @@ if __name__ == '__main__':
 
     print(f"Relevant objects:")
     print("\n".join(rel_objects))
-    remove_objects(taxi_prob, "./examples/existential-taxi/prob-02_scoped.pddl", irrel_objects)
+    remove_objects(taxi_prob, "./examples/existential-taxi/prob-03_scoped.pddl", irrel_objects)
 
     end_time = time.time()
     print(f"Total time: {end_time - start_time}")

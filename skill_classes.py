@@ -102,7 +102,12 @@ class SkillPDDL(): #Skills are Immutable
 		return SkillPDDL(self.precondition, self.action, new_effects, new_side_effects)
 	@property
 	def params(self):
-		return tuple(chain(*[x.params for x in self.effects]))
+		params = []
+		for x in self.effects:
+			if hasattr(x, "params"):
+				params.extend(x.params)
+		return tuple(sorted(list(set(params))))
+		# return tuple(chain(*[x.params for x in self.effects]))
 
 class Skill(): #Skills are Immutable
 	def __init__(self, precondition: z3.ExprRef, action: str, effects: Union[Iterable[EffectType], EffectType]

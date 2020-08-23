@@ -35,6 +35,8 @@ def remove_objects(input_path, output_path, objects):
                 if len(objs) > 0:
                     l_new = " ".join(objs) + " - " + obj_type
                     scoped_lines.append(l_new)
+            else:
+                scoped_lines.append(";" + l)
 
     with open(output_path, "w")  as f:
         f.write("\n".join(scoped_lines))
@@ -49,7 +51,7 @@ if __name__ == '__main__':
     # taxi_prob = "examples/infinite-taxi-numeric/prob02.pddl"
 
     start_time = time.time()
-    taxi_dom, taxi_prob = "./examples/existential-taxi/taxi-domain.pddl", "./examples/existential-taxi/prob-02.pddl"
+    taxi_dom, taxi_prob = "./examples/existential-taxi/taxi-domain.pddl", "./examples/existential-taxi/prob-04.pddl"
 
     domain, problem = taxi_dom, taxi_prob
 

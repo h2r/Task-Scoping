@@ -35,7 +35,9 @@ class EffectTypePDDL():  #EffectTypes are Immutable
 		if str(self.pvar) == str(other.pvar) and str(self.index) >= str(other.index) and str(self.params) >= str(other.params): return False
 		return True
 	def __repr__(self):
-		return f"ET({self.pvar},{self.index},{self.params})"
+		# return f"ET({self.pvar},{self.index},{self.params})"
+		# I'm tempted to use unicode arrow 
+		return f"{self.pvar} <- {self.index}"
 	def __str__(self):
 		return self.__repr__()
 	def __hash__(self):
@@ -83,6 +85,9 @@ class SkillPDDL(): #Skills are Immutable
 	def move_irrelevant2side_effects(self, relevant_pvars):
 		"""Returns a new skill with irrelevant pvars moved to side effects"""
 		# Check that no relevant vars are in side effects
+		"""
+		TODO side effects should be list of EffectTypes. We can extract pvars from these as needed.
+		"""
 		for e in self.side_effects:
 			if e.pvar in relevant_pvars:
 				raise ValueError(f"Skill has relevant pvar in side effects:\n{self}")

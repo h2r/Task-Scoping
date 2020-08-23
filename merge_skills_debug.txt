@@ -40,7 +40,10 @@ Or(
 	),
 	Or(
 		Not(
-			Or(Not(passenger-in-taxi(littman, t0)),             Or(passenger-in-taxi(isbell, t0),                Or(passenger-in-taxi(curly, t0),                   passenger-in-taxi(smoov, t0))))
+			Or(Not(passenger-in-taxi(littman, t0)),
+			Or(passenger-in-taxi(isbell, t0),
+			Or(passenger-in-taxi(curly, t0),
+			passenger-in-taxi(smoov, t0))))
 		),
 		Or(
 			Not(

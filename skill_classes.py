@@ -85,6 +85,9 @@ class SkillPDDL(): #Skills are Immutable
 	def move_irrelevant2side_effects(self, relevant_pvars):
 		"""Returns a new skill with irrelevant pvars moved to side effects"""
 		# Check that no relevant vars are in side effects
+		"""
+		TODO side effects should be list of EffectTypes. We can extract pvars from these as needed.
+		"""
 		for e in self.side_effects:
 			if e.pvar in relevant_pvars:
 				raise ValueError(f"Skill has relevant pvar in side effects:\n{self}")

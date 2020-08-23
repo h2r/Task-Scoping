@@ -35,7 +35,9 @@ class EffectTypePDDL():  #EffectTypes are Immutable
 		if str(self.pvar) == str(other.pvar) and str(self.index) >= str(other.index) and str(self.params) >= str(other.params): return False
 		return True
 	def __repr__(self):
-		return f"ET({self.pvar},{self.index},{self.params})"
+		# return f"ET({self.pvar},{self.index},{self.params})"
+		# I'm tempted to use unicode arrow 
+		return f"{self.pvar} <- {self.index}"
 	def __str__(self):
 		return self.__repr__()
 	def __hash__(self):

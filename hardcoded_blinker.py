@@ -106,6 +106,14 @@ def make_pickup_dropoff_skills(ps: List[Passenger], t: Taxi):
 		skills.append(dropoff_skill)
 	return skills
 
+def make_state_constraints(passengers: List[Passenger]):
+	conds = []
+	for i in range(len(passengers)):
+		for j in range(len(passengers)):
+			if i != j:
+				conds.append(z3.Not(z3.And(passengers[i].intaxi, passengers[j].intaxi)))
+	return z3.And(*conds)
+
 def prepare_taxi_domain(n_passegners=2, blinker = False, goal = (6, 8)):
 	"""Returns skills, init_cond, goal"""
 	# if blinker:
@@ -121,7 +129,8 @@ def prepare_taxi_domain(n_passegners=2, blinker = False, goal = (6, 8)):
 	start_condition = make_initial_condition(passengers, taxi)
 	goal = make_goal(passengers[0], x=goal[0], y=goal[1])
 	pvars = [taxi.y] + [p.y for p in passengers] + [p.intaxi for p in passengers]
-	return goal, skills, start_condition, pvars
+	state_constraints = make_state_constraints(passengers)
+	return goal, skills, start_condition, pvars, state_constraints
 
 
 # return pas

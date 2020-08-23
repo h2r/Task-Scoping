@@ -163,7 +163,11 @@ class Skill(): #Skills are Immutable
 				new_side_effects.append(e)
 		return Skill(self.precondition, self.action, new_effects, new_side_effects)
 
-def merge_skills_pddl(skills: Iterable[SkillPDDL], relevant_pvars: Iterable[z3.ExprRef]):
+def merge_skills_pddl(skills: Iterable[SkillPDDL], relevant_pvars: Iterable[z3.ExprRef], solver = None):
+	"""
+	Merges skills that have the same effects on relevant_pvars
+	:param solver: A z3 solver. Use this arg to assume state constraints when simplifying disjunctions
+	"""
 	new_skills = []
 	hashed_skills = OrderedDict()
 	if "taxi-x(t0)" in map(str,relevant_pvars):
@@ -179,7 +183,7 @@ def merge_skills_pddl(skills: Iterable[SkillPDDL], relevant_pvars: Iterable[z3.E
 		# Skip empty effects
 		if len(effects) == 0: continue
 		side_effects = chain(*[s.side_effects for s in sks])
-		precondition = simplify_disjunction([s.precondition for s in sks])
+		precondition = simplify_disjunction([s.precondition for s in sks], my_solver=solver)
 		# Actions is the list of actions that appeared in any of the parent skills
 		actions = sorted(list(set(flatten([s.action for s in sks]))))
 		if len(actions) == 1: actions = actions[0]

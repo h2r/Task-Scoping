@@ -32,10 +32,12 @@ def get_unlinked_pvars(skills, causal_links, dummy_goal, solver):
 	return pvars_rel_new
 
 def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill]
-		  , start_condition: Union[Iterable[z3.ExprRef], z3.ExprRef]):
+		  , start_condition: Union[Iterable[z3.ExprRef], z3.ExprRef], state_constraints: z3.ExprRef = None):
 	if isinstance(goals, z3.ExprRef): goals = split_conj(goals)
 	if isinstance(start_condition, z3.ExprRef):	start_condition = split_conj(start_condition)
 	solver = z3.Solver()
+	if state_constraints is not None:
+		solver.add(state_constraints)
 	solver.push()
 
 	# We make a dummy goal and dummy final skill a la LCP because it simplifies the beginning of the algorithm.
@@ -49,7 +51,7 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 	converged = False
 	while not converged:
 		# Get quotient skills
-		skills_rel = merge_skills_pddl(skills, pvars_rel)
+		skills_rel = merge_skills_pddl(skills, pvars_rel, solver=solver)
 
 		# Get causal links
 		causal_links = get_causal_links(start_condition, skills_rel)

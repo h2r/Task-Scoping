@@ -6,11 +6,11 @@ import pdb
 
 def test_blinker():
 	# Won't work until we fix EffectTypes in hardcoded_blinker.py
-	goals, skills, start_condition, pvars = prepare_blinker_domain(n_passegners=3, blinker=False, goal=(3,7))
+	goals, skills, start_condition, pvars, state_constraints = prepare_blinker_domain(n_passegners=2, blinker=False, goal=(3,7))
 
 	print(f"~~~Start condition~~~~\n{start_condition}")
 	# pdb.set_trace()
-	relevant_pvars, used_skills = scope(goals, skills, start_condition)
+	relevant_pvars, used_skills = scope(goals, skills, start_condition, state_constraints = state_constraints)
 	print("\n~~~All Skills~~~")
 	for s in skills: print(str(s) + "\n")
 	print("\n~~~Relevant skills~~~")

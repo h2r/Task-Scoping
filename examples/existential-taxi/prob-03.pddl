@@ -8,6 +8,10 @@
     (= (taxi-x t0) 0)
     (= (taxi-y t0) 0)
 
+    (is-relevant curly)
+    (not (is-relevant smoov))
+    (not (is-relevant littman))
+
     (not (passenger-in-taxi curly t0))
     (not (passenger-in-taxi smoov t0))
     (not (passenger-in-taxi littman t0))

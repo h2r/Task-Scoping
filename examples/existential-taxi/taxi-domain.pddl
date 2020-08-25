@@ -4,7 +4,9 @@
 (:requirements :equality :typing :fluents :negative-preconditions :universal-preconditions :existential-preconditions)
 
 (:types passenger taxi - object)
-(:predicates (passenger-in-taxi ?p - passenger ?t - taxi))
+(:predicates (passenger-in-taxi ?p - passenger ?t - taxi) 
+             (is-relevant ?p - passenger)
+)
 (:functions (passenger-y ?p - passenger)
             (passenger-x ?p - passenger)
             (taxi-x ?t - taxi)
@@ -56,29 +58,27 @@
 
 (:action move-north-pass
  :parameters (?t - taxi ?p - passenger)
- :precondition (and (passenger-in-taxi ?p ?t)
-                    (forall (?pb - passenger) (or (= ?pb ?p) (not (passenger-in-taxi ?pb ?t)))))
+ :precondition (and (passenger-in-taxi ?p ?t) (is-relevant ?p))
  :effect (and (increase (taxi-y ?t) 1)
               (increase (passenger-y ?p) 1)))
 
 (:action move-south-pass
  :parameters (?t - taxi ?p - passenger)
- :precondition (and (passenger-in-taxi ?p ?t)
-                    (forall (?pb - passenger) (or (= ?pb ?p) (not (passenger-in-taxi ?pb ?t)))))
+ :precondition (and (passenger-in-taxi ?p ?t) (is-relevant ?p))
+;  (and (passenger-in-taxi ?p ?t)
+;                     (forall (?pb - passenger) (or (= ?pb ?p) (not (passenger-in-taxi ?pb ?t)))))
  :effect (and (decrease (taxi-y ?t) 1)
               (decrease (passenger-y ?p) 1)))
 
 (:action move-east-pass
  :parameters (?t - taxi ?p - passenger)
- :precondition (and (passenger-in-taxi ?p ?t)
-                    (forall (?pb - passenger) (or (= ?pb ?p) (not (passenger-in-taxi ?pb ?t)))))
+ :precondition (and (passenger-in-taxi ?p ?t) (is-relevant ?p))
  :effect (and (increase (taxi-x ?t) 1)
               (increase (passenger-x ?p) 1)))
 
 (:action move-west-pass
  :parameters (?t - taxi ?p - passenger)
- :precondition (and (passenger-in-taxi ?p ?t)
-                    (forall (?pb - passenger) (or (= ?pb ?p) (not (passenger-in-taxi ?pb ?t)))))
+ :precondition (and (passenger-in-taxi ?p ?t) (is-relevant ?p))
  :effect (and (decrease (taxi-x ?t) 1)
               (decrease (passenger-x ?p) 1)))
 

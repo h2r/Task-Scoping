@@ -169,6 +169,7 @@ def merge_skills_pddl(skills: Iterable[SkillPDDL], relevant_pvars: Iterable[z3.E
 		k = (s.effects)
 		if k not in hashed_skills.keys(): hashed_skills[k] = []
 		hashed_skills[k].append(s)
+
 	# Merge skills that share a key
 	for (effects), sks in hashed_skills.items():
 		# Skip empty effects

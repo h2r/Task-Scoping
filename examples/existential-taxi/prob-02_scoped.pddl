@@ -1,24 +1,31 @@
-(define (problem TAXINUMERIC-64)
+(define (problem TAXINUMERIC-03)
 (:domain universal_multipasstaxi)
 (:objects
-	curly smoov littman isbell - passenger
+	curly smoov littman - passenger
     t0 - taxi
 )
 (:init
     (= (taxi-x t0) 0)
     (= (taxi-y t0) 0)
 
-    (not (passenger-in-taxi curly t0))
-;    (not (passenger-in-taxi smoov t0))
-    (= (passenger-x curly) 3329)
-    (= (passenger-y curly) 3614)
-;    (= (passenger-x smoov) 3459)
-;    (= (passenger-y smoov) 1462)
+    (not (in-taxi curly t0))
+    (not (in-taxi smoov t0))
+    (not (in-taxi littman t0))
+
+    (= (pass-x curly) 3329)
+    (= (pass-y curly) 3615)
+
+    (= (pass-x smoov) 3459)
+    (= (pass-y smoov) 1262)
+
+    (= (pass-x littman) 1291)
+    (= (pass-y littman) 5037)
+
 )
 (:goal (and
-    (= (passenger-y curly) 10000)
-	(= (passenger-x curly) 9000)
-    (not (passenger-in-taxi curly t0))
+    (= (pass-y curly) 10000)
+	(= (pass-x curly) 9000)
+    (not (in-taxi curly t0))
 	
     )
 )

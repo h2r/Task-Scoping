@@ -7,13 +7,13 @@
 (:init
     (= (taxi-x t0) 0)
     (= (taxi-y t0) 0)
-    (= (passenger-x curly) 3)
-    (= (passenger-y curly) 3)
+    (= (pass-x curly) 3)
+    (= (pass-y curly) 3)
 )
 (:goal (and
-    (= (passenger-y curly) 10000)
-	(= (passenger-x curly) 9000)
-    (not (passenger-in-taxi curly t0))	
+    (= (pass-y curly) 10000)
+	(= (pass-x curly) 9000)
+    (not (in-taxi curly t0))	
     )
     )
 )

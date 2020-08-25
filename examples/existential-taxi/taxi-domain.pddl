@@ -4,82 +4,86 @@
 (:requirements :equality :typing :fluents :negative-preconditions :universal-preconditions :existential-preconditions)
 
 (:types passenger taxi - object)
-(:predicates (passenger-in-taxi ?p - passenger ?t - taxi) 
-             (is-relevant ?p - passenger)
-)
-(:functions (passenger-y ?p - passenger)
-            (passenger-x ?p - passenger)
+(:predicates (in-taxi ?p - passenger ?t - taxi))
+(:functions (pass-y ?p - passenger)
+            (pass-x ?p - passenger)
             (taxi-x ?t - taxi)
             (taxi-y ?t - taxi))
 
 
 (:action pickup
  :parameters (?p - passenger ?t - taxi)
- :precondition (and (= (passenger-x ?p) (taxi-x ?t)) 
-                    (= (passenger-y ?p) (taxi-y ?t))
+ :precondition (and (= (pass-x ?p) (taxi-x ?t)) 
+                    (= (pass-y ?p) (taxi-y ?t))
                     (forall (?pn - passenger)
-                       (not (passenger-in-taxi ?pn ?t))
+                       (not (in-taxi ?pn ?t))
                     )
                 )
- :effect (passenger-in-taxi ?p ?t))
+ :effect (in-taxi ?p ?t))
 
 (:action dropoff
  :parameters (?p - passenger ?t - taxi)
- :precondition (passenger-in-taxi ?p ?t)
- :effect (not (passenger-in-taxi ?p ?t)))
+ :precondition (in-taxi ?p ?t)
+ :effect (not (in-taxi ?p ?t)))
 
 (:action move-north
  :parameters (?t - taxi)
  :precondition (forall (?pn - passenger)
-                        (not (passenger-in-taxi ?pn ?t))
+                        (not (in-taxi ?pn ?t))
                     )
  :effect (and (increase (taxi-y ?t) 1)))
 
 (:action move-south
  :parameters (?t - taxi)
  :precondition (forall (?pn - passenger)
-                        (not (passenger-in-taxi ?pn ?t))
+                        (not (in-taxi ?pn ?t))
                     )
  :effect (and (decrease (taxi-y ?t) 1)))
 
 (:action move-east
  :parameters (?t - taxi)
  :precondition (forall (?pn - passenger)
-                        (not (passenger-in-taxi ?pn ?t))
+                        (not (in-taxi ?pn ?t))
                     )
  :effect (and (increase (taxi-x ?t) 1)))
 
 (:action move-west
  :parameters (?t - taxi)
  :precondition (forall (?pn - passenger)
-                        (not (passenger-in-taxi ?pn ?t))
+                        (not (in-taxi ?pn ?t))
                     )
  :effect (and (decrease (taxi-x ?t) 1)))
 
 (:action move-north-pass
  :parameters (?t - taxi ?p - passenger)
- :precondition (and (passenger-in-taxi ?p ?t) (is-relevant ?p))
+ :precondition (and (in-taxi ?p ?t)
+                    (forall (?pb - passenger) (or (= ?pb ?p) (not (in-taxi ?pb ?t)))))
  :effect (and (increase (taxi-y ?t) 1)
-              (increase (passenger-y ?p) 1)))
+              (increase (pass-y ?p) 1)))
 
 (:action move-south-pass
  :parameters (?t - taxi ?p - passenger)
- :precondition (and (passenger-in-taxi ?p ?t) (is-relevant ?p))
-;  (and (passenger-in-taxi ?p ?t)
-;                     (forall (?pb - passenger) (or (= ?pb ?p) (not (passenger-in-taxi ?pb ?t)))))
+ :precondition (and (in-taxi ?p ?t)
+                    (forall (?pb - passenger) (or (= ?pb ?p) (not (in-taxi ?pb ?t)))))
  :effect (and (decrease (taxi-y ?t) 1)
-              (decrease (passenger-y ?p) 1)))
+              (decrease (pass-y ?p) 1)))
 
 (:action move-east-pass
  :parameters (?t - taxi ?p - passenger)
- :precondition (and (passenger-in-taxi ?p ?t) (is-relevant ?p))
+ :precondition (and (in-taxi ?p ?t)
+                    (forall (?pb - passenger) (or (= ?pb ?p) (not (in-taxi ?pb ?t)))))
  :effect (and (increase (taxi-x ?t) 1)
-              (increase (passenger-x ?p) 1)))
+              (increase (pass-x ?p) 1)))
 
 (:action move-west-pass
  :parameters (?t - taxi ?p - passenger)
- :precondition (and (passenger-in-taxi ?p ?t) (is-relevant ?p))
+ :precondition (and (in-taxi ?p ?t)
+                    (forall (?pb - passenger) (or (= ?pb ?p) (not (in-taxi ?pb ?t)))))
  :effect (and (decrease (taxi-x ?t) 1)
-              (decrease (passenger-x ?p) 1)))
+              (decrease (pass-x ?p) 1)))
 
 )
+
+; !!!STATE_CONSTRAINT!!! (forall (?t - taxi ?p0, ?p1 - passenger) (not (and (
+;     (in-taxi ?p0) (in-taxi ?p1) (not (?p0 = ?p1))
+; )))) !!!CONSTRAINT_STATE!!!

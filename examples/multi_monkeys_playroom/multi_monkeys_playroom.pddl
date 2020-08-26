@@ -9,6 +9,12 @@
 ; Red and green buttons are 'connected'. You can only press a red button if the 
 ; green button is on and vice-versa. When a green button is on, music is played, and 
 ; turning a red button on turns the music off and also toggles the green button
+; Once all green buttons are on, the agent's eye and hand can pick up balls and throw them
+; Throwing a ball causes it to go to the x-y position of the agent's marker
+; If there is a bell at that x-y position, the bell will be rung
+; Bells are being watched by monkeys. When a specific bell is rung, its connected monkey 
+; will scream.
+; The goal of this domain is to get a specific monkey to scream.
 
 (define (domain multi_monkeys_playroom)
 (:requirements :equality :typing :fluents :negative-preconditions :universal-preconditions :existential-preconditions)
@@ -18,6 +24,7 @@
              (gbutton-on ?gb - greenbutton)
              (light-on ?lt - lightswitch)
              (monkey-screaming ?mo - monkey)
+             (monkey-watching-bell ?mo - monkey ?be - bell)
              (connected-buttons ?rb - redbutton ?gb - greenbutton))
 
 (:functions (rbutton-x ?rb - redbutton)
@@ -43,9 +50,6 @@
 
             (bell-x ?be - bell)
             (bell-y ?be - bell)
-
-            (monkey-x ?mo - monkey)
-            (monkey-y ?mo - monkey)
 
 )
 
@@ -138,7 +142,8 @@
 ; Toggle red and green buttons
 (:action turn_on_redbutton
  :parameters (?rb - redbutton ?gb - greenbutton ?ma - marker ?e - eye)
- :precondition (and (= (rbutton-x ?rb) (marker-x ?ma))
+ :precondition (and (forall (?ls - lightswitch) (light-on ?ls) )
+                    (= (rbutton-x ?rb) (marker-x ?ma))
                     (= (rbutton-y ?rb) (marker-y ?ma))
                     (= (rbutton-x ?rb) (eye-x ?e))
                     (= (rbutton-y ?rb) (eye-y ?e))
@@ -149,7 +154,8 @@
 )
 (:action turn_on_greenbutton
  :parameters (?rb - redbutton ?gb - greenbutton ?ma - marker ?e - eye)
- :precondition (and (= (gbutton-x ?gb) (marker-x ?ma))
+ :precondition (and (forall (?ls - lightswitch) (light-on ?ls) )
+                    (= (gbutton-x ?gb) (marker-x ?ma))
                     (= (gbutton-y ?gb) (marker-y ?ma))
                     (= (gbutton-x ?gb) (eye-x ?e))
                     (= (gbutton-y ?gb) (eye-y ?e))
@@ -158,4 +164,34 @@
  :effect (and (gbutton-on ?gb)
               (not (rbutton-on ?rb)))
 )
+
+; Throw balls
+(:action throw_ball_miss_bell
+    :parameters (?ba - ball ?e - eye ?ha - hand ?ma - marker ?be - bell)
+    :precondition (and (forall (?gb - greenbutton) (gbutton-on ?gb))
+                       (= (eye-x ?e) (ball-x ?ba))
+                       (= (eye-y ?e) (ball-y ?ba))
+                       (= (hand-x ?ha) (ball-x ?ba))
+                       (= (hand-y ?ha) (ball-y ?ba))
+                       (not (= (marker-x ?ma) (bell-x ?be)))
+                       (not (= (marker-y ?ma) (bell-y ?be))))
+    :effect (and (assign (ball-x ?ba) (marker-x ?ma))
+                 (assign (ball-y ?ba) (marker-y ?ma)))
+)
+(:action throw_ball_hit_bell
+:parameters (?ba - ball ?e - eye ?ha - hand ?ma - marker ?be - bell ?mo - monkey)
+:precondition (and (forall (?gb - greenbutton) (gbutton-on ?gb))
+                    (= (eye-x ?e) (ball-x ?ba))
+                    (= (eye-y ?e) (ball-y ?ba))
+                    (= (hand-x ?ha) (ball-x ?ba))
+                    (= (hand-y ?ha) (ball-y ?ba))
+                    (= (marker-x ?ma) (bell-x ?be))
+                    (= (marker-y ?ma) (bell-y ?be))
+                    (monkey-watching-bell ?mo ?be)
+                    (not (monkey-screaming ?mo)))
+:effect (and (assign (ball-x ?ba) (marker-x ?ma))
+             (assign (ball-y ?ba) (marker-y ?ma))
+             (monkey-screaming ?mo))
+)
+
 )

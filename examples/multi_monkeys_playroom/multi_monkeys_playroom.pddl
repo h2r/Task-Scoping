@@ -17,7 +17,7 @@
 ; The goal of this domain is to get a specific monkey to scream.
 
 (define (domain multi_monkeys_playroom)
-(:requirements :equality :typing :fluents :negative-preconditions :universal-preconditions :existential-preconditions)
+(:requirements :typing :fluents :negative-preconditions :universal-preconditions)
 
 (:types eye hand marker ball bell redbutton greenbutton lightswitch monkey - object)
 (:predicates (rbutton-on ?rb - redbutton)

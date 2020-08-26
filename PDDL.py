@@ -331,7 +331,8 @@ class PDDL_Parser:
         if not type(group) is list:
             raise Exception('Error with ' + name + part)
         if group == []:
-            pass
+            # pass
+            return
             # from IPython import embed; embed()
         if group[0] == 'and':
             group.pop(0)

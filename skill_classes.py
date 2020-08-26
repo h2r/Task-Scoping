@@ -3,7 +3,7 @@ from itertools import chain, product
 from collections import OrderedDict
 import z3
 import copy
-from utils import simplify_disjunction, flatten
+from utils import simplify_disjunction, flatten, get_unique_z3_vars
 
 class EffectType():  #EffectTypes are Immutable
 	def __init__(self, pvar: z3.ExprRef, index: int):
@@ -25,6 +25,8 @@ class EffectType():  #EffectTypes are Immutable
 class EffectTypePDDL():  #EffectTypes are Immutable
 	def __init__(self, pvar: z3.ExprRef, index, params: Iterable= None):
 		self.pvar, self.index = pvar, index
+		# These params are NOT the same as pddl params, and should probably be renamed
+		# These params are vars on which the effect relies - ex. in p.y <- t.y, t.y is a param
 		self.params = params if params is not None else tuple()
 	def __eq__(self, other):
 		return z3.eq(self.pvar, other.pvar) and self.index == other.index and self.params == other.params
@@ -106,7 +108,8 @@ class SkillPDDL(): #Skills are Immutable
 		for x in self.effects:
 			if hasattr(x, "params"):
 				params.extend(x.params)
-		return tuple(sorted(list(set(params))))
+		return get_unique_z3_vars(params)
+		# return tuple(sorted(list(set(params))))
 		# return tuple(chain(*[x.params for x in self.effects]))
 
 class Skill(): #Skills are Immutable

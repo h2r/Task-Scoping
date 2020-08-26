@@ -30,6 +30,7 @@
     (= (gbutton-x gb1) 3)
     (= (gbutton-y gb1) 4)
     (rbutton-on rb1)
+    (not (gbutton-on gb1))
     (connected-buttons rb1 gb1)
 
     (= (ball-x ball1) 5)
@@ -41,6 +42,8 @@
 
     (not (monkey-screaming george))
 )
+
+; (:goal (gbutton-on gb1))
 
 (:goal (monkey-screaming george))
 

@@ -330,6 +330,9 @@ class PDDL_Parser:
     def split_predicates(self, group, pos, neg, name, part):
         if not type(group) is list:
             raise Exception('Error with ' + name + part)
+        if group == []:
+            pass
+            # from IPython import embed; embed()
         if group[0] == 'and':
             group.pop(0)
         else:

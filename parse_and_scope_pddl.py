@@ -31,7 +31,7 @@ def remove_objects(input_path, output_path, objects):
             if in_objects_flag:
                 split_l = l.split(" ")
                 obj_type = split_l[-1]
-                objs = [o for o in split_l[:-2] if o not in objects]
+                objs = [o for o in split_l[:-2] if o not in objects and o != '']
                 if len(objs) > 0:
                     l_new = " ".join(objs) + " - " + obj_type
                     scoped_lines.append(l_new)

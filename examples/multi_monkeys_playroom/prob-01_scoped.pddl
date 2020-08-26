@@ -7,9 +7,6 @@
     eye1 - eye
     hand1 - hand
     marker1 - marker
-    - redbutton
-    - greenbutton
-    - lightswitch
 )
 (:init
     (= (eye-x eye1) 0)

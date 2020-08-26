@@ -29,8 +29,8 @@
     (= (rbutton-y rb1) 3)
     (= (gbutton-x gb1) 3)
     (= (gbutton-y gb1) 4)
-    (rbutton-on rb1)
-    (not (gbutton-on gb1))
+    (not (rbutton-on rb1))
+    (gbutton-on gb1)
     (connected-buttons rb1 gb1)
 
     (= (ball-x ball1) 5)

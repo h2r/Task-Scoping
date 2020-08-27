@@ -22,6 +22,10 @@ def get_unlinked_pvars(skills, causal_links, dummy_goal, solver):
 		for prec in split_conj(s.precondition):
 			if not solver_implies_condition(solver, prec):
 				pvars_rel_new.extend(get_atoms(prec))
+			# if(s.action == "turn_on_greenbutton"):
+			# 	from IPython import embed; embed()
+
+		# from IPython import embed; embed()
 		# params are pvars that influence the effects of the skill. Ex. if a skill has effect (person.y += person.leg_length),
 		# then leg_length is a parameter. params are different from preconditions in that a param can not be implied
 		# by the start condition, so we always consider them unlinked. 

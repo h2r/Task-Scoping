@@ -51,7 +51,7 @@ if __name__ == '__main__':
     # taxi_prob = "examples/infinite-taxi-numeric/prob02.pddl"
 
     start_time = time.time()
-    taxi_dom, taxi_prob = "./examples/multi_monkeys_playroom/multi_monkeys_playroom.pddl", "./examples/multi_monkeys_playroom/prob-01.pddl"
+    taxi_dom, taxi_prob = "./examples/multi_monkeys_playroom/multi_monkeys_playroom.pddl", "./examples/multi_monkeys_playroom/prob-08.pddl"
 
     domain, problem = taxi_dom, taxi_prob
 
@@ -94,7 +94,7 @@ if __name__ == '__main__':
 
     print(f"Relevant objects:")
     print("\n".join(rel_objects))
-    remove_objects(taxi_prob, "./examples/multi_monkeys_playroom/prob-01_scoped.pddl", irrel_objects)
+    remove_objects(taxi_prob, "./examples/multi_monkeys_playroom/prob-08_scoped.pddl", irrel_objects)
 
     end_time = time.time()
     print(f"Total time: {end_time - start_time}")

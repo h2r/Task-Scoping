@@ -34,7 +34,7 @@ class PDDL_Parser_z3(PDDL_Parser):
         for action_class in str_grounded_actions:
             for grounded_action in action_class:
                 precond = self.action2precondition(grounded_action, str2var_dict)
-                effect_types = action2effect_types(grounded_action, str2var_dict)
+                effect_types = action2effect_types(grounded_action, str2var_dict, self)
                 skill = SkillPDDL(precond, grounded_action.name, effect_types)
                 skill_list.append(skill)
         return skill_list
@@ -66,8 +66,8 @@ str2operator = {
     "+": lambda a, b: a + b,
     "/": lambda a, b: a / b,
     "-": lambda a, b: a - b,
-    "and": lambda a, b: z3.And(a,b),
-    "or": lambda a, b: z3.Or(a,b),
+    "and": z3.And,
+    "or": z3.Or,
     "increase": lambda a, b: a + b,
     "decrease": lambda a, b: a - b,
     "assign": lambda a, b: b
@@ -117,14 +117,15 @@ def compile_expression(expr, str_var_dict, parser=None):
         elif len(expr) == 2:
             # The only length 2 expression we can compile is ['not', [subexpression]]
             if expr[0] == "not":
-                return z3.Not(compile_expression(expr[1], str_var_dict))
+                return z3.Not(compile_expression(expr[1], str_var_dict, parser))
             else:
                 raise ValueError(f"Don't understand how to compile: {expr}")
         else:
-            assert len(expr) == 3, f"Don't understand how to compile: {expr}"
+            # assert len(expr) == 3, f"Don't understand how to compile: {expr}"
             # Handle quantifiers. It is a bit odd that we ground quantifiers here, not during grounding
                 # Example quantifier: ['forall', ['?pn', '-', 'passenger'], ['not', ['in-taxi', '?pn', '?t']]]]
             if expr[0] in ["forall", "exists"]:
+                # TODO edit to work with multiple quantified vars, ex (forall ?be - bell ?mo - monkey)
                 quantifier, quantified_var, subexpr = expr
                 varnm, vartype = quantified_var[0], quantified_var[2]
                 # Get all groundings for the quantified object
@@ -132,38 +133,38 @@ def compile_expression(expr, str_var_dict, parser=None):
                 # Get all grounded versions of the subexpression
                 subexpr_groundings = [nested_list_replace(subexpr, {varnm: x}) for x in var_groundings]
                 # Compile the grounded subexpressions
-                compiled_subexpressions = [compile_expression(x, str_var_dict) for x in subexpr_groundings]
+                compiled_subexpressions = [compile_expression(x, str_var_dict, parser) for x in subexpr_groundings]
                 # Combine the compiled subexpressions
                 combinator = {"forall":z3.And, "exists":z3.Or}[quantifier]
                 return combinator(*compiled_subexpressions)
             # Handle operations
             else:
                 operator = str2operator[expr[0]]
-                operator_args = [compile_expression(x, str_var_dict) for x in expr[1:]]
+                operator_args = [compile_expression(x, str_var_dict, parser) for x in expr[1:]]
                 return operator(*operator_args)
     else:
         raise NotImplementedError(f"Don't understand how to compile non lists: {expr}; {type(expr)}")
 
-def action2effect_types(a: Action, str_var_dict) -> List[EffectTypePDDL]:
+def action2effect_types(a: Action, str_var_dict, parser = None) -> List[EffectTypePDDL]:
     effect_types = []
 
     for eff in a.add_effects:
         # Check for complex effects like 'increase'
         if eff[0] in ["increase", 'decrease', 'assign']:
             effected_var = str_var_dict[list2var_str(eff[1])]
-            effect_details = compile_expression(eff, str_var_dict)
+            effect_details = compile_expression(eff, str_var_dict, parser)
             params = tuple([x for x in get_atoms(effect_details) if not z3_identical(x, effected_var)])
             effect_type = EffectTypePDDL(effected_var, effect_details, params=params)
             effect_types.append(effect_type)
         else:
-            effected_var = compile_expression(eff, str_var_dict)
+            effected_var = compile_expression(eff, str_var_dict, parser)
             # This may accidentally cause different EfectTypes to be identified bc True == 1.
             effect_details = True
             effect_type = EffectTypePDDL(effected_var, effect_details)
             effect_types.append(effect_type)
     # Assume for now that del_effects only sets bools to false
     for eff in a.del_effects:
-        effected_var = compile_expression(eff, str_var_dict)
+        effected_var = compile_expression(eff, str_var_dict, parser)
         # This may accidentally cause different EfectTypes to be identified bc True == 1.        
         effect_details = False
         effect_type = EffectTypePDDL(effected_var, effect_details)

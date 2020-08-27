@@ -104,8 +104,8 @@
     (= (ball-x ball1) 5)
     (= (ball-y ball1) 5)
 
-    (= (bell-x bell1) 30)
-    (= (bell-y bell1) 30)
+    (= (bell-x bell1) 80)
+    (= (bell-y bell1) 80)
  
     (not (monkey-screaming jack))
     (monkey-watching-bell jack bell1)

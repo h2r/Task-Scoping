@@ -7,6 +7,7 @@ from itertools import chain, product
 from action import Action
 import copy
 from utils import product_dict, nested_list_replace
+# TODO CAN WE HANDLE OBJECTS DEFINED ON MULTIPLE LINES?
 class PDDL_Parser:
     # TODO convert type hierarchy to ordered dict (parent: [children])
 

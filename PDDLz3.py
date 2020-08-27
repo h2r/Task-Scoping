@@ -66,8 +66,8 @@ str2operator = {
     "+": lambda a, b: a + b,
     "/": lambda a, b: a / b,
     "-": lambda a, b: a - b,
-    "and": lambda a, b: z3.And(a,b),
-    "or": lambda a, b: z3.Or(a,b),
+    "and": z3.And,
+    "or": z3.Or,
     "increase": lambda a, b: a + b,
     "decrease": lambda a, b: a - b,
     "assign": lambda a, b: b
@@ -121,7 +121,7 @@ def compile_expression(expr, str_var_dict, parser=None):
             else:
                 raise ValueError(f"Don't understand how to compile: {expr}")
         else:
-            assert len(expr) == 3, f"Don't understand how to compile: {expr}"
+            # assert len(expr) == 3, f"Don't understand how to compile: {expr}"
             # Handle quantifiers. It is a bit odd that we ground quantifiers here, not during grounding
                 # Example quantifier: ['forall', ['?pn', '-', 'passenger'], ['not', ['in-taxi', '?pn', '?t']]]]
             if expr[0] in ["forall", "exists"]:

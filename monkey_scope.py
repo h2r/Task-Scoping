@@ -41,6 +41,10 @@ def remove_objects(input_path, output_path, objects):
     with open(output_path, "w")  as f:
         f.write("\n".join(scoped_lines))
 
+def get_scoped_path(p):
+    p_split = p.split(".")
+    base = ".".join(p_split[:-1])
+    return base + "_scoped." + p_split[-1]
 
 if __name__ == '__main__':
     # zeno_dom = "examples/zeno/zeno.pddl"
@@ -92,7 +96,7 @@ if __name__ == '__main__':
 
     print(f"Relevant objects:")
     print("\n".join(rel_objects))
-    remove_objects(taxi_prob, "./examples/multi_monkeys_playroom/prob-08_scoped.pddl", irrel_objects)
+    remove_objects(problem, get_scoped_path(problem), irrel_objects)
 
     end_time = time.time()
     print(f"Total time: {end_time - start_time}")

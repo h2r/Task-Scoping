@@ -37,14 +37,31 @@ def get_unlinked_pvars(skills, causal_links, dummy_goal, solver):
 	return pvars_rel_new
 
 def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill]
-		  , start_condition: Union[Iterable[z3.ExprRef], z3.ExprRef], state_constraints: z3.ExprRef = None):
-	if isinstance(goals, z3.ExprRef): goals = split_conj(goals)
-	if isinstance(start_condition, z3.ExprRef):	start_condition = split_conj(start_condition)
+		  , start_condition: Union[Iterable[z3.ExprRef], z3.ExprRef], state_constraints: z3.ExprRef = None
+		  , verbose=0):
+	if isinstance(goals, z3.ExprRef):
+		print("Splitting goals")
+		goals = split_conj(goals)
+		print("Split goals")
+	if isinstance(start_condition, z3.ExprRef):
+		print("Splitting initial condition")
+		start_condition = split_conj(start_condition)
+		print("Split initial conditions")
 	solver = z3.Solver()
 	if state_constraints is not None:
 		solver.add(state_constraints)
 	solver.push()
+	if verbose > 0:
+		print("~" * 10 + "Initial Conditions" + "~" * 10)
+		print("\n\n".join(map(str,start_condition)))
+		print('\n')
+		print("~" * 10 + "Goals" + "~" * 10)
+		print("\n\n".join(map(str,goals)))
+		print("\n")
+		print("~" * 10 + "State Constraints" + "~" * 10)
+		print(state_constraints)
 
+		
 	# We make a dummy goal and dummy final skill a la LCP because it simplifies the beginning of the algorithm.
 	# We will remove the dummy goal and skill before returning the final results
 	dummy_goal = z3.Bool("dummy_goal") #TODO make sure this var does not already exist
@@ -54,10 +71,17 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 	pvars_rel = [dummy_goal]
 
 	converged = False
+	i = 0
 	while not converged:
 		# Get quotient skills
 		skills_rel = merge_skills_pddl(skills, pvars_rel, solver=solver)
-
+		if verbose > 1:
+			print(i)
+			print("~" * 10 + "Skills" + "~" * 10)
+			print("\n\n".join(map(str,skills_rel)))
+			print("\n")
+			print("~" * 10 + "Pvars Rel" + "~" * 10)
+			print("\n\n".join(map(str,pvars_rel)))
 		# Get causal links
 		causal_links = get_causal_links(start_condition, skills_rel)
 
@@ -68,7 +92,7 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 		converged = (pvars_rel == pvars_rel_new)
 
 		pvars_rel = pvars_rel_new
-
+		i += 1
 		# from IPython import embed; embed()
 
 	# Remove the dummy pvar and skill

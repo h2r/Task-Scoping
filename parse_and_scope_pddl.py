@@ -51,7 +51,7 @@ if __name__ == '__main__':
     # taxi_prob = "examples/infinite-taxi-numeric/prob02.pddl"
 
     start_time = time.time()
-    taxi_dom, taxi_prob = "./examples/multi_monkeys_playroom/multi_monkeys_playroom.pddl", "./examples/multi_monkeys_playroom/prob-01.pddl"
+    taxi_dom, taxi_prob = "./examples/multi_monkeys_playroom/multi_monkeys_playroom.pddl", "./examples/multi_monkeys_playroom/prob-02.pddl"
 
     domain, problem = taxi_dom, taxi_prob
 
@@ -70,11 +70,11 @@ if __name__ == '__main__':
     # Run the scoper on the constructed goal, skills and initial condition
     rel_pvars, rel_skills = scope(goals=goal_cond, skills=skill_list, start_condition=init_cond_list)
       
-    print("~~~~~Relevant skills~~~~~")
-    print("\n\n".join(map(str,rel_skills)))
-    print("~~~~~Relevant pvars~~~~~")
-    for p in rel_pvars:
-        print(p)
+    # print("~~~~~Relevant skills~~~~~")
+    # print("\n\n".join(map(str,rel_skills)))
+    # print("~~~~~Relevant pvars~~~~~")
+    # for p in rel_pvars:
+    #     print(p)
  
     # print(rel_pvars)
     # print(rel_skills)
@@ -92,9 +92,9 @@ if __name__ == '__main__':
     rel_objects = pvars2objects(rel_pvars)
     irrel_objects = [x for x in all_objects if x not in rel_objects]
 
-    print(f"Relevant objects:")
-    print("\n".join(rel_objects))
-    remove_objects(taxi_prob, "./examples/multi_monkeys_playroom/prob-01_scoped.pddl", irrel_objects)
+    # print(f"Relevant objects:")
+    # print("\n".join(rel_objects))
+    remove_objects(taxi_prob, "./examples/multi_monkeys_playroom/prob-02_scoped.pddl", irrel_objects)
 
     end_time = time.time()
     print(f"Total time: {end_time - start_time}")

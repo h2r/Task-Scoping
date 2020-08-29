@@ -1,4 +1,4 @@
-(define (problem MULTIMONKEY-08)
+(define (problem MULTIMONKEY-07)
 (:domain multi_monkeys_playroom)
 (:objects
 
@@ -40,9 +40,6 @@
 ;    (= (lightswitch-x ls7) 8)
 ;    (= (lightswitch-y ls7) 2)
 ;    (light-on ls7)
-;    (= (lightswitch-x ls8) 9)
-;    (= (lightswitch-y ls8) 2)
-;    (not (light-on ls8))
 
 ;    (= (rbutton-x rb1) 3)
 ;    (= (rbutton-y rb1) 3)
@@ -93,13 +90,6 @@
 ;    (not (rbutton-on rb7))
 ;    (gbutton-on gb7)
 ;    (connected-buttons rb7 gb7)
-;    (= (rbutton-x rb8) 8)
-;    (= (rbutton-y rb8) 7)
-;    (= (gbutton-x gb8) 8)
-;    (= (gbutton-y gb8) 8)
-;    (not (rbutton-on rb8))
-;    (gbutton-on gb8)
-;    (connected-buttons rb8 gb8)
 
     (= (ball-x ball1) 5)
     (= (ball-y ball1) 5)

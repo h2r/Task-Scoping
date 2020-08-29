@@ -1,11 +1,16 @@
-import re, copy, itertools, z3, time, sys, pprint
 from action import Action
+# from PDDL import PDDL_Parser
 from PDDLz3 import PDDL_Parser_z3
+import sys, pprint
 from collections import OrderedDict
 from typing import List, Tuple, Dict, Iterable
+import re, copy
+import itertools
+import z3
 from skill_classes import EffectTypePDDL, SkillPDDL
 from utils import product_dict, nested_list_replace, get_atoms, get_all_objects, condition_str2objects
 from scoping import scope
+import time
 
 
 def remove_objects(input_path, output_path, objects):
@@ -36,6 +41,10 @@ def remove_objects(input_path, output_path, objects):
     with open(output_path, "w")  as f:
         f.write("\n".join(scoped_lines))
 
+def get_scoped_path(p):
+    p_split = p.split(".")
+    base = ".".join(p_split[:-1])
+    return base + "_scoped." + p_split[-1]
 
 if __name__ == '__main__':
     # zeno_dom = "examples/zeno/zeno.pddl"
@@ -46,9 +55,8 @@ if __name__ == '__main__':
     # taxi_prob = "examples/infinite-taxi-numeric/prob02.pddl"
 
     start_time = time.time()
-    taxi_dom, taxi_prob = "./examples/multi_monkeys_playroom/multi_monkeys_playroom.pddl", "./examples/multi_monkeys_playroom/prob-09.pddl"
-
-    domain, problem = taxi_dom, taxi_prob
+    domain =  "examples/existential-taxi/taxi-domain.pddl"
+    problem =  "examples/existential-taxi/prob-02.pddl"
 
     parser = PDDL_Parser_z3()
     parser.parse_domain(domain)
@@ -65,11 +73,11 @@ if __name__ == '__main__':
     # Run the scoper on the constructed goal, skills and initial condition
     rel_pvars, rel_skills = scope(goals=goal_cond, skills=skill_list, start_condition=init_cond_list)
       
-    # print("~~~~~Relevant skills~~~~~")
-    # print("\n\n".join(map(str,rel_skills)))
-    # print("~~~~~Relevant pvars~~~~~")
-    # for p in rel_pvars:
-    #     print(p)
+    print("~~~~~Relevant skills~~~~~")
+    print("\n\n".join(map(str,rel_skills)))
+    print("~~~~~Relevant pvars~~~~~")
+    for p in rel_pvars:
+        print(p)
  
     # print(rel_pvars)
     # print(rel_skills)
@@ -87,9 +95,9 @@ if __name__ == '__main__':
     rel_objects = pvars2objects(rel_pvars)
     irrel_objects = [x for x in all_objects if x not in rel_objects]
 
-    # print(f"Relevant objects:")
-    # print("\n".join(rel_objects))
-    remove_objects(taxi_prob, "./examples/multi_monkeys_playroom/prob-09_scoped.pddl", irrel_objects)
+    print(f"Relevant objects:")
+    print("\n".join(rel_objects))
+    remove_objects(problem, get_scoped_path(problem), irrel_objects)
 
     end_time = time.time()
     print(f"Total time: {end_time - start_time}")

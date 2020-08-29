@@ -239,28 +239,33 @@ def str_iter(itr):
 	return [str(x) for x in itr]
 
 def flatten(arr, exclusions = (str,)):
-    new_arr = []
-    for x in arr:
-        if isinstance(x,Iterable) and not isinstance(x,exclusions):
-            new_arr.extend(flatten(x))
-        else:
-            new_arr.append(x)
-    return new_arr
+	new_arr = []
+	for x in arr:
+		if isinstance(x,Iterable) and not isinstance(x,exclusions):
+			new_arr.extend(flatten(x))
+		else:
+			new_arr.append(x)
+	return new_arr
 
 
 def product_dict(**kwargs):
-    keys = kwargs.keys()
-    vals = kwargs.values()
-    for instance in product(*vals):
-        yield dict(zip(keys, instance))
-        
+	keys = kwargs.keys()
+	vals = kwargs.values()
+	for instance in product(*vals):
+		yield dict(zip(keys, instance))
+		
 def nested_list_replace(arr, replacements):
-    if isinstance(arr, str):
-        return replacements.get(arr,arr)
-    elif isinstance(arr, list):
-        return [nested_list_replace(x, replacements) for x in arr]
-    else:
-        raise TypeError(f"Unsupported type: {type(arr)}")
+	if isinstance(arr, str):
+		return replacements.get(arr,arr)
+	elif isinstance(arr, list):
+		arr2 = []
+		for x in arr:
+			x2 = nested_list_replace(x, replacements)
+			arr2.append(x2)
+		return arr2
+		# return [nested_list_replace(x, replacements) for x in arr]
+	else:
+		raise TypeError(f"Unsupported type: {type(arr)}")
 def get_unique_z3_vars(args):
 	vars = []
 	for x in args:

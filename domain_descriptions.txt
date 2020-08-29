@@ -1,0 +1,5 @@
+Unparseable
+    Settlers (metric)
+    non-strips satellite (metric)
+    strips satellite (conditional effects)
+    rover (metric)

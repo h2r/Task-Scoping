@@ -8,16 +8,39 @@ from utils import product_dict, nested_list_replace, get_atoms, get_all_objects,
 from scoping import scope
 pp = pprint.PrettyPrinter(indent=4)
 
-constraint_s = """(
-	forall (?t - taxi ?p0, ?p1 - passenger) 
-	(not
-		(and
-			(
-    			(in-taxi ?p0 ?t) (in-taxi ?p1 ?t) (not (= ?p0 ?p1))
-    		)
-    	)
-    )
-)"""
+
+def remove_objects(input_path, output_path, objects):
+    with open(input_path, "r") as f:
+        instance_lines = f.read().splitlines()
+    scoped_lines = []
+    in_objects_flag = False
+    for l in instance_lines:
+        if in_objects_flag == True:
+            if len(l) > 0 and l[0] == ")":
+                in_objects_flag = False
+        if "(:objects" in l:
+            in_objects_flag = True
+        
+        if not any(o in l for o in objects):
+            scoped_lines.append(l)
+        else:
+            if in_objects_flag:
+                split_l = l.split(" ")
+                obj_type = split_l[-1]
+                objs = [o for o in split_l[:-2] if o not in objects and o != '']
+                if len(objs) > 0:
+                    l_new = " ".join(objs) + " - " + obj_type
+                    scoped_lines.append(l_new)
+            else:
+                scoped_lines.append(";" + l)
+
+    with open(output_path, "w")  as f:
+        f.write("\n".join(scoped_lines))
+
+def get_scoped_path(p):
+    p_split = p.split(".")
+    base = ".".join(p_split[:-1])
+    return base + "_scoped." + p_split[-1]
 
 def parse_tokens2(my_str):
     stack = []
@@ -61,18 +84,61 @@ def split_predicates2(group):
         else:
             pos.append(predicate)
     return pos, neg
+start_time = time.time()
 
-tokens = parse_tokens2(constraint_s)
-pp.pprint(tokens)
-pos, neg = split_predicates2(tokens)
-pp.pprint(pos)
-
-domain, problem = "examples/taxi-state-constraint/taxi-domain.pddl", "examples/taxi-state-constraint/prob-02.pddl"
+domain = "examples/taxi-state-constraint/taxi-domain.pddl"
+problem = "examples/taxi-state-constraint/prob-04.pddl"
 
 parser = PDDL_Parser_z3()
 parser.parse_domain(domain)
 parser.parse_problem(problem)
 
-# constraint_expr = compile_expression(pos[0], parser.make_str2var_dict(), parser)
-constraint_expr = str2expression(constraint_s, parser)
-print(constraint_expr)
+
+# Get state constraint
+with open(domain, "r") as f:
+    dom_s = f.read()
+if "STATE_CONSTRAINT_START" in dom_s:
+    constraint_s = dom_s.split("STATE_CONSTRAINT_START")[1].split("STATE_CONSTRAINT_END")[0]
+    constraint_s = constraint_s.replace("\n;","\n")
+    constraint_expr = str2expression(constraint_s, parser)
+    # print(constraint_expr)
+
+skill_list = parser.get_skills()
+
+# This below block converts all the domain's goals to z3
+goal_cond = parser.get_goal_cond()
+
+# This below block converts all the domain's initial conditions to z3
+init_cond_list = parser.get_init_cond_list()
+
+# Run the scoper on the constructed goal, skills and initial condition
+rel_pvars, rel_skills = scope(goals=goal_cond, skills=skill_list, start_condition=init_cond_list, state_constraints=constraint_expr)
+    
+print("~~~~~Relevant skills~~~~~")
+print("\n\n".join(map(str,rel_skills)))
+print("~~~~~Relevant pvars~~~~~")
+for p in rel_pvars:
+    print(p)
+
+# print(rel_pvars)
+# print(rel_skills)
+
+def pvars2objects(pvars):
+    objs = condition_str2objects(map(str,pvars))
+    objs = [s.strip() for s in objs]
+    objs = sorted(list(set(objs)))
+    return objs
+all_pvars = []
+for s in skill_list:
+    all_pvars.extend(get_atoms(s.precondition))
+    all_pvars.extend(s.params)
+all_objects = pvars2objects(all_pvars)
+rel_objects = pvars2objects(rel_pvars)
+irrel_objects = [x for x in all_objects if x not in rel_objects]
+
+print(f"Relevant objects:")
+print("\n".join(rel_objects))
+remove_objects(problem, get_scoped_path(problem), irrel_objects)
+
+end_time = time.time()
+print(f"Total time: {end_time - start_time}")

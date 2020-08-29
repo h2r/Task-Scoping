@@ -84,6 +84,15 @@
 
 )
 
-; !!!STATE_CONSTRAINT!!! (forall (?t - taxi ?p0, ?p1 - passenger) (not (and (
-;     (in-taxi ?p0) (in-taxi ?p1) (not (?p0 = ?p1))
-; )))) !!!CONSTRAINT_STATE!!!
+;STATE_CONSTRAINT_START
+; (
+; 	forall (?t - taxi ?p0 ?p1 - passenger) 
+; 	(not
+; 		(and
+; 			(
+;     			(in-taxi ?p0 ?t) (in-taxi ?p1 ?t) (not (= ?p0 ?p1))
+;     		)
+;     	)
+;     )
+; )
+;STATE_CONSTRAINT_END

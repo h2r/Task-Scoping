@@ -1,16 +1,11 @@
+import re, copy, itertools, z3, time, sys, pprint
 from action import Action
-# from PDDL import PDDL_Parser
 from PDDLz3 import PDDL_Parser_z3
-import sys, pprint
 from collections import OrderedDict
 from typing import List, Tuple, Dict, Iterable
-import re, copy
-import itertools
-import z3
 from skill_classes import EffectTypePDDL, SkillPDDL
 from utils import product_dict, nested_list_replace, get_atoms, get_all_objects, condition_str2objects
 from scoping import scope
-import time
 
 
 def remove_objects(input_path, output_path, objects):

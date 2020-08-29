@@ -86,8 +86,56 @@ def list_is_flat(l):
 
 def z3_identical(a, b):
     return a.sort() == b.sort() and str(a) == str(b)
-
-
+def parse_tokens2(my_str):
+    stack = []
+    l2 = []
+    for t in re.findall(r'[()]|[^\s()]+', my_str):
+        if t == '(':
+            stack.append(l2)
+            l2 = []
+        elif t == ')':
+            if stack:
+                l = l2
+                l2 = stack.pop()
+                l2.append(l)
+            else:
+                raise Exception('Missing open parentheses')
+        else:
+            l2.append(t)
+    if stack:
+        raise Exception('Missing close parentheses')
+    if len(l2) != 1:
+        raise Exception('Malformed expression')
+    return l2[0]
+def split_predicates2(group):
+    pos = []
+    neg = []
+    if not type(group) is list:
+        raise Exception('Error with ')
+    if group == []:
+        # pass
+        return
+        # from IPython import embed; embed()
+    if group[0] == 'and':
+        group.pop(0)
+    else:
+        group = [group]
+    for predicate in group:
+        if predicate[0] == 'not':
+            if len(predicate) != 2:
+                raise Exception('Unexpected not in ')
+            neg.append(predicate[-1])
+        else:
+            pos.append(predicate)
+    return pos, neg
+def condition2expression(cond_s, parser: PDDL_Parser_z3):
+    str_var_dict = parser.make_str2var_dict()
+    pos, neg = parse_tokens2(split_predicates2(cond_s))
+    pos = compile_expression(pos, str_var_dict, parser)
+    if len(neg) > 0:
+        neg = compile_expression(neg, str_var_dict, parser)
+        pos = z3.And(pos, z3.Not(neg))
+    return pos
 
 def compile_expression(expr, str_var_dict, parser=None):
 

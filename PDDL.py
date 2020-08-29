@@ -132,7 +132,7 @@ class PDDL_Parser:
             if predicate_name in self.predicates:
                 raise Exception('Predicate ' + predicate_name + ' redefined')
             arguments = OrderedDict()
-            untyped_variables = []
+            untyped_variables = [] #Not always untyped
             while pred:
                 t = pred.pop(0)
                 if t == '-':
@@ -140,7 +140,7 @@ class PDDL_Parser:
                         raise Exception('Unexpected hyphen in predicates')
                     type = pred.pop(0)
                     while untyped_variables:
-                        arguments[untyped_variables.pop(0)] = type
+                        arguments[untyped_variables.pop(0)] = type #These untyped vars are typed...
                 else:
                     untyped_variables.append(t)
             while untyped_variables:

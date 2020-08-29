@@ -1,5 +1,5 @@
 from PDDL import PDDL_Parser, Action
-import z3
+import z3, re
 from collections import OrderedDict
 from skill_classes import EffectTypePDDL, SkillPDDL
 from utils import product_dict, nested_list_replace, get_atoms
@@ -128,14 +128,13 @@ def split_predicates2(group):
         else:
             pos.append(predicate)
     return pos, neg
-def condition2expression(cond_s, parser: PDDL_Parser_z3):
+def str2expression(cond_s: str, parser: PDDL_Parser_z3):
     str_var_dict = parser.make_str2var_dict()
-    pos, neg = parse_tokens2(split_predicates2(cond_s))
-    pos = compile_expression(pos, str_var_dict, parser)
-    if len(neg) > 0:
-        neg = compile_expression(neg, str_var_dict, parser)
-        pos = z3.And(pos, z3.Not(neg))
-    return pos
+    tokens = parse_tokens2(cond_s)
+    pos, neg = split_predicates2(tokens)
+    pos = [compile_expression(p, str_var_dict, parser) for p in pos]
+    neg = [z3.Not(compile_expression(n, str_var_dict, parser)) for n in neg]
+    return z3.And(*pos,*neg)
 
 def compile_expression(expr, str_var_dict, parser=None):
 
@@ -166,6 +165,11 @@ def compile_expression(expr, str_var_dict, parser=None):
             # The only length 2 expression we can compile is ['not', [subexpression]]
             if expr[0] == "not":
                 return z3.Not(compile_expression(expr[1], str_var_dict, parser))
+            elif expr[0] in ["and","or"]:
+                if list_is_flat(expr[1]):
+                    return compile_expression(expr[1], str_var_dict, parser)
+                else:
+                    return compile_expression([expr[0]] + expr[1], str_var_dict, parser)
             else:
                 raise ValueError(f"Don't understand how to compile: {expr}")
         else:
@@ -175,11 +179,22 @@ def compile_expression(expr, str_var_dict, parser=None):
             if expr[0] in ["forall", "exists"]:
                 # TODO edit to work with multiple quantified vars, ex (forall ?be - bell ?mo - monkey)
                 quantifier, quantified_var, subexpr = expr
-                varnm, vartype = quantified_var[0], quantified_var[2]
+                obj2type = extract_typed_objects(quantified_var)
+                # varnm, vartype = quantified_var[0], quantified_var[2]
                 # Get all groundings for the quantified object
-                var_groundings = parser.get_objects_of_type(vartype)
+                obj2groundings = OrderedDict()
+                for o, t in obj2type.items():
+                    obj2groundings[o] = parser.get_objects_of_type(t)
+                groundings = list(product_dict(**obj2groundings)) #Probably don't need list here
+                # var_groundings = parser.get_objects_of_type(vartype)
                 # Get all grounded versions of the subexpression
-                subexpr_groundings = [nested_list_replace(subexpr, {varnm: x}) for x in var_groundings]
+                # subexpr_groundings = [nested_list_replace(subexpr, {varnm: x}) for x in var_groundings]
+                subexpr_groundings = []
+                for g in groundings:
+                    subexpr_g = nested_list_replace(subexpr,g)
+                    subexpr_groundings.append(subexpr_g)
+                # subexpr_groundings = [nested_list_replace(subexpr, x) for x in groundings]
+
                 # Compile the grounded subexpressions
                 compiled_subexpressions = [compile_expression(x, str_var_dict, parser) for x in subexpr_groundings]
                 # Combine the compiled subexpressions
@@ -192,6 +207,22 @@ def compile_expression(expr, str_var_dict, parser=None):
                 return operator(*operator_args)
     else:
         raise NotImplementedError(f"Don't understand how to compile non lists: {expr}; {type(expr)}")
+def extract_typed_objects(l):
+    obj2type = OrderedDict()
+    objs = []
+    next_is_type = False
+    for x in l:
+        if next_is_type:
+            for o in objs:
+                obj2type[o] = x
+            next_is_type = False
+            objs = []
+        elif x == "-":
+            next_is_type = True
+        else:
+            x = x.replace(",","").replace(" ","")
+            objs.append(x)
+    return obj2type
 
 def action2effect_types(a: Action, str_var_dict, parser = None) -> List[EffectTypePDDL]:
     effect_types = []

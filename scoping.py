@@ -2,7 +2,7 @@ from itertools import chain
 from typing import Iterable, Union
 import z3
 from skill_classes import merge_skills, Skill, EffectType, SkillPDDL, EffectTypePDDL, merge_skills_pddl
-from utils import split_conj, get_atoms, solver_implies_condition
+from utils import split_conj, get_atoms, solver_implies_condition, simplify_disjunction
 
 
 def get_causal_links(start_condition, skills):
@@ -49,7 +49,8 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 		print("Split initial conditions")
 	solver = z3.Solver()
 	if state_constraints is not None:
-		solver.add(state_constraints)
+		state_constraints_simple = simplify_disjunction(state_constraints)
+		solver.add(state_constraints_simple)
 	solver.push()
 	if verbose > 0:
 		print("~" * 10 + "Initial Conditions" + "~" * 10)

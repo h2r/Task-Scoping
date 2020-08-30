@@ -186,12 +186,16 @@ def merge_skills_pddl(skills: Iterable[SkillPDDL], relevant_pvars: Iterable[z3.E
 	for (effects), sks in hashed_skills.items():
 		# Skip empty effects
 		if len(effects) == 0: continue
-		side_effects = chain(*[s.side_effects for s in sks])
-		precondition = simplify_disjunction([s.precondition for s in sks], my_solver=solver)
-		# Actions is the list of actions that appeared in any of the parent skills
 		actions = sorted(list(set(flatten([s.action for s in sks]))))
+		if 'move-north' in actions:
+			print("north time")
+		side_effects = chain(*[s.side_effects for s in sks])
+		conds = [s.precondition for s in sks]
+		precondition = simplify_disjunction(conds, my_solver=solver)
+		# Actions is the list of actions that appeared in any of the parent skills
 		if len(actions) == 1: actions = actions[0]
-		new_skills.append(SkillPDDL(precondition, actions, effects, side_effects))
+		s_merged = SkillPDDL(precondition, actions, effects, side_effects)
+		new_skills.append(s_merged)
 	return sorted(new_skills)
 
 def merge_skills(skills: Iterable[Skill], relevant_pvars: Iterable[z3.ExprRef]):

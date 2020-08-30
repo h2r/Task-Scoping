@@ -15,8 +15,11 @@ synth2varnames = {}
 # 	vars = [str(i) for i in z3.z3util.get_vars(expr)]
 # 	return vars
 def simplify_disjunction(conds, my_solver=None, tactic='aig'):
+	#tactic = 'simplify'
 	global solver
 	if my_solver is None: my_solver = solver
+	if not isinstance(conds, Iterable):
+		conds = [conds]
 	disj = z3.Or(*conds)
 	g = z3.Goal()
 	g.add(disj)

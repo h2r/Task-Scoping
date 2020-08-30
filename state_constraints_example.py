@@ -87,7 +87,7 @@ def split_predicates2(group):
 start_time = time.time()
 
 domain = "examples/taxi-state-constraint/taxi-domain.pddl"
-problem = "examples/taxi-state-constraint/prob-04.pddl"
+problem = "examples/taxi-state-constraint/prob-03.pddl"
 
 parser = PDDL_Parser_z3()
 parser.parse_domain(domain)

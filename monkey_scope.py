@@ -8,7 +8,9 @@ import re, copy
 import itertools
 import z3
 from skill_classes import EffectTypePDDL, SkillPDDL
-from utils import product_dict, nested_list_replace, get_atoms, get_all_objects, condition_str2objects, remove_objects, get_scoped_path
+from utils import product_dict, nested_list_replace, get_atoms, get_all_objects\
+    , condition_str2objects, writeback_problem, writeback_domain\
+        , get_scoped_problem_path, get_scoped_domain_path
 from scoping import scope
 import time
 
@@ -21,7 +23,7 @@ if __name__ == '__main__':
     # taxi_prob = "examples/infinite-taxi-numeric/prob02.pddl"
 
     start_time = time.time()
-    domain, problem = "./examples/multi_monkeys_playroom_freeballing/multi_monkeys_playroom.pddl", "./examples/multi_monkeys_playroom_freeballing/prob-02.pddl"
+    domain, problem = "./examples/multi_monkeys_playroom/multi_monkeys_playroom.pddl", "./examples/multi_monkeys_playroom/prob-01.pddl"
 
     parser = PDDL_Parser_z3()
     parser.parse_domain(domain)
@@ -40,9 +42,9 @@ if __name__ == '__main__':
       
     print("~~~~~Relevant skills~~~~~")
     print("\n\n".join(map(str,rel_skills)))
-    print("~~~~~Relevant pvars~~~~~")
-    for p in rel_pvars:
-        print(p)
+    # print("~~~~~Relevant pvars~~~~~")
+    # for p in rel_pvars:
+    #     print(p)
  
     # print(rel_pvars)
     # print(rel_skills)
@@ -60,9 +62,24 @@ if __name__ == '__main__':
     rel_objects = pvars2objects(rel_pvars)
     irrel_objects = [x for x in all_objects if x not in rel_objects]
 
-    print(f"Relevant objects:")
-    print("\n".join(rel_objects))
-    remove_objects(problem, get_scoped_path(problem), irrel_objects)
+    print(f"Irrelevant objects:")
+    print("\n".join(irrel_objects))
+    scoped_problem_path = get_scoped_problem_path(problem)
+    writeback_problem(problem, scoped_problem_path, irrel_objects)
+
+    all_actions = sorted(list(set([a.name for a in parser.actions])))
+    relevant_actions = []
+    for s in rel_skills:
+        if isinstance(s.action,str):
+            relevant_actions.append(s.action)
+        else:
+            relevant_actions.extend(s.action)
+    relevant_actions = sorted(list(set(relevant_actions)))
+    irrel_actions = [a for a in all_actions if a not in relevant_actions]
+    print("~~~~~~~Irrel actions~~~~~~~")
+    for a in irrel_actions: print(a)
+    scoped_domain_path = get_scoped_domain_path(domain, problem)
+    writeback_domain(domain, scoped_domain_path, irrel_actions)
 
     end_time = time.time()
     print(f"Total time: {end_time - start_time}")

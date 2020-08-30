@@ -4,7 +4,7 @@ from PDDLz3 import PDDL_Parser_z3
 from collections import OrderedDict
 from typing import List, Tuple, Dict, Iterable
 from skill_classes import EffectTypePDDL, SkillPDDL
-from utils import product_dict, nested_list_replace, get_atoms, get_all_objects, condition_str2objects, remove_objects, get_scoped_path
+from utils import product_dict, nested_list_replace, get_atoms, get_all_objects, condition_str2objects, writeback_problem, get_scoped_problem_path
 from scoping import scope
 
 if __name__ == '__main__':
@@ -59,7 +59,7 @@ if __name__ == '__main__':
 
     # print(f"Relevant objects:")
     # print("\n".join(rel_objects))
-    remove_objects(taxi_prob, "./examples/multi_monkeys_playroom/prob-09_scoped.pddl", irrel_objects)
+    writeback_problem(taxi_prob, "./examples/multi_monkeys_playroom/prob-09_scoped.pddl", irrel_objects)
 
     end_time = time.time()
     print(f"Total time: {end_time - start_time}")

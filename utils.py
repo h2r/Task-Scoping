@@ -11,6 +11,43 @@ solver = z3.Solver()
 synth2varnames = {}
 
 
+
+
+def get_scoped_path(p):
+    p_split = p.split(".")
+    base = ".".join(p_split[:-1])
+    return base + "_scoped." + p_split[-1]
+	
+# TODO clean this up, maybe make less janky
+def remove_objects(input_path, output_path, objects):
+    with open(input_path, "r") as f:
+        instance_lines = f.read().splitlines()
+    scoped_lines = []
+    in_objects_flag = False
+    for l in instance_lines:
+        if in_objects_flag == True:
+            if len(l) > 0 and l[0] == ")":
+                in_objects_flag = False
+        elif "(:objects" in l:
+            in_objects_flag = True
+        tokens = re.split('[ (),]',l)
+        if not any(o in tokens for o in objects):
+            scoped_lines.append(l)
+        else:
+            if in_objects_flag:
+                split_l = l.split(" ")
+                obj_type = split_l[-1]
+                objs = [o.replace("\t","") for o in split_l[:-2]]
+                objs = [o for o in objs if o not in objects and o != '']
+                if len(objs) > 0:
+                    l_new = " ".join(objs) + " - " + obj_type
+                    scoped_lines.append(l_new)
+            else:
+                scoped_lines.append(";" + l)
+
+    with open(output_path, "w")  as f:
+        f.write("\n".join(scoped_lines))
+
 # def get_var_names(expr):
 # 	vars = [str(i) for i in z3.z3util.get_vars(expr)]
 # 	return vars

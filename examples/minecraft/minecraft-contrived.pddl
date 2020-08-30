@@ -40,7 +40,7 @@
             (agent-num-apples ?ag - agent)
             (agent-num-potatoes ?ag - agent)
             (agent-num-orchids ?ag - agent)
-            (agent-num-daisies ?ag - daisy-flower)
+            (agent-num-daisies ?ag - agent)
             (agent-num-raw-rabbits ?ag - agent)
             (agent-num-cooked-rabbits ?ag - agent)
 

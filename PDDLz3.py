@@ -22,7 +22,7 @@ class PDDL_Parser_z3(PDDL_Parser):
                 assert s not in str2var.keys(), f"{s}: {str2var[s]}, {grounded_predicate}"
                 str2var[s] = grounded_predicate
         return str2var
-    
+    # TODO make this a property?
     def make_str2var_dict(self):
         str2var_dict = OrderedDict()
         str2var_dict = self.make_z3_atoms(self.predicates, z3.Bool, str2var_dict)

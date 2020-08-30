@@ -56,7 +56,7 @@ if __name__ == '__main__':
 
     start_time = time.time()
     domain =  "examples/minecraft/minecraft-contrived.pddl"
-    problem =  "examples/minecraft/prob-01.pddl"
+    problem =  "examples/minecraft/prob-02.pddl"
 
     parser = PDDL_Parser_z3()
     parser.parse_domain(domain)

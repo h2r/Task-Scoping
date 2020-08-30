@@ -17,7 +17,7 @@
 (define (domain minecraft-contrived)
 (:requirements :typing :fluents :negative-preconditions :universal-preconditions :existential-preconditions)
 
-(:types dirt-block redstone-block glass-block - block
+(:types bedrock-block dirt-block redstone-block glass-block - block
         agent 
         apple potato rabbit diamond-axe orchid-flower daisy-flower - item
         block
@@ -184,7 +184,7 @@
 (:action dropoff-potato
  :parameters (?ag - agent ?po - potato)
  :precondition (and (not (potato-present ?po))
-                    (> (agent-num-potatoes ?po) 0))
+                    (> (agent-num-potatoes ?ag) 0))
  :effect (and (decrease (agent-num-potatoes ?ag) 1)
               (potato-present ?po)
               (assign (potato-x ?po) (agent-x ?ag))

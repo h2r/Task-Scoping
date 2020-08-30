@@ -5,7 +5,8 @@
 (:objects
 	steve - agent
 	ap0 - apple
-bed54 bed55 bed64 bed65 bed74 bed75 bed84 bed85 bed94 bed95 bed120 bed121 bed122 bed123 bed124 bed125 bed126 bed127 bed128 bed129 - bedrock-block
+	bed54 bed55 bed64 bed65 bed74 bed75 bed84 bed85 bed94 bed95 bed120 bed121 bed122 bed123 bed124 bed125 bed126 bed127 bed128 bed129 - bedrock-block
+;	bed0 bed1 bed2 bed3 bed4 bed5 bed6 bed7 bed8 bed9 bed10 bed11 bed12 bed13 bed14 bed15 bed16 bed17 bed18 bed19 bed20 bed21 bed22 bed23 bed24 bed25 bed26 bed27 bed28 bed29 bed30 bed31 bed32 bed33 bed34 bed35 bed36 bed37 bed38 bed39 bed40 bed41 bed42 bed43 bed44 bed45 bed46 bed47 bed48 bed49 bed50 bed51 bed52 bed53 bed56 bed57 bed58 bed59 bed60 bed61 bed62 bed63 bed66 bed67 bed68 bed69 bed70 bed71 bed72 bed73 bed76 bed77 bed78 bed79 bed80 bed81 bed82 bed83 bed86 bed87 bed88 bed89 bed90 bed91 bed92 bed93 bed96 bed97 bed98 bed99 bed100 bed101 bed102 bed103 bed104 bed105 bed106 bed107 bed108 bed109 bed110 bed111 bed112 bed113 bed114 bed115 bed116 bed117 bed118 bed119 bed130 bed131 bed132 bed133 bed134 bed135 bed136 bed137 bed138 bed139 bed140 bed141 bed142 bed143 bed144 bed145 bed146 bed147 bed148 bed149 - bedrock-block
 )
 
 

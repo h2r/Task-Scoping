@@ -20,8 +20,8 @@
 (:types bedrock-block dirt-block redstone-block glass-block - block
         agent 
         apple potato rabbit diamond-axe orchid-flower daisy-flower - item
-        block
-        lava - object)
+        
+)
 
 (:predicates (block-present ?b - block)
              (apple-present ?ap - apple)

@@ -17,11 +17,12 @@
 (define (domain minecraft-contrived)
 (:requirements :typing :fluents :negative-preconditions :universal-preconditions :existential-preconditions)
 
-(:types dirt-block redstone-block glass-block - block
-        agent 
+(:types 
+        agent block lava - object
+        dirt-block redstone-block glass-block - block 
         apple potato rabbit diamond-axe orchid-flower daisy-flower - item
-        block
-        lava - object)
+        
+)
 
 (:predicates (block-present ?b - block)
              (apple-present ?ap - apple)

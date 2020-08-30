@@ -103,19 +103,23 @@ x_min, x_max = 0, 2
 y_min, y_max = 0, 2
 z_min, z_max = 0, 2
 
-item_counts = OrderedDict([("apple",2),("potato",1)])
+use_bedrock_boundaries = True
+# item_counts = OrderedDict([("apple",2),("potato",1)])
+item_counts = OrderedDict([("apple",1)])
 
 boundary_positions = get_boundary_positions(x_min, x_max, y_min, y_max, z_min, z_max)
 init_conds = get_init_conds_agent() + get_init_conds_items(item_counts)
-# init_conds += get_init_conds_boundary(boundary_positions)
+if use_bedrock_boundaries:
+    init_conds += get_init_conds_boundary(boundary_positions)
+    item_counts["bedrock-block"] = len(boundary_positions)
 init_conds = make_init_conds_str(init_conds)
-# item_counts["bedrock-block"] = len(boundary_positions)
 object_declaration = set_objects(item_counts)
 
 prob_parts = [header, object_declaration, init_conds, goal, ")"]
 prob_s = "\n\n\n".join(prob_parts)
 
-tgt_path = "examples/minecraft/prob-02.pddl"
+bedrock_path_str = "-bedrock" if use_bedrock_boundaries else ""
+tgt_path = f"examples/minecraft/prob-01{bedrock_path_str}.pddl"
 print(prob_s)
 with open(tgt_path, "w") as f:
     f.write(prob_s)

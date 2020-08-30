@@ -106,10 +106,10 @@ z_min, z_max = 0, 2
 item_counts = OrderedDict([("apple",2),("potato",1)])
 
 boundary_positions = get_boundary_positions(x_min, x_max, y_min, y_max, z_min, z_max)
-init_conds = get_init_conds_agent() + get_init_conds_items(item_counts)\
-     + get_init_conds_boundary(boundary_positions)
+init_conds = get_init_conds_agent() + get_init_conds_items(item_counts)
+# init_conds += get_init_conds_boundary(boundary_positions)
 init_conds = make_init_conds_str(init_conds)
-item_counts["bedrock-block"] = len(boundary_positions)
+# item_counts["bedrock-block"] = len(boundary_positions)
 object_declaration = set_objects(item_counts)
 
 prob_parts = [header, object_declaration, init_conds, goal, ")"]

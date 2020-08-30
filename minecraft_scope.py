@@ -8,43 +8,11 @@ import re, copy
 import itertools
 import z3
 from skill_classes import EffectTypePDDL, SkillPDDL
-from utils import product_dict, nested_list_replace, get_atoms, get_all_objects, condition_str2objects
+from utils import product_dict, nested_list_replace, get_atoms, get_all_objects, condition_str2objects, remove_objects, get_scoped_path
 from scoping import scope
 import time
 
 
-def remove_objects(input_path, output_path, objects):
-    with open(input_path, "r") as f:
-        instance_lines = f.read().splitlines()
-    scoped_lines = []
-    in_objects_flag = False
-    for l in instance_lines:
-        if in_objects_flag == True:
-            if len(l) > 0 and l[0] == ")":
-                in_objects_flag = False
-        if "(:objects" in l:
-            in_objects_flag = True
-        
-        if not any(o in l for o in objects):
-            scoped_lines.append(l)
-        else:
-            if in_objects_flag:
-                split_l = l.split(" ")
-                obj_type = split_l[-1]
-                objs = [o for o in split_l[:-2] if o not in objects and o != '']
-                if len(objs) > 0:
-                    l_new = " ".join(objs) + " - " + obj_type
-                    scoped_lines.append(l_new)
-            else:
-                scoped_lines.append(";" + l)
-
-    with open(output_path, "w")  as f:
-        f.write("\n".join(scoped_lines))
-
-def get_scoped_path(p):
-    p_split = p.split(".")
-    base = ".".join(p_split[:-1])
-    return base + "_scoped." + p_split[-1]
 
 if __name__ == '__main__':
     # zeno_dom = "examples/zeno/zeno.pddl"
@@ -56,7 +24,7 @@ if __name__ == '__main__':
 
     start_time = time.time()
     domain =  "examples/minecraft/minecraft-contrived.pddl"
-    problem =  "examples/minecraft/prob-01.pddl"
+    problem =  "examples/minecraft/prob-01-bedrock.pddl"
 
     parser = PDDL_Parser_z3()
     parser.parse_domain(domain)

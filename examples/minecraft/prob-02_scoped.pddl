@@ -4,7 +4,8 @@
 
 (:objects
 	steve - agent
-	ap0 - apple
+	ap0 ap1 - apple
+	tot0 - potato
 )
 
 
@@ -25,6 +26,17 @@
 	(= (apple-y ap0) 1)
 	(= (apple-z ap0) 0)
 	( apple-present ap0 )
+	
+	(= (apple-x ap1) 1)
+	(= (apple-y ap1) 1)
+	(= (apple-z ap1) 0)
+	( apple-present ap1 )
+	
+	
+;	(= (potato-x tot0) 0)
+;	(= (potato-y tot0) 1)
+;	(= (potato-z tot0) 0)
+;	( potato-present tot0 )
 )
 
 

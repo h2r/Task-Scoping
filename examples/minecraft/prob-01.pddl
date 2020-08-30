@@ -24,3 +24,4 @@
         (= (agent-num-apples steve) 1)
     )
 )
+)

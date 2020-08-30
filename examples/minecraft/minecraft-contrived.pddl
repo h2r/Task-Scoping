@@ -4,17 +4,22 @@
 ; yet. This can totally be hacked around using different actions with preconditions
 ; differing in whether there's lava/pick-uppable items ahead
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;Pickup
+;       ALL items are picked up when walked over. This would be implemented 
+;       via a foreach-expansion, but few planners support this, and ENHSP is no exception
+;       Instead, we will assume that no location holds more than 1 item
+;       Our scoper/parser probably would not handle the foreach version very well,
+;       since we would have 2^(n items) move actions in each direction. There is probably
+;       a good way to handle this in the future.
+;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define (domain minecraft-contrived)
 (:requirements :typing :fluents :negative-preconditions :universal-preconditions :existential-preconditions)
 
 (:types dirt-block redstone-block glass-block - block
         agent 
-        apple 
-        potato 
-        rabbit 
-        diamond-axe 
-        orchid-flower
-        daisy-flower 
+        apple potato rabbit diamond-axe orchid-flower daisy-flower - item
         block
         lava - object)
 

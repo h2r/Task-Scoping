@@ -17,17 +17,18 @@
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define (domain minecraft-contrived)
+(define (domain minecraft-contrived-dummy)
 (:requirements :typing :fluents :negative-preconditions :universal-preconditions :existential-preconditions)
 
 (:types dirt-block redstone-block glass-block - block
+        apple potato rabbit diamond-axe orchid-flower daisy-flower - item
         agent 
-        apple 
-        potato 
-        rabbit 
-        diamond-axe 
-        orchid-flower
-        daisy-flower 
+        ; apple 
+        ; potato 
+        ; rabbit 
+        ; diamond-axe 
+        ; orchid-flower
+        ; daisy-flower 
         block
         lava - object)
 
@@ -40,6 +41,7 @@
              (rabbit-cooked ?ra - rabbit)
              (agent-alive ?ag - agent)
              (agent-has-pickaxe ?ag - agent)
+             (item-present ?i - item)
 )
 
 (:functions (agent-x ?ag - agent)
@@ -60,21 +62,25 @@
 
             (db-hits ?db - dirt-block)
 
-            (apple-x ?ap - apple)
-            (apple-y ?ap - apple)
-            (apple-z ?ap - apple)
+            ( item-x ?i - item)
+            ( item-y ?i - item)
+            ( item-z ?i - item)
 
-            (potato-x ?po - potato)
-            (potato-y ?po - potato)
-            (potato-z ?po - potato)
+        ;     (item-x?ap - apple)
+        ;     (item-y ?ap - apple)
+        ;     (item-z ?ap - apple)
 
-            (daisy-x ?df - daisy-flower)
-            (daisy-y ?df - daisy-flower)
-            (daisy-z ?df - daisy-flower)
+        ;     (item-x ?po - potato)
+        ;     (item-y ?po - potato)
+        ;     (item-z ?po - potato)
 
-            (rabbit-x ?ra - rabbit)
-            (rabbit-y ?ra - rabbit)
-            (rabbit-z ?ra - rabbit)
+        ;     (daisy-x ?df - daisy-flower)
+        ;     (daisy-y ?df - daisy-flower)
+        ;     (daisy-z ?df - daisy-flower)
+
+        ;     (item-x ?ra - rabbit)
+        ;     (item-y ?ra - rabbit)
+        ;     (item-z ?ra - rabbit)
 )
 
 ; Note: There actually cannot be a block at agent-z, agent-z + 1 or agent-z + 2 for any of the move actions
@@ -89,6 +95,27 @@
                                                     (= (bl-y ?bl) (+ (agent-y ?ag) 1))
                                                     (= (bl-z ?bl) (+ (agent-z ?ag) 1))))))
  :effect (and (increase (agent-y ?ag) 1))
+)
+(:action move-north-item
+ :parameters (?ag - agent ?i - item)
+ :precondition (and 
+                        (agent-alive ?ag)
+                        ;No block in way
+                        (not (exists (?bl - block) (and (= (bl-x ?bl) (agent-x ?ag))
+                                                    (= (bl-y ?bl) (+ (agent-y ?ag) 1))
+                                                    (= (bl-z ?bl) (+ (agent-z ?ag) 1))
+                                                ))
+                        )
+                        ;Item is in target location
+                        ( = (item-x ?i) (agent-x ?ag) )
+                        ( = (item-y ?i) ( + (agent-y ?ag) 1 ))
+                        ( = (item-z ?i) (agent-z ?ag) )
+                )
+ :effect (and 
+                (increase (agent-y ?ag) 1)
+                (increase (agent-num-cooked-rabbits ?ag) 1)
+                ( not (item-present ?i))
+        )
 )
 ;Proper z condition. Test out current version first
 ;(:action move-north
@@ -174,9 +201,9 @@
 (:action pickup-apple
  :parameters (?ag - agent ?ap - apple)
  :precondition (and (apple-present ?ap)
-                    (= (apple-x ?ap) (agent-x ?ag))
-                    (= (apple-y ?ap) (agent-y ?ag))
-                    (= (apple-z ?ap) (agent-z ?ag)))
+                    (= (item-x?ap) (agent-x ?ag))
+                    (= (item-y ?ap) (agent-y ?ag))
+                    (= (item-z ?ap) (agent-z ?ag)))
  :effect (and (increase (agent-num-apples ?ag) 1)
               (not (apple-present ?ap)))
 )
@@ -187,17 +214,17 @@
                     (> (agent-num-apples ?ag) 0))
  :effect (and (decrease (agent-num-apples ?ag) 1)
               (apple-present ?ap)
-              (assign (apple-x ?ap) (agent-x ?ag))
-              (assign (apple-y ?ap) (agent-y ?ag))
-              (assign (apple-z ?ap) (agent-z ?ag)))
+              (assign (item-x?ap) (agent-x ?ag))
+              (assign (item-y ?ap) (agent-y ?ag))
+              (assign (item-z ?ap) (agent-z ?ag)))
 )
 
 (:action pickup-potato
  :parameters (?ag - agent ?po - potato)
  :precondition (and (potato-present ?po)
-                    (= (potato-x ?po) (agent-x ?ag))
-                    (= (potato-y ?po) (agent-y ?ag))
-                    (= (potato-z ?po) (agent-z ?ag)))
+                    (= (item-x ?po) (agent-x ?ag))
+                    (= (item-y ?po) (agent-y ?ag))
+                    (= (item-z ?po) (agent-z ?ag)))
  :effect (and (increase (agent-num-potatoes ?ag) 1)
               (not (potato-present ?po)))
 )
@@ -208,18 +235,18 @@
                     (> (agent-num-potatoes ?po) 0))
  :effect (and (decrease (agent-num-potatoes ?ag) 1)
               (potato-present ?po)
-              (assign (potato-x ?po) (agent-x ?ag))
-              (assign (potato-y ?po) (agent-y ?ag))
-              (assign (potato-z ?po) (agent-z ?ag)))
+              (assign (item-x ?po) (agent-x ?ag))
+              (assign (item-y ?po) (agent-y ?ag))
+              (assign (item-z ?po) (agent-z ?ag)))
 )
 
 (:action pickup-raw-rabbit
  :parameters (?ag - agent ?rb - rabbit)
  :precondition (and (rabbit-present ?rb)
                     (not (rabbit-cooked ?rb))
-                    (= (rabbit-x ?rb) (agent-x ?ag))
-                    (= (rabbit-y ?rb) (agent-y ?ag))
-                    (= (rabbit-z ?rb) (agent-z ?ag)))
+                    (= (item-x ?rb) (agent-x ?ag))
+                    (= (item-y ?rb) (agent-y ?ag))
+                    (= (item-z ?rb) (agent-z ?ag)))
  :effect (and (increase (agent-num-raw-rabbits ?ag) 1)
               (not (rabbit-present ?rb)))
 )
@@ -230,18 +257,18 @@
                     (> (agent-num-raw-rabbits ?ag) 0))
  :effect (and (decrease (agent-num-raw-rabbits ?ag) 1)
               (rabbit-present ?rb)
-              (assign (rabbit-x ?rb) (agent-x ?ag))
-              (assign (rabbit-y ?rb) (agent-y ?ag))
-              (assign (rabbit-z ?rb) (agent-z ?ag)))
+              (assign (item-x ?rb) (agent-x ?ag))
+              (assign (item-y ?rb) (agent-y ?ag))
+              (assign (item-z ?rb) (agent-z ?ag)))
 )
 
 (:action pickup-cooked-rabbit
  :parameters (?ag - agent ?rb - rabbit)
  :precondition (and (rabbit-present ?rb)
                     (rabbit-cooked ?rb)
-                    (= (rabbit-x ?rb) (agent-x ?ag))
-                    (= (rabbit-y ?rb) (agent-y ?ag))
-                    (= (rabbit-z ?rb) (agent-z ?ag)))
+                    (= (item-x ?rb) (agent-x ?ag))
+                    (= (item-y ?rb) (agent-y ?ag))
+                    (= (item-z ?rb) (agent-z ?ag)))
  :effect (and (increase (agent-num-cooked-rabbits ?ag) 1)
               (not (rabbit-present ?rb)))
 )
@@ -252,9 +279,9 @@
                     (> (agent-num-cooked-rabbits ?ag) 0))
  :effect (and (decrease (agent-num-cooked-rabbits ?ag) 1)
               (rabbit-present ?rb)
-              (assign (rabbit-x ?rb) (agent-x ?ag))
-              (assign (rabbit-y ?rb) (agent-y ?ag))
-              (assign (rabbit-z ?rb) (agent-z ?ag)))
+              (assign (item-x ?rb) (agent-x ?ag))
+              (assign (item-y ?rb) (agent-y ?ag))
+              (assign (item-z ?rb) (agent-z ?ag)))
 )
 
 (:action cook-rabbit

@@ -36,6 +36,12 @@ def find_closing_paren(s, start):
         elif c == "(":
             lefts_left += 1
 
+def pvars2objects(pvars):
+        objs = condition_str2objects(map(str,pvars))
+        objs = [s.strip() for s in objs]
+        objs = sorted(list(set(objs)))
+        return objs
+
 def writeback_domain(input_path, output_path, actions):
     with open(input_path, "r") as f:
         domain = f.read()
@@ -298,7 +304,7 @@ def get_atoms(*args: Union[bool, z3.ExprRef, z3.Goal], remove_constants = True) 
     if remove_constants:
         atoms_filtered = []
         for a in atoms:
-            if not isinstance(a, z3.IntNumRef):
+            if not isinstance(a, z3.IntNumRef) and str(a) not in ["And", "Or"]:
                 atoms_filtered.append(a)
         atoms = atoms_filtered
     return atoms

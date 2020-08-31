@@ -10,21 +10,12 @@ import z3
 from skill_classes import EffectTypePDDL, SkillPDDL
 from utils import product_dict, nested_list_replace, get_atoms, get_all_objects\
     , condition_str2objects, writeback_problem, writeback_domain\
-        , get_scoped_problem_path, get_scoped_domain_path
+        , get_scoped_problem_path, get_scoped_domain_path, pvars2objects, get_unique_z3_vars
 from scoping import scope
 import time
 
-if __name__ == '__main__':
-    # zeno_dom = "examples/zeno/zeno.pddl"
-    # zeno_prob = "examples/zeno/pb1.pddl"
-    # domain, problem = zeno_dom, zeno_prob
 
-    # taxi_dom = "examples/infinite-taxi-numeric/taxi-domain.pddl"
-    # taxi_prob = "examples/infinite-taxi-numeric/prob02.pddl"
-
-    start_time = time.time()
-    domain, problem = "./examples/multi_monkeys_playroom/multi_monkeys_playroom.pddl", "./examples/multi_monkeys_playroom/prob-01.pddl"
-
+def scope_pddl(domain, problem):
     parser = PDDL_Parser_z3()
     parser.parse_domain(domain)
     parser.parse_problem(problem)
@@ -49,19 +40,19 @@ if __name__ == '__main__':
     # print(rel_pvars)
     # print(rel_skills)
 
-    def pvars2objects(pvars):
-        objs = condition_str2objects(map(str,pvars))
-        objs = [s.strip() for s in objs]
-        objs = sorted(list(set(objs)))
-        return objs
+    
     all_pvars = []
     for s in skill_list:
         all_pvars.extend(get_atoms(s.precondition))
         all_pvars.extend(s.params)
+    all_pvars = get_unique_z3_vars(all_pvars)
+    irrel_pvars = [p for p in map(str,all_pvars) if p not in map(str,rel_pvars)]
     all_objects = pvars2objects(all_pvars)
     rel_objects = pvars2objects(rel_pvars)
     irrel_objects = [x for x in all_objects if x not in rel_objects]
 
+    print(f"Irrelevant pvars:")
+    print("\n".join(irrel_pvars))
     print(f"Irrelevant objects:")
     print("\n".join(irrel_objects))
     scoped_problem_path = get_scoped_problem_path(problem)
@@ -80,6 +71,19 @@ if __name__ == '__main__':
     for a in irrel_actions: print(a)
     scoped_domain_path = get_scoped_domain_path(domain, problem)
     writeback_domain(domain, scoped_domain_path, irrel_actions)
+
+if __name__ == '__main__':
+    # zeno_dom = "examples/zeno/zeno.pddl"
+    # zeno_prob = "examples/zeno/pb1.pddl"
+    # domain, problem = zeno_dom, zeno_prob
+
+    # taxi_dom = "examples/infinite-taxi-numeric/taxi-domain.pddl"
+    # taxi_prob = "examples/infinite-taxi-numeric/prob02.pddl"
+
+    start_time = time.time()
+    domain, problem = "./examples/multi_monkeys_playroom/multi_monkeys_playroom.pddl", "./examples/multi_monkeys_playroom/prob-01.pddl"
+    scope_pddl(domain, problem)
+    
 
     end_time = time.time()
     print(f"Total time: {end_time - start_time}")

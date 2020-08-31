@@ -79,6 +79,7 @@ def writeback_problem(input_path, output_path, objects):
                         objs_removed.append(o)
                     else:
                         objs_kept.append(o)
+                objs_kept = [i for i in objs_kept if i]
                 if len(objs_kept) > 0:
                     l_new = "\t" + " ".join(objs_kept) + " - " + obj_type
                     scoped_lines.append(l_new)

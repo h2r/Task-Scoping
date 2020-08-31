@@ -7,11 +7,8 @@
     eye1 - eye
     hand1 - hand
     marker1 - marker
-	    - redbutton
 ;	rb1 - redbutton
-	    - greenbutton
 ;	gb1 - greenbutton
-	    - lightswitch
 ;	ls1 - lightswitch
 )
 (:init
@@ -26,7 +23,7 @@
 
 ;    (= (lightswitch-x ls1) 2)
 ;    (= (lightswitch-y ls1) 2)
-;    (not (light-on ls1))
+;    (light-on ls1)
 
 ;    (= (rbutton-x rb1) 3)
 ;    (= (rbutton-y rb1) 3)

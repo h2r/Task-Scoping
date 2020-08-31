@@ -1,0 +1,44 @@
+(define (problem FreeCell-simple)
+(:domain freecell)
+(:objects
+	diamond - suitsort
+	N0 N1 - denomination 
+	diamondA diamond0 - card
+)
+
+; (and 
+; 			(incell ?card)
+; 			(home ?homecard) 
+; 			(suit ?card ?suit)
+; 			(suit ?homecard ?suit)
+; 			(value ?card ?vcard)
+; 			(value ?homecard ?vhomecard)
+; 			(successor ?vcard ?vhomecard)
+; 			(cellspace ?cells)
+; 			(successor ?ncells ?cells))
+
+(:init
+	(successor N1 N0)
+
+    ; (and 
+	; 		(incell ?card)
+	; 		(home ?homecard) 
+	; 		(suit ?card ?suit)
+	; 		(suit ?homecard ?suit)
+	; 		(value ?card ?vcard)
+	; 		(value ?homecard ?vhomecard)
+	; 		(successor ?vcard ?vhomecard)
+	; 		(cellspace ?cells)
+	; 		(successor ?ncells ?cells))
+
+    (incell diamondA)
+    (home diamond0)
+    (suit diamondA diamond)
+    (suit diamond0 diamond)
+    (value diamondA N1)
+    (value diamond0 N0)
+    (cellspace N0)
+
+)
+(:goal (home diamondA))
+)

@@ -40,13 +40,13 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 		  , start_condition: Union[Iterable[z3.ExprRef], z3.ExprRef], state_constraints: z3.ExprRef = None
 		  , verbose=0):
 	if isinstance(goals, z3.ExprRef):
-		print("Splitting goals")
+		# print("Splitting goals")
 		goals = split_conj(goals)
-		print("Split goals")
+		# print("Split goals")
 	if isinstance(start_condition, z3.ExprRef):
-		print("Splitting initial condition")
+		# print("Splitting initial condition")
 		start_condition = split_conj(start_condition)
-		print("Split initial conditions")
+		# print("Split initial conditions")
 	solver = z3.Solver()
 	if state_constraints is not None:
 		state_constraints_simple = simplify_disjunction(state_constraints)
@@ -62,7 +62,7 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 		print("~" * 10 + "State Constraints" + "~" * 10)
 		print(state_constraints)
 
-		
+	# print("Starting to scope!")
 	# We make a dummy goal and dummy final skill a la LCP because it simplifies the beginning of the algorithm.
 	# We will remove the dummy goal and skill before returning the final results
 	dummy_goal = z3.Bool("dummy_goal") #TODO make sure this var does not already exist
@@ -94,7 +94,9 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 
 		pvars_rel = pvars_rel_new
 		i += 1
+		# print(pvars_rel)
 		# from IPython import embed; embed()
+		# from IPython.core.debugger import set_trace; set_trace()
 
 	# Remove the dummy pvar and skill
 	pvars_rel.remove(dummy_goal)

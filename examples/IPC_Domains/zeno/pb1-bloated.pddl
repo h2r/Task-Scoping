@@ -1,4 +1,4 @@
-(define (problem ZTRAVEL-1-2)
+(define (problem ZTRAVEL-bloated)
 (:domain zenotravel)
 (:objects
 	plane1 - aircraft
@@ -32,9 +32,5 @@
 	(= (total-fuel-used) 0)
 
 )
-(:goal (and	
-	(located person1 city2)
-	(located person2 city1)
-	(located person3 city2)
-	))
+(:goal (located person1 city2))
 )

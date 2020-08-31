@@ -27,9 +27,9 @@ def set_objects(item_counts):
 def get_init_conds_agent():
     init_conds = []
     agent_name = "Steve"
-    init_conds.append(f"(= (agent-x {agent_name}) 0)")
-    init_conds.append(f"(= (agent-y {agent_name}) 0)")
-    init_conds.append(f"(= (agent-z {agent_name}) 0)")
+    init_conds.append(f"(= (x {agent_name}) 0)")
+    init_conds.append(f"(= (y {agent_name}) 0)")
+    init_conds.append(f"(= (z {agent_name}) 0)")
     init_conds.append(f"( agent-has-pickaxe {agent_name} )")
     for item_type in inventory_types:
         init_conds.append(f"(= (agent-num-{item_type} {agent_name}) 0)")
@@ -54,9 +54,9 @@ def get_init_conds_boundary(positions):
     for i, p in enumerate(positions):
         name = f"{name_prefix}{i}"
         init_conds.append("")
-        init_conds.append(f"(= (bl-x {name}) {p[0]})")
-        init_conds.append(f"(= (bl-y {name}) {p[1]})")
-        init_conds.append(f"(= (bl-z {name}) {p[2]})")
+        init_conds.append(f"(= (x {name}) {p[0]})")
+        init_conds.append(f"(= (y {name}) {p[1]})")
+        init_conds.append(f"(= (z {name}) {p[2]})")
         init_conds.append(f"(block-present {name})")
     return init_conds
 
@@ -122,7 +122,7 @@ def get_predicates_str(predicates):
     body = "\n".join(lines)
     return prefix + '\n' + body + "\n" + suffix
 def get_move_actions():
-    s = "(:action move-north\n :parameters (?ag - agent)\n :precondition (and (agent-alive ?ag)\n                    (not (exists (?bl - block) (and (= (bl-x ?bl) (x ?ag))\n                                                    (= (bl-y ?bl) (+ (y ?ag) 1))\n                                                    (= (bl-z ?bl) (+ (z ?ag) 1))))))\n :effect (and (increase (y ?ag) 1))\n)\n\n(:action move-south\n :parameters (?ag - agent)\n :precondition (and (agent-alive ?ag)\n                    (not (exists (?bl - block) (and (= (bl-x ?bl) (x ?ag))\n                                                    (= (bl-y ?bl) (- (y ?ag) 1))\n                                                    (= (bl-z ?bl) (+ (z ?ag) 1))))))\n :effect (and (decrease (y ?ag) 1))\n)\n\n(:action move-east\n :parameters (?ag - agent)\n :precondition (and (agent-alive ?ag)\n                    (not (exists (?bl - block) (and (= (bl-x ?bl) (+ (x ?ag) 1))\n                                                    (= (bl-y ?bl) (y ?ag))\n                                                    (= (bl-z ?bl) (+ (z ?ag) 1))))))\n :effect (and (increase (x ?ag) 1))\n)\n\n(:action move-west\n :parameters (?ag - agent)\n :precondition (and (agent-alive ?ag)\n                    (not (exists (?bl - block) (and (= (bl-x ?bl) (- (x ?ag) 1))\n                                                    (= (bl-y ?bl) (y ?ag))\n                                                    (= (bl-z ?bl) (+ (z ?ag) 1))))))\n :effect (and (decrease (x ?ag) 1))\n)"
+    s = "(:action move-north\n :parameters (?ag - agent)\n :precondition (and (agent-alive ?ag)\n                    (not (exists (?bl - block) (and (= (x ?bl) (x ?ag))\n                                                    (= (y ?bl) (+ (y ?ag) 1))\n                                                    (= (z ?bl) (+ (z ?ag) 1))))))\n :effect (and (increase (y ?ag) 1))\n)\n\n(:action move-south\n :parameters (?ag - agent)\n :precondition (and (agent-alive ?ag)\n                    (not (exists (?bl - block) (and (= (x ?bl) (x ?ag))\n                                                    (= (y ?bl) (- (y ?ag) 1))\n                                                    (= (z ?bl) (+ (z ?ag) 1))))))\n :effect (and (decrease (y ?ag) 1))\n)\n\n(:action move-east\n :parameters (?ag - agent)\n :precondition (and (agent-alive ?ag)\n                    (not (exists (?bl - block) (and (= (x ?bl) (+ (x ?ag) 1))\n                                                    (= (y ?bl) (y ?ag))\n                                                    (= (z ?bl) (+ (z ?ag) 1))))))\n :effect (and (increase (x ?ag) 1))\n)\n\n(:action move-west\n :parameters (?ag - agent)\n :precondition (and (agent-alive ?ag)\n                    (not (exists (?bl - block) (and (= (x ?bl) (- (x ?ag) 1))\n                                                    (= (y ?bl) (y ?ag))\n                                                    (= (z ?bl) (+ (z ?ag) 1))))))\n :effect (and (decrease (x ?ag) 1))\n)"
     return s
 def make_pickup_actions(item_types):
     action_template = """(:action pickup-{t}
@@ -140,7 +140,31 @@ def make_pickup_actions(item_types):
         actions.append(action_template.format(t=t))
     return actions
 
-
+def get_destructible_block_action(block_type, needed_tool = None):
+    # TODO either set x,y,z to far away, or check for block existence in movement actions
+    if needed_tool is None:
+        tool_precond = ""
+    else:
+        tool_precond = f"\n                        ( > (agent-num-{needed_tool}) 1 )"
+    hit_s = f"""(:action hit-{block_type}
+    :parameters (?ag - agent ?b - {block_type})
+    :precondition (and (= (x ?b) (x ?ag))
+                        (= (y ?b) (+ (y ?ag) 1))
+                        (= (z ?b) (z ?ag))
+                        (block-present ?b)
+                        (< (db-hits ?b) 4)){tool_precond}
+    :effect (and (increase (db-hits ?b) 1))
+    )"""
+    destroy_s = f"""(:action destroy-{block_type}
+    :parameters (?ag - agent ?b - {block_type})
+    :precondition (and (= (x ?b) (x ?ag))
+                        (= (y ?b) (+ (y ?ag) 1))
+                        (= (z ?b) (z ?ag))
+                        (block-present ?b)
+                        (= (db-hits ?b) 3)){tool_precond}
+    :effect (not (block-present ?b))
+    )"""
+    return [hit_s, destroy_s]
 
 def make_domain():
     sections = []
@@ -153,7 +177,9 @@ def make_domain():
     type_hierarchy["locatable"] = None
     type_hierarchy["agent"] = "locatable"
     type_hierarchy["item"] = "locatable"
-    type_hierarchy["destructible-block"] = "locatable"
+    type_hierarchy["block"] = "locatable"
+    type_hierarchy["bedrock"] = "block"
+    type_hierarchy["destructible-block"] = "block"
     type_hierarchy["obsidian-block"] = "destructible-block"
     item_types_irrelevant = ["apple", "potato", "rabbit", "diamond-axe", "orchid-flower", "daisy-flower"]
     item_types = ["diamond", "stick", "iron", "diamond-pickaxe", "shears"]
@@ -164,7 +190,8 @@ def make_domain():
     sections.append(types_s)
     
     predicates = []
-    predicates.append("present ?i - item")        
+    predicates.append("present ?i - item")  
+    predicates.append("block-present ?b - block")      
     functions = []
     functions.extend(get_inventory_funcs(inverse_type_hierarchy["item"]))
     for d in ["x","y","z"]:
@@ -189,6 +216,9 @@ def make_domain():
 
     actions.append(craft_diamond_pickaxe)
     actions.append(craft_shears)
+
+    for block_type in inverse_type_hierarchy["destructible-block"]:
+        actions.extend(get_destructible_block_action(block_type, needed_tool = "diamond-pickaxe"))
 
     sections.extend(actions)
     sections.append(footer)

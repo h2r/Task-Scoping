@@ -43,8 +43,11 @@ class PDDL_Parser_z3(PDDL_Parser):
         return z3.And(*clauses)
     def get_skills(self):
         str2var_dict = self.make_str2var_dict()
+        # print("Got str2var dict")
         str_grounded_actions = [self.get_action_groundings(a) for a in self.actions]
+        # print("Got action groundings")
         skill_list = self.str_grounded_actions2skills(str_grounded_actions, str2var_dict)
+        # print("Got skill list")
         return skill_list
     def get_goal_cond(self):
         str2var_dict = self.make_str2var_dict()
@@ -168,7 +171,7 @@ def compile_expression(expr, str_var_dict, parser=None):
             expr = int(expr)
             return expr
         except ValueError as e:
-            from IPython import embed; embed() #What is embed?
+            # from IPython import embed; embed() #What is embed?
             raise e
     elif isinstance(expr, list):
         # A flat list corresponds to a pvar

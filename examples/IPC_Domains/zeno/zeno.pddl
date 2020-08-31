@@ -1,7 +1,7 @@
 ;; Enrico Scala (enricos83@gmail.com) and Miquel Ramirez (miquel.ramirez@gmail.com)
 (define (domain zenotravel)
-; (:requirements :typing :fluents)
-(:requirements :typing)
+(:requirements :typing :fluents)
+; (:requirements :typing)
 
 (:types locatable city - object
 	aircraft person - locatable)

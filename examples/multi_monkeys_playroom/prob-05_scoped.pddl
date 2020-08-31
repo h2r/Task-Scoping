@@ -1,4 +1,4 @@
-(define (problem MULTIMONKEY-07)
+(define (problem MULTIMONKEY-05)
 (:domain multi_monkeys_playroom)
 (:objects
 
@@ -8,9 +8,9 @@
     eye1 - eye
     hand1 - hand
     marker1 - marker
-;	rb1 rb2 rb3 rb4 rb5 rb6 rb7 - redbutton
-;	gb1 gb2 gb3 gb4 gb5 gb6 gb7 - greenbutton
-;	ls1 ls2 ls3 ls4 ls5 ls6 ls7 - lightswitch
+;	rb1 rb2 rb3 rb4 rb5 - redbutton
+;	gb1 gb2 gb3 gb4 gb5 - greenbutton
+;	ls1 ls2 ls3 ls4 ls5 - lightswitch
 )
 (:init
     (= (eye-x eye1) 0)
@@ -37,12 +37,6 @@
 ;    (= (lightswitch-x ls5) 6)
 ;    (= (lightswitch-y ls5) 2)
 ;    (light-on ls5)
-;    (= (lightswitch-x ls6) 7)
-;    (= (lightswitch-y ls6) 2)
-;    (light-on ls6)
-;    (= (lightswitch-x ls7) 8)
-;    (= (lightswitch-y ls7) 2)
-;    (light-on ls7)
 
 ;    (= (rbutton-x rb1) 3)
 ;    (= (rbutton-y rb1) 3)
@@ -79,20 +73,6 @@
 ;    (not (rbutton-on rb5))
 ;    (gbutton-on gb5)
 ;    (connected-buttons rb5 gb5)
-;    (= (rbutton-x rb6) 6)
-;    (= (rbutton-y rb6) 7)
-;    (= (gbutton-x gb6) 6)
-;    (= (gbutton-y gb6) 8)
-;    (not (rbutton-on rb6))
-;    (gbutton-on gb6)
-;    (connected-buttons rb6 gb6)
-;    (= (rbutton-x rb7) 7)
-;    (= (rbutton-y rb7) 7)
-;    (= (gbutton-x gb7) 7)
-;    (= (gbutton-y gb7) 8)
-;    (not (rbutton-on rb7))
-;    (gbutton-on gb7)
-;    (connected-buttons rb7 gb7)
 
     (= (ball-x ball1) 5)
     (= (ball-y ball1) 5)

@@ -153,7 +153,10 @@ def make_domain():
     type_hierarchy["locatable"] = None
     type_hierarchy["agent"] = "locatable"
     type_hierarchy["item"] = "locatable"
-    item_types = ["apple", "potato", "rabbit", "diamond-axe", "orchid-flower", "daisy-flower"]
+    type_hierarchy["destructible-block"] = "locatable"
+    type_hierarchy["obsidian-block"] = "destructible-block"
+    item_types_irrelevant = ["apple", "potato", "rabbit", "diamond-axe", "orchid-flower", "daisy-flower"]
+    item_types = ["diamond", "stick", "iron", "diamond-pickaxe", "shears"]
     for i in item_types:
         type_hierarchy[i] = "item"
     inverse_type_hierarchy = invert_dict(type_hierarchy)
@@ -286,4 +289,6 @@ if __name__ == "__main__":
     # for i in item_types:
     #     type_hierarchy[i] = "item"
     # print(make_types_declaration(type_hierarchy))
-    make_domain()
+    dom_s = make_domain()
+    with open("examples/minecraft2/minecraft-contrived2.pddl","w") as f:
+        f.write(dom_s)

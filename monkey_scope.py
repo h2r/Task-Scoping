@@ -27,18 +27,14 @@ def scope_pddl(domain, problem):
 
     # This below block converts all the domain's initial conditions to z3
     init_cond_list = parser.get_init_cond_list()
+   
+    
 
     # Run the scoper on the constructed goal, skills and initial condition
     rel_pvars, rel_skills = scope(goals=goal_cond, skills=skill_list, start_condition=init_cond_list)
       
     print("~~~~~Relevant skills~~~~~")
     print("\n\n".join(map(str,rel_skills)))
-    # print("~~~~~Relevant pvars~~~~~")
-    # for p in rel_pvars:
-    #     print(p)
- 
-    # print(rel_pvars)
-    # print(rel_skills)
 
     
     all_pvars = []

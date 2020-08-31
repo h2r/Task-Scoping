@@ -2,7 +2,7 @@ from PDDL import PDDL_Parser, Action
 import z3, re
 from collections import OrderedDict
 from skill_classes import EffectTypePDDL, SkillPDDL
-from utils import product_dict, nested_list_replace, get_atoms
+from utils import product_dict, nested_list_replace, get_atoms, get_unique_z3_vars
 from typing import List, Tuple, Dict, Iterable
 
 class PDDL_Parser_z3(PDDL_Parser):
@@ -52,9 +52,26 @@ class PDDL_Parser_z3(PDDL_Parser):
         goal_list += [z3.Not(compile_expression(neg_goal_expr, str2var_dict, self)) for neg_goal_expr in self.negative_goals]
         goal_cond = z3.And(*goal_list)
         return goal_cond
-    def get_init_cond_list(self):
+    def get_init_cond_list(self, pred_default = False):
         str2var_dict = self.make_str2var_dict()
-        return [compile_expression(init_cond, str2var_dict, self) for init_cond in self.state]
+        init_cond_list = [compile_expression(init_cond, str2var_dict, self) for init_cond in self.state]
+        # Set the preds not mentioned in the intitial state to the pred_default.
+        if pred_default is not None:
+            pred_processor = {True:lambda p: p, False: z3.Not}[pred_default]
+             # Set boolean pvars not mentioned in initial condition to False
+            pvars_in_init = []
+            for c in init_cond_list:
+                pvars_in_init.extend(get_atoms(c))
+            pvars_in_init = get_unique_z3_vars(pvars_in_init)
+            all_grounded_preds_str = []
+            for p in self.predicates.items():
+                all_grounded_preds_str.extend(self.get_predicate_groundings(p))
+            str2var = self.make_str2var_dict()
+            preds_not_in_init = [str2var[p] for p in all_grounded_preds_str if p not in map(str,pvars_in_init)]
+            # Assert the preds not mentioned in the initial state are False
+            for p in preds_not_in_init:
+                init_cond_list.append(pred_processor(p))
+        return init_cond_list
 
 str2operator = {
     "<": lambda a, b: a < b,

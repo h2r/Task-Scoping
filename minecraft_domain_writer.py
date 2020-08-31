@@ -182,7 +182,7 @@ def make_domain():
     type_hierarchy["destructible-block"] = "block"
     type_hierarchy["obsidian-block"] = "destructible-block"
     item_types_irrelevant = ["apple", "potato", "rabbit", "diamond-axe", "orchid-flower", "daisy-flower"]
-    item_types = ["diamond", "stick", "iron", "diamond-pickaxe", "shears"]
+    item_types = ["diamond", "stick", "iron", "diamond-pickaxe", "shears", "wool"]
     for i in item_types:
         type_hierarchy[i] = "item"
     inverse_type_hierarchy = invert_dict(type_hierarchy)

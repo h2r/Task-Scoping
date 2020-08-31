@@ -6,7 +6,7 @@
 	agent item block - locatable
 	bedrock destructible-block - block
 	obsidian-block - destructible-block
-	diamond stick iron diamond-pickaxe shears - item
+	diamond stick iron diamond-pickaxe shears wool - item
 )
 
 (:predicates
@@ -20,6 +20,7 @@
 	( agent-num-iron ?ag - agent )
 	( agent-num-diamond-pickaxe ?ag - agent )
 	( agent-num-shears ?ag - agent )
+	( agent-num-wool ?ag - agent )
 	( x ?l - locatable )
 	( y ?l - locatable )
 	( z ?l - locatable )
@@ -112,6 +113,17 @@
                     (= (y ?i) (y ?ag))
                     (= (z ?i) (z ?ag)))
  :effect (and (increase (agent-num-shears ?ag) 1)
+              (not (present ?i)))
+)
+
+
+(:action pickup-wool
+ :parameters (?ag - agent ?i - wool)
+ :precondition (and (present ?i)
+                    (= (x ?i) (x ?ag))
+                    (= (y ?i) (y ?ag))
+                    (= (z ?i) (z ?ag)))
+ :effect (and (increase (agent-num-wool ?ag) 1)
               (not (present ?i)))
 )
 

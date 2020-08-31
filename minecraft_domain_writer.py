@@ -85,43 +85,205 @@ def get_boundary_positions(x_min, x_max, y_min, y_max, z_min, z_max):
         positions.append((x_max + 1, y, z))
     return positions
 
-
-header = """(define (problem MINECRAFTCONTRIVED-1)
-(:domain minecraft-contrived)"""
-
-goal = """(:goal (and
-        (> (agent-num-apples steve) 0)
-    )
-)
-
-"""
 def make_init_conds_str(init_conds):
     s_prefix = "(:init"
     s_suffix = ")"
     return s_prefix + "\n\t" + "\n\t".join(init_conds) + "\n" + s_suffix
-x_min, x_max = 0, 2
-y_min, y_max = 0, 2
-z_min, z_max = 0, 2
 
-use_bedrock_boundaries = True
-# item_counts = OrderedDict([("apple",2),("potato",1)])
-item_counts = OrderedDict([("apple",1)])
 
-boundary_positions = get_boundary_positions(x_min, x_max, y_min, y_max, z_min, z_max)
-init_conds = get_init_conds_agent() + get_init_conds_items(item_counts)
-if use_bedrock_boundaries:
-    init_conds += get_init_conds_boundary(boundary_positions)
-    item_counts["bedrock-block"] = len(boundary_positions)
-init_conds = make_init_conds_str(init_conds)
-object_declaration = set_objects(item_counts)
+def get_inventory_funcs(item_types):
+    inventory_count_vars = []
+    for t in item_types:
+        inventory_count_vars.append(f"( agent-num-{t} ?ag - agent )")
+    return inventory_count_vars
+    
+def get_pickup_actions(item_types):
+    pass
 
-prob_parts = [header, object_declaration, init_conds, goal, ")"]
-prob_s = "\n\n\n".join(prob_parts)
+def invert_dict(d):
+    d_new = OrderedDict()
+    for k, v in d.items():
+        if v not in d_new.keys():
+            d_new[v] = []
+        d_new[v].append(k)
+    return d_new
 
-bedrock_path_str = "-bedrock" if use_bedrock_boundaries else ""
-tgt_path = f"examples/minecraft/prob-01{bedrock_path_str}.pddl"
-print(prob_s)
-with open(tgt_path, "w") as f:
-    f.write(prob_s)
-# print(set_objects(item_counts))
-# print(set_initial_conditions(item_counts))
+def get_functions_str(functions):
+    prefix = "(:functions"
+    suffix = ")"
+    lines = ["\t" + f for f in functions]
+    body = "\n".join(lines)
+    return prefix + '\n' + body + "\n" + suffix
+
+def get_predicates_str(predicates):
+    prefix = "(:predicates"
+    suffix = ")"
+    lines = ["\t " + f for f in predicates]
+    body = "\n".join(lines)
+    return prefix + '\n' + body + "\n" + suffix
+def get_move_actions():
+    s = "(:action move-north\n :parameters (?ag - agent)\n :precondition (and (agent-alive ?ag)\n                    (not (exists (?bl - block) (and (= (bl-x ?bl) (x ?ag))\n                                                    (= (bl-y ?bl) (+ (y ?ag) 1))\n                                                    (= (bl-z ?bl) (+ (z ?ag) 1))))))\n :effect (and (increase (y ?ag) 1))\n)\n\n(:action move-south\n :parameters (?ag - agent)\n :precondition (and (agent-alive ?ag)\n                    (not (exists (?bl - block) (and (= (bl-x ?bl) (x ?ag))\n                                                    (= (bl-y ?bl) (- (y ?ag) 1))\n                                                    (= (bl-z ?bl) (+ (z ?ag) 1))))))\n :effect (and (decrease (y ?ag) 1))\n)\n\n(:action move-east\n :parameters (?ag - agent)\n :precondition (and (agent-alive ?ag)\n                    (not (exists (?bl - block) (and (= (bl-x ?bl) (+ (x ?ag) 1))\n                                                    (= (bl-y ?bl) (y ?ag))\n                                                    (= (bl-z ?bl) (+ (z ?ag) 1))))))\n :effect (and (increase (x ?ag) 1))\n)\n\n(:action move-west\n :parameters (?ag - agent)\n :precondition (and (agent-alive ?ag)\n                    (not (exists (?bl - block) (and (= (bl-x ?bl) (- (x ?ag) 1))\n                                                    (= (bl-y ?bl) (y ?ag))\n                                                    (= (bl-z ?bl) (+ (z ?ag) 1))))))\n :effect (and (decrease (x ?ag) 1))\n)"
+    return s
+def make_pickup_actions(item_types):
+    action_template = """(:action pickup-{t}
+ :parameters (?ag - agent ?i - {t})
+ :precondition (and (present ?i)
+                    (= (x ?i) (x ?ag))
+                    (= (y ?i) (y ?ag))
+                    (= (z ?i) (z ?ag)))
+ :effect (and (increase (agent-num-{t} ?ag) 1)
+              (not (present ?i)))
+)
+"""
+    actions = []
+    for t in item_types:
+        actions.append(action_template.format(t=t))
+    return actions
+
+
+
+def make_domain():
+    sections = []
+    header = "(define (domain minecraft-contrived)\n(:requirements :typing :fluents :negative-preconditions :universal-preconditions :existential-preconditions)"
+    footer = ")"
+    sections.append(header)
+    type_hierarchy = OrderedDict()
+    # locatables have position
+    # items have agent count and present, in addition to location
+    type_hierarchy["locatable"] = None
+    type_hierarchy["agent"] = "locatable"
+    type_hierarchy["item"] = "locatable"
+    item_types = ["apple", "potato", "rabbit", "diamond-axe", "orchid-flower", "daisy-flower"]
+    for i in item_types:
+        type_hierarchy[i] = "item"
+    inverse_type_hierarchy = invert_dict(type_hierarchy)
+    types_s = make_types_declaration(type_hierarchy)
+    sections.append(types_s)
+    
+    predicates = []
+    predicates.append("present ?i - item")        
+    functions = []
+    functions.extend(get_inventory_funcs(inverse_type_hierarchy["item"]))
+    for d in ["x","y","z"]:
+        functions.append(f"( {d} ?l - locatable )")
+
+    predicates_s = get_predicates_str(predicates)
+    sections.append(predicates_s)
+    functions_s = get_functions_str(functions)
+    sections.append(functions_s)
+
+    actions = []
+    actions.append(get_move_actions())
+    actions.extend(make_pickup_actions(inverse_type_hierarchy["item"]))
+
+    diamond_pick_inputs = OrderedDict([("stick",2),("diamond",3)])
+    diamond_pick_outputs = OrderedDict([("diamond-pickaxe",1)])
+    craft_diamond_pickaxe = get_crafting_action("craft-diamond-pickaxe", diamond_pick_inputs, diamond_pick_outputs)
+
+    shears_inputs = OrderedDict([("iron",2)])
+    shears_outputs = OrderedDict([("shears",1)])
+    craft_shears= get_crafting_action("craft-shears", shears_inputs, shears_outputs)
+
+    actions.append(craft_diamond_pickaxe)
+    actions.append(craft_shears)
+
+    sections.extend(actions)
+    sections.append(footer)
+    domain_s = "\n\n".join(sections)
+    print(domain_s)
+    return domain_s
+
+def get_crafting_action(name, inputs, outputs, extra_preconditions = tuple()):
+    """
+    input: Dict[item_type] -> item_count
+    output: Dict[item_type] -> item_count
+    """
+    prefix = f"""(:action {name}
+    :parameters ( ?ag - agent )"""
+    suffix = "\n)"
+
+    precondition_prefix = "    :precondition ( and\n                      "
+    precondition_suffix = "\n                  )"
+
+    preconds = []
+    for item_type, item_count in inputs.items():
+        preconds.append(f"( > (agent-num-{item_type} ?ag) {item_count} )")
+
+    preconds.extend(extra_preconditions)
+    precond_body = "\n                      ".join(preconds)
+    precond_s = precondition_prefix + precond_body + precondition_suffix
+
+    effects_prefix = "    :effect (and "
+    effects_suffix = ")"
+    effects = []
+    for item_type, item_count in outputs.items():
+        effects.append(f"(increase (agent-num-{item_type} ?ag) {item_count})")
+    effects_body = "\n        ".join(effects)
+    effects_s = effects_prefix + effects_body + effects_suffix
+
+    return "\n".join([prefix, precond_s, effects_s, suffix])
+def make_instance():
+
+    header = """(define (problem MINECRAFTCONTRIVED-1)
+    (:domain minecraft-contrived)"""
+
+    goal = """(:goal (and
+            (> (agent-num-apples steve) 0)
+        )
+    )
+
+    """
+    x_min, x_max = 0, 2
+    y_min, y_max = 0, 2
+    z_min, z_max = 0, 2
+
+    use_bedrock_boundaries = True
+    # item_counts = OrderedDict([("apple",2),("potato",1)])
+    item_counts = OrderedDict([("apple",1)])
+
+    boundary_positions = get_boundary_positions(x_min, x_max, y_min, y_max, z_min, z_max)
+    init_conds = get_init_conds_agent() + get_init_conds_items(item_counts)
+    if use_bedrock_boundaries:
+        init_conds += get_init_conds_boundary(boundary_positions)
+        item_counts["bedrock-block"] = len(boundary_positions)
+    init_conds = make_init_conds_str(init_conds)
+    object_declaration = set_objects(item_counts)
+
+    prob_parts = [header, object_declaration, init_conds, goal, ")"]
+    prob_s = "\n\n\n".join(prob_parts)
+
+    bedrock_path_str = "-bedrock" if use_bedrock_boundaries else ""
+    tgt_path = f"examples/minecraft/prob-01{bedrock_path_str}.pddl"
+    print(prob_s)
+    with open(tgt_path, "w") as f:
+        f.write(prob_s)
+    # print(set_objects(item_counts))
+    # print(set_initial_conditions(item_counts))
+
+
+def make_types_declaration(type_hierarchy):
+    inverse_type_hierarchy = invert_dict(type_hierarchy)
+    lines = []
+    for parent, children in inverse_type_hierarchy.items():
+        if parent is None:
+            lines.extend(children)
+        else:
+            l = " ".join(children) + " - " + parent
+            lines.append(l)
+    types_prefix = "(:types "
+    types_suffix = ")"
+    types_s = types_prefix + "\n\t" + "\n\t".join(lines) + "\n" + types_suffix
+    return types_s
+        
+if __name__ == "__main__":
+    # type_hierarchy = OrderedDict()
+    # # locatables have position
+    # # items have agent count and present, in addition to location
+    # type_hierarchy["locatable"] = None
+    # type_hierarchy["agent"] = "locatable"
+    # type_hierarchy["item"] = "locatable"
+    # item_types = ["apple", "potato", "rabbit", "diamond-axe", "orchid-flower", "daisy-flower"]
+    # for i in item_types:
+    #     type_hierarchy[i] = "item"
+    # print(make_types_declaration(type_hierarchy))
+    make_domain()

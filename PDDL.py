@@ -7,6 +7,7 @@ from itertools import chain, product
 from action import Action
 import copy
 from utils import product_dict, nested_list_replace
+from typing import Dict
 # TODO CAN WE HANDLE OBJECTS DEFINED ON MULTIPLE LINES?
 class PDDL_Parser:
     # TODO convert type hierarchy to ordered dict (parent: [children])
@@ -370,6 +371,24 @@ class PDDL_Parser:
             if t in self.objects.keys():
                 valid_objects.extend(self.objects[t])
         return valid_objects
+    def get_predicate_groundings(self, p):
+        """
+        Get's all groundings for a pddl predicate - ie a boolean pvar
+        :param p: (pred_name, Dict mapping param name to type)
+        """
+        pred_name, pred_params = p
+        # If there are no params
+        if len(pred_params.keys()) == 0:
+            return [f"{pred_name}()"]
+        # If there are params
+        else:
+            grounding_dicts = product_dict(**OrderedDict([(varnm, self.get_objects_of_type(vartype)) for (varnm, vartype) in pred_params.items()]))
+            grounded_preds = []
+            for d in grounding_dicts:
+                pred_s = pred_name + "(" + ", ".join(d.values()) + ")"
+                grounded_preds.append(pred_s)
+            return grounded_preds
+
     def get_action_groundings(self, a):
         # We handle quantifier grounding when converting to z3 expressions
         # Ground non-quantiifed vars in all possible ways

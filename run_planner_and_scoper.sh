@@ -1,4 +1,4 @@
 #!/bin/bash
 
-python3 monkey_scope.py
-enhsp-2020 -o examples/multi_monkeys_playroom/multi_monkeys_playroom_scoped_07.pddl -f examples/multi_monkeys_playroom/prob-07_scoped.pddl
+python3 scope_and_writeback.py
+# enhsp-2020 -o examples/IPC_Domains/zeno/zeno_scoped_03.pddl -f examples/IPC_Domains/zeno/prob-03_scoped.pddl

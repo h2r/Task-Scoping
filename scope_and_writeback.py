@@ -14,16 +14,6 @@ from utils import product_dict, nested_list_replace, get_atoms, get_all_objects\
 from scoping import scope
 import time
 
-if __name__ == '__main__':
-    # zeno_dom = "examples/zeno/zeno.pddl"
-    # zeno_prob = "examples/zeno/pb1.pddl"
-    # domain, problem = zeno_dom, zeno_prob
-
-    # taxi_dom = "examples/infinite-taxi-numeric/taxi-domain.pddl"
-    # taxi_prob = "examples/infinite-taxi-numeric/prob02.pddl"
-
-    start_time = time.time()
-    domain, problem = "examples/IPC_Domains/depot/DepotsNum.pddl", "examples/IPC_Domains/depot/prob-01.pddl"
 
 def scope_pddl(domain, problem):
     parser = PDDL_Parser_z3()
@@ -91,9 +81,8 @@ if __name__ == '__main__':
     # taxi_prob = "examples/infinite-taxi-numeric/prob02.pddl"
 
     start_time = time.time()
-    domain, problem = "./examples/multi_monkeys_playroom/multi_monkeys_playroom.pddl", "./examples/multi_monkeys_playroom/prob-01.pddl"
+    domain, problem = "examples/IPC_Domains/Rovers/NumRover.pddl", "examples/IPC_Domains/Rovers/prob-01.pddl"
     scope_pddl(domain, problem)
     
-
     end_time = time.time()
     print(f"Total time: {end_time - start_time}")

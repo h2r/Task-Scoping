@@ -2,34 +2,29 @@
 (:domain freecell)
 (:objects
 	diamond - suitsort
-	N0 N1 - denomination 
+	N0 N1 N2 N3 - denomination 
 	diamondA diamond0 - card
 )
 
-; (and 
-; 			(incell ?card)
-; 			(home ?homecard) 
-; 			(suit ?card ?suit)
-; 			(suit ?homecard ?suit)
-; 			(value ?card ?vcard)
-; 			(value ?homecard ?vhomecard)
-; 			(successor ?vcard ?vhomecard)
-; 			(cellspace ?cells)
-; 			(successor ?ncells ?cells))
-
 (:init
-	(successor N1 N0)
 
     ; (and 
-	; 		(incell ?card)
-	; 		(home ?homecard) 
-	; 		(suit ?card ?suit)
-	; 		(suit ?homecard ?suit)
-	; 		(value ?card ?vcard)
-	; 		(value ?homecard ?vhomecard)
-	; 		(successor ?vcard ?vhomecard)
-	; 		(cellspace ?cells)
-	; 		(successor ?ncells ?cells))
+	; 		(incell diamondA)
+	; 		(home diamond0) 
+	; 		(suit diamondA diamond)
+	; 		(suit diamond0 diamond)
+	; 		(value diamondA N1)
+	; 		(value diamond0 N0)
+	; 		(successor N1 N0)
+	; 		(cellspace N2)
+	; 		(successor N3 N2))
+
+	; :effect (and
+	; 	  (home ?card)
+	; 	  (cellspace ?ncells)
+	; 	  (not (incell ?card))
+	; 	  (not (cellspace ?cells))
+	; 	  (not (home ?homecard))
 
     (incell diamondA)
     (home diamond0)
@@ -37,8 +32,12 @@
     (suit diamond0 diamond)
     (value diamondA N1)
     (value diamond0 N0)
-    (cellspace N0)
+	(successor N1 N0)
+	(successor N2 N1)
+	(successor N3 N2)
+    (cellspace N2)
 
 )
-(:goal (home diamondA))
+(:goal (and (home diamondA) (not (incell diamondA)))
+)
 )

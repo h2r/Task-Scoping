@@ -86,7 +86,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define (domain freecell)
-  (:requirements :strips :typing)
+  (:requirements :strips :typing :negative-preconditions)
   (:types card suitsort denomination) 
   (:predicates (on ?c1 ?c2 - card)
 	       (incell ?c - card)
@@ -237,14 +237,36 @@
 			(value ?homecard ?vhomecard)
 			(successor ?vcard ?vhomecard)
 			(cellspace ?cells)
-			(successor ?ncells ?cells))
+			(successor ?ncells ?cells)
+			)
 	 :effect (and
 		  (home ?card)
 		  (cellspace ?ncells)
-		  (not (incell ?card))
-		  (not (cellspace ?cells))
-		  (not (home ?homecard))
+		;   (not (incell ?card))
+		;   (not (cellspace ?cells))
+		;   (not (home ?homecard))
 ))
+
+(:action homeimmedfreecell
+	 :parameters (?card - card ?homecard - card ?suit - suitsort ?vcard - denomination ?vhomecard - denomination ?cells ?ncells - denomination)
+    ;;Send a card home from a free cell.
+	 :precondition (and 
+			(incell ?card)
+			(home ?homecard)
+			(suit ?card ?suit)
+			(suit ?homecard ?suit)
+			(value ?card ?vcard)
+			(value ?homecard ?vhomecard)
+			(successor ?vcard ?vhomecard)
+			(cellspace ?cells)
+			(successor ?ncells ?cells)
+
+			)
+	 :effect (and (home ?card)
+	 			  (cellspace ?ncells)
+				  (not (incell ?card))
+				  )
+)
 
 (:action colfromfreecell
 	 :parameters (?card ?newcard - card ?cells ?ncells - denomination)

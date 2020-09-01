@@ -45,10 +45,10 @@ def scope_file(domain, problem):
     all_objects = pvars2objects(all_pvars)
     rel_objects = pvars2objects(rel_pvars)
     irrel_objects = [x for x in all_objects if x not in rel_objects]
-    irrel_pvars = [str(x) for x in all_pvars if str(x) not in map(str, all_pvars)]
+    irrel_pvars = [str(x) for x in all_pvars if str(x) not in map(str, rel_pvars)]
 
-    # return rel_objects, irrel_objects
-    return rel_pvars, irrel_pvars
+    return irrel_objects
+    # return irrel_pvars
 
 if __name__ == '__main__':
-    scope_file("examples/IPC_Domains/zeno/zeno.pddl", "examples/IPC_Domains/zeno/pb1-bloated.pddl")
+    print(scope_file("examples/IPC_Domains/Rovers/NumRover.pddl", "examples/IPC_Domains/Rovers/prob-01.pddl"))

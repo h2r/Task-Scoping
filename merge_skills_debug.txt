@@ -1,6 +1,6 @@
 OR(
 	And(And(Not(in-taxi(curly, t0)),
-        Not(in-taxi(smoov, t0)),
+        Not(in-taxi(s`mo`ov, t0)),
         Not(in-taxi(littman, t0)),
         Not(in-taxi(isbell, t0)))),
 	And(in-taxi(smoov, t0),

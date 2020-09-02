@@ -2,7 +2,7 @@ from itertools import chain
 from typing import Iterable, Union
 import z3
 from skill_classes import merge_skills, Skill, EffectType, SkillPDDL, EffectTypePDDL, merge_skills_pddl
-from utils import split_conj, get_atoms, solver_implies_condition, simplify_disjunction
+from utils import split_conj, get_atoms, solver_implies_condition, simplify_disjunction, get_unique_z3_vars
 
 
 def get_causal_links(start_condition, skills):
@@ -101,4 +101,9 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 	# Remove the dummy pvar and skill
 	pvars_rel.remove(dummy_goal)
 	skills_rel = [x for x in skills_rel if dummy_goal_et not in x.effects]
-	return pvars_rel, skills_rel
+	# TODO return cl pvars as well
+	pvars_cl = []
+	for c in causal_links:
+		pvars_cl.extend(get_atoms(c))
+	pvars_cl = get_unique_z3_vars(pvars_cl)
+	return pvars_rel, pvars_cl, skills_rel

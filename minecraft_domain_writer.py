@@ -270,7 +270,7 @@ def make_instance():
     y_min, y_max = 0, 2
     z_min, z_max = 0, 2
 
-    use_bedrock_boundaries = True
+    use_bedrock_boundaries = False
     # item_counts = OrderedDict([("apple",2),("potato",1)])
     item_counts = OrderedDict([("apple",1)])
 

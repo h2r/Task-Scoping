@@ -102,8 +102,14 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 	pvars_rel.remove(dummy_goal)
 	skills_rel = [x for x in skills_rel if dummy_goal_et not in x.effects]
 	# TODO set pvars_cl to only include pvars that matter in preconditions of rel_skills
+	skills_conds_pvars = []
+	for s in skills_rel:
+		skills_conds_pvars.extend(get_atoms(s.precondition))
+	skills_conds_pvars = get_unique_z3_vars(skills_conds_pvars)
+
 	pvars_cl = []
 	for c in causal_links:
 		pvars_cl.extend(get_atoms(c))
 	pvars_cl = get_unique_z3_vars(pvars_cl)
+	pvars_cl = [c for c in pvars_cl if c not in skills_conds_pvars]
 	return pvars_rel, pvars_cl, skills_rel

@@ -38,6 +38,7 @@
     (cellspace N2)
 
 )
-(:goal (home diamondA))
+(:goal (and (home diamondA))
+)
 )
 

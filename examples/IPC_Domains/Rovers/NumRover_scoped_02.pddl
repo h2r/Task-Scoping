@@ -44,7 +44,7 @@
 
 (:action recharge
 :parameters (?x - rover ?w - waypoint)
-:precondition (and (located-at ?x ?w) (in_sun ?w) (<= (energy ?x) 1500))
+:precondition (and (located-at ?x ?w) (in_sun ?w) (<= (energy ?x) 500))
 :effect (and (increase (energy ?x) 20) (increase (recharges) 1)) 
 )
 

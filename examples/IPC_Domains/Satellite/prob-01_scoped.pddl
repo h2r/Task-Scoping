@@ -3,13 +3,11 @@
 (:objects
 	satellite0 - satellite
 	instrument0 - instrument
-	image1 - mode
-	spectrograph2 - mode
-	thermograph0 - mode
+;	image1 spectrograph2 thermograph0 - mode
 	GroundStation0 GroundStation1 GroundStation2 - direction
 )
 (:init
-	(supports instrument0 thermograph0)
+;	(supports instrument0 thermograph0)
 	(calibration_target instrument0 GroundStation2)
 	(on_board instrument0 satellite0)
 	(power_avail satellite0)

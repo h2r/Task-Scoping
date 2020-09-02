@@ -51,4 +51,4 @@ def scope_file(domain, problem):
     # return irrel_pvars
 
 if __name__ == '__main__':
-    print(scope_file("examples/IPC_Domains/Rovers/NumRover.pddl", "examples/IPC_Domains/Rovers/prob-01.pddl"))
+    print(scope_file("examples/IPC_Domains/Satellite/metricSat.pddl", "examples/IPC_Domains/Satellite/prob-03.pddl"))

@@ -39,7 +39,7 @@
 
 (:goal (and
 ; (communicated_soil_data waypoint1)
-(= (energy rover0) 1500)
+(= (energy rover0) 500)
 ; (communicated_rock_data waypoint1)
 ; (communicated_image_data objective1 high_res)
 	)

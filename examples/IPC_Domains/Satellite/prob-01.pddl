@@ -3,9 +3,7 @@
 (:objects
 	satellite0 - satellite
 	instrument0 - instrument
-	image1 - mode
-	spectrograph2 - mode
-	thermograph0 - mode
+	image1 spectrograph2 thermograph0 - mode
 	GroundStation0 GroundStation1 GroundStation2 - direction
 )
 (:init

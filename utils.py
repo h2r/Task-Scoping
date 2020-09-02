@@ -93,6 +93,7 @@ def writeback_problem(input_path, output_path, objects):
                     l_new = ";\t" + " ".join(objs_removed) + " - " + obj_type
                     scoped_lines.append(l_new)
             else:
+                print(l)
                 scoped_lines.append(";" + l)
 
     with open(output_path, "w")  as f:

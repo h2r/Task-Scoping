@@ -53,8 +53,8 @@ def scope_pddl(domain, problem):
     rel_objects = pvars2objects(rel_pvars)
     irrel_objects = [x for x in all_objects if x not in rel_objects]
 
-    # print(f"Irrelevant objects:")
-    # print("\n".join(irrel_objects))
+    print(f"Irrelevant objects:")
+    print("\n".join(irrel_objects))
     scoped_problem_path = get_scoped_problem_path(problem)
     writeback_problem(problem, scoped_problem_path, irrel_objects)
 
@@ -81,7 +81,7 @@ if __name__ == '__main__':
     # taxi_prob = "examples/infinite-taxi-numeric/prob02.pddl"
 
     start_time = time.time()
-    domain, problem = "examples/IPC_Domains/Rovers/NumRover.pddl", "examples/IPC_Domains/Rovers/prob-01.pddl"
+    domain, problem = "examples/IPC_Domains/driverlog/driverlogNumeric.pddl", "examples/IPC_Domains/driverlog/prob-03.pddl"
     scope_pddl(domain, problem)
     
     end_time = time.time()

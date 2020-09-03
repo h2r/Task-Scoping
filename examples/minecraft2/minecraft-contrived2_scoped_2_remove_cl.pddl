@@ -86,15 +86,15 @@
 )
 
 
-(:action pickup-iron
- :parameters (?ag - agent ?i - iron)
- :precondition (and (present ?i)
-                    (= (x ?i) (x ?ag))
-                    (= (y ?i) (y ?ag))
-                    (= (z ?i) (z ?ag)))
- :effect (and (increase (agent-num-iron ?ag) 1)
-              (not (present ?i)))
-)
+;(:action pickup-iron
+; :parameters (?ag - agent ?i - iron)
+; :precondition (and (present ?i)
+;                    (= (x ?i) (x ?ag))
+;                    (= (y ?i) (y ?ag))
+;                    (= (z ?i) (z ?ag)))
+; :effect (and (increase (agent-num-iron ?ag) 1)
+;              (not (present ?i)))
+;)
 
 
 (:action pickup-diamond-pickaxe
@@ -108,26 +108,26 @@
 )
 
 
-(:action pickup-shears
- :parameters (?ag - agent ?i - shears)
- :precondition (and (present ?i)
-                    (= (x ?i) (x ?ag))
-                    (= (y ?i) (y ?ag))
-                    (= (z ?i) (z ?ag)))
- :effect (and (increase (agent-num-shears ?ag) 1)
-              (not (present ?i)))
-)
+;(:action pickup-shears
+; :parameters (?ag - agent ?i - shears)
+; :precondition (and (present ?i)
+;                    (= (x ?i) (x ?ag))
+;                    (= (y ?i) (y ?ag))
+;                    (= (z ?i) (z ?ag)))
+; :effect (and (increase (agent-num-shears ?ag) 1)
+;              (not (present ?i)))
+;)
 
 
-(:action pickup-wool
- :parameters (?ag - agent ?i - wool)
- :precondition (and (present ?i)
-                    (= (x ?i) (x ?ag))
-                    (= (y ?i) (y ?ag))
-                    (= (z ?i) (z ?ag)))
- :effect (and (increase (agent-num-wool ?ag) 1)
-              (not (present ?i)))
-)
+;(:action pickup-wool
+; :parameters (?ag - agent ?i - wool)
+; :precondition (and (present ?i)
+;                    (= (x ?i) (x ?ag))
+;                    (= (y ?i) (y ?ag))
+;                    (= (z ?i) (z ?ag)))
+; :effect (and (increase (agent-num-wool ?ag) 1)
+;              (not (present ?i)))
+;)
 
 
 (:action craft-diamond-pickaxe
@@ -140,14 +140,14 @@
 
 )
 
-(:action craft-shears
-    :parameters ( ?ag - agent )
-    :precondition ( and
-                      ( > (agent-num-iron ?ag) 2 )
-                  )
-    :effect (and (increase (agent-num-shears ?ag) 1))
-
-)
+;(:action craft-shears
+;    :parameters ( ?ag - agent )
+;    :precondition ( and
+;                      ( > (agent-num-iron ?ag) 2 )
+;                  )
+;    :effect (and (increase (agent-num-shears ?ag) 1))
+;
+;)
 
 (:action hit-obsidian-block
     :parameters (?ag - agent ?b - obsidian-block)

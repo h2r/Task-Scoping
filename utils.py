@@ -13,16 +13,24 @@ synth2varnames = {}
 
 
 
-def get_scoped_problem_path(p):
+def get_scoped_problem_path(p, suffix = None):
     p_split = p.split(".")
     base = ".".join(p_split[:-1])
-    return base + "_scoped." + p_split[-1]
+    if suffix is None:
+        suffix = ""
+    else:
+        suffix = "_" + suffix
+    return base + "_scoped" + suffix + "." +  p_split[-1]
 
-def get_scoped_domain_path(d, p):
+def get_scoped_domain_path(d, p, suffix = None):
     d_split = d.split(".")
     base = ".".join(d_split[:-1])
     p_id = re.search("([0-9]+)",p).group()
-    d_new = base + "_" + "scoped" + "_"  + p_id + "." + d_split[-1]
+    if suffix is None:
+        suffix = ""
+    else:
+        suffix = "_" + suffix
+    d_new = base + "_" + "scoped" + "_"  + p_id + suffix + "." + d_split[-1]
     return d_new
 
 def find_closing_paren(s, start):

@@ -3,8 +3,8 @@
 taxi_trace_bleh.txt
 /docs
 .ds_store
-__pychache__
 .ruby-version
 .vscode/settings.json
 __pycache__/
+*.cpython
 /.vscode

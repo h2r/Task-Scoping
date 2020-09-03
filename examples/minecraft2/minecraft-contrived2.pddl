@@ -2,7 +2,7 @@
 (:requirements :typing :fluents :negative-preconditions :universal-preconditions :existential-preconditions)
 
 (:types 
-	locatable
+	locatable - object
 	agent item block - locatable
 	bedrock destructible-block - block
 	obsidian-block - destructible-block

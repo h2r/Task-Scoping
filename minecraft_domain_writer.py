@@ -153,7 +153,9 @@ def make_domain():
     type_hierarchy = OrderedDict()
     # locatables have position
     # items have agent count and present, in addition to location
-    type_hierarchy["locatable"] = None
+    type_hierarchy["object"] = None
+    type_hierarchy["locatable"] = "object"
+    # type_hierarchy["item"] = "object"
     type_hierarchy["agent"] = "locatable"
     type_hierarchy["item"] = "locatable"
     type_hierarchy["block"] = "locatable"
@@ -319,7 +321,9 @@ def make_types_declaration(type_hierarchy):
     lines = []
     for parent, children in inverse_type_hierarchy.items():
         if parent is None:
-            lines.extend(children)
+            pass
+            # from IPython import embed; embed()
+            # lines.extend(children)
         else:
             l = " ".join(children) + " - " + parent
             lines.append(l)

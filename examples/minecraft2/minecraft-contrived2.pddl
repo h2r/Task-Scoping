@@ -6,7 +6,7 @@
 	agent item block - locatable
 	bedrock destructible-block - block
 	obsidian-block - destructible-block
-	iron wool diamond stick diamond-pickaxe apple potato rabbit diamond-axe orchid-flower daisy-flower shears - item
+	iron wool diamond stick diamond-pickaxe apple potato rabbit diamond-axe orchid-flower daisy-flower - item
 )
 
 (:predicates
@@ -28,7 +28,6 @@
 	(agent-num-diamond-axe ?ag - agent)
 	(agent-num-orchid-flower ?ag - agent)
 	(agent-num-daisy-flower ?ag - agent)
-	(agent-num-shears ?ag - agent)
 	(x ?l - locatable)
 	(y ?l - locatable)
 	(z ?l - locatable)
@@ -191,33 +190,15 @@
 )
 
 
-(:action pickup-shears
- :parameters (?ag - agent ?i - shears)
- :precondition (and (present ?i)
-                    (= (x ?i) (x ?ag))
-                    (= (y ?i) (y ?ag))
-                    (= (z ?i) (z ?ag)))
- :effect (and (increase (agent-num-shears ?ag) 1)
-              (not (present ?i)))
-)
-
-
 (:action craft-diamond-pickaxe
     :parameters ( ?ag - agent )
     :precondition ( and
-                      ( > (agent-num-stick ?ag) 2 )
-                      ( > (agent-num-diamond ?ag) 3 )
+                      ( >= (agent-num-stick ?ag) 2 )
+                      ( >= (agent-num-diamond ?ag) 3 )
                   )
-    :effect (and (increase (agent-num-diamond-pickaxe ?ag) 1))
-
-)
-
-(:action craft-shears
-    :parameters ( ?ag - agent )
-    :precondition ( and
-                      ( > (agent-num-iron ?ag) 2 )
-                  )
-    :effect (and (increase (agent-num-shears ?ag) 1))
+    :effect (and (increase (agent-num-diamond-pickaxe ?ag) 1)
+        (decrease (agent-num-stick ?ag) 2)
+        (decrease (agent-num-diamond ?ag) 3))
 
 )
 

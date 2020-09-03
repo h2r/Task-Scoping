@@ -18,6 +18,5 @@ if __name__ == '__main__':
         scope_pddl(domain, problem, remove_cl_pvars=False, scoping_suffix="keep_cl")
         # scope_pddl(domain, problem, remove_cl_pvars=True, scoping_suffix="remove_cl")
 
-    
     end_time = time.time()
     print(f"Total time: {end_time - start_time}")

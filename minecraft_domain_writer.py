@@ -2,7 +2,7 @@ from collections import OrderedDict
 from itertools import product
 
 item_types = ["iron","wool","diamond", "stick", "diamond-pickaxe", "apple", "potato"
-    , "rabbit", "diamond-axe", "orchid-flower", "daisy-flower", "shears"]
+    , "rabbit", "diamond-axe", "orchid-flower", "daisy-flower"]
 type2name = {
     "apple":"ap",
     "potato":"tot",
@@ -10,7 +10,7 @@ type2name = {
     "diamond-axe":"ax",
     "orchid-flower":"orc",
     "daisy-flower":"daisy",
-    "bedrock-block":"bed"
+    "bedrock":"bed"
 }
 
 # def set_objects(item_counts):
@@ -32,7 +32,6 @@ def get_object_declarations(objects):
     for type_name, object_names in objects.items():
         lines.append( " ".join(object_names) + " - " + type_name)
     return prefix + "\n\t".join(lines) + suffix
-
 
 
 def get_init_location_conds(pos, object_name):
@@ -193,12 +192,11 @@ def make_domain():
     diamond_pick_outputs = OrderedDict([("diamond-pickaxe",1)])
     craft_diamond_pickaxe = get_crafting_action("craft-diamond-pickaxe", diamond_pick_inputs, diamond_pick_outputs)
 
-    shears_inputs = OrderedDict([("iron",2)])
-    shears_outputs = OrderedDict([("shears",1)])
-    craft_shears= get_crafting_action("craft-shears", shears_inputs, shears_outputs)
+    # shears_inputs = OrderedDict([("iron",2)])
+    # shears_outputs = OrderedDict([("shears",1)])
+    # craft_shears= get_crafting_action("craft-shears", shears_inputs, shears_outputs)
 
     actions.append(craft_diamond_pickaxe)
-    actions.append(craft_shears)
 
     for block_type in inverse_type_hierarchy["destructible-block"]:
         actions.extend(get_destructible_block_action(block_type, needed_tool = "diamond-pickaxe"))
@@ -223,7 +221,7 @@ def get_crafting_action(name, inputs, outputs, extra_preconditions = tuple()):
 
     preconds = []
     for item_type, item_count in inputs.items():
-        preconds.append(f"( > (agent-num-{item_type} ?ag) {item_count} )")
+        preconds.append(f"( >= (agent-num-{item_type} ?ag) {item_count} )")
 
     preconds.extend(extra_preconditions)
     precond_body = "\n                      ".join(preconds)
@@ -234,17 +232,26 @@ def get_crafting_action(name, inputs, outputs, extra_preconditions = tuple()):
     effects = []
     for item_type, item_count in outputs.items():
         effects.append(f"(increase (agent-num-{item_type} ?ag) {item_count})")
+    for item_type, item_count in inputs.items():
+        effects.append(f"(decrease (agent-num-{item_type} ?ag) {item_count})")
     effects_body = "\n        ".join(effects)
     effects_s = effects_prefix + effects_body + effects_suffix
 
     return "\n".join([prefix, precond_s, effects_s, suffix])
-def make_instance_1(start_with_pick = True, use_bedrock_boundaries = False):
+
+def make_instance_1(start_with_pick = True, use_bedrock_boundaries = False, add_irrel_items = False):
     object_names = OrderedDict()
     object_names["obsidian-block"] = ["obsidian0", "obsidian1"]
     object_names["agent"] = ["steve"]
     object_names["diamond-pickaxe"] = ["old-pointy"]
     object_names["diamond"] = ["dmd0","dmd1","dmd2"]
     object_names["stick"] = ["stick0", "stick1"]
+    if(add_irrel_items):
+        object_names["apple"] = ["apple1", "apple2", "apple3"]
+        object_names["potato"] = ["potato1", "potato2", "potato3", "potato4", "potato5"]
+        object_names["orchid-flower"] = ["orchid-flower1", "orchid-flower2", "orchid-flower3", "orchid-flower4", "orchid-flower5"]
+        object_names["daisy-flower"] = ["daisy-flower1", "daisy-flower2", "daisy-flower3", "daisy-flower4", "daisy-flower5"]
+        object_names["rabbit"] = ["rabbit1", "rabbit2", "rabbit3", "rabbit4", "rabbit5"]
 
     tgt_obsidian = object_names["obsidian-block"][0]
 
@@ -274,8 +281,8 @@ def make_instance_1(start_with_pick = True, use_bedrock_boundaries = False):
     for item_type, item_count in inventory_count.items():
         init_conds.append(f"( = ( agent-num-{item_type} {agent_name} ) {item_count} )")
     # init_conds.append(f"( = ( agent-num-diamond-pickaxe {agent_name} ) 1 )")
-    init_conds.extend(get_init_location_conds((0,3,1),tgt_obsidian))
-    init_conds.extend(get_init_location_conds((0,3,2),object_names["obsidian-block"][1]))
+    init_conds.extend(get_init_location_conds((35,35,1),tgt_obsidian))
+    init_conds.extend(get_init_location_conds((35,35,2),object_names["obsidian-block"][1]))
     for s in object_names["obsidian-block"]:
         init_conds.append(f"( = ( block-hits {s} ) 0 )")
     diamond_pick_name = object_names["diamond-pickaxe"][0]
@@ -290,15 +297,36 @@ def make_instance_1(start_with_pick = True, use_bedrock_boundaries = False):
         init_conds.extend(get_init_location_conds((2,i,0),s))
         init_conds.append(f"(present {s})")
 
+    if(add_irrel_items):
+        for i, s in enumerate(object_names["apple"]):
+            init_conds.extend(get_init_location_conds((3,i,0),s))
+            init_conds.append(f"( present {s} )")
+
+        for i, s in enumerate(object_names["potato"]):
+            init_conds.extend(get_init_location_conds((4,i,0),s))
+            init_conds.append(f"( present {s} )")
+
+        for i, s in enumerate(object_names["daisy-flower"]):
+            init_conds.extend(get_init_location_conds((5,i,0),s))
+            init_conds.append(f"( present {s} )")
+
+        for i, s in enumerate(object_names["orchid-flower"]):
+            init_conds.extend(get_init_location_conds((6,i,0),s))
+            init_conds.append(f"( present {s} )")
+
+        for i, s in enumerate(object_names["rabbit"]):
+            init_conds.extend(get_init_location_conds((7,i,0),s))
+            init_conds.append(f"( present {s} )")
+
     for s in object_names["obsidian-block"]:
         init_conds.append(f"(block-present {s})")
 
 
     if use_bedrock_boundaries:
         boundary_positions = get_boundary_positions(x_min, x_max, y_min, y_max, z_min, z_max)
-        object_names["bedrock-block"] = [f"bed{i}" for i in range(len(boundary_positions))]
+        object_names["bedrock"] = [f"bed{i}" for i in range(len(boundary_positions))]
         for i in range(len(boundary_positions)):
-            s = object_names["bedrock-block"][i]
+            s = object_names["bedrock"][i]
             init_conds.extend(get_init_location_conds(boundary_positions[i], s))
             init_conds.append(f"(block-present {s})")
     init_conds = make_init_conds_str(init_conds)
@@ -344,12 +372,12 @@ if __name__ == "__main__":
     #     type_hierarchy[i] = "item"
     # print(make_types_declaration(type_hierarchy))
     dom_s = make_domain()
-    prob_s = make_instance_1(start_with_pick=True)
+    prob_s = make_instance_1(start_with_pick=True, add_irrel_items=True)
     with open("examples/minecraft2/minecraft-contrived2.pddl","w") as f:
         f.write(dom_s)
     with open("examples/minecraft2/prob_obsidian_with_pick.pddl","w") as f:
         f.write(prob_s)
 
-    prob_s = make_instance_1(start_with_pick=False)
+    prob_s = make_instance_1(start_with_pick=False, add_irrel_items=True)
     with open("examples/minecraft2/prob_obsidian_without_pick.pddl","w") as f:
         f.write(prob_s)

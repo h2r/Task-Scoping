@@ -1,20 +1,6 @@
-from action import Action
-# from PDDL import PDDL_Parser
-from PDDLz3 import PDDL_Parser_z3
-import sys, pprint
-from collections import OrderedDict
-from typing import List, Tuple, Dict, Iterable
-import re, copy
-import itertools
-import z3
-from skill_classes import EffectTypePDDL, SkillPDDL
-from utils import product_dict, nested_list_replace, get_atoms, get_all_objects\
-    , condition_str2objects, writeback_problem, writeback_domain\
-        , get_scoped_problem_path, get_scoped_domain_path, pvars2objects, get_unique_z3_vars
+from utils import get_atoms, get_unique_z3_vars, get_scoped_domain_path, get_scoped_problem_path, writeback_problem, writeback_domain, pvars2objects
 from scoping import scope
-import time
-
-
+from PDDLz3 import PDDL_Parser_z3
 def scope_pddl(domain, problem):
     parser = PDDL_Parser_z3()
     parser.parse_domain(domain)
@@ -32,16 +18,6 @@ def scope_pddl(domain, problem):
 
     # Run the scoper on the constructed goal, skills and initial condition
     rel_pvars, cl_pvars, rel_skills = scope(goals=goal_cond, skills=skill_list, start_condition=init_cond_list)
-    # rel_pvars = rel_pvar  s + cl_pvars #TODO don't just merge them
-    # print("~~~~~Relevant skills~~~~~")
-    # print("\n\n".join(map(str,rel_skills)))
-    # print("~~~~~Relevant pvars~~~~~")
-    # for p in rel_pvars:
-    #     print(p)
- 
-    # print(rel_pvars)
-    # print(rel_skills)
-
     
     all_pvars = []
     for s in skill_list:
@@ -53,8 +29,6 @@ def scope_pddl(domain, problem):
     rel_objects = pvars2objects(rel_pvars)
     irrel_objects = [x for x in all_objects if x not in rel_objects]
 
-    # print(f"Irrelevant objects:")
-    # print("\n".join(irrel_objects))
     scoped_problem_path = get_scoped_problem_path(problem)
     writeback_problem(problem, scoped_problem_path, irrel_objects)
 
@@ -67,22 +41,6 @@ def scope_pddl(domain, problem):
             relevant_actions.extend(s.action)
     relevant_actions = sorted(list(set(relevant_actions)))
     irrel_actions = [a for a in all_actions if a not in relevant_actions]
-    # print("~~~~~~~Irrel actions~~~~~~~")
-    # for a in irrel_actions: print(a)
+
     scoped_domain_path = get_scoped_domain_path(domain, problem)
     writeback_domain(domain, scoped_domain_path, irrel_actions)
-
-if __name__ == '__main__':
-    # zeno_dom = "examples/zeno/zeno.pddl"
-    # zeno_prob = "examples/zeno/pb1.pddl"
-    # domain, problem = zeno_dom, zeno_prob
-
-    # taxi_dom = "examples/infinite-taxi-numeric/taxi-domain.pddl"
-    # taxi_prob = "examples/infinite-taxi-numeric/prob02.pddl"
-
-    start_time = time.time()
-    domain, problem = "examples/multi_monkeys_playroom/multi_monkeys_playroom.pddl", "examples/multi_monkeys_playroom/prob-03.pddl"
-    scope_pddl(domain, problem)
-    
-    end_time = time.time()
-    print(f"Total time: {end_time - start_time}")

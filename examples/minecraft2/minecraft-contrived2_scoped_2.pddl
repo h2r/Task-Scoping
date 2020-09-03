@@ -64,90 +64,90 @@
  :effect (and (decrease (x ?ag) 1))
 )
 
-(:action pickup-diamond
- :parameters (?ag - agent ?i - diamond)
- :precondition (and (present ?i)
-                    (= (x ?i) (x ?ag))
-                    (= (y ?i) (y ?ag))
-                    (= (z ?i) (z ?ag)))
- :effect (and (increase (agent-num-diamond ?ag) 1)
-              (not (present ?i)))
-)
+;(:action pickup-diamond
+; :parameters (?ag - agent ?i - diamond)
+; :precondition (and (present ?i)
+;                    (= (x ?i) (x ?ag))
+;                    (= (y ?i) (y ?ag))
+;                    (= (z ?i) (z ?ag)))
+; :effect (and (increase (agent-num-diamond ?ag) 1)
+;              (not (present ?i)))
+;)
 
 
-(:action pickup-stick
- :parameters (?ag - agent ?i - stick)
- :precondition (and (present ?i)
-                    (= (x ?i) (x ?ag))
-                    (= (y ?i) (y ?ag))
-                    (= (z ?i) (z ?ag)))
- :effect (and (increase (agent-num-stick ?ag) 1)
-              (not (present ?i)))
-)
+;(:action pickup-stick
+; :parameters (?ag - agent ?i - stick)
+; :precondition (and (present ?i)
+;                    (= (x ?i) (x ?ag))
+;                    (= (y ?i) (y ?ag))
+;                    (= (z ?i) (z ?ag)))
+; :effect (and (increase (agent-num-stick ?ag) 1)
+;              (not (present ?i)))
+;)
 
 
-(:action pickup-iron
- :parameters (?ag - agent ?i - iron)
- :precondition (and (present ?i)
-                    (= (x ?i) (x ?ag))
-                    (= (y ?i) (y ?ag))
-                    (= (z ?i) (z ?ag)))
- :effect (and (increase (agent-num-iron ?ag) 1)
-              (not (present ?i)))
-)
+;(:action pickup-iron
+; :parameters (?ag - agent ?i - iron)
+; :precondition (and (present ?i)
+;                    (= (x ?i) (x ?ag))
+;                    (= (y ?i) (y ?ag))
+;                    (= (z ?i) (z ?ag)))
+; :effect (and (increase (agent-num-iron ?ag) 1)
+;              (not (present ?i)))
+;)
 
 
-(:action pickup-diamond-pickaxe
- :parameters (?ag - agent ?i - diamond-pickaxe)
- :precondition (and (present ?i)
-                    (= (x ?i) (x ?ag))
-                    (= (y ?i) (y ?ag))
-                    (= (z ?i) (z ?ag)))
- :effect (and (increase (agent-num-diamond-pickaxe ?ag) 1)
-              (not (present ?i)))
-)
+;(:action pickup-diamond-pickaxe
+; :parameters (?ag - agent ?i - diamond-pickaxe)
+; :precondition (and (present ?i)
+;                    (= (x ?i) (x ?ag))
+;                    (= (y ?i) (y ?ag))
+;                    (= (z ?i) (z ?ag)))
+; :effect (and (increase (agent-num-diamond-pickaxe ?ag) 1)
+;              (not (present ?i)))
+;)
 
 
-(:action pickup-shears
- :parameters (?ag - agent ?i - shears)
- :precondition (and (present ?i)
-                    (= (x ?i) (x ?ag))
-                    (= (y ?i) (y ?ag))
-                    (= (z ?i) (z ?ag)))
- :effect (and (increase (agent-num-shears ?ag) 1)
-              (not (present ?i)))
-)
+;(:action pickup-shears
+; :parameters (?ag - agent ?i - shears)
+; :precondition (and (present ?i)
+;                    (= (x ?i) (x ?ag))
+;                    (= (y ?i) (y ?ag))
+;                    (= (z ?i) (z ?ag)))
+; :effect (and (increase (agent-num-shears ?ag) 1)
+;              (not (present ?i)))
+;)
 
 
-(:action pickup-wool
- :parameters (?ag - agent ?i - wool)
- :precondition (and (present ?i)
-                    (= (x ?i) (x ?ag))
-                    (= (y ?i) (y ?ag))
-                    (= (z ?i) (z ?ag)))
- :effect (and (increase (agent-num-wool ?ag) 1)
-              (not (present ?i)))
-)
+;(:action pickup-wool
+; :parameters (?ag - agent ?i - wool)
+; :precondition (and (present ?i)
+;                    (= (x ?i) (x ?ag))
+;                    (= (y ?i) (y ?ag))
+;                    (= (z ?i) (z ?ag)))
+; :effect (and (increase (agent-num-wool ?ag) 1)
+;              (not (present ?i)))
+;)
 
 
-(:action craft-diamond-pickaxe
-    :parameters ( ?ag - agent )
-    :precondition ( and
-                      ( > (agent-num-stick ?ag) 2 )
-                      ( > (agent-num-diamond ?ag) 3 )
-                  )
-    :effect (and (increase (agent-num-diamond-pickaxe ?ag) 1))
+;(:action craft-diamond-pickaxe
+;    :parameters ( ?ag - agent )
+;    :precondition ( and
+;                      ( > (agent-num-stick ?ag) 2 )
+;                      ( > (agent-num-diamond ?ag) 3 )
+;                  )
+;    :effect (and (increase (agent-num-diamond-pickaxe ?ag) 1))
+;
+;)
 
-)
-
-(:action craft-shears
-    :parameters ( ?ag - agent )
-    :precondition ( and
-                      ( > (agent-num-iron ?ag) 2 )
-                  )
-    :effect (and (increase (agent-num-shears ?ag) 1))
-
-)
+;(:action craft-shears
+;    :parameters ( ?ag - agent )
+;    :precondition ( and
+;                      ( > (agent-num-iron ?ag) 2 )
+;                  )
+;    :effect (and (increase (agent-num-shears ?ag) 1))
+;
+;)
 
 (:action hit-obsidian-block
     :parameters (?ag - agent ?b - obsidian-block)

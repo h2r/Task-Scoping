@@ -1,8 +1,7 @@
 from collections import OrderedDict
 from itertools import product
 
-item_types = ["apple", "potato", "rabbit", "diamond-axe", "orchid-flower", "daisy-flower"]
-inventory_types = ["apples", "potatoes", "orchids", "daisies", "raw-rabbits", "cooked-rabbits"]
+item_types = ["diamond", "stick", "diamond-pickaxe", "apple", "potato", "rabbit", "diamond-axe", "orchid-flower", "daisy-flower"]
 type2name = {
     "apple":"ap",
     "potato":"tot",
@@ -13,57 +12,36 @@ type2name = {
     "bedrock-block":"bed"
 }
 
-def set_objects(item_counts):
-    s_prefix = "(:objects"
-    s_suffix = ")"
-    type_lines = []
-    type_lines.append("steve - agent")
-    for item_type, n in item_counts.items():
-        name_prefix = type2name[item_type]
-        obj_names = [f"{name_prefix}{i}" for i in range(n)]
-        this_line = " ".join(obj_names) + " - " + item_type
-        type_lines.append(this_line)
-    return s_prefix + "\n\t" + "\n\t".join(type_lines) + "\n" + s_suffix
-def get_init_conds_agent():
+# def set_objects(item_counts):
+#     s_prefix = "(:objects"
+#     s_suffix = ")"
+#     type_lines = []
+#     type_lines.append("steve - agent")
+#     for item_type, n in item_counts.items():
+#         name_prefix = type2name[item_type]
+#         obj_names = [f"{name_prefix}{i}" for i in range(n)]
+#         this_line = " ".join(obj_names) + " - " + item_type
+#         type_lines.append(this_line)
+#     return s_prefix + "\n\t" + "\n\t".join(type_lines) + "\n" + s_suffix
+
+def get_object_declarations(objects):
+    prefix = "(:objects\n\t"
+    suffix = "\n)"
+    lines = []
+    for type_name, object_names in objects.items():
+        lines.append( " ".join(object_names) + " - " + type_name)
+    return prefix + "\n\t".join(lines) + suffix
+
+
+
+def get_init_location_conds(pos, object_name):
+    x,y,z = pos
     init_conds = []
-    agent_name = "Steve"
-    init_conds.append(f"(= (x {agent_name}) 0)")
-    init_conds.append(f"(= (y {agent_name}) 0)")
-    init_conds.append(f"(= (z {agent_name}) 0)")
-    init_conds.append(f"( agent-has-pickaxe {agent_name} )")
-    for item_type in inventory_types:
-        init_conds.append(f"(= (agent-num-{item_type} {agent_name}) 0)")
-    return init_conds
-def get_init_conds_items(item_counts):
-    init_conds = []
-    y = 1
-    for item_type, n in item_counts.items():
-        init_conds.append("")
-        name_prefix = type2name[item_type]
-        for i in range(n):
-            init_conds.append("")
-            init_conds.append(f"(= ({item_type}-x {name_prefix}{i}) {i})")
-            init_conds.append(f"(= ({item_type}-y {name_prefix}{i}) {y})")
-            init_conds.append(f"(= ({item_type}-z {name_prefix}{i}) 0)")
-            init_conds.append(f"( {item_type}-present {name_prefix}{i} )")
+    init_conds.append(f"(= (x {object_name}) {x})")
+    init_conds.append(f"(= (y {object_name}) {y})")
+    init_conds.append(f"(= (z {object_name}) {z})")
     return init_conds
 
-def get_init_conds_boundary(positions):
-    name_prefix = type2name["bedrock-block"]
-    init_conds = []
-    for i, p in enumerate(positions):
-        name = f"{name_prefix}{i}"
-        init_conds.append("")
-        init_conds.append(f"(= (x {name}) {p[0]})")
-        init_conds.append(f"(= (y {name}) {p[1]})")
-        init_conds.append(f"(= (z {name}) {p[2]})")
-        init_conds.append(f"(block-present {name})")
-    return init_conds
-
-def count_boundary_blocks(x,y,z):
-    wall_blocks = (x*2 + y*2)*z
-    ceiling_and_floor_blocks = x*y*2
-    return wall_blocks + ceiling_and_floor_blocks
 
 def get_boundary_positions(x_min, x_max, y_min, y_max, z_min, z_max):
     positions = []
@@ -152,8 +130,8 @@ def get_destructible_block_action(block_type, needed_tool = None):
                         (= (y ?b) (+ (y ?ag) 1))
                         (= (z ?b) (z ?ag))
                         (block-present ?b)
-                        (< (db-hits ?b) 4)){tool_precond}
-    :effect (and (increase (db-hits ?b) 1))
+                        (< (block-hits ?b) 4)){tool_precond}
+    :effect (and (increase (block-hits ?b) 1))
     )"""
     destroy_s = f"""(:action destroy-{block_type}
     :parameters (?ag - agent ?b - {block_type})
@@ -161,7 +139,7 @@ def get_destructible_block_action(block_type, needed_tool = None):
                         (= (y ?b) (+ (y ?ag) 1))
                         (= (z ?b) (z ?ag))
                         (block-present ?b)
-                        (= (db-hits ?b) 3)){tool_precond}
+                        (= (block-hits ?b) 3)){tool_precond}
     :effect (not (block-present ?b))
     )"""
     return [hit_s, destroy_s]
@@ -190,9 +168,11 @@ def make_domain():
     sections.append(types_s)
     
     predicates = []
-    predicates.append("present ?i - item")  
-    predicates.append("block-present ?b - block")      
+    predicates.append("( present ?i - item )")  
+    predicates.append("( block-present ?b - block )")
+    predicates.append("( agent-alive ?ag - agent )")
     functions = []
+    functions.append("( block-hits ?b - destructible-block )")
     functions.extend(get_inventory_funcs(inverse_type_hierarchy["item"]))
     for d in ["x","y","z"]:
         functions.append(f"( {d} ?l - locatable )")
@@ -255,13 +235,21 @@ def get_crafting_action(name, inputs, outputs, extra_preconditions = tuple()):
     effects_s = effects_prefix + effects_body + effects_suffix
 
     return "\n".join([prefix, precond_s, effects_s, suffix])
-def make_instance():
+def make_instance_1():
+    object_names = OrderedDict()
+    object_names["obsidian-block"] = ["obsidian0", "obsidian1"]
+    object_names["agent"] = ["steve"]
+    object_names["diamond-pickaxe"] = ["old-pointy"]
+    object_names["diamond"] = ["dmd0","dmd1","dmd2"]
+    object_names["stick"] = ["stick0", "stick1"]
+
+    tgt_obsidian = object_names["obsidian-block"][0]
 
     header = """(define (problem MINECRAFTCONTRIVED-1)
     (:domain minecraft-contrived)"""
 
-    goal = """(:goal (and
-            (> (agent-num-apples steve) 0)
+    goal = f"""(:goal (and
+            (not (block-present {tgt_obsidian} ))
         )
     )
 
@@ -272,27 +260,51 @@ def make_instance():
 
     use_bedrock_boundaries = False
     # item_counts = OrderedDict([("apple",2),("potato",1)])
-    item_counts = OrderedDict([("apple",1)])
+    # item_counts = OrderedDict([("apple",1)])
+    agent_name = "steve"
+    init_conds = []
+    init_conds.extend(get_init_location_conds((0,0,0),agent_name))
+    init_conds.append(f"( = ( agent-num-diamond-pickaxe {agent_name} ) 1 )")
+    init_conds.extend(get_init_location_conds((0,3,1),tgt_obsidian))
+    init_conds.extend(get_init_location_conds((0,3,2),object_names["obsidian-block"][1]))
+    for s in object_names["obsidian-block"]:
+        init_conds.append(f"( = ( block-hits {s} ) 0 )")
+    diamond_pick_name = object_names["diamond-pickaxe"][0]
+    init_conds.extend(get_init_location_conds((0,0,0), diamond_pick_name))
+    init_conds.append(f"( not ( present {diamond_pick_name} ) )")
 
-    boundary_positions = get_boundary_positions(x_min, x_max, y_min, y_max, z_min, z_max)
-    init_conds = get_init_conds_agent() + get_init_conds_items(item_counts)
+    for i, s in enumerate(object_names["stick"]):
+        init_conds.extend(get_init_location_conds((1,i,0),s))
+        init_conds.append(f"( present {s} )")
+    
+    for i, s in enumerate(object_names["diamond"]):
+        init_conds.extend(get_init_location_conds((2,i,0),s))
+        init_conds.append(f"( present {s} )")
+
+    for s in object_names["obsidian-block"]:
+        init_conds.append(f"(block-present {s})")
+
+
     if use_bedrock_boundaries:
-        init_conds += get_init_conds_boundary(boundary_positions)
-        item_counts["bedrock-block"] = len(boundary_positions)
+        boundary_positions = get_boundary_positions(x_min, x_max, y_min, y_max, z_min, z_max)
+        object_names["bedrock-block"] = [f"bed{i}" for i in range(len(boundary_positions))]
+        for i in range(len(boundary_positions)):
+            init_conds.extend(get_init_location_conds(boundary_positions[i], object_names["bedrock-block"][i]))
+
     init_conds = make_init_conds_str(init_conds)
-    object_declaration = set_objects(item_counts)
+    object_declaration = get_object_declarations(object_names)
 
     prob_parts = [header, object_declaration, init_conds, goal, ")"]
     prob_s = "\n\n\n".join(prob_parts)
 
-    bedrock_path_str = "-bedrock" if use_bedrock_boundaries else ""
-    tgt_path = f"examples/minecraft/prob-01{bedrock_path_str}.pddl"
-    print(prob_s)
-    with open(tgt_path, "w") as f:
-        f.write(prob_s)
+    # bedrock_path_str = "-bedrock" if use_bedrock_boundaries else ""
+    # tgt_path = f"examples/minecraft/prob-01{bedrock_path_str}.pddl"
+    # print(prob_s)
+    # with open(tgt_path, "w") as f:
+    #     f.write(prob_s)
     # print(set_objects(item_counts))
     # print(set_initial_conditions(item_counts))
-
+    return prob_s
 
 def make_types_declaration(type_hierarchy):
     inverse_type_hierarchy = invert_dict(type_hierarchy)
@@ -320,5 +332,8 @@ if __name__ == "__main__":
     #     type_hierarchy[i] = "item"
     # print(make_types_declaration(type_hierarchy))
     dom_s = make_domain()
+    prob_s = make_instance_1()
     with open("examples/minecraft2/minecraft-contrived2.pddl","w") as f:
         f.write(dom_s)
+    with open("examples/minecraft2/prob_obsidian.pddl","w") as f:
+        f.write(prob_s)

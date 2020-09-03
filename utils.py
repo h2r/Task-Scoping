@@ -25,12 +25,15 @@ def get_scoped_problem_path(p, suffix = None):
 def get_scoped_domain_path(d, p, suffix = None):
     d_split = d.split(".")
     base = ".".join(d_split[:-1])
-    p_id = re.search("([0-9]+)",p).group()
+    # p_id = re.search("([0-9]+)",p).group()
+    p_name = p.split("/")[-1]
+    p_base = ".".join(p_name.split(".")[:-1])
+
     if suffix is None:
         suffix = ""
     else:
         suffix = "_" + suffix
-    d_new = base + "_" + "scoped" + "_"  + p_id + suffix + "." + d_split[-1]
+    d_new = base + "_" + "scoped" + "_"  + p_base + suffix + "." + d_split[-1]
     return d_new
 
 def find_closing_paren(s, start):
@@ -73,7 +76,8 @@ def writeback_problem(input_path, output_path, objects):
     in_objects_flag = False
     for l in instance_lines:
         if in_objects_flag == True:
-            if len(l) > 0 and l[0] == ")":
+            l_stripped = l.replace("\t","").replace(" ","")
+            if len(l_stripped) > 0 and l_stripped[0] == ")":
                 in_objects_flag = False
         elif "(:objects" in l:
             in_objects_flag = True

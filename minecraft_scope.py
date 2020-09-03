@@ -11,10 +11,12 @@ from pddl_scoper import scope_pddl
 if __name__ == '__main__':
     start_time = time.time()
     domain = "examples/minecraft2/minecraft-contrived2.pddl"
-    problems = ["examples/minecraft2/prob_obsidian_with_pick.pddl", "examples/minecraft2/prob_obsidian_without_pick.pddl"]
+    # problems = ["examples/minecraft2/prob_obsidian_with_pick.pddl", "examples/minecraft2/prob_obsidian_without_pick.pddl"]
+    problems = ["examples/minecraft2/prob_obsidian_with_pick.pddl"]
+
     for problem in problems:
         scope_pddl(domain, problem, remove_cl_pvars=False, scoping_suffix="keep_cl")
-        scope_pddl(domain, problem, remove_cl_pvars=True, scoping_suffix="remove_cl")
+        # scope_pddl(domain, problem, remove_cl_pvars=True, scoping_suffix="remove_cl")
 
     
     end_time = time.time()

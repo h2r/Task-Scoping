@@ -2,7 +2,7 @@
 (:requirements :typing :fluents :negative-preconditions :universal-preconditions :existential-preconditions)
 
 (:types 
-	locatable
+	locatable - object
 	agent item block - locatable
 	bedrock destructible-block - block
 	obsidian-block - destructible-block
@@ -10,28 +10,28 @@
 )
 
 (:predicates
-	 ( present ?i - item )
-	 ( block-present ?b - block )
-	 ( agent-alive ?ag - agent )
+	 (present ?i - item)
+	 (block-present ?b - block)
+	 (agent-alive ?ag - agent)
 )
 
 (:functions
-	( block-hits ?b - destructible-block )
-	( agent-num-iron ?ag - agent )
-	( agent-num-wool ?ag - agent )
-	( agent-num-diamond ?ag - agent )
-	( agent-num-stick ?ag - agent )
-	( agent-num-diamond-pickaxe ?ag - agent )
-	( agent-num-apple ?ag - agent )
-	( agent-num-potato ?ag - agent )
-	( agent-num-rabbit ?ag - agent )
-	( agent-num-diamond-axe ?ag - agent )
-	( agent-num-orchid-flower ?ag - agent )
-	( agent-num-daisy-flower ?ag - agent )
-	( agent-num-shears ?ag - agent )
-	( x ?l - locatable )
-	( y ?l - locatable )
-	( z ?l - locatable )
+	(block-hits ?b - destructible-block)
+	(agent-num-iron ?ag - agent)
+	(agent-num-wool ?ag - agent)
+	(agent-num-diamond ?ag - agent)
+	(agent-num-stick ?ag - agent)
+	(agent-num-diamond-pickaxe ?ag - agent)
+	(agent-num-apple ?ag - agent)
+	(agent-num-potato ?ag - agent)
+	(agent-num-rabbit ?ag - agent)
+	(agent-num-diamond-axe ?ag - agent)
+	(agent-num-orchid-flower ?ag - agent)
+	(agent-num-daisy-flower ?ag - agent)
+	(agent-num-shears ?ag - agent)
+	(x ?l - locatable)
+	(y ?l - locatable)
+	(z ?l - locatable)
 )
 
 (:action move-north
@@ -225,7 +225,7 @@
     :parameters (?ag - agent ?b - obsidian-block)
     :precondition (and (= (x ?b) (x ?ag))
                         (= (y ?b) (+ (y ?ag) 1))
-                        (= (z ?b) (z ?ag))
+                        (= (z ?b) (+ (z ?ag) 1))
                         (block-present ?b)
                         (< (block-hits ?b) 4)
                         ( >= ( agent-num-diamond-pickaxe ?ag ) 1 ))
@@ -236,7 +236,7 @@
     :parameters (?ag - agent ?b - obsidian-block)
     :precondition (and (= (x ?b) (x ?ag))
                         (= (y ?b) (+ (y ?ag) 1))
-                        (= (z ?b) (z ?ag))
+                        (= (z ?b) (+ (z ?ag) 1))
                         (block-present ?b)
                         (= (block-hits ?b) 3)
                         ( >= ( agent-num-diamond-pickaxe ?ag ) 1 ))

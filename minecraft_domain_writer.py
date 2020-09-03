@@ -73,7 +73,7 @@ def make_init_conds_str(init_conds):
 def get_inventory_funcs(item_types):
     inventory_count_vars = []
     for t in item_types:
-        inventory_count_vars.append(f"( agent-num-{t} ?ag - agent )")
+        inventory_count_vars.append(f"(agent-num-{t} ?ag - agent)")
     return inventory_count_vars
     
 def get_pickup_actions(item_types):
@@ -129,7 +129,7 @@ def get_destructible_block_action(block_type, needed_tool = None):
     :parameters (?ag - agent ?b - {block_type})
     :precondition (and (= (x ?b) (x ?ag))
                         (= (y ?b) (+ (y ?ag) 1))
-                        (= (z ?b) (z ?ag))
+                        (= (z ?b) (+ (z ?ag) 1))
                         (block-present ?b)
                         (< (block-hits ?b) 4){tool_precond})
     :effect (and (increase (block-hits ?b) 1))
@@ -138,7 +138,7 @@ def get_destructible_block_action(block_type, needed_tool = None):
     :parameters (?ag - agent ?b - {block_type})
     :precondition (and (= (x ?b) (x ?ag))
                         (= (y ?b) (+ (y ?ag) 1))
-                        (= (z ?b) (z ?ag))
+                        (= (z ?b) (+ (z ?ag) 1))
                         (block-present ?b)
                         (= (block-hits ?b) 3){tool_precond})
     :effect (not (block-present ?b))
@@ -171,14 +171,14 @@ def make_domain():
     sections.append(types_s)
     
     predicates = []
-    predicates.append("( present ?i - item )")  
-    predicates.append("( block-present ?b - block )")
-    predicates.append("( agent-alive ?ag - agent )")
+    predicates.append("(present ?i - item)")  
+    predicates.append("(block-present ?b - block)")
+    predicates.append("(agent-alive ?ag - agent)")
     functions = []
-    functions.append("( block-hits ?b - destructible-block )")
+    functions.append("(block-hits ?b - destructible-block)")
     functions.extend(get_inventory_funcs(inverse_type_hierarchy["item"]))
     for d in ["x","y","z"]:
-        functions.append(f"( {d} ?l - locatable )")
+        functions.append(f"({d} ?l - locatable)")
 
     predicates_s = get_predicates_str(predicates)
     sections.append(predicates_s)
@@ -264,7 +264,7 @@ def make_instance_1(start_with_pick = True, use_bedrock_boundaries = False):
     # item_counts = OrderedDict([("apple",2),("potato",1)])
     # item_counts = OrderedDict([("apple",1)])
     agent_name = "steve"
-    init_conds = []
+    init_conds = [f"(agent-alive {agent_name})"]
     init_conds.extend(get_init_location_conds((0,0,0),agent_name))
     inventory_count = OrderedDict()
     for item_type in item_types:
@@ -288,7 +288,7 @@ def make_instance_1(start_with_pick = True, use_bedrock_boundaries = False):
     
     for i, s in enumerate(object_names["diamond"]):
         init_conds.extend(get_init_location_conds((2,i,0),s))
-        init_conds.append(f"( present {s} )")
+        init_conds.append(f"(present {s})")
 
     for s in object_names["obsidian-block"]:
         init_conds.append(f"(block-present {s})")

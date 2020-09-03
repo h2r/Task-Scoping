@@ -12,6 +12,7 @@
 
 
 (:init
+	(agent-alive steve)
 	(= (x steve) 0)
 	(= (y steve) 0)
 	(= (z steve) 0)
@@ -50,15 +51,15 @@
 	(= (x dmd0) 2)
 	(= (y dmd0) 0)
 	(= (z dmd0) 0)
-	( present dmd0 )
+	(present dmd0)
 	(= (x dmd1) 2)
 	(= (y dmd1) 1)
 	(= (z dmd1) 0)
-	( present dmd1 )
+	(present dmd1)
 	(= (x dmd2) 2)
 	(= (y dmd2) 2)
 	(= (z dmd2) 0)
-	( present dmd2 )
+	(present dmd2)
 	(block-present obsidian0)
 	(block-present obsidian1)
 )

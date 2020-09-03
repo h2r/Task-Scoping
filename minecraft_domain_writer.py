@@ -296,8 +296,9 @@ def make_instance_1(start_with_pick = True, use_bedrock_boundaries = False):
         boundary_positions = get_boundary_positions(x_min, x_max, y_min, y_max, z_min, z_max)
         object_names["bedrock-block"] = [f"bed{i}" for i in range(len(boundary_positions))]
         for i in range(len(boundary_positions)):
-            init_conds.extend(get_init_location_conds(boundary_positions[i], object_names["bedrock-block"][i]))
-
+            s = object_names["bedrock-block"][i]
+            init_conds.extend(get_init_location_conds(boundary_positions[i], s))
+            init_conds.append(f"(block-present {s})")
     init_conds = make_init_conds_str(init_conds)
     object_declaration = get_object_declarations(object_names)
 

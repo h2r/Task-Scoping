@@ -102,6 +102,7 @@ def get_predicates_str(predicates):
 def get_move_actions():
     s = "(:action move-north\n :parameters (?ag - agent)\n :precondition (and (agent-alive ?ag)\n                    (not (exists (?bl - block) (and (= (x ?bl) (x ?ag))\n                                                    (= (y ?bl) (+ (y ?ag) 1))\n                                                    (= (z ?bl) (+ (z ?ag) 1))))))\n :effect (and (increase (y ?ag) 1))\n)\n\n(:action move-south\n :parameters (?ag - agent)\n :precondition (and (agent-alive ?ag)\n                    (not (exists (?bl - block) (and (= (x ?bl) (x ?ag))\n                                                    (= (y ?bl) (- (y ?ag) 1))\n                                                    (= (z ?bl) (+ (z ?ag) 1))))))\n :effect (and (decrease (y ?ag) 1))\n)\n\n(:action move-east\n :parameters (?ag - agent)\n :precondition (and (agent-alive ?ag)\n                    (not (exists (?bl - block) (and (= (x ?bl) (+ (x ?ag) 1))\n                                                    (= (y ?bl) (y ?ag))\n                                                    (= (z ?bl) (+ (z ?ag) 1))))))\n :effect (and (increase (x ?ag) 1))\n)\n\n(:action move-west\n :parameters (?ag - agent)\n :precondition (and (agent-alive ?ag)\n                    (not (exists (?bl - block) (and (= (x ?bl) (- (x ?ag) 1))\n                                                    (= (y ?bl) (y ?ag))\n                                                    (= (z ?bl) (+ (z ?ag) 1))))))\n :effect (and (decrease (x ?ag) 1))\n)"
     return s
+
 def make_pickup_actions(item_types):
     action_template = """(:action pickup-{t}
  :parameters (?ag - agent ?i - {t})
@@ -111,6 +112,23 @@ def make_pickup_actions(item_types):
                     (= (z ?i) (z ?ag)))
  :effect (and (increase (agent-num-{t} ?ag) 1)
               (not (present ?i)))
+)
+"""
+    actions = []
+    for t in item_types:
+        actions.append(action_template.format(t=t))
+    return actions
+
+def make_drop_actions(item_types):
+    action_template = """(:action drop-{t}
+ :parameters (?ag - agent ?i - {t})
+ :precondition (>= (agent-num-{t} ?ag) 1)
+ :effect (and (present ?i)
+              (assign (x ?i) (x ?ag))
+              (assign (y ?i) (y ?ag))
+              (assign (z ?i) (z ?ag))
+              (decrease (agent-num-{t} ?ag) 1)
+         )
 )
 """
     actions = []
@@ -187,6 +205,8 @@ def make_domain():
     actions = []
     actions.append(get_move_actions())
     actions.extend(make_pickup_actions(inverse_type_hierarchy["item"]))
+    actions.extend(make_drop_actions(inverse_type_hierarchy["item"]))
+
 
     diamond_pick_inputs = OrderedDict([("stick",2),("diamond",3)])
     diamond_pick_outputs = OrderedDict([("diamond-pickaxe",1)])

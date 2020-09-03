@@ -1,7 +1,8 @@
 from collections import OrderedDict
 from itertools import product
 
-item_types = ["diamond", "stick", "diamond-pickaxe", "apple", "potato", "rabbit", "diamond-axe", "orchid-flower", "daisy-flower"]
+item_types = ["iron","wool","diamond", "stick", "diamond-pickaxe", "apple", "potato"
+    , "rabbit", "diamond-axe", "orchid-flower", "daisy-flower", "shears"]
 type2name = {
     "apple":"ap",
     "potato":"tot",
@@ -159,8 +160,8 @@ def make_domain():
     type_hierarchy["bedrock"] = "block"
     type_hierarchy["destructible-block"] = "block"
     type_hierarchy["obsidian-block"] = "destructible-block"
-    item_types_irrelevant = ["apple", "potato", "rabbit", "diamond-axe", "orchid-flower", "daisy-flower"]
-    item_types = ["diamond", "stick", "iron", "diamond-pickaxe", "shears", "wool"]
+    # item_types_irrelevant = ["apple", "potato", "rabbit", "diamond-axe", "orchid-flower", "daisy-flower"]
+    # item_types = ["diamond", "stick", "iron", "diamond-pickaxe", "shears", "wool"]
     for i in item_types:
         type_hierarchy[i] = "item"
     inverse_type_hierarchy = invert_dict(type_hierarchy)
@@ -235,7 +236,7 @@ def get_crafting_action(name, inputs, outputs, extra_preconditions = tuple()):
     effects_s = effects_prefix + effects_body + effects_suffix
 
     return "\n".join([prefix, precond_s, effects_s, suffix])
-def make_instance_1():
+def make_instance_1(start_with_pick = True):
     object_names = OrderedDict()
     object_names["obsidian-block"] = ["obsidian0", "obsidian1"]
     object_names["agent"] = ["steve"]
@@ -264,7 +265,14 @@ def make_instance_1():
     agent_name = "steve"
     init_conds = []
     init_conds.extend(get_init_location_conds((0,0,0),agent_name))
-    init_conds.append(f"( = ( agent-num-diamond-pickaxe {agent_name} ) 1 )")
+    inventory_count = OrderedDict()
+    for item_type in item_types:
+        inventory_count[item_type] = 0
+    if start_with_pick:
+        inventory_count["diamond-pickaxe"] = 1
+    for item_type, item_count in inventory_count.items():
+        init_conds.append(f"( = ( agent-num-{item_type} {agent_name} ) {item_count} )")
+    # init_conds.append(f"( = ( agent-num-diamond-pickaxe {agent_name} ) 1 )")
     init_conds.extend(get_init_location_conds((0,3,1),tgt_obsidian))
     init_conds.extend(get_init_location_conds((0,3,2),object_names["obsidian-block"][1]))
     for s in object_names["obsidian-block"]:
@@ -332,8 +340,12 @@ if __name__ == "__main__":
     #     type_hierarchy[i] = "item"
     # print(make_types_declaration(type_hierarchy))
     dom_s = make_domain()
-    prob_s = make_instance_1()
+    prob_s = make_instance_1(start_with_pick=True)
     with open("examples/minecraft2/minecraft-contrived2.pddl","w") as f:
         f.write(dom_s)
     with open("examples/minecraft2/prob_obsidian_with_pick.pddl","w") as f:
+        f.write(prob_s)
+
+    prob_s = make_instance_1(start_with_pick=False)
+    with open("examples/minecraft2/prob_obsidian_without_pick.pddl","w") as f:
         f.write(prob_s)

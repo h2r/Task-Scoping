@@ -156,7 +156,7 @@
                         (= (z ?b) (z ?ag))
                         (block-present ?b)
                         (< (block-hits ?b) 4)
-                        ( > ( agent-num-diamond-pickaxe ?ag ) 1 ))
+                        ( >= ( agent-num-diamond-pickaxe ?ag ) 1 ))
     :effect (and (increase (block-hits ?b) 1))
     )
 
@@ -167,7 +167,7 @@
                         (= (z ?b) (z ?ag))
                         (block-present ?b)
                         (= (block-hits ?b) 3)
-                        ( > ( agent-num-diamond-pickaxe ?ag ) 1 ))
+                        ( >= ( agent-num-diamond-pickaxe ?ag ) 1 ))
     :effect (not (block-present ?b))
     )
 

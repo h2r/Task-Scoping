@@ -123,7 +123,7 @@ def get_destructible_block_action(block_type, needed_tool = None):
     if needed_tool is None:
         tool_precond = ""
     else:
-        tool_precond = f"\n                        ( > ( agent-num-{needed_tool} ?ag ) 1 )"
+        tool_precond = f"\n                        ( >= ( agent-num-{needed_tool} ?ag ) 1 )"
     hit_s = f"""(:action hit-{block_type}
     :parameters (?ag - agent ?b - {block_type})
     :precondition (and (= (x ?b) (x ?ag))

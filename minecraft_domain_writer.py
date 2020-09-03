@@ -236,7 +236,7 @@ def get_crafting_action(name, inputs, outputs, extra_preconditions = tuple()):
     effects_s = effects_prefix + effects_body + effects_suffix
 
     return "\n".join([prefix, precond_s, effects_s, suffix])
-def make_instance_1(start_with_pick = True):
+def make_instance_1(start_with_pick = True, use_bedrock_boundaries = False):
     object_names = OrderedDict()
     object_names["obsidian-block"] = ["obsidian0", "obsidian1"]
     object_names["agent"] = ["steve"]
@@ -259,7 +259,6 @@ def make_instance_1(start_with_pick = True):
     y_min, y_max = 0, 2
     z_min, z_max = 0, 2
 
-    use_bedrock_boundaries = False
     # item_counts = OrderedDict([("apple",2),("potato",1)])
     # item_counts = OrderedDict([("apple",1)])
     agent_name = "steve"

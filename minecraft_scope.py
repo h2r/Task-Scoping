@@ -11,8 +11,8 @@ from pddl_scoper import scope_pddl
 if __name__ == '__main__':
     start_time = time.time()
     domain = "examples/minecraft2/minecraft-contrived2.pddl"
-    problem = "examples/minecraft2/prob_obsidian.pddl"
-    scope_pddl(domain, problem)
+    problem = "examples/minecraft2/prob_obsidian_with_pick.pddl"
+    scope_pddl(domain, problem, remove_cl_pvars=False)
     
     end_time = time.time()
     print(f"Total time: {end_time - start_time}")

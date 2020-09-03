@@ -335,5 +335,5 @@ if __name__ == "__main__":
     prob_s = make_instance_1()
     with open("examples/minecraft2/minecraft-contrived2.pddl","w") as f:
         f.write(dom_s)
-    with open("examples/minecraft2/prob_obsidian.pddl","w") as f:
+    with open("examples/minecraft2/prob_obsidian_with_pick.pddl","w") as f:
         f.write(prob_s)

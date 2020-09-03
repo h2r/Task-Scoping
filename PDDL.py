@@ -273,7 +273,8 @@ class PDDL_Parser:
                 self.split_predicates(group.pop(0), positive_preconditions, negative_preconditions, name, ' preconditions')
             elif t == ':effect':
                 self.split_predicates(group.pop(0), add_effects, del_effects, name, ' effects')
-            else: print(str(t) + ' is not recognized in action')
+            else:
+                print(str(t) + ' is not recognized in action')
         self.actions.append(Action(name, parameters, positive_preconditions, negative_preconditions, add_effects, del_effects))
 
     #-----------------------------------------------

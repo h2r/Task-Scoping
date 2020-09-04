@@ -107,13 +107,12 @@
 
 
 (:goal (and
-                (not (block-present obsidian0 ))
+                ( = ( agent-num-flint-and-steel steve ) 1 )
                 (= (x steve) 5)
                 (= (y steve) 5)
                 (= (z steve) 0)
+                )
             )
-        )
-        
 
 
 )

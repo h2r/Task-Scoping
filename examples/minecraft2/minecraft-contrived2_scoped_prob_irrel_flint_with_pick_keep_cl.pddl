@@ -73,103 +73,103 @@
  :effect (and (decrease (x ?ag) 1))
 )
 
-(:action pickup-wool
- :parameters (?ag - agent ?i - wool)
- :precondition (and (present ?i)
-                    (= (x ?i) (x ?ag))
-                    (= (y ?i) (y ?ag))
-                    (= (z ?i) (z ?ag)))
- :effect (and (increase (agent-num-wool ?ag) 1)
-              (not (present ?i)))
-)
+;(:action pickup-wool
+; :parameters (?ag - agent ?i - wool)
+; :precondition (and (present ?i)
+;                    (= (x ?i) (x ?ag))
+;                    (= (y ?i) (y ?ag))
+;                    (= (z ?i) (z ?ag)))
+; :effect (and (increase (agent-num-wool ?ag) 1)
+;              (not (present ?i)))
+;)
 
 
-(:action pickup-diamond
- :parameters (?ag - agent ?i - diamond)
- :precondition (and (present ?i)
-                    (= (x ?i) (x ?ag))
-                    (= (y ?i) (y ?ag))
-                    (= (z ?i) (z ?ag)))
- :effect (and (increase (agent-num-diamond ?ag) 1)
-              (not (present ?i)))
-)
+;(:action pickup-diamond
+; :parameters (?ag - agent ?i - diamond)
+; :precondition (and (present ?i)
+;                    (= (x ?i) (x ?ag))
+;                    (= (y ?i) (y ?ag))
+;                    (= (z ?i) (z ?ag)))
+; :effect (and (increase (agent-num-diamond ?ag) 1)
+;              (not (present ?i)))
+;)
 
 
-(:action pickup-stick
- :parameters (?ag - agent ?i - stick)
- :precondition (and (present ?i)
-                    (= (x ?i) (x ?ag))
-                    (= (y ?i) (y ?ag))
-                    (= (z ?i) (z ?ag)))
- :effect (and (increase (agent-num-stick ?ag) 1)
-              (not (present ?i)))
-)
+;(:action pickup-stick
+; :parameters (?ag - agent ?i - stick)
+; :precondition (and (present ?i)
+;                    (= (x ?i) (x ?ag))
+;                    (= (y ?i) (y ?ag))
+;                    (= (z ?i) (z ?ag)))
+; :effect (and (increase (agent-num-stick ?ag) 1)
+;              (not (present ?i)))
+;)
 
 
-(:action pickup-diamond-pickaxe
- :parameters (?ag - agent ?i - diamond-pickaxe)
- :precondition (and (present ?i)
-                    (= (x ?i) (x ?ag))
-                    (= (y ?i) (y ?ag))
-                    (= (z ?i) (z ?ag)))
- :effect (and (increase (agent-num-diamond-pickaxe ?ag) 1)
-              (not (present ?i)))
-)
+;(:action pickup-diamond-pickaxe
+; :parameters (?ag - agent ?i - diamond-pickaxe)
+; :precondition (and (present ?i)
+;                    (= (x ?i) (x ?ag))
+;                    (= (y ?i) (y ?ag))
+;                    (= (z ?i) (z ?ag)))
+; :effect (and (increase (agent-num-diamond-pickaxe ?ag) 1)
+;              (not (present ?i)))
+;)
 
 
-(:action pickup-apple
- :parameters (?ag - agent ?i - apple)
- :precondition (and (present ?i)
-                    (= (x ?i) (x ?ag))
-                    (= (y ?i) (y ?ag))
-                    (= (z ?i) (z ?ag)))
- :effect (and (increase (agent-num-apple ?ag) 1)
-              (not (present ?i)))
-)
+;(:action pickup-apple
+; :parameters (?ag - agent ?i - apple)
+; :precondition (and (present ?i)
+;                    (= (x ?i) (x ?ag))
+;                    (= (y ?i) (y ?ag))
+;                    (= (z ?i) (z ?ag)))
+; :effect (and (increase (agent-num-apple ?ag) 1)
+;              (not (present ?i)))
+;)
 
 
-(:action pickup-potato
- :parameters (?ag - agent ?i - potato)
- :precondition (and (present ?i)
-                    (= (x ?i) (x ?ag))
-                    (= (y ?i) (y ?ag))
-                    (= (z ?i) (z ?ag)))
- :effect (and (increase (agent-num-potato ?ag) 1)
-              (not (present ?i)))
-)
+;(:action pickup-potato
+; :parameters (?ag - agent ?i - potato)
+; :precondition (and (present ?i)
+;                    (= (x ?i) (x ?ag))
+;                    (= (y ?i) (y ?ag))
+;                    (= (z ?i) (z ?ag)))
+; :effect (and (increase (agent-num-potato ?ag) 1)
+;              (not (present ?i)))
+;)
 
 
-(:action pickup-rabbit
- :parameters (?ag - agent ?i - rabbit)
- :precondition (and (present ?i)
-                    (= (x ?i) (x ?ag))
-                    (= (y ?i) (y ?ag))
-                    (= (z ?i) (z ?ag)))
- :effect (and (increase (agent-num-rabbit ?ag) 1)
-              (not (present ?i)))
-)
+;(:action pickup-rabbit
+; :parameters (?ag - agent ?i - rabbit)
+; :precondition (and (present ?i)
+;                    (= (x ?i) (x ?ag))
+;                    (= (y ?i) (y ?ag))
+;                    (= (z ?i) (z ?ag)))
+; :effect (and (increase (agent-num-rabbit ?ag) 1)
+;              (not (present ?i)))
+;)
 
 
-(:action pickup-orchid-flower
- :parameters (?ag - agent ?i - orchid-flower)
- :precondition (and (present ?i)
-                    (= (x ?i) (x ?ag))
-                    (= (y ?i) (y ?ag))
-                    (= (z ?i) (z ?ag)))
- :effect (and (increase (agent-num-orchid-flower ?ag) 1)
-              (not (present ?i)))
-)
+;(:action pickup-orchid-flower
+; :parameters (?ag - agent ?i - orchid-flower)
+; :precondition (and (present ?i)
+;                    (= (x ?i) (x ?ag))
+;                    (= (y ?i) (y ?ag))
+;                    (= (z ?i) (z ?ag)))
+; :effect (and (increase (agent-num-orchid-flower ?ag) 1)
+;              (not (present ?i)))
+;)
 
 
-(:action pickup-daisy-flower
- :parameters (?ag - agent ?i - daisy-flower)
- :precondition (and (present ?i)
-                    (= (x ?i) (x ?ag))
-                    (= (y ?i) (y ?ag))
-                    (= (z ?i) (z ?ag)))
- :effect (and (increase (agent-num-daisy-flower ?ag) 1)
-              (not (present ?i)))
-)
+;(:action pickup-daisy-flower
+; :parameters (?ag - agent ?i - daisy-flower)
+; :precondition (and (present ?i)
+;                    (= (x ?i) (x ?ag))
+;                    (= (y ?i) (y ?ag))
+;                    (= (z ?i) (z ?ag)))
+; :effect (and (increase (agent-num-daisy-flower ?ag) 1)
+;              (not (present ?i)))
+;)
 
 
 (:action pickup-flint
@@ -227,108 +227,108 @@
 )
 
 
-(:action drop-wool
- :parameters (?ag - agent ?i - wool)
- :precondition (and (>= (agent-num-wool ?ag) 1)
-                    (not (present ?i)))
- :effect (and (present ?i)
-              (assign (x ?i) (x ?ag))
-              (assign (y ?i) (+ (y ?ag) 1))
-              (assign (z ?i) (z ?ag))
-              (decrease (agent-num-wool ?ag) 1)
-         )
-)
+;(:action drop-wool
+; :parameters (?ag - agent ?i - wool)
+; :precondition (and (>= (agent-num-wool ?ag) 1)
+;                    (not (present ?i)))
+; :effect (and (present ?i)
+;              (assign (x ?i) (x ?ag))
+;              (assign (y ?i) (+ (y ?ag) 1))
+;              (assign (z ?i) (z ?ag))
+;              (decrease (agent-num-wool ?ag) 1)
+;         )
+;)
 
 
-(:action drop-diamond
- :parameters (?ag - agent ?i - diamond)
- :precondition (and (>= (agent-num-diamond ?ag) 1)
-                    (not (present ?i)))
- :effect (and (present ?i)
-              (assign (x ?i) (x ?ag))
-              (assign (y ?i) (+ (y ?ag) 1))
-              (assign (z ?i) (z ?ag))
-              (decrease (agent-num-diamond ?ag) 1)
-         )
-)
+;(:action drop-diamond
+; :parameters (?ag - agent ?i - diamond)
+; :precondition (and (>= (agent-num-diamond ?ag) 1)
+;                    (not (present ?i)))
+; :effect (and (present ?i)
+;              (assign (x ?i) (x ?ag))
+;              (assign (y ?i) (+ (y ?ag) 1))
+;              (assign (z ?i) (z ?ag))
+;              (decrease (agent-num-diamond ?ag) 1)
+;         )
+;)
 
 
-(:action drop-stick
- :parameters (?ag - agent ?i - stick)
- :precondition (and (>= (agent-num-stick ?ag) 1)
-                    (not (present ?i)))
- :effect (and (present ?i)
-              (assign (x ?i) (x ?ag))
-              (assign (y ?i) (+ (y ?ag) 1))
-              (assign (z ?i) (z ?ag))
-              (decrease (agent-num-stick ?ag) 1)
-         )
-)
+;(:action drop-stick
+; :parameters (?ag - agent ?i - stick)
+; :precondition (and (>= (agent-num-stick ?ag) 1)
+;                    (not (present ?i)))
+; :effect (and (present ?i)
+;              (assign (x ?i) (x ?ag))
+;              (assign (y ?i) (+ (y ?ag) 1))
+;              (assign (z ?i) (z ?ag))
+;              (decrease (agent-num-stick ?ag) 1)
+;         )
+;)
 
 
-(:action drop-apple
- :parameters (?ag - agent ?i - apple)
- :precondition (and (>= (agent-num-apple ?ag) 1)
-                    (not (present ?i)))
- :effect (and (present ?i)
-              (assign (x ?i) (x ?ag))
-              (assign (y ?i) (+ (y ?ag) 1))
-              (assign (z ?i) (z ?ag))
-              (decrease (agent-num-apple ?ag) 1)
-         )
-)
+;(:action drop-apple
+; :parameters (?ag - agent ?i - apple)
+; :precondition (and (>= (agent-num-apple ?ag) 1)
+;                    (not (present ?i)))
+; :effect (and (present ?i)
+;              (assign (x ?i) (x ?ag))
+;              (assign (y ?i) (+ (y ?ag) 1))
+;              (assign (z ?i) (z ?ag))
+;              (decrease (agent-num-apple ?ag) 1)
+;         )
+;)
 
 
-(:action drop-potato
- :parameters (?ag - agent ?i - potato)
- :precondition (and (>= (agent-num-potato ?ag) 1)
-                    (not (present ?i)))
- :effect (and (present ?i)
-              (assign (x ?i) (x ?ag))
-              (assign (y ?i) (+ (y ?ag) 1))
-              (assign (z ?i) (z ?ag))
-              (decrease (agent-num-potato ?ag) 1)
-         )
-)
+;(:action drop-potato
+; :parameters (?ag - agent ?i - potato)
+; :precondition (and (>= (agent-num-potato ?ag) 1)
+;                    (not (present ?i)))
+; :effect (and (present ?i)
+;              (assign (x ?i) (x ?ag))
+;              (assign (y ?i) (+ (y ?ag) 1))
+;              (assign (z ?i) (z ?ag))
+;              (decrease (agent-num-potato ?ag) 1)
+;         )
+;)
 
 
-(:action drop-rabbit
- :parameters (?ag - agent ?i - rabbit)
- :precondition (and (>= (agent-num-rabbit ?ag) 1)
-                    (not (present ?i)))
- :effect (and (present ?i)
-              (assign (x ?i) (x ?ag))
-              (assign (y ?i) (+ (y ?ag) 1))
-              (assign (z ?i) (z ?ag))
-              (decrease (agent-num-rabbit ?ag) 1)
-         )
-)
+;(:action drop-rabbit
+; :parameters (?ag - agent ?i - rabbit)
+; :precondition (and (>= (agent-num-rabbit ?ag) 1)
+;                    (not (present ?i)))
+; :effect (and (present ?i)
+;              (assign (x ?i) (x ?ag))
+;              (assign (y ?i) (+ (y ?ag) 1))
+;              (assign (z ?i) (z ?ag))
+;              (decrease (agent-num-rabbit ?ag) 1)
+;         )
+;)
 
 
-(:action drop-orchid-flower
- :parameters (?ag - agent ?i - orchid-flower)
- :precondition (and (>= (agent-num-orchid-flower ?ag) 1)
-                    (not (present ?i)))
- :effect (and (present ?i)
-              (assign (x ?i) (x ?ag))
-              (assign (y ?i) (+ (y ?ag) 1))
-              (assign (z ?i) (z ?ag))
-              (decrease (agent-num-orchid-flower ?ag) 1)
-         )
-)
+;(:action drop-orchid-flower
+; :parameters (?ag - agent ?i - orchid-flower)
+; :precondition (and (>= (agent-num-orchid-flower ?ag) 1)
+;                    (not (present ?i)))
+; :effect (and (present ?i)
+;              (assign (x ?i) (x ?ag))
+;              (assign (y ?i) (+ (y ?ag) 1))
+;              (assign (z ?i) (z ?ag))
+;              (decrease (agent-num-orchid-flower ?ag) 1)
+;         )
+;)
 
 
-(:action drop-daisy-flower
- :parameters (?ag - agent ?i - daisy-flower)
- :precondition (and (>= (agent-num-daisy-flower ?ag) 1)
-                    (not (present ?i)))
- :effect (and (present ?i)
-              (assign (x ?i) (x ?ag))
-              (assign (y ?i) (+ (y ?ag) 1))
-              (assign (z ?i) (z ?ag))
-              (decrease (agent-num-daisy-flower ?ag) 1)
-         )
-)
+;(:action drop-daisy-flower
+; :parameters (?ag - agent ?i - daisy-flower)
+; :precondition (and (>= (agent-num-daisy-flower ?ag) 1)
+;                    (not (present ?i)))
+; :effect (and (present ?i)
+;              (assign (x ?i) (x ?ag))
+;              (assign (y ?i) (+ (y ?ag) 1))
+;              (assign (z ?i) (z ?ag))
+;              (decrease (agent-num-daisy-flower ?ag) 1)
+;         )
+;)
 
 
 (:action drop-flint
@@ -409,17 +409,17 @@
 )
 
 
-(:action craft-diamond-pickaxe
-    :parameters ( ?ag - agent )
-    :precondition ( and
-                      ( >= (agent-num-stick ?ag) 2 )
-                      ( >= (agent-num-diamond ?ag) 3 )
-                  )
-    :effect (and (increase (agent-num-diamond-pickaxe ?ag) 1)
-        (decrease (agent-num-stick ?ag) 2)
-        (decrease (agent-num-diamond ?ag) 3))
-
-)
+;(:action craft-diamond-pickaxe
+;    :parameters ( ?ag - agent )
+;    :precondition ( and
+;                      ( >= (agent-num-stick ?ag) 2 )
+;                      ( >= (agent-num-diamond ?ag) 3 )
+;                  )
+;    :effect (and (increase (agent-num-diamond-pickaxe ?ag) 1)
+;        (decrease (agent-num-stick ?ag) 2)
+;        (decrease (agent-num-diamond ?ag) 3))
+;
+;)
 
 (:action craft-iron-ingot
     :parameters ( ?ag - agent )
@@ -469,21 +469,21 @@
             )
     )
 
-(:action open-netherportal
- :parameters (?ag - agent ?ob - obsidian-block ?np - netherportal)
- :precondition (and (>= (agent-num-flint-and-steel ?ag) 1)
-                    (= (y ?ob) (+ (y ?ag) 1))
-                    (= (z ?ob) (z ?ag))
-                    (= (x ?ob) (x ?ag))
-                    (block-present ?ob)
-                    (not (present ?np))
-                )
- :effect (and (present ?np)
-              (assign (x ?np) (x ?ob))
-              (assign (y ?np) (y ?ob))
-              (assign (z ?np) (z ?ob))
-         )
-)
+;(:action open-netherportal
+; :parameters (?ag - agent ?ob - obsidian-block ?np - netherportal)
+; :precondition (and (>= (agent-num-flint-and-steel ?ag) 1)
+;                    (= (y ?ob) (+ (y ?ag) 1))
+;                    (= (z ?ob) (z ?ag))
+;                    (= (x ?ob) (x ?ag))
+;                    (block-present ?ob)
+;                    (not (present ?np))
+;                )
+; :effect (and (present ?np)
+;              (assign (x ?np) (x ?ob))
+;              (assign (y ?np) (y ?ob))
+;              (assign (z ?np) (z ?ob))
+;         )
+;)
 
 
 )

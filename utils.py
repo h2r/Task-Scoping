@@ -81,10 +81,15 @@ def writeback_problem(input_path, output_path, objects):
                 in_objects_flag = False
         elif "(:objects" in l:
             in_objects_flag = True
+        
         tokens = re.split('[ (),]',l)
+        tokens[0] = tokens[0].strip('\t')
+        
         if not any(o in tokens for o in objects):
             scoped_lines.append(l)
+        
         else:
+            # from IPython import embed; embed()
             if in_objects_flag:
                 split_l = l.split(" ")
                 obj_type = split_l[-1]
@@ -105,7 +110,7 @@ def writeback_problem(input_path, output_path, objects):
                     l_new = ";\t" + " ".join(objs_removed) + " - " + obj_type
                     scoped_lines.append(l_new)
             else:
-                print(l)
+                # print(l)
                 scoped_lines.append(";" + l)
 
     with open(output_path, "w")  as f:

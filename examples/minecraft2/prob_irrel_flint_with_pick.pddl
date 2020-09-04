@@ -205,8 +205,8 @@
 
 (:goal (and
                 ( = ( agent-num-flint-and-steel steve ) 1 )
-                (= (x steve) 5)
-                (= (y steve) 5)
+                (= (x steve) 11)
+                (= (y steve) 2)
                 (= (z steve) 0)
                 )
             )

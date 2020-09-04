@@ -13,9 +13,9 @@ if __name__ == '__main__':
     domain = "examples/minecraft2/minecraft-contrived2.pddl"
     # problems = ["examples/minecraft2/prob_obsidian_with_pick.pddl", "examples/minecraft2/prob_obsidian_without_pick.pddl"]
     problems = [
-        "examples/minecraft2/prob_irrel_obsidian_with_pick.pddl"
+        # "examples/minecraft2/prob_irrel_obsidian_with_pick.pddl"
         # "examples/minecraft2/prob_irrel_flint_with_pick.pddl"
-        # "examples/minecraft2/prob_irrel_nether_with_pick.pddl"
+        "examples/minecraft2/prob_irrel_nether_with_pick.pddl"
     ]
 
     for problem in problems:

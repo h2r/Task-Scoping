@@ -108,8 +108,8 @@
 
 (:goal (and
                 (not (block-present obsidian0 ))
-                (= (x steve) 5)
-                (= (y steve) 5)
+                (= (x steve) 3)
+                (= (y steve) 4)
                 (= (z steve) 0)
             )
         )

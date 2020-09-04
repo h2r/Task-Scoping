@@ -34,7 +34,7 @@ def scope_pddl(domain, problem, remove_cl_pvars = True, scoping_suffix = None):
     rel_objects = pvars2objects(rel_pvars)
     irrel_objects = [x for x in all_objects if x not in rel_objects]
 
-    from IPython import embed; embed()
+    # from IPython import embed; embed()
 
     scoped_problem_path = get_scoped_problem_path(problem, suffix=scoping_suffix)
     writeback_problem(problem, scoped_problem_path, irrel_objects)

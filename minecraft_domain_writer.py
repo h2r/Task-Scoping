@@ -343,8 +343,8 @@ def make_instance_1(start_with_pick = True, use_bedrock_boundaries = False, add_
     if (goal_var == "break_obsidian"):
         goal = f"""(:goal (and
                 (not (block-present {tgt_obsidian} ))
-                (= (x {agent_name}) 5)
-                (= (y {agent_name}) 5)
+                (= (x {agent_name}) 3)
+                (= (y {agent_name}) 4)
                 (= (z {agent_name}) 0)
             )
         )
@@ -361,8 +361,8 @@ def make_instance_1(start_with_pick = True, use_bedrock_boundaries = False, add_
     elif(goal_var == "make_flint_and_steel"):
         goal = f"""(:goal (and
                 ( = ( agent-num-flint-and-steel {agent_name} ) 1 )
-                (= (x {agent_name}) 5)
-                (= (y {agent_name}) 5)
+                (= (x {agent_name}) 11)
+                (= (y {agent_name}) 2)
                 (= (z {agent_name}) 0)
                 )
             )"""

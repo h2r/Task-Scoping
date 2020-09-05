@@ -26,12 +26,10 @@ def scope_pddl(domain, problem):
     goal_cond = parser.get_goal_cond()
 
     # This below block converts all the domain's initial conditions to z3
-    init_cond_list = parser.get_init_cond_list()
-   
-    
+    init_cond_list = parser.get_init_cond_list() 
 
     # Run the scoper on the constructed goal, skills and initial condition
-    rel_pvars, rel_skills = scope(goals=goal_cond, skills=skill_list, start_condition=init_cond_list)
+    rel_pvars, cl_pvars, rel_skills = scope(goals=goal_cond, skills=skill_list, start_condition=init_cond_list)
       
     # print("~~~~~Relevant skills~~~~~")
     # print("\n\n".join(map(str,rel_skills)))
@@ -81,7 +79,7 @@ if __name__ == '__main__':
     # taxi_prob = "examples/infinite-taxi-numeric/prob02.pddl"
 
     start_time = time.time()
-    domain, problem = "examples/IPC_Domains/driverlog/driverlogNumeric.pddl", "examples/IPC_Domains/driverlog/prob-03.pddl"
+    domain, problem = "examples/IPC_Domains/SatRovers/SatRovers.pddl", "examples/IPC_Domains/SatRovers/prob-01.pddl"
     scope_pddl(domain, problem)
     
     end_time = time.time()

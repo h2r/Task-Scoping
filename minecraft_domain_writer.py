@@ -388,8 +388,8 @@ def make_instance_1(start_with_pick = True, use_bedrock_boundaries = False, add_
         if item_type != "netherportal":
             init_conds.append(f"( = ( agent-num-{item_type} {agent_name} ) {item_count} )")
     # init_conds.append(f"( = ( agent-num-diamond-pickaxe {agent_name} ) 1 )")
-    init_conds.extend(get_init_location_conds((11,7,1),tgt_obsidian))
-    init_conds.extend(get_init_location_conds((10,7,0),object_names["obsidian-block"][1]))
+    init_conds.extend(get_init_location_conds((11,8,1),tgt_obsidian)) # We got current excel results on (11, 7, 1)
+    init_conds.extend(get_init_location_conds((10,8,0),object_names["obsidian-block"][1]))
     # init_conds.extend(get_init_location_conds((12,7,0),object_names["obsidian-block"][2]))
     # init_conds.extend(get_init_location_conds((10,7,1),object_names["obsidian-block"][3]))
     # init_conds.extend(get_init_location_conds((12,7,1),object_names["obsidian-block"][4]))

@@ -71,6 +71,7 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 	skills = skills + [dummy_final_skill]
 	pvars_rel = [dummy_goal]
 
+	print("Done grounding! Starting to scope!!!")
 	converged = False
 	i = 0
 	while not converged:
@@ -94,6 +95,7 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 
 		pvars_rel = pvars_rel_new
 		i += 1
+		print("Done 1 iteration")
 		# print(pvars_rel)
 		# from IPython import embed; embed()
 		# from IPython.core.debugger import set_trace; set_trace()
@@ -126,7 +128,6 @@ def scope_pddl(domain, problem):
 
     # This below block converts all the domain's initial conditions to z3
     init_cond_list = parser.get_init_cond_list()
-   
     
 
     # Run the scoper on the constructed goal, skills and initial condition

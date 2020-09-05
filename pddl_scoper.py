@@ -1,7 +1,7 @@
 from utils import get_atoms, get_unique_z3_vars, get_scoped_domain_path, get_scoped_problem_path, writeback_problem, writeback_domain, pvars2objects
 from scoping import scope
 from PDDLz3 import PDDL_Parser_z3
-def scope_pddl(domain, problem, remove_cl_pvars = True, scoping_suffix = None):
+def scope_pddl(domain, problem, remove_cl_pvars = True):
     parser = PDDL_Parser_z3()
     parser.parse_domain(domain)
     parser.parse_problem(problem)
@@ -26,18 +26,21 @@ def scope_pddl(domain, problem, remove_cl_pvars = True, scoping_suffix = None):
         all_pvars.extend(get_atoms(s.precondition))
         all_pvars.extend(s.params)
     all_pvars = get_unique_z3_vars(all_pvars)
-    if remove_cl_pvars:
-        irrel_pvars = [p for p in map(str,all_pvars) if p not in map(str,rel_pvars)]
-    else:
-        irrel_pvars = [p for p in map(str,all_pvars) if p not in map(str,rel_pvars + cl_pvars)]
+    # if remove_cl_pvars:
+    #     irrel_pvars = [p for p in map(str,all_pvars) if p not in map(str,rel_pvars)]
+    # else:
+    #     irrel_pvars = [p for p in map(str,all_pvars) if p not in map(str,rel_pvars + cl_pvars)]
     all_objects = pvars2objects(all_pvars)
     rel_objects = pvars2objects(rel_pvars)
-    irrel_objects = [x for x in all_objects if x not in rel_objects]
-
-    # from IPython import embed; embed()
-
-    scoped_problem_path = get_scoped_problem_path(problem, suffix=scoping_suffix)
-    writeback_problem(problem, scoped_problem_path, irrel_objects)
+    cl_objects = pvars2objects(cl_pvars)
+    objects2remove_keep_cl = [x for x in all_objects if x not in rel_objects + cl_objects]
+    objects2remove_remove_cl = [x for x in all_objects if x not in rel_objects]
+    # Keep CL
+    scoped_problem_path = get_scoped_problem_path(problem, suffix="with_cl")
+    writeback_problem(problem, scoped_problem_path, objects2remove_keep_cl)
+    # Remove CL
+    scoped_problem_path = get_scoped_problem_path(problem, suffix="sans_cl")
+    writeback_problem(problem, scoped_problem_path, objects2remove_remove_cl)
 
     all_actions = sorted(list(set([a.name for a in parser.actions])))
     relevant_actions = []
@@ -49,5 +52,5 @@ def scope_pddl(domain, problem, remove_cl_pvars = True, scoping_suffix = None):
     relevant_actions = sorted(list(set(relevant_actions)))
     irrel_actions = [a for a in all_actions if a not in relevant_actions]
 
-    scoped_domain_path = get_scoped_domain_path(domain, problem, suffix=scoping_suffix)
+    scoped_domain_path = get_scoped_domain_path(domain, problem)
     writeback_domain(domain, scoped_domain_path, irrel_actions)

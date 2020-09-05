@@ -5,6 +5,8 @@ item_types = ["wool","diamond", "stick", "diamond-pickaxe", "apple", "potato"
     , "rabbit", "orchid-flower", "daisy-flower", "flint", "coal", "iron-ore", "iron-ingot", "netherportal",
     "flint-and-steel"]
 
+def count_state_space(x_range, y_range, z_range):
+    pass
 
 # type2name = {
 #     "apple":"ap",

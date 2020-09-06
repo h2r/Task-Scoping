@@ -355,7 +355,7 @@
 (:action load-truck-driverlog
   :parameters
    (?obj - obj
-    ?truck - truck
+    ?truck - truck-driverlog
     ?loc - location)
   :precondition
    (and (located-at-driverlog ?truck ?loc) (located-at-driverlog ?obj ?loc))
@@ -365,7 +365,7 @@
 (:action unload-truck
   :parameters
    (?obj - obj
-    ?truck - truck
+    ?truck - truck-driverlog
     ?loc - location)
   :precondition
    (and (located-at-driverlog ?truck ?loc) (in ?obj ?truck))
@@ -375,7 +375,7 @@
 (:action board-truck
   :parameters
    (?driver - driver
-    ?truck - truck
+    ?truck - truck-driverlog
     ?loc - location)
   :precondition
    (and (located-at-driverlog ?truck ?loc) (located-at-driverlog ?driver ?loc) (empty-driverlog  ?truck))
@@ -385,7 +385,7 @@
 (:action disembark-truck
   :parameters
    (?driver - driver
-    ?truck - truck
+    ?truck - truck-driverlog
     ?loc - location)
   :precondition
    (and (located-at-driverlog ?truck ?loc) (driving ?driver ?truck))
@@ -394,7 +394,7 @@
 
 (:action drive-truck
   :parameters
-   (?truck - truck
+   (?truck - truck-driverlog
     ?loc-from - location
     ?loc-to - location
     ?driver - driver)

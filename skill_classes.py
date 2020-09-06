@@ -84,20 +84,22 @@ class SkillPDDL(): #Skills are Immutable
 		return str(self) < str(other)
 		# if self.action < other.action: return True
 		# elif self.action > other.action: return False
+	
 	def move_irrelevant2side_effects(self, relevant_pvars):
 		"""Returns a new skill with irrelevant pvars moved to side effects"""
 		# Check that no relevant vars are in side effects
 		"""
 		TODO side effects should be list of EffectTypes. We can extract pvars from these as needed.
 		"""
-		for e in self.side_effects:
-			if e.pvar in relevant_pvars:
-				raise ValueError(f"Skill has relevant pvar in side effects:\n{self}")
+		# for e in self.side_effects:
+		# 	if e.pvar in relevant_pvars:
+		# 		raise ValueError(f"Skill has relevant pvar in side effects:\n{self}")
 
 		new_effects = []
 		new_side_effects = list(copy.copy(self.side_effects))
 		for e in self.effects:
-			if e.pvar in relevant_pvars:
+			# if e.pvar in relevant_pvars:
+			if(relevant_pvars.get(e.pvar) is not None):
 				new_effects.append(e)
 			else:
 				new_side_effects.append(e)
@@ -173,14 +175,20 @@ def merge_skills_pddl(skills: Iterable[SkillPDDL], relevant_pvars: Iterable[z3.E
 	"""
 	new_skills = []
 	hashed_skills = OrderedDict()
-	if "taxi-x(t0)" in map(str,relevant_pvars):
-		print("taxi time")
+
+	rel_pvar_dict = {}
+	for rel_pvar in relevant_pvars:
+		rel_pvar_dict[rel_pvar] = True
+
 	# Move irrelevant pvars to side effects and group skills by actions and effect types
 	for s in skills:
-		s = s.move_irrelevant2side_effects(relevant_pvars)
+		# s = s.move_irrelevant2side_effects(relevant_pvars)
+		s = s.move_irrelevant2side_effects(rel_pvar_dict)
 		k = (s.effects)
 		if k not in hashed_skills.keys(): hashed_skills[k] = []
 		hashed_skills[k].append(s)
+	
+	print("Done getting skills according to effect")
 
 	# Merge skills that share a key
 	for (effects), sks in hashed_skills.items():
@@ -196,6 +204,9 @@ def merge_skills_pddl(skills: Iterable[SkillPDDL], relevant_pvars: Iterable[z3.E
 		if len(actions) == 1: actions = actions[0]
 		s_merged = SkillPDDL(precondition, actions, effects, side_effects)
 		new_skills.append(s_merged)
+	
+	print("Done Quotienting!")
+
 	return sorted(new_skills)
 
 def merge_skills(skills: Iterable[Skill], relevant_pvars: Iterable[z3.ExprRef]):

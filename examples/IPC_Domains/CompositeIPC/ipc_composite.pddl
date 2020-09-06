@@ -1,16 +1,12 @@
 
 (define (domain ipc_composite)
   (:requirements :typing :fluents :equality)
- (:types satellite direction instrument mode  ; Satellite
-         rover waypoint store camera mode lander objective ; Rover 
-         locatable_zeno city ; zeno
-         place locatable_depot ;depot
-         location locatable-driverlog - object ;driverlog
-         aircraft person - locatable_zeno ; zeno
-         depot distributor - place ; depot
-         truck-depot hoist surface - locatable_depot ; depot
-         pallet crate - surface ; depot
-         driver truck-driverlog obj - locatable-driverlog ; driverlog
+ (:types satellite direction instrument mode rover waypoint store camera mode lander objective locatable_zeno city place locatable_depot location locatable-driverlog - object
+         aircraft person - locatable_zeno
+         depot distributor - place
+         truck-depot hoist surface - locatable_depot
+         pallet crate - surface
+         driver truck-driverlog obj - locatable-driverlog
 )
 
  (:predicates 
@@ -66,9 +62,9 @@
 
           ;driverlog
           (located-at-driverlog ?obj - locatable-driverlog ?loc - location)
-		(in ?obj1 - obj ?obj - truck-driverlog)
-		(driving ?d - driver ?v - truck-driverlog)
-		(link ?x ?y - location) (path ?x ?y - location)
+		      (in ?obj1 - obj ?obj - truck-driverlog)
+		      (driving ?d - driver ?v - truck-driverlog)
+		      (link ?x ?y - location) (path ?x ?y - location)
           (empty-driverlog  ?v - truck-driverlog)
 )
 
@@ -112,11 +108,11 @@
    :parameters (?s - satellite ?d_new - direction ?d_prev - direction)
    :precondition (and (pointing ?s ?d_prev)
                    (not (= ?d_new ?d_prev))
-		(>= (fuel-satellite?s) (slew_time ?d_new ?d_prev))
+		(>= (fuel-satellite ?s) (slew_time ?d_new ?d_prev))
               )
    :effect (and  (pointing ?s ?d_new)
                  (not (pointing ?s ?d_prev))
-		(decrease (fuel-satellite?s) (slew_time ?d_new ?d_prev))
+		(decrease (fuel-satellite ?s) (slew_time ?d_new ?d_prev))
 		(increase (fuel-used) (slew_time ?d_new ?d_prev))
            )
   )
@@ -340,13 +336,13 @@
 :parameters (?x - hoist ?y - crate ?z - truck-depot ?p - place)
 :precondition (and (located-at-depot ?x ?p) (located-at-depot ?z ?p) (lifting ?x ?y)
 		(<= (+ (current_load ?z) (weight ?y)) (load_limit ?z)))
-:effect (and (not (lifting ?x ?y)) (in-depot?y ?z) (available-depot ?x)
+:effect (and (not (lifting ?x ?y)) (in-depot ?y ?z) (available-depot ?x)
 		(increase (current_load ?z) (weight ?y))))
 
 (:action unload 
 :parameters (?x - hoist ?y - crate ?z - truck-depot ?p - place)
-:precondition (and (located-at-depot ?x ?p) (located-at-depot ?z ?p) (available-depot ?x) (in-depot?y ?z))
-:effect (and (not (in-depot?y ?z)) (not (available-depot ?x)) (lifting ?x ?y)
+:precondition (and (located-at-depot ?x ?p) (located-at-depot ?z ?p) (available-depot ?x) (in-depot ?y ?z))
+:effect (and (not (in-depot ?y ?z)) (not (available-depot ?x)) (lifting ?x ?y)
 		(decrease (current_load ?z) (weight ?y))))
 
 ;--------------------------------------------------------------------------------

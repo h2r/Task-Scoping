@@ -16,17 +16,21 @@ class PDDL_Parser_z3(PDDL_Parser):
             str2var = OrderedDict()
         for p_name, p_args in things_dict.items():
             groundings = product_dict(**OrderedDict([(varnm, self.get_objects_of_type(vartype)) for (varnm, vartype) in p_args.items()]))
+            # if("located-at" in p_name):
+            #     from IPython import embed; embed()
             for x in groundings:
                 s = p_name + "(" + ", ".join(x.values()) + ")"
                 grounded_predicate = z3_class(s)
                 assert s not in str2var.keys(), f"{s}: {str2var[s]}, {grounded_predicate}"
                 str2var[s] = grounded_predicate
         return str2var
+
     # TODO make this a property?
     def make_str2var_dict(self):
         str2var_dict = OrderedDict()
         str2var_dict = self.make_z3_atoms(self.predicates, z3.Bool, str2var_dict)
         str2var_dict = self.make_z3_atoms(self.functions, z3.Int, str2var_dict)
+        # from IPython import embed; embed()
         return str2var_dict
 
     def str_grounded_actions2skills(self, str_grounded_actions, str2var_dict):
@@ -180,7 +184,10 @@ def compile_expression(expr, str_var_dict, parser=None):
             if expr[0] == "=":
                 return expr[1] == expr[2]
             else:
+                # try:
                 return str_var_dict[list2var_str(expr)]
+                # except KeyError:
+                #     from IPython import embed; embed()
         elif len(expr) == 2:
             # The only length 2 expression we can compile is ['not', [subexpression]]
             if expr[0] == "not":

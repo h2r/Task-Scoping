@@ -77,6 +77,7 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 	while not converged:
 		# Get quotient skills
 		skills_rel = merge_skills_pddl(skills, pvars_rel, solver=solver)
+
 		if verbose > 1:
 			print(i)
 			print("~" * 10 + "Skills" + "~" * 10)
@@ -87,6 +88,7 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 		# Get causal links
 		causal_links = get_causal_links(start_condition, skills_rel)
 
+		print("Got new causal links!!!")
 		# Get pvars not guaranteed by causal links
 		pvars_rel_new = get_unlinked_pvars(skills_rel, causal_links, dummy_goal, solver)
 
@@ -95,6 +97,7 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 
 		pvars_rel = pvars_rel_new
 		i += 1
+		print(pvars_rel)
 		print("Done 1 iteration")
 		# print(pvars_rel)
 		# from IPython import embed; embed()

@@ -202,6 +202,7 @@ class PDDL_Parser:
         type_hierarchy = type_hierarchy_sorted
         self.type_hierarchy = type_hierarchy_sorted
         self.types = list(type_hierarchy.keys())
+        
 
     def domain2types(self, domain_filename):
         with open(domain_filename, "r") as f:
@@ -232,6 +233,7 @@ class PDDL_Parser:
         type_hierarchy = type_hierarchy_sorted
         self.type_hierarchy = type_hierarchy_sorted
         self.types = list(type_hierarchy.keys())
+        # from IPython import embed; embed()
 
     #-----------------------------------------------
     # Parse action

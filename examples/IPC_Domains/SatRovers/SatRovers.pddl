@@ -1,5 +1,5 @@
 
-(define (domain satellite)
+(define (domain satrovers)
   (:requirements :typing :fluents :equality)
  (:types satellite direction instrument mode rover waypoint store camera mode lander objective - object)
  (:predicates 

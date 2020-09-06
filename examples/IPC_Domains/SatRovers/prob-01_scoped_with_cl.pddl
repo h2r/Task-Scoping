@@ -88,6 +88,7 @@
 		(communicated_image_data objective1 colour)
 		(communicated_image_data objective1 low_res)
 	    (calibrated-satellite instrument0)
+		(pointing satellite0 GroundStation0)
 	   )
 )
 

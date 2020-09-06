@@ -1,8 +1,8 @@
 (define (problem strips-sat-x-0)
-(:domain satellite)
+(:domain satrovers)
 (:objects
-	satellite0 - satellite
-	instrument0 - instrument
+	satellite0 satellite1 - satellite
+	instrument0 instrument1 - instrument
 	image1 spectrograph2 thermograph0 - mode
 	GroundStation0 GroundStation1 GroundStation2 - direction
 	general - lander
@@ -15,6 +15,7 @@
 )
 (:init
 	(supports instrument0 thermograph0)
+	(supports instrument1 thermograph0)
 	(calibration_target instrument0 GroundStation2)
 	(on_board instrument0 satellite0)
 	(power_avail satellite0)
@@ -69,7 +70,7 @@
 	(calibration_target-rover camera0 objective1)
 	
 	(supports-camera-rover camera0 high_res)
-	(supports-camera-rover camera0 colour)
+	; (supports-camera-rover camera0 colour)
 	(supports-camera-rover camera0 low_res)
 
 	(visible_from objective0 waypoint0)
@@ -83,11 +84,12 @@
 )
 (:goal (and
 		(communicated_soil_data waypoint2)
-		(communicated_rock_data waypoint3)
+		; (communicated_rock_data waypoint3)
 		(communicated_image_data objective1 high_res)
-		(communicated_image_data objective1 colour)
-		(communicated_image_data objective1 low_res)
+		; (communicated_image_data objective1 colour)
+		; (communicated_image_data objective1 low_res)
 	    (calibrated-satellite instrument0)
+		; (pointing satellite0 GroundStation0)
 	   )
 )
 

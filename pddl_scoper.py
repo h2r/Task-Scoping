@@ -1,6 +1,7 @@
 from utils import get_atoms, get_unique_z3_vars, get_scoped_domain_path, get_scoped_problem_path, writeback_problem, writeback_domain, pvars2objects
 from scoping import scope
 from PDDLz3 import PDDL_Parser_z3
+
 def scope_pddl(domain, problem, remove_cl_pvars = True):
     parser = PDDL_Parser_z3()
     parser.parse_domain(domain)

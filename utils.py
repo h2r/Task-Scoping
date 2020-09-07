@@ -10,9 +10,6 @@ from itertools import product, chain
 solver = z3.Solver()
 synth2varnames = {}
 
-
-
-
 def get_scoped_problem_path(p, suffix = None):
     p_split = p.split(".")
     base = ".".join(p_split[:-1])
@@ -20,7 +17,7 @@ def get_scoped_problem_path(p, suffix = None):
         suffix = ""
     else:
         suffix = "_" + suffix
-    return base + "_scoped" + suffix + "." +  p_split[-1]
+    return base + "_scoped_depot" + suffix + "." +  p_split[-1]
 
 def get_scoped_domain_path(d, p, suffix = None):
     d_split = d.split(".")
@@ -33,7 +30,7 @@ def get_scoped_domain_path(d, p, suffix = None):
         suffix = ""
     else:
         suffix = "_" + suffix
-    d_new = base + "_" + "scoped" + "_"  + p_base + suffix + "." + d_split[-1]
+    d_new = base + "_" + "scoped_depot" + "_"  + p_base + suffix + "." + d_split[-1]
     return d_new
 
 def find_closing_paren(s, start):

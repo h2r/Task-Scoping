@@ -2,12 +2,12 @@
 (:domain ipc_composite)
 (:objects
 	; Depot
-	depot0 - depot
-	distributor0 distributor1 - distributor
-	truck0 truck1 - truck-depot
-	pallet0 pallet1 pallet2 - pallet
-	crate0 crate1 crate2 crate3 crate4 crate5 - crate
-	hoist0 hoist1 hoist2 - hoist
+;	depot0 - depot
+;	distributor0 distributor1 - distributor
+;	truck0 truck1 - truck-depot
+;	pallet0 pallet1 pallet2 - pallet
+;	crate0 crate1 crate2 crate3 crate4 crate5 - crate
+;	hoist0 hoist1 hoist2 - hoist
 
 	; Satellite
 	satellite0 - satellite
@@ -16,93 +16,93 @@
 	GroundStation1 Star0 GroundStation2 Planet3 Planet4 Phenomenon5 Phenomenon6 Star7 - direction
 
 	; Driverlog
-	driver1 driver2 - driver
-    truckd1 truckd2 - truck-driverlog
-    package1 package2 - obj
-    s0 s1 s2 p1-0 p1-2 - location
+;	driver1 driver2 - driver
+;	truckd1 truckd2 - truck-driverlog
+;	package1 package2 - obj
+;	s0 s1 s2 p1-0 p1-2 - location
 )
 
 (:init
 	; Depot
-	(located-at-depot pallet0 depot0)
-	(clear crate1)
-	(located-at-depot pallet1 distributor0)
-	(clear crate4)
-	(located-at-depot pallet2 distributor1)
-	(clear crate5)
-	(located-at-depot truck0 depot0)
-	(= (current_load truck0) 0)
-	(= (load_limit truck0) 457)
-	(located-at-depot truck1 distributor0)
-	(= (current_load truck1) 0)
-	(= (load_limit truck1) 331)
-	(located-at-depot hoist0 depot0)
-	(available-depot hoist0)
-	(located-at-depot hoist1 distributor0)
-	(available-depot hoist1)
-	(located-at-depot hoist2 distributor1)
-	(available-depot hoist2)
-	(located-at-depot crate0 distributor0)
-	(on-depot crate0 pallet1)
-	(= (weight crate0) 99)
-	(located-at-depot crate1 depot0)
-	(on-depot crate1 pallet0)
-	(= (weight crate1) 89)
-	(located-at-depot crate2 distributor1)
-	(on-depot crate2 pallet2)
-	(= (weight crate2) 67)
-	(located-at-depot crate3 distributor0)
-	(on-depot crate3 crate0)
-	(= (weight crate3) 81)
-	(located-at-depot crate4 distributor0)
-	(on-depot crate4 crate3)
-	(= (weight crate4) 4)
-	(located-at-depot crate5 distributor1)
-	(on-depot crate5 crate2)
-	(= (weight crate5) 50)
+;	(located-at-depot pallet0 depot0)
+;	(clear crate1)
+;	(located-at-depot pallet1 distributor0)
+;	(clear crate4)
+;	(located-at-depot pallet2 distributor1)
+;	(clear crate5)
+;	(located-at-depot truck0 depot0)
+;	(= (current_load truck0) 0)
+;	(= (load_limit truck0) 457)
+;	(located-at-depot truck1 distributor0)
+;	(= (current_load truck1) 0)
+;	(= (load_limit truck1) 331)
+;	(located-at-depot hoist0 depot0)
+;	(available-depot hoist0)
+;	(located-at-depot hoist1 distributor0)
+;	(available-depot hoist1)
+;	(located-at-depot hoist2 distributor1)
+;	(available-depot hoist2)
+;	(located-at-depot crate0 distributor0)
+;	(on-depot crate0 pallet1)
+;	(= (weight crate0) 99)
+;	(located-at-depot crate1 depot0)
+;	(on-depot crate1 pallet0)
+;	(= (weight crate1) 89)
+;	(located-at-depot crate2 distributor1)
+;	(on-depot crate2 pallet2)
+;	(= (weight crate2) 67)
+;	(located-at-depot crate3 distributor0)
+;	(on-depot crate3 crate0)
+;	(= (weight crate3) 81)
+;	(located-at-depot crate4 distributor0)
+;	(on-depot crate4 crate3)
+;	(= (weight crate4) 4)
+;	(located-at-depot crate5 distributor1)
+;	(on-depot crate5 crate2)
+;	(= (weight crate5) 50)
 	(= (fuel-cost) 0)
 ; ----------------------------------------------------------------------------
 	; Driverlog
-	(located-at-driverlog driver1 s2)
-    (located-at-driverlog driver2 s2)
-    (located-at-driverlog truckd1 s0)
-    (empty-driverlog truckd1)
-    (located-at-driverlog truckd2 s0)
-    (empty-driverlog truckd2)
-    (located-at-driverlog package1 s0)
-    (located-at-driverlog package2 s0)
-    (path s1 p1-0)
-    (path p1-0 s1)
-    (path s0 p1-0)
-    (path p1-0 s0)
-    (= (time-to-walk s1 p1-0) 43)
-    (= (time-to-walk p1-0 s1) 43)
-    (= (time-to-walk s0 p1-0) 80)
-    (= (time-to-walk p1-0 s0) 80)
-    (path s1 p1-2)
-    (path p1-2 s1)
-    (path s2 p1-2)
-    (path p1-2 s2)
-    (= (time-to-walk s1 p1-2) 29)
-    (= (time-to-walk p1-2 s1) 29)
-    (= (time-to-walk s2 p1-2) 79)
-    (= (time-to-walk p1-2 s2) 79)
-    (link s0 s1)
-    (link s1 s0)
-    (= (time-to-drive s0 s1) 70)
-    (= (time-to-drive s1 s0) 70)
-    (link s0 s2)
-    (link s2 s0)
-    (= (time-to-drive s0 s2) 47)
-    (= (time-to-drive s2 s0) 47)
-    (link s2 s1)
-    (link s1 s2)
-    (= (time-to-drive s2 s1) 24)
-    (= (time-to-drive s1 s2) 24)
+;	(located-at-driverlog driver1 s2)
+;    (located-at-driverlog driver2 s2)
+;    (located-at-driverlog truckd1 s0)
+;    (empty-driverlog truckd1)
+;    (located-at-driverlog truckd2 s0)
+;    (empty-driverlog truckd2)
+;    (located-at-driverlog package1 s0)
+;    (located-at-driverlog package2 s0)
+;    (path s1 p1-0)
+;    (path p1-0 s1)
+;    (path s0 p1-0)
+;    (path p1-0 s0)
+;    (= (time-to-walk s1 p1-0) 43)
+;    (= (time-to-walk p1-0 s1) 43)
+;    (= (time-to-walk s0 p1-0) 80)
+;    (= (time-to-walk p1-0 s0) 80)
+;    (path s1 p1-2)
+;    (path p1-2 s1)
+;    (path s2 p1-2)
+;    (path p1-2 s2)
+;    (= (time-to-walk s1 p1-2) 29)
+;    (= (time-to-walk p1-2 s1) 29)
+;    (= (time-to-walk s2 p1-2) 79)
+;    (= (time-to-walk p1-2 s2) 79)
+;    (link s0 s1)
+;    (link s1 s0)
+;    (= (time-to-drive s0 s1) 70)
+;    (= (time-to-drive s1 s0) 70)
+;    (link s0 s2)
+;    (link s2 s0)
+;    (= (time-to-drive s0 s2) 47)
+;    (= (time-to-drive s2 s0) 47)
+;    (link s2 s1)
+;    (link s1 s2)
+;    (= (time-to-drive s2 s1) 24)
+;    (= (time-to-drive s1 s2) 24)
     (= (driven) 0)
     (= (walked) 0)
 ; ----------------------------------------------------------------------------
-	; Satellite
+; Satellite
 	(supports instrument0 infrared1)
 	(supports instrument0 infrared0)
 	(calibration_target instrument0 Star0)
@@ -193,19 +193,16 @@
 )
 
 (:goal (and
-		(on-depot crate0 crate1)
-		(on-depot crate1 pallet2)
-		(on-depot crate2 pallet0)
-
-		; (located-at-driverlog truckd2 s0)
-	    ; (located-at-driverlog package1 s0)
-    	; (located-at-driverlog package2 s0)
-
-		; Satellite Goal
-		; (have_image Planet4 infrared0)
-		; (have_image Phenomenon5 image2)
-		; (have_image Phenomenon6 infrared0)
-		; (have_image Star7 infrared0)
+;		; (on-depot crate0 crate1)
+;		; (on-depot crate1 pallet2)
+;		; (on-depot crate2 pallet0)
+;		; (located-at-driverlog truckd2 s0)
+;	    ; (located-at-driverlog package1 s0)
+;    	; (located-at-driverlog package2 s0)
+		(have_image Planet4 infrared0)
+		(have_image Phenomenon5 image2)
+		(have_image Phenomenon6 infrared0)
+		(have_image Star7 infrared0)
 	)
 )
 )

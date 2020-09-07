@@ -102,7 +102,7 @@
     (= (driven) 0)
     (= (walked) 0)
 ; ----------------------------------------------------------------------------
-	; Satellite
+; Satellite
 	(supports instrument0 infrared1)
 	(supports instrument0 infrared0)
 	(calibration_target instrument0 Star0)
@@ -193,19 +193,16 @@
 )
 
 (:goal (and
-		(on-depot crate0 crate1)
-		(on-depot crate1 pallet2)
-		(on-depot crate2 pallet0)
-
+		; (on-depot crate0 crate1)
+		; (on-depot crate1 pallet2)
+		; (on-depot crate2 pallet0)
 		; (located-at-driverlog truckd2 s0)
 	    ; (located-at-driverlog package1 s0)
     	; (located-at-driverlog package2 s0)
-
-		; Satellite Goal
-		; (have_image Planet4 infrared0)
-		; (have_image Phenomenon5 image2)
-		; (have_image Phenomenon6 infrared0)
-		; (have_image Star7 infrared0)
+		(have_image Planet4 infrared0)
+		(have_image Phenomenon5 image2)
+		(have_image Phenomenon6 infrared0)
+		(have_image Star7 infrared0)
 	)
 )
 )

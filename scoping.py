@@ -116,7 +116,8 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 	for c in causal_links:
 		pvars_cl.extend(get_atoms(c))
 	pvars_cl = get_unique_z3_vars(pvars_cl)
-	pvars_cl = [c for c in pvars_cl if c not in skills_conds_pvars]
+	# We only care about the pvars that are causally linked AND used in preconditions
+	pvars_cl = [c for c in pvars_cl if c in skills_conds_pvars]
 	return pvars_rel, pvars_cl, skills_rel
 
 def scope_pddl(domain, problem):

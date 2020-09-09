@@ -4,6 +4,7 @@ import math
 import operator as op
 from functools import reduce
 import copy
+from malmo_writer import make_malmo_domain
 
 item_types = ["wool","diamond", "stick", "diamond-pickaxe", "apple", "potato"
     , "rabbit", "orchid-flower", "daisy-flower", "flint", "coal", "iron-ore", "iron-ingot", "netherportal",
@@ -510,8 +511,10 @@ def make_instance_1(start_with_pick = True, use_bedrock_boundaries = False, add_
         if item_type != "netherportal":
             init_conds.append(f"( = ( agent-num-{item_type} {agent_name} ) {item_count} )")
     # init_conds.append(f"( = ( agent-num-diamond-pickaxe {agent_name} ) 1 )")
-    init_conds.extend(get_init_location_conds((11,8,1),tgt_obsidian)) # We got current excel results on (11, 7, 1)
-    init_conds.extend(get_init_location_conds((10,8,0),object_names["obsidian-block"][1]))
+    block_locations = OrderedDict()
+    block_locations["obsidian-block"] = [(11,8,1), (10,8,0)]
+    init_conds.extend(get_init_location_conds(block_locations["obsidian-block"][0],tgt_obsidian)) # We got current excel results on (11, 7, 1)
+    init_conds.extend(get_init_location_conds(block_locations["obsidian-block"][1],object_names["obsidian-block"][1]))
     # init_conds.extend(get_init_location_conds((12,7,0),object_names["obsidian-block"][2]))
     # init_conds.extend(get_init_location_conds((10,7,1),object_names["obsidian-block"][3]))
     # init_conds.extend(get_init_location_conds((12,7,1),object_names["obsidian-block"][4]))
@@ -528,32 +531,55 @@ def make_instance_1(start_with_pick = True, use_bedrock_boundaries = False, add_
     init_conds.extend(get_init_location_conds((0,0,0), diamond_pick_name))
     init_conds.append(f"( not ( present {diamond_pick_name} ) )")
 
+    item_locations = OrderedDict()
+    item_locations["stick"] = []
     for i, s in enumerate(object_names["stick"]):
-        init_conds.extend(get_init_location_conds((1,i,0),s))
+        loc = (1,i,0)
+        item_locations["stick"].append(loc)
+        init_conds.extend(get_init_location_conds(loc,s))
         init_conds.append(f"( present {s} )")
 
+    item_locations["flint"] = []
     for i, s in enumerate(object_names["flint"]):
-        init_conds.extend(get_init_location_conds((8,i,0),s))
+        loc = (8,i,0)
+        item_locations["flint"].append(loc)
+        init_conds.extend(get_init_location_conds(loc,s))
         init_conds.append(f"( present {s} )")
 
+    block_locations["iron-ore"] = []
     for i, s in enumerate(object_names["iron-ore"]):
-        init_conds.extend(get_init_location_conds((10,i,0),s))
+        loc = (10,i,0)
+        block_locations["iron-ore"].append(loc)
+        init_conds.extend(get_init_location_conds(loc,s))
         init_conds.append(f"( present {s} )")
     
+    item_locations["coal"] = []
     for i, s in enumerate(object_names["coal"]):
-        init_conds.extend(get_init_location_conds((9,i,0),s))
+        loc = (9,i,0)
+        item_locations["coal"] = loc
+        init_conds.extend(get_init_location_conds(loc,s))
         init_conds.append(f"( present {s} )")
     
+    item_locations["diamond"] = []
     for i, s in enumerate(object_names["diamond"]):
-        init_conds.extend(get_init_location_conds((2,i,0),s))
+        loc = (2,i,0)
+        item_locations["diamond"].append(loc)
+        init_conds.extend(get_init_location_conds(,s))
         init_conds.append(f"(present {s})")
 
+    # item_locations["iron-ingot"] = []
+    inventory_count
     for i, s in enumerate(object_names["iron-ingot"]):
-        init_conds.extend(get_init_location_conds((0,i,0),s))
+        loc = (0,i,0)
+        # item_locations["iron-ingot"].append(loc)
+        init_conds.extend(get_init_location_conds(loc,s))
         init_conds.append(f"(not ( present {s} ))")
 
+    # item_locations["flint-and-steel"] = []
     for i, s in enumerate(object_names["flint-and-steel"]):
-        init_conds.extend(get_init_location_conds((0,i,0),s))
+        loc = (0,i,0)
+        # item_locations["flint-and-steel"].append(loc)
+        init_conds.extend(get_init_location_conds(loc,s))
         init_conds.append(f"(not ( present {s} ))")
 
     for i, s in enumerate(object_names["netherportal"]):
@@ -561,24 +587,39 @@ def make_instance_1(start_with_pick = True, use_bedrock_boundaries = False, add_
         init_conds.append(f"(not ( present {s} ))")
 
     if(add_irrel_items):
+        item_locations["apple"] = []
         for i, s in enumerate(object_names["apple"]):
-            init_conds.extend(get_init_location_conds((3,i,0),s))
+            loc = (3,i,0)
+            item_locations["apple"].append(loc)
+            init_conds.extend(get_init_location_conds(loc,s))
             init_conds.append(f"( present {s} )")
 
+        item_locations["potato"] = []
         for i, s in enumerate(object_names["potato"]):
-            init_conds.extend(get_init_location_conds((4,i,0),s))
+            loc = (4,i,0)
+            item_locations["potato"].append(loc)
+            init_conds.extend(get_init_location_conds(loc,s))
             init_conds.append(f"( present {s} )")
 
+        item_locations["daisy-flower"] = []
         for i, s in enumerate(object_names["daisy-flower"]):
-            init_conds.extend(get_init_location_conds((5,i,0),s))
+            loc = (5,i,0)
+            item_locations["daisy-flower"].append(loc)
+            init_conds.extend(get_init_location_conds(loc,s))
             init_conds.append(f"( present {s} )")
 
+        item_locations["orchid-flower"] = []
         for i, s in enumerate(object_names["orchid-flower"]):
-            init_conds.extend(get_init_location_conds((6,i,0),s))
+            loc = (6,i,0)
+            item_locations["orchid-flower"].append(loc)
+            init_conds.extend(get_init_location_conds(loc,s))
             init_conds.append(f"( present {s} )")
 
+        item_locations["rabbit"] = []
         for i, s in enumerate(object_names["rabbit"]):
-            init_conds.extend(get_init_location_conds((7,i,0),s))
+            loc = (7,i,0)
+            item_locations["rabbit"].append(loc)
+            init_conds.extend(get_init_location_conds(loc,s))
             init_conds.append(f"( present {s} )")
 
     for s in object_names["obsidian-block"]:
@@ -588,6 +629,7 @@ def make_instance_1(start_with_pick = True, use_bedrock_boundaries = False, add_
     if use_bedrock_boundaries:
         boundary_positions = get_boundary_positions(x_min, x_max, y_min, y_max, z_min, z_max)
         object_names["bedrock"] = [f"bed{i}" for i in range(len(boundary_positions))]
+        # We don't add these to block_locations because we build the malmo boundaries using a different function
         for i in range(len(boundary_positions)):
             s = object_names["bedrock"][i]
             init_conds.extend(get_init_location_conds(boundary_positions[i], s))
@@ -618,6 +660,10 @@ def make_instance_1(start_with_pick = True, use_bedrock_boundaries = False, add_
     state_space_conventional_s = f"; Conventional state space size = {state_space_conventional}"
     prob_parts = [header, object_declaration, init_conds, goal, state_space_underestimate_s,state_space_conventional_s, ")"]
     prob_s = "\n\n\n".join(prob_parts)
+
+    # Make malmo domain
+    malmo_s = make_malmo_domain(block_locations, item_locations, )
+
     return prob_s
 
 def make_types_declaration(type_hierarchy):

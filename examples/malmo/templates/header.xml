@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+    <Mission xmlns="http://ProjectMalmo.microsoft.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <About>
+            <Summary>Domain Summary</Summary>
+        </About>
+
+        <ModSettings>
+            <MsPerTick>50</MsPerTick>
+        </ModSettings>
+        <ServerSection>
+            <ServerInitialConditions>
+                <Time>
+                    <StartTime>1000</StartTime>
+                    <AllowPassageOfTime>false</AllowPassageOfTime>
+                </Time>
+                <Weather>clear</Weather>
+                <AllowSpawning>false</AllowSpawning>
+                <AllowedMobs>Sheep</AllowedMobs>
+            </ServerInitialConditions>
+            <ServerHandlers>
+                <FlatWorldGenerator generatorString="3;7,202*1,5*3,2;3;,biome_1" />

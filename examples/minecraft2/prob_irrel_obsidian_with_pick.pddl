@@ -216,7 +216,7 @@
 ; State space size if we allow any object to have any z > 11270071133336964680660791038899983442985
 
 
-; Conventional state space size = 7.700977396386494e+31
+; Conventional state space size = 1.0352527663655793e+58
 
 
 )

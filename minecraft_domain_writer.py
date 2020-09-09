@@ -24,7 +24,7 @@ def conventional_state_space_count(x_min, x_max, y_min, y_max, z_min, z_max, n_o
     # xy position
     x_y_types = list(set(item_types + ["agent", "obsidian-block"]))
     n_x_y_objects = count_key_values(item_counts, x_y_types)
-    x_y_states = math.pow(2,n_x_y_objects)
+    x_y_states = math.pow(plane_size,n_x_y_objects)
 
     # z position
     z_types = ["obsidian-block"]

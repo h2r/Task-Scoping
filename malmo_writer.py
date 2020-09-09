@@ -112,8 +112,14 @@ def make_malmo_domain(blocks, items, start_pos, inventory_counts
         del items_new
 
         # y is negatized, which swaps max and min
-        x_min, y_min, z_min = pddl2malmo_coords(x_min, y_max, z_min)
-        x_max, y_max, z_max = pddl2malmo_coords(x_max, y_min, z_max)
+        # x_min, y_min, z_min = x_min, z_min + 200, -y_max
+        # x_min, y_min, z_min = x_min, z_min + 200, -y_max
+        min_new = pddl2malmo_coords(x_min, y_max, z_min)
+        max_new = pddl2malmo_coords(x_max, y_min, z_max)
+        x_min, y_min, z_min = min_new
+        x_max, y_max, z_max = max_new
+        # x_min, y_min, z_min = pddl2malmo_coords(x_min, y_max, z_min)
+        # x_max, y_max, z_max = pddl2malmo_coords(x_max, y_min, z_max)
     with open("examples/malmo/templates/main_template.xml","r") as f:
         domain = f.read()
 

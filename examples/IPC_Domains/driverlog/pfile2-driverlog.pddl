@@ -1,5 +1,5 @@
 (define (problem DLOG-2-2-3)
-	(:domain driverlog)
+	(:domain ipc_composite)
 	(:objects
 	driver1 - driver
 	driver2 - driver

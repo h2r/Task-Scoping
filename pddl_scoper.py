@@ -15,13 +15,9 @@ def scope_pddl(domain, problem, remove_cl_pvars = True):
     # This below block converts all the domain's initial conditions to z3
     init_cond_list = parser.get_init_cond_list()
    
-    
-
     # Run the scoper on the constructed goal, skills and initial condition
     rel_pvars, cl_pvars, rel_skills = scope(goals=goal_cond, skills=skill_list, start_condition=init_cond_list)
     
-    
-
     all_pvars = []
     for s in skill_list:
         all_pvars.extend(get_atoms(s.precondition))
@@ -34,7 +30,7 @@ def scope_pddl(domain, problem, remove_cl_pvars = True):
     all_objects = pvars2objects(all_pvars)
     rel_objects = pvars2objects(rel_pvars)
     cl_objects = pvars2objects(cl_pvars)
-    objects2remove_keep_cl = [x for x in all_objects if x not in rel_objects + cl_objects]
+    objects2remove_keep_cl = [x for x in all_objects if x not in (rel_objects + cl_objects)]
     objects2remove_remove_cl = [x for x in all_objects if x not in rel_objects]
     # Keep CL
     scoped_problem_path = get_scoped_problem_path(problem, suffix="with_cl")
@@ -55,3 +51,4 @@ def scope_pddl(domain, problem, remove_cl_pvars = True):
 
     scoped_domain_path = get_scoped_domain_path(domain, problem)
     writeback_domain(domain, scoped_domain_path, irrel_actions)
+    # from IPython import embed; embed()

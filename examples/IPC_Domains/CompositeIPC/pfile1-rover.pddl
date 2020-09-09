@@ -1,4 +1,4 @@
-(define (problem roverprob1234) (:domain Rover)
+(define (problem roverprob1234) (:domain ipc_composite)
 (:objects
 	general - lander
 	colour high_res low_res - mode
@@ -32,10 +32,10 @@
 	(at_lander general waypoint0)
 	(channel_free general)
 	(= (energy rover0) 50)
-	(located-at rover0 waypoint3)
-	(available rover0)
+	(located-at-rover rover0 waypoint3)
+	(available-rover rover0)
 	(store_of rover0store rover0)
-	(empty rover0store)
+	(empty-rover rover0store)
 	(equipped_for_soil_analysis rover0)
 	(equipped_for_rock_analysis rover0)
 	(equipped_for_imaging rover0)
@@ -47,8 +47,8 @@
 	(can_traverse rover0 waypoint2 waypoint1)
 	(on_board camera0 rover0)
 	(calibration_target camera0 objective1)
-	(supports camera0 colour)
-	(supports camera0 high_res)
+	(supports-camera-rover camera0 colour)
+	(supports-camera-rover camera0 high_res)
 	(visible_from objective0 waypoint0)
 	(visible_from objective0 waypoint1)
 	(visible_from objective0 waypoint2)
@@ -57,7 +57,6 @@
 	(visible_from objective1 waypoint1)
 	(visible_from objective1 waypoint2)
 	(visible_from objective1 waypoint3)
-	(communicated_image_data objective1 high_res)
 )
 
 (:goal (and

@@ -492,9 +492,9 @@ def make_instance_1(start_with_pick = True, use_bedrock_boundaries = False, add_
                 )
             )"""
 
-    x_min, x_max = 0, 2
-    y_min, y_max = 0, 2
-    z_min, z_max = 0, 2
+    x_min, x_max = 0, 8
+    y_min, y_max = 0, 11
+    z_min, z_max = 0, 1
 
     # item_counts = OrderedDict([("apple",2),("potato",1)])
     # item_counts = OrderedDict([("apple",1)])

@@ -1,10 +1,10 @@
 (define (problem DLOG-2-2-3)
-	(:domain driverlog)
+	(:domain ipc_composite)
 	(:objects
 	driver1 - driver
 	driver2 - driver
-	truck1 - truck
-	truck2 - truck
+	truckd1 - truck-driverlog
+	truckd2 - truck-driverlog
 	package1 - obj
 	package2 - obj
 	package3 - obj
@@ -17,15 +17,15 @@
 	p2-1 - location
 	)
 	(:init
-	(located-at driver1 s0)
-	(located-at driver2 s0)
-	(located-at truck1 s0)
-	(empty truck1)
-	(located-at truck2 s1)
-	(empty truck2)
-	(located-at package1 s2)
-	(located-at package2 s1)
-	(located-at package3 s1)
+	(located-at-driverlog driver1 s0)
+	(located-at-driverlog driver2 s0)
+	(located-at-driverlog truckd1 s0)
+	(empty-driverlog truckd1)
+	(located-at-driverlog truckd2 s1)
+	(empty-driverlog truckd2)
+	(located-at-driverlog package1 s2)
+	(located-at-driverlog package2 s1)
+	(located-at-driverlog package3 s1)
 	(path s0 p0-1)
 	(path p0-1 s0)
 	(path s1 p0-1)
@@ -66,13 +66,13 @@
 	(= (walked) 0)
 )
 	(:goal (and
-			(located-at driver1 s1)
-			(located-at driver2 s1)
-			(located-at truck1 s2)
-			(located-at truck2 s0)
-			(located-at package1 s0)
-			(located-at package2 s2)
-			(located-at package3 s0)
+			(located-at-driverlog driver1 s1)
+			(located-at-driverlog driver2 s1)
+			(located-at-driverlog truckd1 s2)
+			(located-at-driverlog truckd2 s0)
+			(located-at-driverlog package1 s0)
+			(located-at-driverlog package2 s2)
+			(located-at-driverlog package3 s0)
 		   )
 	)
 

@@ -19,7 +19,7 @@ def errorfill(x, y, yerr, color=None, alpha_fill=0.3, ax=None, linestyle=None, p
 def plot():
     plt.figure(1)
 
-    domain_num = np.log10(np.array([5.37*(10 ** 16),8.59*(10 ** 16),1.37 * (10 ** 19),2.20 * (10 ** 20),3.52 * (10 ** 21)]))
+    domain_num = np.log10(np.array([2.68*(10 ** 16),4.29*(10 ** 17),6.87 * (10 ** 18),1.01 * (10 ** 20),31.76 * (10 ** 21)]))
 
     planner_time = np.array([10.4528, 17.9689, 23.0667, 28.284, 29.4582])
     planner_stddev = np.array([0.3371968762,0.4784970568,0.8237816661,0.3609755301,0.6369407438])

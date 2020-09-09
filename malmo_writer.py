@@ -8,12 +8,12 @@ import copy
 type_replacements = {
     "obsidian-block":"obsidian",
     "netherportal":"portal",
-    'daisy-flower': 'daisy_flower',
+    'daisy-flower': 'oxeye_daisy',
     'diamond-pickaxe': 'diamond_pickaxe',
     'flint-and-steel': 'flint_and_steel',
     'iron-ingot': 'iron_ingot',
     'iron-ore': 'iron_ore',
-    'orchid-flower': 'orchid_flower'
+    'orchid-flower': 'blue_orchid'
 }
 
 with open("examples/malmo/block_types.txt", "r") as f:
@@ -71,31 +71,54 @@ def make_malmo_domain(blocks, items, start_pos, inventory_counts
     start_pos: x,y,z position of agent
     convert_coords: If true, we convert coords to malmo. If false, we assume coords are already in malmo format
     """
+    # Update block and item types to match malmo types
+    blocks_new = OrderedDict()
+    for t, positions in blocks.items():
+        t = type_replacements.get(t,t)
+        blocks_new[t] = positions
+    blocks = blocks_new
+    del blocks_new
+
+    items_new = OrderedDict()
+    for t, positions in items.items():
+        t = type_replacements.get(t,t)
+        items_new[t] = positions
+    items = items_new
+    del items_new
+
+    # Convert to malmo coordinates
     if convert_coords:
         start_pos = pddl2malmo_coords(*start_pos)
 
         blocks_new = OrderedDict()
         for t, positions in blocks.items():
-            blocks[t] = [pddl2malmo_coords(*p) for p in positions]
+            blocks_new[t] = [pddl2malmo_coords(*p) for p in positions]
         blocks = blocks_new
         del blocks_new
 
         items_new = OrderedDict()
         for t, positions in items.items():
-            items[t] = [pddl2malmo_coords(*p) for p in positions]
+            items_new[t] = [pddl2malmo_coords(*p) for p in positions]
         items = items_new
         del items_new
 
         # y is negatized, which swaps max and min
         x_min, y_min, z_min = pddl2malmo_coords(x_min, y_max, z_min)
         x_max, y_max, z_max = pddl2malmo_coords(x_max, y_min, z_max)
-
     with open("examples/malmo/templates/main_template.xml","r") as f:
         domain = f.read()
+
+    
     # Used to fill in blanks in template domain
     format_dict = OrderedDict()
+    format_dict["arena_width"] = x_max - x_min + 1
+    format_dict["arena_breadth"] = z_max - z_min + 1
+    format_dict["arena_height"] = y_max - y_min + 1
     # Set summary
-    format_dict["summary"] = summary
+    # format_dict["summary"] = summary
+    format_dict["summary"] = "{summary}"
+    format_dict["video_requirements"] = "{video_requirements}"
+
     # Set agent start position
     format_dict["placement"] = make_agent_placement(*start_pos)
     # Set agent start inventory

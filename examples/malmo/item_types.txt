@@ -186,3 +186,13 @@ record_strad
 record_ward
 record_11
 record_wait
+dandelion
+poppy
+blue_orchid
+allium
+houstonia
+red_tulip
+orange_tulip
+white_tulip
+pink_tulip
+oxeye_daisy

@@ -44,7 +44,7 @@
                 </RewardForDamagingEntity>
                 <SimpleCraftCommands/>
                 <ObservationFromNearbyEntities>
-                    <Range name="entities" xrange="{arena_width}'" yrange="{arena_height}" zrange="{arena_breadth}" />
+                    <Range name="entities" xrange="{arena_width}" yrange="{arena_height}" zrange="{arena_breadth}" />
                 </ObservationFromNearbyEntities>
                 <ObservationFromFullStats/>{video_requirements}
             </AgentHandlers>

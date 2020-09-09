@@ -8,12 +8,12 @@ import copy
 type_replacements = {
     "obsidian-block":"obsidian",
     "netherportal":"portal",
-    'daisy-flower': 'pumpkin_pie',
+    'daisy-flower': 'oxeye_daisy',
     'diamond-pickaxe': 'diamond_pickaxe',
     'flint-and-steel': 'flint_and_steel',
     'iron-ingot': 'iron_ingot',
     'iron-ore': 'iron_ore',
-    'orchid-flower': 'bow'
+    'orchid-flower': 'blue_orchid'
 }
 
 with open("examples/malmo/block_types.txt", "r") as f:
@@ -37,13 +37,15 @@ def draw_block(object_type, x, y, z):
         raise ValueError(f"{object_type} not a valid block type")
     return f'<DrawCuboid x1="{x}" y1="{y}" z1="{z}" x2="{x}" y2="{y}" z2="{z}" type="{object_type}"/>'
     # return 'x'+index+'="'+x+'" y'+index+'="' +str(y)+'" z'+index+'="'+z+'"'
+def draw_flower(object_type, x, y, z):
+    return f'<DrawCuboid x1="{x}" y1="{y}" z1="{z}" x2="{x}" y2="{y}" z2="{z}" type="red_flower" variant="{object_type}"/>'
 
 def add_decimal(x: int):
     return str(x) + ".0"
 
-def make_agent_placement(x,y,z):
+def make_agent_placement(x,y,z, pitch=10, yaw=270):
     x,y,z = add_decimal(x), add_decimal(y), add_decimal(z)
-    return f'<Placement x="{x}" y="{y}" z="{z}" pitch="50"/>'
+    return f'<Placement x="{x}" y="{y}" z="{z}" pitch="{pitch}" yaw="{yaw}"/>'
 
 def make_inventory(inventory_counts):
     inventory_lines = []
@@ -60,8 +62,10 @@ def make_arena(x_min, x_max, y_min, y_max, z_min, z_max):
     Returns pair of lines that place bedrock around, and air inside
     """
     bedrock = f'<DrawCuboid x1="{x_min - 1}" y1="{y_min - 1}" z1="{z_min - 1}" x2="{x_max + 1}" y2="{y_max + 1}" z2="{z_max + 1}" type="bedrock"/>'
+    glowstone = f'<DrawCuboid x1="{x_min - 1}" y1="{y_max + 1}" z1="{z_min - 1}" x2="{x_max + 1}" y2="{y_max + 1}" z2="{z_max + 1}" type="glowstone"/>'
     air = f'<DrawCuboid x1="{x_min}" y1="{y_min}" z1="{z_min}" x2="{x_max}" y2="{y_max}" z2="{z_max}" type="air"/>'
-    return [bedrock, air]
+    
+    return [bedrock, glowstone, air]
 
 def make_malmo_domain(blocks, items, start_pos, inventory_counts
     , x_min, x_max, y_min, y_max, z_min, z_max
@@ -148,9 +152,13 @@ def make_malmo_domain(blocks, items, start_pos, inventory_counts
             drawing_lines.append(draw_block(t,*p))
     # Place items in the world
     for t, positions in items.items():
+        if t in ["daisy-flower", "orchid-flower", "oxeye_daisy", "blue_orchid"]:
+            draw_func = draw_flower
+        else:
+            draw_func = draw_item
         for p in positions:
-            drawing_lines.append(draw_item(t, *p))
+            drawing_lines.append(draw_func(t, *p))
     
-    format_dict["drawing_objects"] = "\n".join(drawing_lines)
+    format_dict["drawing_objects"] = "\n\t\t\t\t\t".join(drawing_lines)
     
     return domain.format(**format_dict)

@@ -196,3 +196,13 @@ birch_door
 jungle_door
 acacia_door
 dark_oak_door
+dandelion
+poppy
+blue_orchid
+allium
+houstonia
+red_tulip
+orange_tulip
+white_tulip
+pink_tulip
+oxeye_daisy

@@ -20,20 +20,21 @@
             <ServerHandlers>
                 <FlatWorldGenerator generatorString="3;7,202*1,5*3,2;3;,biome_1" />
                 <DrawingDecorator>
-                    <DrawCuboid x1="-1" y1="199" z1="-12" x2="9" y2="202" z2="1" type="bedrock"/>
-<DrawCuboid x1="0" y1="200" z1="-11" x2="8" y2="201" z2="0" type="air"/>
-<DrawCuboid x1="11" y1="201" z1="-8" x2="11" y2="201" z2="-8" type="obsidian"/>
-<DrawCuboid x1="10" y1="200" z1="-8" x2="10" y2="200" z2="-8" type="obsidian"/>
-<DrawCuboid x1="10" y1="200" z1="0" x2="10" y2="200" z2="0" type="iron_ore"/>
-<DrawItem x="1" y="200" z="0" type="stick"/>
-<DrawItem x="1" y="200" z="-1" type="stick"/>
-<DrawItem x="8" y="200" z="0" type="flint"/>
-<DrawItem x="8" y="200" z="-1" type="flint"/>
-<DrawItem x="8" y="200" z="-2" type="flint"/>
-<DrawItem x="9" y="200" z="0" type="coal"/>
-<DrawItem x="2" y="200" z="0" type="diamond"/>
-<DrawItem x="2" y="200" z="-1" type="diamond"/>
-<DrawItem x="2" y="200" z="-2" type="diamond"/>
+                    <DrawCuboid x1="-1" y1="199" z1="-9" x2="12" y2="202" z2="1" type="bedrock"/>
+					<DrawCuboid x1="-1" y1="202" z1="-9" x2="12" y2="202" z2="1" type="glowstone"/>
+					<DrawCuboid x1="0" y1="200" z1="-8" x2="11" y2="201" z2="0" type="air"/>
+					<DrawCuboid x1="11" y1="201" z1="-8" x2="11" y2="201" z2="-8" type="obsidian"/>
+					<DrawCuboid x1="10" y1="200" z1="-8" x2="10" y2="200" z2="-8" type="obsidian"/>
+					<DrawCuboid x1="10" y1="200" z1="0" x2="10" y2="200" z2="0" type="iron_ore"/>
+					<DrawItem x="1" y="200" z="0" type="stick"/>
+					<DrawItem x="1" y="200" z="-1" type="stick"/>
+					<DrawItem x="8" y="200" z="0" type="flint"/>
+					<DrawItem x="8" y="200" z="-1" type="flint"/>
+					<DrawItem x="8" y="200" z="-2" type="flint"/>
+					<DrawItem x="9" y="200" z="0" type="coal"/>
+					<DrawItem x="2" y="200" z="0" type="diamond"/>
+					<DrawItem x="2" y="200" z="-1" type="diamond"/>
+					<DrawItem x="2" y="200" z="-2" type="diamond"/>
                 </DrawingDecorator>
                <ServerQuitWhenAnyAgentFinishes />
                <ServerQuitFromTimeUp timeLimitMs="120000"/>
@@ -43,7 +44,7 @@
         <AgentSection mode="Survival">
             <Name>The Q-Learner</Name>
             <AgentStart>
-                <Placement x="0.0" y="200.0" z="0.0" pitch="50"/>
+                <Placement x="0.0" y="200.0" z="0.0" pitch="10" yaw="270"/>
                 <Inventory>
                     <InventoryItem type="diamond_pickaxe" slot="0"/>
                 </Inventory>
@@ -57,7 +58,7 @@
                 </RewardForDamagingEntity>
                 <SimpleCraftCommands/>
                 <ObservationFromNearbyEntities>
-                    <Range name="entities" xrange="9'" yrange="2" zrange="12" />
+                    <Range name="entities" xrange="12" yrange="2" zrange="9" />
                 </ObservationFromNearbyEntities>
                 <ObservationFromFullStats/>{video_requirements}
             </AgentHandlers>

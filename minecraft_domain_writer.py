@@ -700,35 +700,35 @@ if __name__ == "__main__":
     prob_s, malmo_s = make_instance_1(start_with_pick=True, add_irrel_items=False, goal_var="make_netherportal")
     with open("examples/minecraft2/prob_nether_with_pick.pddl","w") as f:
         f.write(prob_s)
-    with open("examples/malmo/problems/prob_nether_with_pick.pddl","w") as f:
+    with open("examples/malmo/problems/prob_nether_with_pick.xml","w") as f:
         f.write(malmo_s)
 
     prob_ir, malmo_ir = make_instance_1(start_with_pick=True, add_irrel_items=True, goal_var="make_netherportal")
     with open("examples/minecraft2/prob_irrel_nether_with_pick.pddl","w") as f:
         f.write(prob_ir)
-    with open("examples/malmo/problems/prob_irrel_nether_with_pick.pddl","w") as f:
+    with open("examples/malmo/problems/prob_irrel_nether_with_pick.xml","w") as f:
         f.write(malmo_ir)
 
     prob_s, malmo_s = make_instance_1(start_with_pick=True, add_irrel_items=False, goal_var="break_obsidian")
     with open("examples/minecraft2/prob_obsidian_with_pick.pddl","w") as f:
         f.write(prob_s)
-    with open("examples/malmo/problems/prob_obsidian_with_pick.pddl","w") as f:
+    with open("examples/malmo/problems/prob_obsidian_with_pick.xml","w") as f:
         f.write(malmo_s)
 
     prob_ir, malmo_ir = make_instance_1(start_with_pick=True, add_irrel_items=True, goal_var="break_obsidian")
     with open("examples/minecraft2/prob_irrel_obsidian_with_pick.pddl","w") as f:
         f.write(prob_ir)
-    with open("examples/malmo/problems/prob_irrel_obsidian_with_pick.pddl","w") as f:
+    with open("examples/malmo/problems/prob_irrel_obsidian_with_pick.xml","w") as f:
         f.write(malmo_ir)
     
     prob_s, malmo_s = make_instance_1(start_with_pick=True, add_irrel_items=False, goal_var="make_flint_and_steel")
     with open("examples/minecraft2/prob_flint_with_pick.pddl","w") as f:
         f.write(prob_s)
-    with open("examples/malmo/problems/prob_flint_with_pick.pddl","w") as f:
+    with open("examples/malmo/problems/prob_flint_with_pick.xml","w") as f:
         f.write(malmo_s)
 
     prob_ir, malmo_ir = make_instance_1(start_with_pick=True, add_irrel_items=True, goal_var="make_flint_and_steel")
     with open("examples/minecraft2/prob_irrel_flint_with_pick.pddl","w") as f:
         f.write(prob_ir)
-    with open("examples/malmo/problems/prob_irrel_flint_with_pick.pddl","w") as f:
+    with open("examples/malmo/problems/prob_irrel_flint_with_pick.xml","w") as f:
         f.write(malmo_ir)

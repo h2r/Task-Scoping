@@ -42,16 +42,16 @@
 <DrawItem x="4" y="200" z="-2" type="potato"/>
 <DrawItem x="4" y="200" z="-3" type="potato"/>
 <DrawItem x="4" y="200" z="-4" type="potato"/>
-<DrawItem x="5" y="200" z="0" type="oxeye_daisy"/>
-<DrawItem x="5" y="200" z="-1" type="oxeye_daisy"/>
-<DrawItem x="5" y="200" z="-2" type="oxeye_daisy"/>
-<DrawItem x="5" y="200" z="-3" type="oxeye_daisy"/>
-<DrawItem x="5" y="200" z="-4" type="oxeye_daisy"/>
-<DrawItem x="6" y="200" z="0" type="blue_orchid"/>
-<DrawItem x="6" y="200" z="-1" type="blue_orchid"/>
-<DrawItem x="6" y="200" z="-2" type="blue_orchid"/>
-<DrawItem x="6" y="200" z="-3" type="blue_orchid"/>
-<DrawItem x="6" y="200" z="-4" type="blue_orchid"/>
+<DrawItem x="5" y="200" z="0" type="pumpkin_pie"/>
+<DrawItem x="5" y="200" z="-1" type="pumpkin_pie"/>
+<DrawItem x="5" y="200" z="-2" type="pumpkin_pie"/>
+<DrawItem x="5" y="200" z="-3" type="pumpkin_pie"/>
+<DrawItem x="5" y="200" z="-4" type="pumpkin_pie"/>
+<DrawItem x="6" y="200" z="0" type="bow"/>
+<DrawItem x="6" y="200" z="-1" type="bow"/>
+<DrawItem x="6" y="200" z="-2" type="bow"/>
+<DrawItem x="6" y="200" z="-3" type="bow"/>
+<DrawItem x="6" y="200" z="-4" type="bow"/>
 <DrawItem x="7" y="200" z="0" type="rabbit"/>
 <DrawItem x="7" y="200" z="-1" type="rabbit"/>
 <DrawItem x="7" y="200" z="-2" type="rabbit"/>
@@ -68,7 +68,7 @@
             <AgentStart>
                 <Placement x="0.0" y="200.0" z="0.0" pitch="50"/>
                 <Inventory>
-                    <InventoryItem type="diamond-pickaxe" slot="0"/>
+                    <InventoryItem type="diamond_pickaxe" slot="0"/>
                 </Inventory>
             </AgentStart>
             <AgentHandlers>

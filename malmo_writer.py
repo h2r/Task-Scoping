@@ -8,12 +8,12 @@ import copy
 type_replacements = {
     "obsidian-block":"obsidian",
     "netherportal":"portal",
-    'daisy-flower': 'oxeye_daisy',
+    'daisy-flower': 'pumpkin_pie',
     'diamond-pickaxe': 'diamond_pickaxe',
     'flint-and-steel': 'flint_and_steel',
     'iron-ingot': 'iron_ingot',
     'iron-ore': 'iron_ore',
-    'orchid-flower': 'blue_orchid'
+    'orchid-flower': 'bow'
 }
 
 with open("examples/malmo/block_types.txt", "r") as f:
@@ -38,8 +38,11 @@ def draw_block(object_type, x, y, z):
     return f'<DrawCuboid x1="{x}" y1="{y}" z1="{z}" x2="{x}" y2="{y}" z2="{z}" type="{object_type}"/>'
     # return 'x'+index+'="'+x+'" y'+index+'="' +str(y)+'" z'+index+'="'+z+'"'
 
+def add_decimal(x: int):
+    return str(x) + ".0"
+
 def make_agent_placement(x,y,z):
-    x,y,z = float(x), float(y), float(z)
+    x,y,z = add_decimal(x), add_decimal(y), add_decimal(z)
     return f'<Placement x="{x}" y="{y}" z="{z}" pitch="50"/>'
 
 def make_inventory(inventory_counts):
@@ -86,6 +89,12 @@ def make_malmo_domain(blocks, items, start_pos, inventory_counts
     items = items_new
     del items_new
 
+    inventory_counts_new = OrderedDict()
+    for t, positions in inventory_counts.items():
+        t = type_replacements.get(t,t)
+        inventory_counts_new[t] = positions
+    inventory_counts = inventory_counts_new
+    del inventory_counts_new
     # Convert to malmo coordinates
     if convert_coords:
         start_pos = pddl2malmo_coords(*start_pos)

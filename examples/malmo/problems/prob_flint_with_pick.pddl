@@ -45,7 +45,7 @@
             <AgentStart>
                 <Placement x="0.0" y="200.0" z="0.0" pitch="50"/>
                 <Inventory>
-                    <InventoryItem type="diamond-pickaxe" slot="0"/>
+                    <InventoryItem type="diamond_pickaxe" slot="0"/>
                 </Inventory>
             </AgentStart>
             <AgentHandlers>

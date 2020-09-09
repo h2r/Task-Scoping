@@ -116,7 +116,10 @@
         
 
 
-; State space size: > 288277779735
+; State space size if we allow any object to have any z > 288277779735
+
+
+; Conventional state space size = 211106232532992.0
 
 
 )

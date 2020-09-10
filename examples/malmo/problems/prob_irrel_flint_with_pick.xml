@@ -67,7 +67,7 @@
         <AgentSection mode="Survival">
             <Name>The Q-Learner</Name>
             <AgentStart>
-                <Placement x="0.0" y="200.0" z="0.0" pitch="10" yaw="270"/>
+                <Placement x="0.0" y="200.0" z="0.0" pitch="10" yaw="180"/>
                 <Inventory>
                     <InventoryItem type="diamond_pickaxe" slot="0"/>
                 </Inventory>
@@ -83,7 +83,22 @@
                 <ObservationFromNearbyEntities>
                     <Range name="entities" xrange="12" yrange="2" zrange="9" />
                 </ObservationFromNearbyEntities>
-                <ObservationFromFullStats/>{video_requirements}
+                <ObservationFromFullStats/> {video_requirements}
+            </AgentHandlers>
+        </AgentSection>
+
+        <AgentSection mode="Creative">
+            <Name>The Watcher</Name>
+            <AgentStart>
+            <Placement x="1.0" y="200.0" z="-8.0" pitch="10" yaw="270"/>
+            </AgentStart>
+            <AgentHandlers>
+            <ContinuousMovementCommands turnSpeedDegs="360"/>
+            <MissionQuitCommands/>
+            <VideoProducer>
+                <Width>640</Width>
+                <Height>640</Height>
+            </VideoProducer>
             </AgentHandlers>
         </AgentSection>
 

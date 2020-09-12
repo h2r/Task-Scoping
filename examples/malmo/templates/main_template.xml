@@ -36,7 +36,17 @@
                 </Inventory>
             </AgentStart>
             <AgentHandlers>
-                <ContinuousMovementCommands turnSpeedDegs="420"/>
+                <!-- <ContinuousMovementCommands turnSpeedDegs="420"/> -->
+                <DiscreteMovementCommands>
+                    <ModifierList type="deny-list">
+                        <command>attack</command>
+                    </ModifierList>
+                </DiscreteMovementCommands>
+                <ContinuousMovementCommands>
+                    <ModifierList type="allow-list">
+                        <command>attack</command>
+                    </ModifierList>
+                </ContinuousMovementCommands>
                 <ObservationFromRay/>
                 <RewardForDamagingEntity>
                     <Mob type="Sheep" reward="1"/>
@@ -50,7 +60,7 @@
             </AgentHandlers>
         </AgentSection>
 
-        <AgentSection mode="Creative">
+        <!-- <AgentSection mode="Creative">
             <Name>The Watcher</Name>
             <AgentStart>
             <Placement x="5.0" y="200.0" z="0.0" pitch="10" yaw="270"/>
@@ -63,6 +73,6 @@
                 <Height>640</Height>
             </VideoProducer>
             </AgentHandlers>
-        </AgentSection>
+        </AgentSection> -->
 
     </Mission>

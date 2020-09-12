@@ -42,9 +42,15 @@ def draw_flower(object_type, x, y, z):
 
 def add_decimal(x: int):
     return str(x) + ".0"
+def sign(x):
+    if x >= 0:
+        return 1
+    else:
+        return -1
 
-def make_agent_placement(x,y,z, pitch=10, yaw=270):
-    x,y,z = add_decimal(x), add_decimal(y), add_decimal(z)
+def make_agent_placement(x,y,z, pitch=10, yaw=180):
+    # Add .5 to center agent on block, so that discrete movement works
+    x,z = x + sign(x)*0.5, z + sign(z)*0.5
     return f'<Placement x="{x}" y="{y}" z="{z}" pitch="{pitch}" yaw="{yaw}"/>'
 
 def make_inventory(inventory_counts):

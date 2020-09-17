@@ -1,7 +1,7 @@
 (define (problem TAXINUMERIC-64)
 (:domain universal_multipasstaxi)
 (:objects
-	curly smoov littman isbell - passenger
+	curly smoov edison isbell - passenger
     t0 - taxi
 )
 (:init
@@ -10,7 +10,7 @@
 
     (not (in-taxi curly t0))
     (not (in-taxi smoov t0))
-    (not (in-taxi littman t0))
+    (not (in-taxi edison t0))
     (not (in-taxi isbell t0))
 
     (= (pass-x curly) 3329)
@@ -19,8 +19,8 @@
     (= (pass-x smoov) 3459)
     (= (pass-y smoov) 1262)
 
-    (= (pass-x littman) 1291)
-    (= (pass-y littman) 5037)
+    (= (pass-x edison) 1291)
+    (= (pass-y edison) 5037)
 
     (= (pass-x isbell) 9723)
     (= (pass-y isbell) 4875)

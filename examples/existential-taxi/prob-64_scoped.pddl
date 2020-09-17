@@ -1,7 +1,7 @@
 (define (problem TAXINUMERIC-64)
 (:domain universal_multipasstaxi)
 (:objects
-	curly smoov littman isbell tellex konidaris kaelbling perez levine abbeel nilsson fikes mcdermott vonNeumann turing urtasun garg shkruti agrawal pathak fidler tedrake finn bohg sadigh dragan srinivasa brooks mataric stone silver sridhar gu hausman anguelov sutskever krizhevsky goodfellow ng schulman bengio hinton lecunn schmidhuber mcilraith geffner bonet thiebeaux russell norvig muise roy brunskill velez nau traverso hilbert djikstra rumelhart minsky reddy mccarthy shannon sacerdoti - passenger
+	curly smoov edison isbell cornelius nero kaelbling perez levine abbeel nilsson fikes mcdermott vonNeumann turing urtasun garg shkruti agrawal pathak fidler tedrake finn bohg sadigh dragan srinivasa brooks mataric stone silver sridhar gu hausman anguelov sutskever krizhevsky goodfellow ng schulman bengio hinton lecunn schmidhuber mcilraith geffner bonet thiebeaux russell norvig muise roy brunskill velez nau traverso hilbert djikstra rumelhart minsky reddy mccarthy shannon sacerdoti - passenger
     t0 - taxi
 )
 (:init
@@ -10,10 +10,10 @@
 
     (not (in-taxi curly t0))
     (not (in-taxi smoov t0))
-    (not (in-taxi littman t0))
+    (not (in-taxi edison t0))
     (not (in-taxi isbell t0))
-    (not (in-taxi tellex t0))
-    (not (in-taxi konidaris t0))
+    (not (in-taxi cornelius t0))
+    (not (in-taxi nero t0))
     (not (in-taxi kaelbling t0))
     (not (in-taxi perez t0))
     (not (in-taxi levine t0))
@@ -75,10 +75,10 @@
 
     (= (pass-x curly) 3329)
     (= (pass-x smoov) 3459)
-    (= (pass-x littman) 1291)
+    (= (pass-x edison) 1291)
     (= (pass-x isbell) 9723)
-    (= (pass-x tellex) 8523)
-    (= (pass-x konidaris) 9621)
+    (= (pass-x cornelius) 8523)
+    (= (pass-x nero) 9621)
     (= (pass-x kaelbling) 3362)
     (= (pass-x perez) 5311)
     (= (pass-x levine) 7900)
@@ -140,10 +140,10 @@
 
     (= (pass-y curly) 3615)
     (= (pass-y smoov) 1262)
-    (= (pass-y littman) 5037)
+    (= (pass-y edison) 5037)
     (= (pass-y isbell) 4875)
-    (= (pass-y tellex) 7637)
-    (= (pass-y konidaris) 1215)
+    (= (pass-y cornelius) 7637)
+    (= (pass-y nero) 1215)
     (= (pass-y kaelbling) 3284)
     (= (pass-y perez) 1361)
     (= (pass-y levine) 6594)

@@ -1,4 +1,4 @@
-;; Domain constructed by: Nishanth J. Kumar (nkumar12@cs.brown.edu)
+;; Domain constructed by: <redacted for review>
 
 (define (domain infinite_multipasstaxi)
 (:requirements :typing :fluents :negative-preconditions)

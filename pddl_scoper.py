@@ -1,8 +1,9 @@
 from utils import get_atoms, get_unique_z3_vars, get_scoped_domain_path, get_scoped_problem_path, writeback_problem, writeback_domain, pvars2objects
 from scoping import scope
 from PDDLz3 import PDDL_Parser_z3
+import argparse
 
-def scope_pddl(domain, problem, remove_cl_pvars = True):
+def scope_pddl(domain, problem):
     parser = PDDL_Parser_z3()
     parser.parse_domain(domain)
     parser.parse_problem(problem)
@@ -23,10 +24,6 @@ def scope_pddl(domain, problem, remove_cl_pvars = True):
         all_pvars.extend(get_atoms(s.precondition))
         all_pvars.extend(s.params)
     all_pvars = get_unique_z3_vars(all_pvars)
-    # if remove_cl_pvars:
-    #     irrel_pvars = [p for p in map(str,all_pvars) if p not in map(str,rel_pvars)]
-    # else:
-    #     irrel_pvars = [p for p in map(str,all_pvars) if p not in map(str,rel_pvars + cl_pvars)]
     all_objects = pvars2objects(all_pvars)
     rel_objects = pvars2objects(rel_pvars)
     cl_objects = pvars2objects(cl_pvars)
@@ -51,4 +48,10 @@ def scope_pddl(domain, problem, remove_cl_pvars = True):
 
     scoped_domain_path = get_scoped_domain_path(domain, problem)
     writeback_domain(domain, scoped_domain_path, irrel_actions)
-    # from IPython import embed; embed()
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("domain")
+    parser.add_argument("problem")
+    args = parser.parse_args()
+    scope_pddl(args.domain, args.problem)

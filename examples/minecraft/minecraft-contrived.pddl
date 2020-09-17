@@ -1,4 +1,4 @@
-;; Domain constructed by: Nishanth J. Kumar (nkumar12@cs.brown.edu)
+;; Domain constructed by: <redacted for review>
 
 ; IMPORTANT: Haven't specified a way for the agent to die or pick stuff up
 ; yet. This can totally be hacked around using different actions with preconditions

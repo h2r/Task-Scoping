@@ -27,7 +27,7 @@ if __name__ == '__main__':
     start_time = time.time()
     domain, problem = "examples/IPC_Domains/CompositeIPC/ipc_composite.pddl", "examples/IPC_Domains/CompositeIPC/prob-01.pddl"
     # domain, problem = "examples/IPC_Domains/depot/DepotsNum.pddl", "examples/IPC_Domains/depot/pfile2"
-    scope_pddl(domain, problem, remove_cl_pvars=False)
+    scope_pddl(domain, problem)
     
     end_time = time.time()
     print(f"Total time: {end_time - start_time}")

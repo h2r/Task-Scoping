@@ -1,4 +1,4 @@
-;; Domain constructed by: Nishanth J. Kumar (nkumar12@cs.brown.edu)
+;; Domain constructed by: <redacted for review>
 
 (define (domain universal_multipasstaxi)
 (:requirements :equality :typing :fluents :negative-preconditions :universal-preconditions :existential-preconditions)

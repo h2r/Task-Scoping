@@ -74,7 +74,7 @@ def parse_operators(s):
 
 s = """And(And(Not(in-taxi(curly, t0)),
         Not(in-taxi(smoov, t0)),
-        Not(in-taxi(littman, t0)),
+        Not(in-taxi(edison, t0)),
         Not(in-taxi(isbell, t0))))"""
 s = collapse_whitespace(s)
 

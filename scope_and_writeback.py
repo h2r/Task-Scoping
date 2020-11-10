@@ -25,9 +25,9 @@ if __name__ == '__main__':
     # taxi_prob = "examples/infinite-taxi-numeric/prob02.pddl"
 
     start_time = time.time()
-    # domain, problem = "examples/IPC_Domains/depot/ipc_composite.pddl", "examples/IPC_Domains/CompositeIPC/prob-01.pddl"
-    domain, problem = "examples/IPC_Domains//Rovers/NumRover.pddl", "examples/IPC_Domains/Rovers/prob-03.pddl"
-    scope_pddl(domain, problem, remove_cl_pvars=False)
+    domain, problem = "examples/IPC_Domains/CompositeIPC/ipc_composite.pddl", "examples/IPC_Domains/CompositeIPC/prob-01.pddl"
+    # domain, problem = "examples/IPC_Domains/depot/DepotsNum.pddl", "examples/IPC_Domains/depot/pfile2"
+    scope_pddl(domain, problem)
     
     end_time = time.time()
     print(f"Total time: {end_time - start_time}")

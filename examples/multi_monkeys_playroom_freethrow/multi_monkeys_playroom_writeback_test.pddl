@@ -1,4 +1,4 @@
-;; Domain constructed by: Nishanth J. Kumar (nkumar12@cs.brown.edu)
+;; Domain constructed by: <redacted for review>
 
 ; How does this domain work?
 ; There are some number of lightswitches, red buttons and green buttons. 

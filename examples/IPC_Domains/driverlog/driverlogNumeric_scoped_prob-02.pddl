@@ -17,25 +17,25 @@
 		(walked))
 
 
-;(:action load-truck
-;  :parameters
-;   (?obj - obj
-;    ?truck - truck
-;    ?loc - location)
-;  :precondition
-;   (and (located-at ?truck ?loc) (located-at ?obj ?loc))
-;  :effect
-;   (and (not (located-at ?obj ?loc)) (in ?obj ?truck)))
+(:action load-truck
+  :parameters
+   (?obj - obj
+    ?truck - truck
+    ?loc - location)
+  :precondition
+   (and (located-at ?truck ?loc) (located-at ?obj ?loc))
+  :effect
+   (and (not (located-at ?obj ?loc)) (in ?obj ?truck)))
 
-;(:action unload-truck
-;  :parameters
-;   (?obj - obj
-;    ?truck - truck
-;    ?loc - location)
-;  :precondition
-;   (and (located-at ?truck ?loc) (in ?obj ?truck))
-;  :effect
-;   (and (not (in ?obj ?truck)) (located-at ?obj ?loc)))
+(:action unload-truck
+  :parameters
+   (?obj - obj
+    ?truck - truck
+    ?loc - location)
+  :precondition
+   (and (located-at ?truck ?loc) (in ?obj ?truck))
+  :effect
+   (and (not (in ?obj ?truck)) (located-at ?obj ?loc)))
 
 (:action board-truck
   :parameters

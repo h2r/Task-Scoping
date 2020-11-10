@@ -3,7 +3,7 @@
 (:objects
     driver1 driver2 - driver
     truck1 truck2 - truck
-;	package1 package2 - obj
+    package1 package2 - obj
     s0 s1 s2 p1-0 p1-2 - location
 )
 (:init
@@ -13,8 +13,8 @@
     (empty truck1)
     (located-at truck2 s0)
     (empty truck2)
-;    (located-at package1 s0)
-;    (located-at package2 s0)
+    (located-at package1 s0)
+    (located-at package2 s0)
     (path s1 p1-0)
     (path p1-0 s1)
     (path s0 p1-0)
@@ -47,8 +47,7 @@
     (= (walked) 0)
 )
 	(:goal (and
-	(located-at driver1 s1)
-	(located-at truck1 s1)
-;	(located-at package1 s0)
+	(located-at package1 s1)
+    (located-at package2 s1)
 	))
 )

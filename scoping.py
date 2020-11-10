@@ -143,6 +143,9 @@ def scope_pddl(domain, problem):
         all_pvars.extend(s.params)
     all_pvars = get_unique_z3_vars(all_pvars)
     irrel_pvars = [p for p in map(str,all_pvars) if p not in map(str,rel_pvars)]
+	
+    print(irrel_pvars)
+
     all_objects = pvars2objects(all_pvars)
     rel_objects = pvars2objects(rel_pvars)
     irrel_objects = [x for x in all_objects if x not in rel_objects]

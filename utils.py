@@ -17,7 +17,7 @@ def get_scoped_problem_path(p, suffix = None):
         suffix = ""
     else:
         suffix = "_" + suffix
-    return base + "_scoped_satellite" + suffix + "." +  p_split[-1]
+    return base + "_scoped" + suffix + "." +  p_split[-1]
 
 def get_scoped_domain_path(d, p, suffix = None):
     d_split = d.split(".")
@@ -30,7 +30,7 @@ def get_scoped_domain_path(d, p, suffix = None):
         suffix = ""
     else:
         suffix = "_" + suffix
-    d_new = base + "_" + "scoped_satellite" + "_"  + p_base + suffix + "." + d_split[-1]
+    d_new = base + "_" + "scoped" + "_"  + p_base + suffix + "." + d_split[-1]
     return d_new
 
 def find_closing_paren(s, start):

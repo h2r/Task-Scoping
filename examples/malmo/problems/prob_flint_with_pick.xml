@@ -74,7 +74,7 @@
             </AgentHandlers>
         </AgentSection>
 
-        <!-- <AgentSection mode="Creative">
+        <AgentSection mode="Creative">
             <Name>The Watcher</Name>
             <AgentStart>
             <Placement x="5.0" y="200.0" z="0.0" pitch="10" yaw="270"/>
@@ -87,6 +87,6 @@
                 <Height>640</Height>
             </VideoProducer>
             </AgentHandlers>
-        </AgentSection> -->
+        </AgentSection>
 
     </Mission>

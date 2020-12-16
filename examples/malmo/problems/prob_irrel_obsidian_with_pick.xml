@@ -19,11 +19,11 @@
             </ServerInitialConditions>
             <ServerHandlers>
                 <FlatWorldGenerator generatorString="3;7,202*1,5*3,2;3;,biome_1" />
-                <DrawingDecorator>
-                    <DrawCuboid x1="-1" y1="199" z1="-9" x2="12" y2="202" z2="1" type="bedrock"/>
-					<DrawCuboid x1="-1" y1="202" z1="-9" x2="12" y2="202" z2="1" type="glowstone"/>
-					<DrawCuboid x1="0" y1="200" z1="-8" x2="11" y2="201" z2="0" type="air"/>
-					<DrawCuboid x1="11" y1="201" z1="-8" x2="11" y2="201" z2="-8" type="obsidian"/>
+                <!-- <DrawingDecorator> -->
+                    <!-- <DrawCuboid x1="-1" y1="199" z1="-9" x2="12" y2="202" z2="1" type="bedrock"/>
+					<DrawCuboid x1="-1" y1="202" z1="-9" x2="12" y2="202" z2="1" type="glowstone"/> -->
+					<!-- <DrawCuboid x1="-2" y1="300" z1="-8" x2="13" y2="300" z2="5" type="air"/> -->
+					<!-- <DrawCuboid x1="11" y1="201" z1="-8" x2="11" y2="201" z2="-8" type="obsidian"/>
 					<DrawCuboid x1="10" y1="200" z1="-8" x2="10" y2="200" z2="-8" type="obsidian"/>
 					<DrawCuboid x1="10" y1="200" z1="0" x2="10" y2="200" z2="0" type="iron_ore"/>
 					<DrawItem x="1" y="200" z="0" type="stick"/>
@@ -57,8 +57,8 @@
 					<DrawItem x="7" y="200" z="-1" type="rabbit"/>
 					<DrawItem x="7" y="200" z="-2" type="rabbit"/>
 					<DrawItem x="7" y="200" z="-3" type="rabbit"/>
-					<DrawItem x="7" y="200" z="-4" type="rabbit"/>
-                </DrawingDecorator>
+					<DrawItem x="7" y="200" z="-4" type="rabbit"/> -->
+                <!-- </DrawingDecorator> -->
                <ServerQuitWhenAnyAgentFinishes />
                <ServerQuitFromTimeUp timeLimitMs="120000"/>
             </ServerHandlers>
@@ -67,7 +67,7 @@
         <AgentSection mode="Survival">
             <Name>The Q-Learner</Name>
             <AgentStart>
-                <Placement x="0.5" y="200" z="0.5" pitch="10" yaw="180"/>
+                <Placement x="0.5" y="209" z="0.5" pitch="10" yaw="180"/>
                 <Inventory>
                     <InventoryItem type="diamond_pickaxe" slot="0"/>
                 </Inventory>

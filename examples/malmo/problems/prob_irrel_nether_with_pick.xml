@@ -20,9 +20,78 @@
             <ServerHandlers>
                 <FlatWorldGenerator generatorString="3;7,202*1,5*3,2;3;,biome_1" />
                 <DrawingDecorator>
-                    <DrawCuboid x1="-1" y1="199" z1="-9" x2="12" y2="202" z2="1" type="bedrock"/>
-					<DrawCuboid x1="-1" y1="202" z1="-9" x2="12" y2="202" z2="1" type="glowstone"/>
-					<DrawCuboid x1="0" y1="200" z1="-8" x2="11" y2="201" z2="0" type="air"/>
+                    <
+					D
+					r
+					a
+					w
+					C
+					u
+					b
+					o
+					i
+					d
+					 
+					x
+					1
+					=
+					"
+					0
+					"
+					 
+					y
+					1
+					=
+					"
+					2
+					0
+					0
+					"
+					 
+					z
+					1
+					=
+					"
+					-
+					8
+					"
+					 
+					x
+					2
+					=
+					"
+					1
+					1
+					"
+					 
+					y
+					2
+					=
+					"
+					2
+					0
+					1
+					"
+					 
+					z
+					2
+					=
+					"
+					0
+					"
+					 
+					t
+					y
+					p
+					e
+					=
+					"
+					a
+					i
+					r
+					"
+					/
+					>
 					<DrawCuboid x1="11" y1="201" z1="-8" x2="11" y2="201" z2="-8" type="obsidian"/>
 					<DrawCuboid x1="10" y1="200" z1="-8" x2="10" y2="200" z2="-8" type="obsidian"/>
 					<DrawCuboid x1="10" y1="200" z1="0" x2="10" y2="200" z2="0" type="iron_ore"/>

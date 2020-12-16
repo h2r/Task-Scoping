@@ -21,8 +21,9 @@ with open("examples/malmo/block_types.txt", "r") as f:
 with open("examples/malmo/item_types.txt", "r") as f:
     valid_item_types = f.read().splitlines()
 
-def pddl2malmo_coords(x,y,z, z_offset = 200):
+def pddl2malmo_coords(x,y,z, z_offset = 209):
 	# TODO test
+    # TODO: IMPORTANT: the ground is at MALMO y=209. this needs to be accounted for
 	return x, z + z_offset, -y
 
 
@@ -67,11 +68,12 @@ def make_arena(x_min, x_max, y_min, y_max, z_min, z_max):
     """
     Returns pair of lines that place bedrock around, and air inside
     """
-    bedrock = f'<DrawCuboid x1="{x_min - 1}" y1="{y_min - 1}" z1="{z_min - 1}" x2="{x_max + 1}" y2="{y_max + 1}" z2="{z_max + 1}" type="bedrock"/>'
-    glowstone = f'<DrawCuboid x1="{x_min - 1}" y1="{y_max + 1}" z1="{z_min - 1}" x2="{x_max + 1}" y2="{y_max + 1}" z2="{z_max + 1}" type="glowstone"/>'
+    # bedrock = f'<DrawCuboid x1="{x_min - 1}" y1="{y_min - 1}" z1="{z_min - 1}" x2="{x_max + 1}" y2="{y_max + 1}" z2="{z_max + 1}" type="bedrock"/>'
+    # glowstone = f'<DrawCuboid x1="{x_min - 1}" y1="{y_max + 1}" z1="{z_min - 1}" x2="{x_max + 1}" y2="{y_max + 1}" z2="{z_max + 1}" type="glowstone"/>'
     air = f'<DrawCuboid x1="{x_min}" y1="{y_min}" z1="{z_min}" x2="{x_max}" y2="{y_max}" z2="{z_max}" type="air"/>'
     
-    return [bedrock, glowstone, air]
+    return [air]
+    # return [bedrock, glowstone, air]
 
 def make_malmo_domain(blocks, items, start_pos, inventory_counts
     , x_min, x_max, y_min, y_max, z_min, z_max

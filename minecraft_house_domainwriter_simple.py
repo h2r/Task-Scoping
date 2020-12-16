@@ -86,7 +86,7 @@ def get_predicates_str(predicates):
 
 def get_move_actions():
     # TODO block can't be at same z or higher z
-    s = "(:action move-north\n :parameters (?ag - agent)\n :precondition (and (agent-alive ?ag)\n                    (not (exists (?bl - block) (and (= (x ?bl) (x ?ag))\n                                                    (= (y ?bl) (+ (y ?ag) 1))\n                                                    (= (z ?bl) (z ?ag))))))\n :effect (and (increase (y ?ag) 1))\n)\n\n(:action move-south\n :parameters (?ag - agent)\n :precondition (and (agent-alive ?ag)\n                    (not (exists (?bl - block) (and (= (x ?bl) (x ?ag))\n                                                    (= (y ?bl) (- (y ?ag) 1))\n                                                    (= (z ?bl) (+ (z ?ag) 1))))))\n :effect (and (decrease (y ?ag) 1))\n)\n\n(:action move-east\n :parameters (?ag - agent)\n :precondition (and (agent-alive ?ag)\n                    (not (exists (?bl - block) (and (= (x ?bl) (+ (x ?ag) 1))\n                                                    (= (y ?bl) (y ?ag))\n                                                    (= (z ?bl) (+ (z ?ag) 1))))))\n :effect (and (increase (x ?ag) 1))\n)\n\n(:action move-west\n :parameters (?ag - agent)\n :precondition (and (agent-alive ?ag)\n                    (not (exists (?bl - block) (and (= (x ?bl) (- (x ?ag) 1))\n                                                    (= (y ?bl) (y ?ag))\n                                                    (= (z ?bl) (+ (z ?ag) 1))))))\n :effect (and (decrease (x ?ag) 1))\n)"
+    s = "(:action move-north\n :parameters (?ag - agent)\n :precondition (and (agent-alive ?ag)\n                    (not (exists (?bl - block) (and (= (x ?bl) (x ?ag))\n                                                    (= (y ?bl) (+ (y ?ag) 1))\n                                                    (= (z ?bl) (z ?ag))))))\n :effect (and (increase (y ?ag) 1))\n)\n\n(:action move-south\n :parameters (?ag - agent)\n :precondition (and (agent-alive ?ag)\n                    (not (exists (?bl - block) (and (= (x ?bl) (x ?ag))\n                                                    (= (y ?bl) (- (y ?ag) 1))\n                                                    (= (z ?bl) (z ?ag))))))\n :effect (and (decrease (y ?ag) 1))\n)\n\n(:action move-east\n :parameters (?ag - agent)\n :precondition (and (agent-alive ?ag)\n                    (not (exists (?bl - block) (and (= (x ?bl) (+ (x ?ag) 1))\n                                                    (= (y ?bl) (y ?ag))\n                                                    (= (z ?bl) (z ?ag) )))))\n :effect (and (increase (x ?ag) 1))\n)\n\n(:action move-west\n :parameters (?ag - agent)\n :precondition (and (agent-alive ?ag)\n                    (not (exists (?bl - block) (and (= (x ?bl) (- (x ?ag) 1))\n                                                    (= (y ?bl) (y ?ag))\n                                                    (= (z ?bl) (z ?ag))))))\n :effect (and (decrease (x ?ag) 1))\n)"
     return s
 
 def make_pickup_actions(item_types):
@@ -144,6 +144,9 @@ def make_drop_actions(item_types, item_or_block=True):
         if(t != "netherportal" and t != "diamond-pickaxe"):
             actions.append(action_template.format(t=t))
     return actions
+
+def make_block_stack_actions(block_type):
+    pass
 
 def make_netherportal_action():
     # No restriction on obdisian being in portal shape?
@@ -288,12 +291,13 @@ def make_instance_1(start_with_pick = True, use_bedrock_boundaries = False, add_
     object_names = OrderedDict()
     object_names["agent"] = ["steve"]
     object_names["diamond-pickaxe"] = ["old-pointy"]
-    object_names["oak_wood-block"] = ["oak1", "oak2", "oak3", "oak4", "oak5", "oak6","oak7", "oak8", "oak9"]
+    object_names["oak_wood-block"] = ["oak1", "oak2", "oak3", "oak4", "oak5", "oak6", "oak7",
+                                      "oak8", "oak9", "oak10", "oak11"]
     object_names["oak_wood_stairs-block"] = ["oak_stairs1"]
     
     agent_name = "steve"
-    house_origin_x = 1
-    house_origin_y = 1
+    house_origin_x = 2
+    house_origin_y = 2
 
     header = """(define (problem MINECRAFTHUT)
     (:domain minecraft-house)"""
@@ -383,6 +387,7 @@ def make_instance_1(start_with_pick = True, use_bedrock_boundaries = False, add_
                 (= (x oak_stairs1) {house_origin_x})
                 (= (y oak_stairs1) {house_origin_y})
                 (= (z oak_stairs1) 0)
+                
                 (= (x oak1) {house_origin_x})
                 (= (y oak1) {house_origin_y + 1})
                 (= (z oak1) 0)
@@ -392,6 +397,7 @@ def make_instance_1(start_with_pick = True, use_bedrock_boundaries = False, add_
                 (= (x oak3) {house_origin_x + 1})
                 (= (y oak3) {house_origin_y + 1})
                 (= (z oak3) 0)
+                
                 (= (x oak4) {house_origin_x})
                 (= (y oak4) {house_origin_y + 2})
                 (= (z oak4) 0)
@@ -407,9 +413,16 @@ def make_instance_1(start_with_pick = True, use_bedrock_boundaries = False, add_
                 (= (x oak8) {house_origin_x - 2})
                 (= (y oak8) {house_origin_y + 2})
                 (= (z oak8) 0)
+
                 (= (x oak9) {house_origin_x})
                 (= (y oak9) {house_origin_y + 3})
                 (= (z oak9) 0)
+                (= (x oak10) {house_origin_x - 1})
+                (= (y oak10) {house_origin_y + 3})
+                (= (z oak10) 0)
+                (= (x oak11) {house_origin_x + 1})
+                (= (y oak11) {house_origin_y + 3})
+                (= (z oak11) 0)
                 
                 ))"""
 
@@ -431,7 +444,9 @@ def make_instance_1(start_with_pick = True, use_bedrock_boundaries = False, add_
             init_conds.append(f"( = ( agent-num-{item_type} {agent_name} ) {item_count} )")
     # init_conds.append(f"( = ( agent-num-diamond-pickaxe {agent_name} ) 1 )")
     block_locations = OrderedDict()
-    block_locations["oak_wood-block"] = [(1,1,1), (1,1,1), (1,1,1), (1,1,1), (1,1,1), (1,1,1), (1,1,1), (1,1,1), (1,1,1)]
+    block_locations["oak_wood-block"] = [(1,1,1), (1,1,1), (1,1,1), (1,1,1), (1,1,1), (1,1,1), (1,1,1), (1,1,1),
+                                         (1,1,1), (1,1,1), (1,1,1)
+                                         ]
     block_locations["oak_wood_stairs-block"] = [(1,1,1)]
 
     for wood_block_loc in range(len(block_locations["oak_wood-block"])):

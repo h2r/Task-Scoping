@@ -39,7 +39,7 @@
  :precondition (and (agent-alive ?ag)
                     (not (exists (?bl - block) (and (= (x ?bl) (x ?ag))
                                                     (= (y ?bl) (- (y ?ag) 1))
-                                                    (= (z ?bl) (+ (z ?ag) 1))))))
+                                                    (= (z ?bl) (z ?ag))))))
  :effect (and (decrease (y ?ag) 1))
 )
 
@@ -48,7 +48,7 @@
  :precondition (and (agent-alive ?ag)
                     (not (exists (?bl - block) (and (= (x ?bl) (+ (x ?ag) 1))
                                                     (= (y ?bl) (y ?ag))
-                                                    (= (z ?bl) (+ (z ?ag) 1))))))
+                                                    (= (z ?bl) (z ?ag) )))))
  :effect (and (increase (x ?ag) 1))
 )
 
@@ -57,7 +57,7 @@
  :precondition (and (agent-alive ?ag)
                     (not (exists (?bl - block) (and (= (x ?bl) (- (x ?ag) 1))
                                                     (= (y ?bl) (y ?ag))
-                                                    (= (z ?bl) (+ (z ?ag) 1))))))
+                                                    (= (z ?bl) (z ?ag))))))
  :effect (and (decrease (x ?ag) 1))
 )
 

@@ -13,6 +13,12 @@ from utils import product_dict, nested_list_replace, get_atoms, get_all_objects\
         , get_scoped_problem_path, get_scoped_domain_path, pvars2objects, get_unique_z3_vars
 from scoping import scope
 import time
+# For profiling
+import cProfile
+import pstats
+from pstats import SortKey
+
+
 
 
 def scope_pddl(domain, problem):
@@ -73,16 +79,20 @@ def scope_pddl(domain, problem):
     writeback_domain(domain, scoped_domain_path, irrel_actions)
 
 if __name__ == '__main__':
-    # zeno_dom = "examples/zeno/zeno.pddl"
-    # zeno_prob = "examples/zeno/pb1.pddl"
-    # domain, problem = zeno_dom, zeno_prob
-
-    # taxi_dom = "examples/infinite-taxi-numeric/taxi-domain.pddl"
-    # taxi_prob = "examples/infinite-taxi-numeric/prob02.pddl"
-
     start_time = time.time()
-    domain, problem = "examples/multi_monkeys_playroom/multi_monkeys_playroom.pddl", "examples/multi_monkeys_playroom/prob-03.pddl"
-    scope_pddl(domain, problem)
-    
+    prob_num = '07'
+    domain, problem = f"examples/multi_monkeys_playroom/multi_monkeys_playroom.pddl", f"examples/multi_monkeys_playroom/prob-{prob_num}.pddl"
+    # Path to save entire, non-human-readable profile object
+    profile_path = f'time_profiles/monkey_{prob_num}'
+    # Path to save human-readable profile stats
+    profile_path_txt = profile_path + ".txt"
+    # Run scoper and profile it, saving the profile to profile_path
+    cProfile.run('scope_pddl(domain, problem)', profile_path)
     end_time = time.time()
     print(f"Total time: {end_time - start_time}")
+    # Get the file object for outputting human-readable profile stats
+    stats_readable_file = open(profile_path_txt,"w")
+    # Get stats object from saves profile, and set it to stream output to stats_readable_file
+    p = pstats.Stats(profile_path, stream = stats_readable_file)
+    # Save output to stats_reasable_file
+    p.strip_dirs().sort_stats(SortKey.CUMULATIVE).print_stats()

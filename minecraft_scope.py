@@ -6,6 +6,10 @@ import re, copy
 from scoping import scope
 import time
 from pddl_scoper import scope_pddl
+# For profiling
+import cProfile
+import pstats
+from pstats import SortKey
 
 
 if __name__ == '__main__':
@@ -19,7 +23,32 @@ if __name__ == '__main__':
     ]
 
     for problem in problems:
-        scope_pddl(domain, problem)
+        # Path to save entire, non-human-readable profile object
+        profile_path = f'time_profiles/minecraft_old'
+        # Path to save human-readable profile stats
+        profile_path_txt = profile_path + ".txt"
+        cProfile.run('scope_pddl(domain, problem, old_var_uniquify = True)', profile_path)
+        # Get the file object for outputting human-readable profile stats
+        stats_readable_file = open(profile_path_txt,"w")
+        # Get stats object from saves profile, and set it to stream output to stats_readable_file
+        p = pstats.Stats(profile_path, stream = stats_readable_file)
+        # Save output to stats_reasable_file
+        p.strip_dirs().sort_stats(SortKey.CUMULATIVE).print_stats()
+        # scope_pddl(domain, problem)
+
+
+        # Path to save entire, non-human-readable profile object
+        profile_path = f'time_profiles/minecraft_new'
+        # Path to save human-readable profile stats
+        profile_path_txt = profile_path + ".txt"
+        cProfile.run('scope_pddl(domain, problem, old_var_uniquify = False)', profile_path)
+        # Get the file object for outputting human-readable profile stats
+        stats_readable_file = open(profile_path_txt,"w")
+        # Get stats object from saves profile, and set it to stream output to stats_readable_file
+        p = pstats.Stats(profile_path, stream = stats_readable_file)
+        # Save output to stats_reasable_file
+        p.strip_dirs().sort_stats(SortKey.CUMULATIVE).print_stats()
+        # scope_pddl(domain, problem)
 
     end_time = time.time()
     print(f"Total time: {end_time - start_time}")

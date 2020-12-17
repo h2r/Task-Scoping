@@ -3,7 +3,7 @@ from scoping import scope
 from PDDLz3 import PDDL_Parser_z3
 import argparse
 
-def scope_pddl(domain, problem):
+def scope_pddl(domain, problem, old_var_uniquify = False):
     parser = PDDL_Parser_z3()
     parser.parse_domain(domain)
     parser.parse_problem(problem)
@@ -24,8 +24,11 @@ def scope_pddl(domain, problem):
         all_pvars.extend(get_atoms(s.precondition))
         all_pvars.extend(s.params)
     # Remove duplicates from all_pvars. This is much faster when we first convert to str
-    all_pvars = map(str,all_pvars)
-    all_pvars = sorted(list(set(all_pvars)))
+    if old_var_uniquify:
+        all_pvars = get_unique_z3_vars(all_pvars)
+    else:
+        all_pvars = map(str,all_pvars)
+        all_pvars = sorted(list(set(all_pvars)))
     # all_pvars = get_unique_z3_vars(all_pvars)
     all_objects = pvars2objects(all_pvars)
     rel_objects = pvars2objects(rel_pvars)

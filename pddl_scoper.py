@@ -23,7 +23,10 @@ def scope_pddl(domain, problem):
     for s in skill_list:
         all_pvars.extend(get_atoms(s.precondition))
         all_pvars.extend(s.params)
-    all_pvars = get_unique_z3_vars(all_pvars)
+    # Remove duplicates from all_pvars. This is much faster when we first convert to str
+    all_pvars = map(str,all_pvars)
+    all_pvars = sorted(list(set(all_pvars)))
+    # all_pvars = get_unique_z3_vars(all_pvars)
     all_objects = pvars2objects(all_pvars)
     rel_objects = pvars2objects(rel_pvars)
     cl_objects = pvars2objects(cl_pvars)

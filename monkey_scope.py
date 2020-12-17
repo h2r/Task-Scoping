@@ -53,7 +53,12 @@ def scope_pddl(domain, problem):
     for s in skill_list:
         all_pvars.extend(get_atoms(s.precondition))
         all_pvars.extend(s.params)
-    all_pvars = get_unique_z3_vars(all_pvars)
+    def get_unique_pvars_in_scope_pddl(all_pvars):
+        """
+        Wrapper used to view this call in a profiler
+        """
+        return get_unique_z3_vars(all_pvars)
+    all_pvars = get_unique_pvars_in_scope_pddl(all_pvars)
     irrel_pvars = [p for p in map(str,all_pvars) if p not in map(str,rel_pvars)]
     all_objects = pvars2objects(all_pvars)
     rel_objects = pvars2objects(rel_pvars)

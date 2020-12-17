@@ -371,6 +371,7 @@ def nested_list_replace(arr, replacements):
         # return [nested_list_replace(x, replacements) for x in arr]
     else:
         raise TypeError(f"Unsupported type: {type(arr)}")
+    
 def get_unique_z3_vars(args):
     vars = get_unique_z3_vars_unsorted(args)
     vars = sort_z3_vars(vars)

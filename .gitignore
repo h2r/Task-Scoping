@@ -5,6 +5,7 @@ taxi_trace_bleh.txt
 .ds_store
 .ruby-version
 .vscode/settings.json
-/.vscode
+.vscode
 __pycache__/
+.ipynb_checkpoints
 *.py[cod]

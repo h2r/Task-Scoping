@@ -3,7 +3,7 @@ from itertools import chain, product
 from collections import OrderedDict
 import z3
 import copy
-from utils import simplify_disjunction, flatten, get_unique_z3_vars
+from oo_scoping.utils import simplify_disjunction, flatten, get_unique_z3_vars
 
 class EffectType():  #EffectTypes are Immutable
 	def __init__(self, pvar: z3.ExprRef, index: int):

@@ -1,8 +1,8 @@
-from PDDL import PDDL_Parser, Action
+from oo_scoping.PDDL import PDDL_Parser, Action
 import z3, re
 from collections import OrderedDict
-from skill_classes import EffectTypePDDL, SkillPDDL
-from utils import product_dict, nested_list_replace, get_atoms, get_unique_z3_vars
+from oo_scoping.skill_classes import EffectTypePDDL, SkillPDDL
+from oo_scoping.utils import product_dict, nested_list_replace, get_atoms, get_unique_z3_vars
 from typing import List, Tuple, Dict, Iterable
 
 class PDDL_Parser_z3(PDDL_Parser):

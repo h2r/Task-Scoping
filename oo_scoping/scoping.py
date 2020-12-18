@@ -1,8 +1,8 @@
 from itertools import chain
 from typing import Iterable, Union
 import z3
-from skill_classes import merge_skills, Skill, EffectType, SkillPDDL, EffectTypePDDL, merge_skills_pddl
-from utils import split_conj, get_atoms, solver_implies_condition, simplify_disjunction, get_unique_z3_vars, writeback_domain, writeback_problem, pvars2objects
+from oo_scoping.skill_classes import merge_skills, Skill, EffectType, SkillPDDL, EffectTypePDDL, merge_skills_pddl
+from oo_scoping.utils import split_conj, get_atoms, solver_implies_condition, simplify_disjunction, get_unique_z3_vars, writeback_domain, writeback_problem, pvars2objects
 
 
 def get_causal_links(start_condition, skills):
@@ -119,49 +119,3 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 	# We only care about the pvars that are causally linked AND used in preconditions
 	pvars_cl = [c for c in pvars_cl if c in skills_conds_pvars]
 	return pvars_rel, pvars_cl, skills_rel
-
-def scope_pddl(domain, problem):
-    parser = PDDL_Parser_z3()
-    parser.parse_domain(domain)
-    parser.parse_problem(problem)
-
-    skill_list = parser.get_skills()
-
-    # This below block converts all the domain's goals to z3
-    goal_cond = parser.get_goal_cond()
-
-    # This below block converts all the domain's initial conditions to z3
-    init_cond_list = parser.get_init_cond_list()
-    
-
-    # Run the scoper on the constructed goal, skills and initial condition
-    rel_pvars, cl_pvars, rel_skills = scope(goals=goal_cond, skills=skill_list, start_condition=init_cond_list)
-    
-    all_pvars = []
-    for s in skill_list:
-        all_pvars.extend(get_atoms(s.precondition))
-        all_pvars.extend(s.params)
-    all_pvars = get_unique_z3_vars(all_pvars)
-    irrel_pvars = [p for p in map(str,all_pvars) if p not in map(str,rel_pvars)]
-	
-    print(irrel_pvars)
-
-    all_objects = pvars2objects(all_pvars)
-    rel_objects = pvars2objects(rel_pvars)
-    irrel_objects = [x for x in all_objects if x not in rel_objects]
-
-    scoped_problem_path = get_scoped_problem_path(problem)
-    writeback_problem(problem, scoped_problem_path, irrel_objects)
-
-    all_actions = sorted(list(set([a.name for a in parser.actions])))
-    relevant_actions = []
-    for s in rel_skills:
-        if isinstance(s.action,str):
-            relevant_actions.append(s.action)
-        else:
-            relevant_actions.extend(s.action)
-    relevant_actions = sorted(list(set(relevant_actions)))
-    irrel_actions = [a for a in all_actions if a not in relevant_actions]
-
-    scoped_domain_path = get_scoped_domain_path(domain, problem)
-    writeback_domain(domain, scoped_domain_path, irrel_actions)

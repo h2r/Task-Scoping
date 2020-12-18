@@ -1,4 +1,7 @@
-To run: Use python 3.7.9 (other versions may work)
+# scoping
+
+## Usage
+Use python 3.7.9 (other versions may work)
 pip install -r requirements.txt
 python scoping_cli.py <domain_path> <problem_path>
     Example: python pddl_scoper.py "examples/multi_monkeys_playroom copy/multi_monkeys_playroom.pddl" "examples/multi_monkeys_playroom copy/prob-02.pddl"

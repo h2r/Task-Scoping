@@ -1,11 +1,11 @@
-from PDDLz3 import PDDL_Parser_z3
+from oo_scoping.PDDLz3 import PDDL_Parser_z3
 import sys, pprint
 from collections import OrderedDict
 from typing import List, Tuple, Dict, Iterable
 import re, copy
-from scoping import scope
+from oo_scoping.scoping import scope
 import time
-from pddl_scoper import scope_pddl
+from oo_scoping.pddl_scoper import scope_pddl
 # For profiling
 import cProfile
 import pstats

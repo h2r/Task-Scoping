@@ -4,9 +4,9 @@
 import re
 from collections import OrderedDict
 from itertools import chain, product
-from action import Action
+from oo_scoping.action import Action
 import copy
-from utils import product_dict, nested_list_replace
+from oo_scoping.utils import product_dict, nested_list_replace
 from typing import Dict
 # TODO CAN WE HANDLE OBJECTS DEFINED ON MULTIPLE LINES?
 class PDDL_Parser:

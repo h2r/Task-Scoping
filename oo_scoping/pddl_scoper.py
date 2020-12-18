@@ -1,6 +1,6 @@
-from utils import get_atoms, get_unique_z3_vars, get_scoped_domain_path, get_scoped_problem_path, writeback_problem, writeback_domain, pvars2objects
-from scoping import scope
-from PDDLz3 import PDDL_Parser_z3
+from oo_scoping.utils import get_atoms, get_unique_z3_vars, get_scoped_domain_path, get_scoped_problem_path, writeback_problem, writeback_domain, pvars2objects
+from oo_scoping.scoping import scope
+from oo_scoping.PDDLz3 import PDDL_Parser_z3
 import argparse
 
 def scope_pddl(domain, problem, old_var_uniquify = False):

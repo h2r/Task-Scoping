@@ -192,19 +192,19 @@ def expr2pvar_names_single(expr):  #Do we still have synthvars?
     global synth2varnames
     if isinstance(expr, bool):
         return []
-    vars = []
-    try:
-        variter = z3.z3util.get_vars(expr)
-    except Exception as e:
-        print(expr)
-        raise e
+    my_vars = []
+    # try:
+    #     variter = z3.z3util.get_vars(expr)
+    # except Exception as e:
+    #     print(expr)
+    #     raise e
     for i in z3.z3util.get_vars(expr):
         i = str(i)
         if i in synth2varnames.keys():
-            vars = vars + synth2varnames[i]
+            my_vars = my_vars + synth2varnames[i]
         else:
-            vars.append(i)
-    return sorted(list(set(vars)))
+            my_vars.append(i)
+    return sorted(list(set(my_vars)))
 
 
 def expr2pvar_names(expressions):

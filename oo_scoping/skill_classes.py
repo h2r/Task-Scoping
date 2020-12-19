@@ -218,8 +218,13 @@ def merge_skills_pddl(skills: Iterable[SkillPDDL], relevant_pvars: Iterable[z3.E
 	new_skills = merge_skills_inner(hashed_skills, solver)
 	
 	print("Done Quotienting!")
+	def sort_in_merge_skills(x):
+		"""
+		Used for profiling
+		"""
+		return sorted(x)
 
-	return sorted(new_skills)
+	return sort_in_merge_skills(new_skills)
 
 
 def test_effect_type_eq():

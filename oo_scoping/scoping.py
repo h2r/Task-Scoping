@@ -140,6 +140,7 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 	skills_conds_pvars = []
 	for s in skills_rel:
 		skills_conds_pvars.extend(get_atoms(s.precondition))
+	# TODO either return str vars, or speed up get_unique_z3_vars
 	skills_conds_pvars = get_unique_z3_vars(skills_conds_pvars)
 
 	pvars_cl = []

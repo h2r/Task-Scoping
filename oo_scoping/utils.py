@@ -379,12 +379,26 @@ def get_unique_z3_vars(args):
     vars = sort_z3_vars(vars)
     return vars
 
-def get_unique_z3_vars_unsorted(args):
-    vars = []
-    for x in args:
-        if x not in vars:
-            vars.append(x)
-    return vars
+def get_unique_z3_vars_unsorted(args, fast=True):
+    """
+    :param args: List of z3 vars
+    :param fast: When True, check for equality based on string equality only
+    """
+    if fast:
+        args_s = map(str,args)
+        idx = []
+        uvars_s = []
+        for i, s in enumerate(args_s):
+            if s not in uvars_s:
+                idx.append(i)
+                uvars_s.append(s)
+        uvars = [args[i] for i in idx]
+    else:
+        uvars = []
+        for x in args:
+            if x not in uvars:
+                uvars.append(x)
+    return uvars
 
 def sort_z3_vars(vars):
     return sorted(vars, key=lambda x: str(x))

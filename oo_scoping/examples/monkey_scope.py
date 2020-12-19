@@ -1,18 +1,18 @@
-from oo_scoping.action import Action
-# from PDDL import PDDL_Parser
-from oo_scoping.PDDLz3 import PDDL_Parser_z3
-import sys, pprint
+
+import sys, pprint, time, itertools, re, copy
 from collections import OrderedDict
 from typing import List, Tuple, Dict, Iterable
-import re, copy
-import itertools
+
 import z3
+
+from oo_scoping.action import Action
+from oo_scoping.PDDLz3 import PDDL_Parser_z3
 from oo_scoping.skill_classes import EffectTypePDDL, SkillPDDL
 from oo_scoping.utils import product_dict, nested_list_replace, get_atoms, get_all_objects\
     , condition_str2objects, writeback_problem, writeback_domain\
         , get_scoped_problem_path, get_scoped_domain_path, pvars2objects, get_unique_z3_vars
 from oo_scoping.scoping import scope
-import time
+
 # For profiling
 import cProfile
 import pstats

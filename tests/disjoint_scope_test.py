@@ -1,8 +1,9 @@
-from utils import condition_str2objects, get_all_objects, get_diff_and_int, str_iter
-from hardcoded_blinker import prepare_taxi_domain as prepare_blinker_domain
-from scoping import scope
-from hardcoded_domains import make_domain
 import pdb
+
+from oo_scoping.utils import condition_str2objects, get_all_objects, get_diff_and_int, str_iter
+from oo_scoping.hardcoded_blinker import prepare_taxi_domain as prepare_blinker_domain
+from oo_scoping.scoping import scope
+from oo_scoping.domain_writers.hardcoded_domains import make_domain
 
 def test_blinker():
 	# Won't work until we fix EffectTypes in hardcoded_blinker.py

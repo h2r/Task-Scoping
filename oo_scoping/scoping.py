@@ -24,9 +24,11 @@ def get_unthreatened_conditions(conditions, effected_pvars):
 	Return list of conditions that are unthreatened by effected_pvars.
 	Created as separate function for profiling purposes.
 	"""
+	# Map effected_pvars to str to make equality checking faster
+	effected_pvars = map(str,effected_pvars)
 	causal_links = []
 	for c in conditions:
-		threatened_pvars = [x for x in get_atoms(c) if x in effected_pvars]
+		threatened_pvars = [x for x in map(str,get_atoms(c)) if x in effected_pvars]
 		if len(threatened_pvars) == 0: causal_links.append(c)
 	return causal_links
 

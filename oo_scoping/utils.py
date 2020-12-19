@@ -1,11 +1,13 @@
-import z3
-import re
+import re, os, copy
 from abc import ABC
 from collections.abc import Iterable
-import copy
-import pdb
 from typing import Union, List
 from itertools import product, chain
+import pathlib
+import pdb
+import z3
+
+# TODO Split this into multiple scripts. Remove unneeded functions.
 
 solver = z3.Solver()
 synth2varnames = {}
@@ -386,6 +388,29 @@ def get_unique_z3_vars_unsorted(args):
 
 def sort_z3_vars(vars):
     return sorted(vars, key=lambda x: str(x))
+
+def make_dir(*ps, is_file=False):
+    """
+    :param ps: Iterable of paths
+    :param is_file: Whether ps contains file paths or directory paths
+    Recursively create p, and parent directories, if they do not yet exist
+    """
+    for p in ps:
+        if is_file:
+            p = pathlib.Path(p).parent
+        # Get list of ancestor directories
+        p_bottom = p
+        p_prev = None
+        ancestors = []
+        while p_prev != p:
+            ancestors.append(p)
+            p_prev = p
+            p = p.parent
+        ancestors.reverse()
+        # Create ancestor directories, for those that don't exist
+        for p_anc in ancestors:
+            if not os.path.exists(p_anc):
+                os.mkdir(p_anc)
 
 if __name__ == "__main__":
     # test_grounded_att2objects("grounded_att2objects passed tests")

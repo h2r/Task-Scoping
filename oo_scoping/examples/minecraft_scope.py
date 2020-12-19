@@ -3,6 +3,7 @@ from collections import OrderedDict
 from typing import List, Tuple, Dict, Iterable
 import re, copy
 import time
+import pathlib
 
 from oo_scoping.scoping import scope
 from oo_scoping.pddl_scoper import scope_pddl
@@ -13,6 +14,7 @@ import cProfile
 import pstats
 from pstats import SortKey
 
+profile_dir = pathlib.Path(__file__).parent.parent.parent.absolute() / 'time_profiles'
 
 if __name__ == '__main__':
     start_time = time.time()

@@ -4,14 +4,42 @@ import z3
 from oo_scoping.skill_classes import merge_skills, Skill, EffectType, SkillPDDL, EffectTypePDDL, merge_skills_pddl
 from oo_scoping.utils import split_conj, get_atoms, solver_implies_condition, simplify_disjunction, get_unique_z3_vars, writeback_domain, writeback_problem, pvars2objects
 
+def skills2effects(skills):
+	"""
+	Return union of effects from skills.
+	Created as separate function for profiling purposes.
+	"""
+	return sorted(list(set(chain(*[s.all_effects for s in skills]))))
+
+
+def effects2pvars(effects):
+	"""
+	Return union of pvars from effects.
+	Created as separate function for profiling purposes.
+	"""
+	return sorted(list(set([x.pvar for x in effects])), key=lambda x: str(x))
+
+def get_unthreatened_conditions(conditions, effected_pvars):
+	"""
+	Return list of conditions that are unthreatened by effected_pvars.
+	Created as separate function for profiling purposes.
+	"""
+	causal_links = []
+	for c in conditions:
+		threatened_pvars = [x for x in get_atoms(c) if x in effected_pvars]
+		if len(threatened_pvars) == 0: causal_links.append(c)
+	return causal_links
+
 
 def get_causal_links(start_condition, skills):
-	all_effects = sorted(list(set(chain(*[s.all_effects for s in skills]))))
-	all_effected_pvars = sorted(list(set([x.pvar for x in all_effects])), key=lambda x: str(x))
-	causal_links = []
-	for c in start_condition:
-		threatened_pvars = [x for x in get_atoms(c) if x in all_effected_pvars]
-		if len(threatened_pvars) == 0: causal_links.append(c)
+	"""
+	:param start_condition: Condition we assume is true at start of trajectory
+	:param skills: Iterable of Skills
+	Returns list of conditions used by skills that are satisfied by start_condition and unthreatened by any skill
+	"""
+	all_effects = skills2effects(skills)
+	all_effected_pvars = effects2pvars(all_effects)
+	causal_links = get_unthreatened_conditions(start_condition, all_effected_pvars)
 	return causal_links
 
 def get_unlinked_pvars(skills, causal_links, dummy_goal, solver):

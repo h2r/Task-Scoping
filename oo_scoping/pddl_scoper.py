@@ -3,7 +3,11 @@ from oo_scoping.scoping import scope
 from oo_scoping.PDDLz3 import PDDL_Parser_z3
 import argparse
 
-def scope_pddl(domain, problem, old_var_uniquify = False):
+def scope_pddl(domain, problem, **kwargs):
+    """
+    :param domain: Path of domain file
+    :param problem: Path of problem file
+    """
     parser = PDDL_Parser_z3()
     parser.parse_domain(domain)
     parser.parse_problem(problem)
@@ -17,19 +21,15 @@ def scope_pddl(domain, problem, old_var_uniquify = False):
     init_cond_list = parser.get_init_cond_list()
    
     # Run the scoper on the constructed goal, skills and initial condition
-    rel_pvars, cl_pvars, rel_skills = scope(goals=goal_cond, skills=skill_list, start_condition=init_cond_list)
+    rel_pvars, cl_pvars, rel_skills = scope(goals=goal_cond, skills=skill_list, start_condition=init_cond_list, **kwargs)
     
     all_pvars = []
     for s in skill_list:
         all_pvars.extend(get_atoms(s.precondition))
         all_pvars.extend(s.params)
-    # Remove duplicates from all_pvars. This is much faster when we first convert to str
-    if old_var_uniquify:
-        all_pvars = get_unique_z3_vars(all_pvars)
-    else:
-        all_pvars = map(str,all_pvars)
-        all_pvars = sorted(list(set(all_pvars)))
-    # all_pvars = get_unique_z3_vars(all_pvars)
+    # Remove duplicates from all_pvars
+    all_pvars = get_unique_z3_vars(all_pvars)
+
     all_objects = pvars2objects(all_pvars)
     rel_objects = pvars2objects(rel_pvars)
     cl_objects = pvars2objects(cl_pvars)

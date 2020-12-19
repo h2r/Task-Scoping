@@ -280,7 +280,7 @@ def action2effect_types(a: Action, str_var_dict, parser = None) -> List[EffectTy
 
 
 if __name__ == "__main__":
-    domain, problem = "./examples/existential-taxi/taxi-domain.pddl", "./examples/existential-taxi/prob02.pddl"
+    domain, problem = "./domains/existential-taxi/taxi-domain.pddl", "./domains/existential-taxi/prob02.pddl"
     parser = PDDL_Parser_z3()
     parser.parse_domain(domain)
     parser.parse_problem(problem)

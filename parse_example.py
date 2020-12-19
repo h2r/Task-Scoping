@@ -42,11 +42,11 @@ def print_parse(domain, problem):
 	print('Positive goals: ' + str(parser.positive_goals))
 	print('Negative goals: ' + str(parser.negative_goals))
 
-dinner_dom = "./examples/dinner/dinner.pddl"
-dinner_prob = "./examples/dinner/pb1.pddl"
+dinner_dom = "./domains/dinner/dinner.pddl"
+dinner_prob = "./domains/dinner/pb1.pddl"
 
-zeno_dom = "examples/zeno/zeno.pddl"
-zeno_prob = "examples/zeno/pb1.pddl"
+zeno_dom = "domains/zeno/zeno.pddl"
+zeno_prob = "domains/zeno/pb1.pddl"
 
 # print_parse(dinner_dom, dinner_prob)
 print_parse(zeno_dom, zeno_prob)

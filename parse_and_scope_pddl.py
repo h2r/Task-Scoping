@@ -8,15 +8,15 @@ from utils import product_dict, nested_list_replace, get_atoms, get_all_objects,
 from scoping import scope
 
 if __name__ == '__main__':
-    # zeno_dom = "examples/zeno/zeno.pddl"
-    # zeno_prob = "examples/zeno/pb1.pddl"
+    # zeno_dom = "domains/zeno/zeno.pddl"
+    # zeno_prob = "domains/zeno/pb1.pddl"
     # domain, problem = zeno_dom, zeno_prob
 
-    # taxi_dom = "examples/infinite-taxi-numeric/taxi-domain.pddl"
-    # taxi_prob = "examples/infinite-taxi-numeric/prob02.pddl"
+    # taxi_dom = "domains/infinite-taxi-numeric/taxi-domain.pddl"
+    # taxi_prob = "domains/infinite-taxi-numeric/prob02.pddl"
 
     start_time = time.time()
-    taxi_dom, taxi_prob = "./examples/minecraft/minecraft-contrived.pddl", "./examples/minecraft/prob-01.pddl"
+    taxi_dom, taxi_prob = "./domains/minecraft/minecraft-contrived.pddl", "./domains/minecraft/prob-01.pddl"
 
     domain, problem = taxi_dom, taxi_prob
 
@@ -59,7 +59,7 @@ if __name__ == '__main__':
 
     # print(f"Relevant objects:")
     # print("\n".join(rel_objects))
-    writeback_problem(taxi_prob, "./examples/minecraft/prob-01.pddl", irrel_objects)
+    writeback_problem(taxi_prob, "./domains/minecraft/prob-01.pddl", irrel_objects)
 
     end_time = time.time()
     print(f"Total time: {end_time - start_time}")

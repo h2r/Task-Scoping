@@ -1,11 +1,11 @@
 import re, copy, itertools, z3, time, sys, pprint
-from action import Action
-from PDDLz3 import PDDL_Parser_z3, compile_expression, str2expression, extract_typed_objects
 from collections import OrderedDict
 from typing import List, Tuple, Dict, Iterable
-from skill_classes import EffectTypePDDL, SkillPDDL
-from utils import product_dict, nested_list_replace, get_atoms, get_all_objects, condition_str2objects
-from scoping import scope
+from oo_scoping.skill_classes import EffectTypePDDL, SkillPDDL
+from oo_scoping.utils import product_dict, nested_list_replace, get_atoms, get_all_objects, condition_str2objects
+from oo_scoping.scoping import scope
+from oo_scoping.action import Action
+from oo_scoping.PDDLz3 import PDDL_Parser_z3, compile_expression, str2expression, extract_typed_objects
 pp = pprint.PrettyPrinter(indent=4)
 
 
@@ -86,8 +86,8 @@ def split_predicates2(group):
     return pos, neg
 start_time = time.time()
 
-domain = "examples/taxi-state-constraint/taxi-domain.pddl"
-problem = "examples/taxi-state-constraint/prob-03.pddl"
+domain = "domains/taxi-state-constraint/taxi-domain.pddl"
+problem = "domains/taxi-state-constraint/prob-03.pddl"
 
 parser = PDDL_Parser_z3()
 parser.parse_domain(domain)

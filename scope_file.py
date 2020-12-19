@@ -1,16 +1,16 @@
-from action import Action
-# from PDDL import PDDL_Parser
-from PDDLz3 import PDDL_Parser_z3
+import time
 import sys, pprint
 from collections import OrderedDict
 from typing import List, Tuple, Dict, Iterable
 import re, copy, json
 import itertools
 import z3
-from skill_classes import EffectTypePDDL, SkillPDDL
-from utils import product_dict, nested_list_replace, get_atoms, get_all_objects, condition_str2objects
-from scoping import scope
-import time
+
+from oo_scoping.skill_classes import EffectTypePDDL, SkillPDDL
+from oo_scoping.utils import product_dict, nested_list_replace, get_atoms, get_all_objects, condition_str2objects
+from oo_scoping.scoping import scope
+from oo_scoping.action import Action
+from oo_scoping.PDDLz3 import PDDL_Parser_z3
 
 def pvars2objects(pvars):
     objs = condition_str2objects(map(str,pvars))
@@ -51,4 +51,4 @@ def scope_file(domain, problem):
     # return irrel_pvars
 
 if __name__ == '__main__':
-    print(scope_file("examples/IPC_Domains/Satellite/metricSat.pddl", "examples/IPC_Domains/Satellite/prob-03.pddl"))
+    print(scope_file("domains/IPC_Domains/Satellite/metricSat.pddl", "domains/IPC_Domains/Satellite/prob-03.pddl"))

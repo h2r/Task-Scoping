@@ -49,9 +49,9 @@ def scope_file(domain, problem):
 
     # return rel_objects, irrel_objects
     return rel_pvars, irrel_pvars
-dom = "examples/Rovers/Strips/StripsRover.pddl"
+dom = "domains/Rovers/Strips/StripsRover.pddl"
 for i in range(3,10): #nada up to 4
-    prob = f"examples/Rovers/Strips/pfile{i}"
+    prob = f"domains/Rovers/Strips/pfile{i}"
     print(f"({dom}, {prob})")
     start_time = time.time()
     try:

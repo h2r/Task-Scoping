@@ -17,16 +17,16 @@ import time
 from pddl_scoper import scope_pddl
 
 if __name__ == '__main__':
-    # zeno_dom = "examples/zeno/zeno.pddl"
-    # zeno_prob = "examples/zeno/pb1.pddl"
+    # zeno_dom = "domains/zeno/zeno.pddl"
+    # zeno_prob = "domains/zeno/pb1.pddl"
     # domain, problem = zeno_dom, zeno_prob
 
-    # taxi_dom = "examples/infinite-taxi-numeric/taxi-domain.pddl"
-    # taxi_prob = "examples/infinite-taxi-numeric/prob02.pddl"
+    # taxi_dom = "domains/infinite-taxi-numeric/taxi-domain.pddl"
+    # taxi_prob = "domains/infinite-taxi-numeric/prob02.pddl"
 
     start_time = time.time()
-    domain, problem = "examples/IPC_Domains/CompositeIPC/ipc_composite.pddl", "examples/IPC_Domains/CompositeIPC/prob-01.pddl"
-    # domain, problem = "examples/IPC_Domains/depot/DepotsNum.pddl", "examples/IPC_Domains/depot/pfile2"
+    domain, problem = "domains/IPC_Domains/CompositeIPC/ipc_composite.pddl", "domains/IPC_Domains/CompositeIPC/prob-01.pddl"
+    # domain, problem = "domains/IPC_Domains/depot/DepotsNum.pddl", "domains/IPC_Domains/depot/pfile2"
     scope_pddl(domain, problem)
     
     end_time = time.time()

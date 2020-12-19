@@ -168,29 +168,19 @@ class Skill(): #Skills are Immutable
 				new_side_effects.append(e)
 		return Skill(self.precondition, self.action, new_effects, new_side_effects)
 
-def merge_skills_pddl(skills: Iterable[SkillPDDL], relevant_pvars: Iterable[z3.ExprRef], solver = None):
-	"""
-	Merges skills that have the same effects on relevant_pvars
-	:param solver: A z3 solver. Use this arg to assume state constraints when simplifying disjunctions
-	"""
-	new_skills = []
+
+def group_skills_by_effects(skills, rel_pvar_dict):
 	hashed_skills = OrderedDict()
-
-	rel_pvar_dict = {}
-	for rel_pvar in relevant_pvars:
-		rel_pvar_dict[rel_pvar] = True
-
-	# Move irrelevant pvars to side effects and group skills by actions and effect types
 	for s in skills:
 		# s = s.move_irrelevant2side_effects(relevant_pvars)
 		s = s.move_irrelevant2side_effects(rel_pvar_dict)
 		k = (s.effects)
 		if k not in hashed_skills.keys(): hashed_skills[k] = []
 		hashed_skills[k].append(s)
-	
-	print("Done getting skills according to effect")
+	return hashed_skills
 
-	# Merge skills that share a key
+def merge_skills_inner(hashed_skills, solver):
+	new_skills = []
 	for (effects), sks in hashed_skills.items():
 		# Skip empty effects
 		if len(effects) == 0: continue
@@ -204,27 +194,31 @@ def merge_skills_pddl(skills: Iterable[SkillPDDL], relevant_pvars: Iterable[z3.E
 		if len(actions) == 1: actions = actions[0]
 		s_merged = SkillPDDL(precondition, actions, effects, side_effects)
 		new_skills.append(s_merged)
+	return new_skills
+
+
+def merge_skills_pddl(skills: Iterable[SkillPDDL], relevant_pvars: Iterable[z3.ExprRef], solver = None):
+	"""
+	Merges skills that have the same effects on relevant_pvars
+	:param skills: Iterable of Skills
+	:param relevant_pvars: Iterable of pvars, where each pvar is a z3 expression
+	:param solver: A z3 solver. Use this arg to assume state constraints when simplifying disjunctions
+	"""
+	# TODO What is the point of rel_pvar_dict ?
+	rel_pvar_dict = {}
+	for rel_pvar in relevant_pvars:
+		rel_pvar_dict[rel_pvar] = True
+
+	# Move irrelevant pvars to side effects and group skills by actions and effect types
+	hashed_skills = group_skills_by_effects(skills, rel_pvar_dict)
+
+	print("Done getting skills according to effect")
+
+	# Merge skills that share a key
+	new_skills = merge_skills_inner(hashed_skills, solver)
 	
 	print("Done Quotienting!")
 
-	return sorted(new_skills)
-
-def merge_skills(skills: Iterable[Skill], relevant_pvars: Iterable[z3.ExprRef]):
-	new_skills = []
-	hashed_skills = OrderedDict()
-	# Move irrelevant pvars to side effects and group skills by actions and effect types
-	for s in skills:
-		s = s.move_irrelevant2side_effects(relevant_pvars)
-		k = (s.action, s.effects)
-		if k not in hashed_skills.keys(): hashed_skills[k] = []
-		hashed_skills[k].append(s)
-	# Merge skills that share a key
-	for (action, effects), sks in hashed_skills.items():
-		# Skip empty effects
-		if len(effects) == 0: continue
-		side_effects = chain(*[s.side_effects for s in sks])
-		precondition = simplify_disjunction([s.precondition for s in sks])
-		new_skills.append(Skill(precondition, action, effects, side_effects))
 	return sorted(new_skills)
 
 

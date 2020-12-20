@@ -8,12 +8,13 @@ import copy
 type_replacements = {
     "obsidian-block":"obsidian",
     "netherportal":"portal",
-    'daisy-flower': 'oxeye_daisy',
     'diamond-pickaxe': 'diamond_pickaxe',
     'flint-and-steel': 'flint_and_steel',
     'iron-ingot': 'iron_ingot',
     'iron-ore': 'iron_ore',
-    'orchid-flower': 'blue_orchid'
+    'daisy-flower': 'oxeye_daisy',
+    'orchid-flower': 'blue_orchid',
+    'red-tulip': 'red_tulip'
 }
 
 with open("examples/malmo/block_types.txt", "r") as f:
@@ -160,7 +161,7 @@ def make_malmo_domain(blocks, items, start_pos, inventory_counts
             drawing_lines.append(draw_block(t,*p))
     # Place items in the world
     for t, positions in items.items():
-        if t in ["daisy-flower", "orchid-flower", "oxeye_daisy", "blue_orchid"]:
+        if t in ["daisy-flower", "orchid-flower", "oxeye_daisy", "blue_orchid", "red_tulip"]:
             draw_func = draw_flower
         else:
             draw_func = draw_item

@@ -6,7 +6,8 @@
 	agent item block - locatable
 	bedrock destructible-block - block
 	obsidian-block - destructible-block
-	wool diamond stick diamond-pickaxe apple potato rabbit orchid-flower daisy-flower flint coal iron-ore iron-ingot netherportal flint-and-steel - item
+	destructible-item wool diamond stick diamond-pickaxe apple potato rabbit flint coal iron-ore iron-ingot netherportal flint-and-steel - item
+	orchid-flower daisy-flower red-tulip - destructible-item
 )
 
 (:predicates
@@ -17,6 +18,7 @@
 
 (:functions
 	(block-hits ?b - destructible-block)
+	(agent-num-destructible-item ?ag - agent)
 	(agent-num-wool ?ag - agent)
 	(agent-num-diamond ?ag - agent)
 	(agent-num-stick ?ag - agent)
@@ -24,8 +26,6 @@
 	(agent-num-apple ?ag - agent)
 	(agent-num-potato ?ag - agent)
 	(agent-num-rabbit ?ag - agent)
-	(agent-num-orchid-flower ?ag - agent)
-	(agent-num-daisy-flower ?ag - agent)
 	(agent-num-flint ?ag - agent)
 	(agent-num-coal ?ag - agent)
 	(agent-num-iron-ore ?ag - agent)
@@ -72,6 +72,17 @@
                                                     (= (z ?bl) (+ (z ?ag) 1))))))
  :effect (and (decrease (x ?ag) 1))
 )
+
+(:action pickup-destructible-item
+ :parameters (?ag - agent ?i - destructible-item)
+ :precondition (and (present ?i)
+                    (= (x ?i) (x ?ag))
+                    (= (y ?i) (y ?ag))
+                    (= (z ?i) (z ?ag)))
+ :effect (and (increase (agent-num-destructible-item ?ag) 1)
+              (not (present ?i)))
+)
+
 
 (:action pickup-wool
  :parameters (?ag - agent ?i - wool)
@@ -150,28 +161,6 @@
 )
 
 
-(:action pickup-orchid-flower
- :parameters (?ag - agent ?i - orchid-flower)
- :precondition (and (present ?i)
-                    (= (x ?i) (x ?ag))
-                    (= (y ?i) (y ?ag))
-                    (= (z ?i) (z ?ag)))
- :effect (and (increase (agent-num-orchid-flower ?ag) 1)
-              (not (present ?i)))
-)
-
-
-(:action pickup-daisy-flower
- :parameters (?ag - agent ?i - daisy-flower)
- :precondition (and (present ?i)
-                    (= (x ?i) (x ?ag))
-                    (= (y ?i) (y ?ag))
-                    (= (z ?i) (z ?ag)))
- :effect (and (increase (agent-num-daisy-flower ?ag) 1)
-              (not (present ?i)))
-)
-
-
 (:action pickup-flint
  :parameters (?ag - agent ?i - flint)
  :precondition (and (present ?i)
@@ -224,6 +213,19 @@
                     (= (z ?i) (z ?ag)))
  :effect (and (increase (agent-num-flint-and-steel ?ag) 1)
               (not (present ?i)))
+)
+
+
+(:action drop-destructible-item
+ :parameters (?ag - agent ?i - destructible-item)
+ :precondition (and (>= (agent-num-destructible-item ?ag) 1)
+                    (not (present ?i)))
+ :effect (and (present ?i)
+              (assign (x ?i) (x ?ag))
+              (assign (y ?i) (+ (y ?ag) 1))
+              (assign (z ?i) (z ?ag))
+              (decrease (agent-num-destructible-item ?ag) 1)
+         )
 )
 
 
@@ -301,32 +303,6 @@
               (assign (y ?i) (+ (y ?ag) 1))
               (assign (z ?i) (z ?ag))
               (decrease (agent-num-rabbit ?ag) 1)
-         )
-)
-
-
-(:action drop-orchid-flower
- :parameters (?ag - agent ?i - orchid-flower)
- :precondition (and (>= (agent-num-orchid-flower ?ag) 1)
-                    (not (present ?i)))
- :effect (and (present ?i)
-              (assign (x ?i) (x ?ag))
-              (assign (y ?i) (+ (y ?ag) 1))
-              (assign (z ?i) (z ?ag))
-              (decrease (agent-num-orchid-flower ?ag) 1)
-         )
-)
-
-
-(:action drop-daisy-flower
- :parameters (?ag - agent ?i - daisy-flower)
- :precondition (and (>= (agent-num-daisy-flower ?ag) 1)
-                    (not (present ?i)))
- :effect (and (present ?i)
-              (assign (x ?i) (x ?ag))
-              (assign (y ?i) (+ (y ?ag) 1))
-              (assign (z ?i) (z ?ag))
-              (decrease (agent-num-daisy-flower ?ag) 1)
          )
 )
 
@@ -445,6 +421,36 @@
 
 )
 
+(:action craft-red-dye
+    :parameters ( ?ag - agent )
+    :precondition ( and
+                      ( >= (agent-num-red-tulip ?ag) 1 )
+                  )
+    :effect (and (increase (agent-num-red-dye ?ag) 1)
+        (decrease (agent-num-red-tulip ?ag) 1))
+
+)
+
+(:action craft-blue-dye
+    :parameters ( ?ag - agent )
+    :precondition ( and
+                      ( >= (agent-num-orchid-flower ?ag) 1 )
+                  )
+    :effect (and (increase (agent-num-blue-dye ?ag) 1)
+        (decrease (agent-num-orchid-flower ?ag) 1))
+
+)
+
+(:action craft-white-dye
+    :parameters ( ?ag - agent )
+    :precondition ( and
+                      ( >= (agent-num-daisy-flower ?ag) 1 )
+                  )
+    :effect (and (increase (agent-num-white-dye ?ag) 1)
+        (decrease (agent-num-daisy-flower ?ag) 1))
+
+)
+
 (:action hit-obsidian-block
     :parameters (?ag - agent ?b - obsidian-block)
     :precondition (and (= (x ?b) (x ?ag))
@@ -465,6 +471,45 @@
                         (= (block-hits ?b) 3)
                         ( >= ( agent-num-diamond-pickaxe ?ag ) 1 ))
     :effect (and (not (block-present ?b))
+                 (increase (agent-num-obsidian-block ?ag) 1)
+            )
+    )
+
+(:action destroy-obsidian-block
+    :parameters (?ag - agent ?b - obsidian-block)
+    :precondition (and (= (x ?b) (x ?ag))
+                        (= (y ?b) (+ (y ?ag) 1))
+                        (= (z ?b) (+ (z ?ag) 1))
+                        (present ?b)
+                        (= (item-hits ?b) 0)
+                        ( >= ( agent-num-diamond-pickaxe ?ag ) 1 ))
+    :effect (and (not (present ?b))
+                 (increase (agent-num-obsidian-block ?ag) 1)
+            )
+    )
+
+(:action destroy-obsidian-block
+    :parameters (?ag - agent ?b - obsidian-block)
+    :precondition (and (= (x ?b) (x ?ag))
+                        (= (y ?b) (+ (y ?ag) 1))
+                        (= (z ?b) (+ (z ?ag) 1))
+                        (present ?b)
+                        (= (item-hits ?b) 0)
+                        ( >= ( agent-num-diamond-pickaxe ?ag ) 1 ))
+    :effect (and (not (present ?b))
+                 (increase (agent-num-obsidian-block ?ag) 1)
+            )
+    )
+
+(:action destroy-obsidian-block
+    :parameters (?ag - agent ?b - obsidian-block)
+    :precondition (and (= (x ?b) (x ?ag))
+                        (= (y ?b) (+ (y ?ag) 1))
+                        (= (z ?b) (+ (z ?ag) 1))
+                        (present ?b)
+                        (= (item-hits ?b) 0)
+                        ( >= ( agent-num-diamond-pickaxe ?ag ) 1 ))
+    :effect (and (not (present ?b))
                  (increase (agent-num-obsidian-block ?ag) 1)
             )
     )

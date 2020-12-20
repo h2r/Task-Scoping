@@ -20,7 +20,7 @@
             <ServerHandlers>
                 <FlatWorldGenerator generatorString="3;7,202*1,5*3,2;3;,biome_1" />
                 <DrawingDecorator>
-                    <DrawCuboid x1="0" y1="209" z1="-8" x2="11" y2="210" z2="0" type="air"/>
+                    <DrawCuboid x1="0" y1="209" z1="-12" x2="12" y2="210" z2="0" type="air"/>
 					<DrawCuboid x1="11" y1="210" z1="-8" x2="11" y2="210" z2="-8" type="obsidian"/>
 					<DrawCuboid x1="10" y1="209" z1="-8" x2="10" y2="209" z2="-8" type="obsidian"/>
 					<DrawCuboid x1="10" y1="209" z1="0" x2="10" y2="209" z2="0" type="iron_ore"/>
@@ -33,6 +33,36 @@
 					<DrawItem x="2" y="209" z="0" type="diamond"/>
 					<DrawItem x="2" y="209" z="-1" type="diamond"/>
 					<DrawItem x="2" y="209" z="-2" type="diamond"/>
+					<DrawItem x="0" y="209" z="0" type="iron_ingot"/>
+					<DrawItem x="0" y="209" z="0" type="flint_and_steel"/>
+					<DrawItem x="0" y="209" z="0" type="flint_and_steel"/>
+					<DrawCuboid x1="6" y1="209" z1="-3" x2="6" y2="209" z2="-3" type="red_flower" variant="red_tulip"/>
+					<DrawCuboid x1="6" y1="209" z1="-4" x2="6" y2="209" z2="-4" type="red_flower" variant="red_tulip"/>
+					<DrawCuboid x1="6" y1="209" z1="-5" x2="6" y2="209" z2="-5" type="red_flower" variant="red_tulip"/>
+					<DrawCuboid x1="7" y1="209" z1="-3" x2="7" y2="209" z2="-3" type="red_flower" variant="red_tulip"/>
+					<DrawCuboid x1="7" y1="209" z1="-4" x2="7" y2="209" z2="-4" type="red_flower" variant="red_tulip"/>
+					<DrawCuboid x1="7" y1="209" z1="-5" x2="7" y2="209" z2="-5" type="red_flower" variant="red_tulip"/>
+					<DrawCuboid x1="8" y1="209" z1="-3" x2="8" y2="209" z2="-3" type="red_flower" variant="red_tulip"/>
+					<DrawCuboid x1="8" y1="209" z1="-4" x2="8" y2="209" z2="-4" type="red_flower" variant="red_tulip"/>
+					<DrawCuboid x1="8" y1="209" z1="-5" x2="8" y2="209" z2="-5" type="red_flower" variant="red_tulip"/>
+					<DrawCuboid x1="1" y1="209" z1="-3" x2="1" y2="209" z2="-3" type="red_flower" variant="oxeye_daisy"/>
+					<DrawCuboid x1="1" y1="209" z1="-4" x2="1" y2="209" z2="-4" type="red_flower" variant="oxeye_daisy"/>
+					<DrawCuboid x1="1" y1="209" z1="-5" x2="1" y2="209" z2="-5" type="red_flower" variant="oxeye_daisy"/>
+					<DrawCuboid x1="2" y1="209" z1="-3" x2="2" y2="209" z2="-3" type="red_flower" variant="oxeye_daisy"/>
+					<DrawCuboid x1="2" y1="209" z1="-4" x2="2" y2="209" z2="-4" type="red_flower" variant="oxeye_daisy"/>
+					<DrawCuboid x1="2" y1="209" z1="-5" x2="2" y2="209" z2="-5" type="red_flower" variant="oxeye_daisy"/>
+					<DrawCuboid x1="3" y1="209" z1="-3" x2="3" y2="209" z2="-3" type="red_flower" variant="oxeye_daisy"/>
+					<DrawCuboid x1="3" y1="209" z1="-4" x2="3" y2="209" z2="-4" type="red_flower" variant="oxeye_daisy"/>
+					<DrawCuboid x1="3" y1="209" z1="-5" x2="3" y2="209" z2="-5" type="red_flower" variant="oxeye_daisy"/>
+					<DrawCuboid x1="4" y1="209" z1="-6" x2="4" y2="209" z2="-6" type="red_flower" variant="blue_orchid"/>
+					<DrawCuboid x1="4" y1="209" z1="-7" x2="4" y2="209" z2="-7" type="red_flower" variant="blue_orchid"/>
+					<DrawCuboid x1="4" y1="209" z1="-8" x2="4" y2="209" z2="-8" type="red_flower" variant="blue_orchid"/>
+					<DrawCuboid x1="5" y1="209" z1="-6" x2="5" y2="209" z2="-6" type="red_flower" variant="blue_orchid"/>
+					<DrawCuboid x1="5" y1="209" z1="-7" x2="5" y2="209" z2="-7" type="red_flower" variant="blue_orchid"/>
+					<DrawCuboid x1="5" y1="209" z1="-8" x2="5" y2="209" z2="-8" type="red_flower" variant="blue_orchid"/>
+					<DrawCuboid x1="6" y1="209" z1="-6" x2="6" y2="209" z2="-6" type="red_flower" variant="blue_orchid"/>
+					<DrawCuboid x1="6" y1="209" z1="-7" x2="6" y2="209" z2="-7" type="red_flower" variant="blue_orchid"/>
+					<DrawCuboid x1="6" y1="209" z1="-8" x2="6" y2="209" z2="-8" type="red_flower" variant="blue_orchid"/>
                 </DrawingDecorator>
                <ServerQuitWhenAnyAgentFinishes />
                <ServerQuitFromTimeUp timeLimitMs="120000"/>
@@ -66,7 +96,7 @@
                 </RewardForDamagingEntity>
                 <SimpleCraftCommands/>
                 <ObservationFromNearbyEntities>
-                    <Range name="entities" xrange="12" yrange="2" zrange="9" />
+                    <Range name="entities" xrange="13" yrange="2" zrange="13" />
                 </ObservationFromNearbyEntities>
                 <ObservationFromFullStats/>{video_requirements}
             </AgentHandlers>

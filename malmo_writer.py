@@ -7,6 +7,8 @@ import copy
 
 type_replacements = {
     "obsidian-block":"obsidian",
+    "wool-block":"wool",
+    "wooden-block": "wooden_slab",
     "netherportal":"portal",
     'diamond-pickaxe': 'diamond_pickaxe',
     'flint-and-steel': 'flint_and_steel',

@@ -157,7 +157,7 @@ def get_destructible_block_action(block_type, needed_tool = None):
                         (= (y ?b) (+ (y ?ag) 1))
                         (= (z ?b) (+ (z ?ag) 1))
                         (block-present ?b)
-                        (< (block-hits ?b) 4){tool_precond})
+                        (< (block-hits ?b) 2){tool_precond})
     :effect (and (increase (block-hits ?b) 1))
     )"""
     destroy_s = f"""(:action destroy-{block_type}
@@ -166,7 +166,7 @@ def get_destructible_block_action(block_type, needed_tool = None):
                         (= (y ?b) (+ (y ?ag) 1))
                         (= (z ?b) (+ (z ?ag) 1))
                         (block-present ?b)
-                        (= (block-hits ?b) 3){tool_precond})
+                        (= (block-hits ?b) 2){tool_precond})
     :effect (and (not (block-present ?b))
                  (increase (agent-num-{block_type} ?ag) 1)
             )
@@ -323,7 +323,7 @@ def make_instance(start_with_pick = True, use_bedrock_boundaries = False, add_ir
     object_names["wooden-block"] = ["wb0","wb1","wb2","wb3","wb4","wb5","wb6","wb7",
                                     "wb8","wb9","wb10","wb11","wb12","wb13","wb14","wb15","wb16",
                                     "wb17","wb18","wb19","wb20","wb21","wb22","wb23","wb24","wb25",
-                                    "wb26","wb27","wb28","wb29"]
+                                    "wb26","wb27","wb28","wb29","wb30"]
     object_names["wool-block"] = ["woolb1", "woolb2","woolb3"]
     if(add_irrel_items):
         object_names["apple"] = ["apple1", "apple2", "apple3"]
@@ -354,12 +354,12 @@ def make_instance(start_with_pick = True, use_bedrock_boundaries = False, add_ir
     
     # Setting up initial conditions block
     init_conds = [f"(agent-alive {agent_name})"]
-    agent_start_pos = (0,0,0)
+    agent_start_pos = (5,0,0)
     init_conds.extend(get_init_location_conds(agent_start_pos,agent_name))
     inventory_count = OrderedDict()
     for item_type in item_types:
         inventory_count[item_type] = 0
-    inventory_count["wool-block"] = 2
+    inventory_count["wool-block"] = 3
     if start_with_pick:
         inventory_count["diamond-axe"] = 1
     for item_type, item_count in inventory_count.items():
@@ -367,7 +367,8 @@ def make_instance(start_with_pick = True, use_bedrock_boundaries = False, add_ir
             init_conds.append(f"( = ( agent-num-{item_type} {agent_name} ) {item_count} )")
 
     block_locations = OrderedDict()
-    block_locations["wooden-block"] = [(6,8,0), (8,8,0),
+    block_locations["wooden-block"] = [(2,10,0),
+                                        (6,8,0), (8,8,0),
                                         (5,9,0), (9,9,0),
                                         (5,10,0), (9,10,0),
                                         (6,11,0),(7,12,0),(8,11,0),
@@ -381,18 +382,11 @@ def make_instance(start_with_pick = True, use_bedrock_boundaries = False, add_ir
                                         (6,11,2),(8,11,2),
                                         (6,11,2),(7,11,2),(8,11,2)
                                         ]
-    block_locations["wool-block"] = [(10,0,0)]
 
     for i,loc in enumerate(block_locations["wooden-block"]):
         s = object_names["wooden-block"][i]
         init_conds.extend(get_init_location_conds(loc,s))
         init_conds.append(f"(block-present {s})")
-
-    for i,loc in enumerate(block_locations["wool-block"]):
-        s = object_names["wool-block"][i]
-        init_conds.extend(get_init_location_conds(loc,s))
-        init_conds.append(f"(block-present {s})")
-
 
     for s in object_names["wooden-block"]:
         init_conds.append(f"( = ( block-hits {s} ) 0 )")
@@ -400,7 +394,7 @@ def make_instance(start_with_pick = True, use_bedrock_boundaries = False, add_ir
 
     for s in object_names["wool-block"]:
         init_conds.append(f"( = ( block-hits {s} ) 0 )")
-    init_conds.append("(= (agent-num-wool-block steve) 2)")
+    init_conds.append("(= (agent-num-wool-block steve) 3)")
 
     for s in object_names["red-tulip"]:
         init_conds.append(f"( = ( item-hits {s} ) 0 )")
@@ -540,7 +534,6 @@ if __name__ == "__main__":
         f.write(malmo_s)
 
 # TODO: 
-# Find items necessary for wood part of bed and strew them in the right place!
+# Start debugging the PDDL domain once you're happy with the MALMO version
 # Put goal in the right place
 # Make the correct goal for make_bed
-# Start debugging the PDDL domain once you're happy with the MALMO version

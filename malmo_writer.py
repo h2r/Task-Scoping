@@ -62,8 +62,8 @@ def make_inventory(inventory_counts):
     inventory_lines = []
     slot_id = 0
     for item_type, item_count in inventory_counts.items():
-        for _ in range(item_count):
-            inventory_lines.append(f'<InventoryItem type="{item_type}" slot="{slot_id}"/>')
+        if item_count > 0:
+            inventory_lines.append(f'<InventoryItem type="{item_type}" slot="{slot_id}" quantity="{item_count}"/>')
             slot_id += 1
     inventory = "\n\t".join(inventory_lines)
     return inventory

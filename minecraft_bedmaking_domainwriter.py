@@ -320,7 +320,10 @@ def make_instance(start_with_pick = True, use_bedrock_boundaries = False, add_ir
                                 "rt14","rt15","rt16","rt17","rt18","rt19"]
     object_names["daisy-flower"] = ["df0","df1","df2","df3","df4","df5","df6","df7","df8","df9","df10","df11"]
     object_names["orchid-flower"] = ["of0","of1","of2"]
-    object_names["wooden-block"] = ["wb1", "wb2"]
+    object_names["wooden-block"] = ["wb0","wb1","wb2","wb3","wb4","wb5","wb6","wb7",
+                                    "wb8","wb9","wb10","wb11","wb12","wb13","wb14","wb15","wb16",
+                                    "wb17","wb18","wb19","wb20","wb21","wb22","wb23","wb24","wb25",
+                                    "wb26","wb27","wb28","wb29"]
     object_names["wool-block"] = ["woolb1", "woolb2","woolb3"]
     if(add_irrel_items):
         object_names["apple"] = ["apple1", "apple2", "apple3"]
@@ -364,7 +367,20 @@ def make_instance(start_with_pick = True, use_bedrock_boundaries = False, add_ir
             init_conds.append(f"( = ( agent-num-{item_type} {agent_name} ) {item_count} )")
 
     block_locations = OrderedDict()
-    block_locations["wooden-block"] = [(11,8,0), (10,8,0)]
+    block_locations["wooden-block"] = [(6,8,0), (8,8,0),
+                                        (5,9,0), (9,9,0),
+                                        (5,10,0), (9,10,0),
+                                        (6,11,0),(7,12,0),(8,11,0),
+                                        (6,8,1), (8,8,1),
+                                        (5,9,1), (9,9,1),
+                                        (5,10,1), (9,10,1),
+                                        (6,11,1),(7,12,1),(8,11,1),
+                                        (6,8,2),(7,8,2),(8,8,2),
+                                        (6,9,2),(8,9,2),
+                                        (6,10,2),(8,10,2),
+                                        (6,11,2),(8,11,2),
+                                        (6,11,2),(7,11,2),(8,11,2)
+                                        ]
     block_locations["wool-block"] = [(10,0,0)]
 
     for i,loc in enumerate(block_locations["wooden-block"]):
@@ -524,8 +540,7 @@ if __name__ == "__main__":
         f.write(malmo_s)
 
 # TODO: 
-# Put the diamond and sticks among the flowers
-# Import house and add to initial conditions!
+# Find items necessary for wood part of bed and strew them in the right place!
+# Put goal in the right place
 # Make the correct goal for make_bed
-# Find actual wooden blocks and plop them down
 # Start debugging the PDDL domain once you're happy with the MALMO version

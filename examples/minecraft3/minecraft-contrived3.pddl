@@ -6,7 +6,7 @@
 	agent item block - locatable
 	bedrock destructible-block - block
 	wooden-block wool-block - destructible-block
-	destructible-item diamond stick diamond-pickaxe apple potato rabbit - item
+	destructible-item diamond stick diamond-axe apple potato rabbit - item
 	orchid-flower daisy-flower red-tulip - destructible-item
 )
 
@@ -20,7 +20,7 @@
 	(agent-num-destructible-item ?ag - agent)
 	(agent-num-diamond ?ag - agent)
 	(agent-num-stick ?ag - agent)
-	(agent-num-diamond-pickaxe ?ag - agent)
+	(agent-num-diamond-axe ?ag - agent)
 	(agent-num-apple ?ag - agent)
 	(agent-num-potato ?ag - agent)
 	(agent-num-rabbit ?ag - agent)
@@ -101,13 +101,13 @@
 )
 
 
-(:action pickup-diamond-pickaxe
- :parameters (?ag - agent ?i - diamond-pickaxe)
+(:action pickup-diamond-axe
+ :parameters (?ag - agent ?i - diamond-axe)
  :precondition (and (present ?i)
                     (= (x ?i) (x ?ag))
                     (= (y ?i) (y ?ag))
                     (= (z ?i) (z ?ag)))
- :effect (and (increase (agent-num-diamond-pickaxe ?ag) 1)
+ :effect (and (increase (agent-num-diamond-axe ?ag) 1)
               (not (present ?i)))
 )
 
@@ -249,13 +249,13 @@
 )
 
 
-(:action craft-diamond-pickaxe
+(:action craft-diamond-axe
     :parameters ( ?ag - agent )
     :precondition ( and
                       ( >= (agent-num-stick ?ag) 2 )
                       ( >= (agent-num-diamond ?ag) 3 )
                   )
-    :effect (and (increase (agent-num-diamond-pickaxe ?ag) 1)
+    :effect (and (increase (agent-num-diamond-axe ?ag) 1)
         (decrease (agent-num-stick ?ag) 2)
         (decrease (agent-num-diamond ?ag) 3))
 
@@ -298,7 +298,7 @@
                         (= (z ?b) (+ (z ?ag) 1))
                         (block-present ?b)
                         (< (block-hits ?b) 4)
-                        ( >= ( agent-num-diamond-pickaxe ?ag ) 1 ))
+                        ( >= ( agent-num-diamond-axe ?ag ) 1 ))
     :effect (and (increase (block-hits ?b) 1))
     )
 
@@ -309,7 +309,7 @@
                         (= (z ?b) (+ (z ?ag) 1))
                         (block-present ?b)
                         (= (block-hits ?b) 3)
-                        ( >= ( agent-num-diamond-pickaxe ?ag ) 1 ))
+                        ( >= ( agent-num-diamond-axe ?ag ) 1 ))
     :effect (and (not (block-present ?b))
                  (increase (agent-num-wooden-block ?ag) 1)
             )
@@ -322,7 +322,7 @@
                         (= (z ?b) (+ (z ?ag) 1))
                         (block-present ?b)
                         (< (block-hits ?b) 4)
-                        ( >= ( agent-num-diamond-pickaxe ?ag ) 1 ))
+                        ( >= ( agent-num-diamond-axe ?ag ) 1 ))
     :effect (and (increase (block-hits ?b) 1))
     )
 
@@ -333,7 +333,7 @@
                         (= (z ?b) (+ (z ?ag) 1))
                         (block-present ?b)
                         (= (block-hits ?b) 3)
-                        ( >= ( agent-num-diamond-pickaxe ?ag ) 1 ))
+                        ( >= ( agent-num-diamond-axe ?ag ) 1 ))
     :effect (and (not (block-present ?b))
                  (increase (agent-num-wool-block ?ag) 1)
             )
@@ -346,7 +346,7 @@
                         (= (z ?b) (+ (z ?ag) 1))
                         (present ?b)
                         (= (item-hits ?b) 0)
-                        ( >= ( agent-num-diamond-pickaxe ?ag ) 1 ))
+                        ( >= ( agent-num-diamond-axe ?ag ) 1 ))
     :effect (and (not (present ?b))
                  (increase (agent-num-wool-block ?ag) 1)
             )
@@ -359,7 +359,7 @@
                         (= (z ?b) (+ (z ?ag) 1))
                         (present ?b)
                         (= (item-hits ?b) 0)
-                        ( >= ( agent-num-diamond-pickaxe ?ag ) 1 ))
+                        ( >= ( agent-num-diamond-axe ?ag ) 1 ))
     :effect (and (not (present ?b))
                  (increase (agent-num-wool-block ?ag) 1)
             )
@@ -372,7 +372,7 @@
                         (= (z ?b) (+ (z ?ag) 1))
                         (present ?b)
                         (= (item-hits ?b) 0)
-                        ( >= ( agent-num-diamond-pickaxe ?ag ) 1 ))
+                        ( >= ( agent-num-diamond-axe ?ag ) 1 ))
     :effect (and (not (present ?b))
                  (increase (agent-num-wool-block ?ag) 1)
             )

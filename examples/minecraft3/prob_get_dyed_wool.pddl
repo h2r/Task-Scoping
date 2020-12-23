@@ -4,9 +4,9 @@
 
 (:objects
 	steve - agent
-	old-pointy - diamond-pickaxe
-	dmd0 dmd1 dmd2 - diamond
-	stick0 stick1 - stick
+	old-pointy - diamond-axe
+	dmd0 dmd1 dmd2 dmd3 dmd4 - diamond
+	stick0 stick1 stick2 stick3 stick4 - stick
 	rt0 rt1 rt2 rt3 rt4 rt5 rt6 rt7 rt8 rt9 rt10 rt11 rt12 rt13 rt14 rt15 rt16 rt17 rt18 rt19 - red-tulip
 	df0 df1 df2 df3 df4 df5 df6 df7 df8 df9 df10 df11 - daisy-flower
 	of0 of1 of2 - orchid-flower
@@ -22,7 +22,7 @@
 	(= (z steve) 0)
 	( = ( agent-num-diamond steve ) 0 )
 	( = ( agent-num-stick steve ) 0 )
-	( = ( agent-num-diamond-pickaxe steve ) 1 )
+	( = ( agent-num-diamond-axe steve ) 1 )
 	( = ( agent-num-apple steve ) 0 )
 	( = ( agent-num-potato steve ) 0 )
 	( = ( agent-num-rabbit steve ) 0 )
@@ -88,26 +88,46 @@
 	(= (y old-pointy) 0)
 	(= (z old-pointy) 0)
 	( not ( present old-pointy ) )
-	(= (x stick0) 1)
-	(= (y stick0) 0)
+	(= (x stick0) 0)
+	(= (y stick0) 2)
 	(= (z stick0) 0)
 	( present stick0 )
-	(= (x stick1) 1)
-	(= (y stick1) 1)
+	(= (x stick1) 0)
+	(= (y stick1) 3)
 	(= (z stick1) 0)
 	( present stick1 )
-	(= (x dmd0) 2)
-	(= (y dmd0) 0)
+	(= (x stick2) 0)
+	(= (y stick2) 4)
+	(= (z stick2) 0)
+	( present stick2 )
+	(= (x stick3) 0)
+	(= (y stick3) 5)
+	(= (z stick3) 0)
+	( present stick3 )
+	(= (x stick4) 0)
+	(= (y stick4) 6)
+	(= (z stick4) 0)
+	( present stick4 )
+	(= (x dmd0) 1)
+	(= (y dmd0) 2)
 	(= (z dmd0) 0)
 	(present dmd0)
-	(= (x dmd1) 2)
-	(= (y dmd1) 1)
+	(= (x dmd1) 1)
+	(= (y dmd1) 3)
 	(= (z dmd1) 0)
 	(present dmd1)
-	(= (x dmd2) 2)
-	(= (y dmd2) 2)
+	(= (x dmd2) 1)
+	(= (y dmd2) 4)
 	(= (z dmd2) 0)
 	(present dmd2)
+	(= (x dmd3) 1)
+	(= (y dmd3) 5)
+	(= (z dmd3) 0)
+	(present dmd3)
+	(= (x dmd4) 1)
+	(= (y dmd4) 6)
+	(= (z dmd4) 0)
+	(present dmd4)
 	(= (x rt0) 2)
 	(= (y rt0) 6)
 	(= (z rt0) 0)

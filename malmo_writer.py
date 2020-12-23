@@ -8,9 +8,10 @@ import copy
 type_replacements = {
     "obsidian-block":"obsidian",
     "wool-block":"wool",
-    "wooden-block": "wooden_slab",
+    "wooden-block": "log",
     "netherportal":"portal",
     'diamond-pickaxe': 'diamond_pickaxe',
+    'diamond-axe': 'diamond_axe',
     'flint-and-steel': 'flint_and_steel',
     'iron-ingot': 'iron_ingot',
     'iron-ore': 'iron_ore',

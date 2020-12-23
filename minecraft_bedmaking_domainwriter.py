@@ -6,7 +6,7 @@ from functools import reduce
 import copy
 from malmo_writer import make_malmo_domain
 
-item_types = ["diamond", "stick", "diamond-pickaxe", "apple", "potato"
+item_types = ["diamond", "stick", "diamond-axe", "apple", "potato"
     , "rabbit"]
 destructible_item_types = ["orchid-flower", "daisy-flower", "red-tulip"]
 
@@ -140,7 +140,7 @@ def make_drop_actions(item_types, item_or_block=True):
 
     actions = []
     for t in item_types:
-        if(t != "netherportal" and t != "diamond-pickaxe"):
+        if(t != "netherportal" and t != "diamond-axe"):
             actions.append(action_template.format(t=t))
     return actions
 
@@ -277,8 +277,8 @@ def make_domain():
     actions.extend(make_drop_actions(inverse_type_hierarchy["destructible-block"], False))
 
     diamond_pick_inputs = OrderedDict([("stick",2),("diamond",3)])
-    diamond_pick_outputs = OrderedDict([("diamond-pickaxe",1)])
-    craft_diamond_pickaxe = get_crafting_action("craft-diamond-pickaxe", diamond_pick_inputs, diamond_pick_outputs)
+    diamond_pick_outputs = OrderedDict([("diamond-axe",1)])
+    craft_diamond_pickaxe = get_crafting_action("craft-diamond-axe", diamond_pick_inputs, diamond_pick_outputs)
     actions.append(craft_diamond_pickaxe)
 
     red_dye_inputs = OrderedDict([("red-tulip",1)])
@@ -297,10 +297,10 @@ def make_domain():
     actions.append(craft_white_dye)
 
     for block_type in inverse_type_hierarchy["destructible-block"]:
-        actions.extend(get_destructible_block_action(block_type, needed_tool = "diamond-pickaxe"))
+        actions.extend(get_destructible_block_action(block_type, needed_tool = "diamond-axe"))
 
     for item_type in inverse_type_hierarchy["destructible-item"]:
-        actions.extend(get_destructible_item_action(block_type, needed_tool = "diamond-pickaxe"))
+        actions.extend(get_destructible_item_action(block_type, needed_tool = "diamond-axe"))
 
     sections.extend(actions)
     sections.append(footer)
@@ -312,9 +312,9 @@ def make_domain():
 def make_instance(start_with_pick = True, use_bedrock_boundaries = False, add_irrel_items = False, goal_var = ""):
     object_names = OrderedDict()
     object_names["agent"] = ["steve"]
-    object_names["diamond-pickaxe"] = ["old-pointy"]
-    object_names["diamond"] = ["dmd0","dmd1","dmd2"]
-    object_names["stick"] = ["stick0", "stick1"]
+    object_names["diamond-axe"] = ["old-pointy"]
+    object_names["diamond"] = ["dmd0","dmd1","dmd2","dmd3","dmd4",]
+    object_names["stick"] = ["stick0","stick1","stick2","stick3","stick4"]
     object_names["red-tulip"] = ["rt0","rt1","rt2","rt3","rt4","rt5","rt6",
                                 "rt7","rt8","rt9","rt10","rt11","rt12","rt13",
                                 "rt14","rt15","rt16","rt17","rt18","rt19"]
@@ -358,7 +358,7 @@ def make_instance(start_with_pick = True, use_bedrock_boundaries = False, add_ir
         inventory_count[item_type] = 0
     inventory_count["wool-block"] = 2
     if start_with_pick:
-        inventory_count["diamond-pickaxe"] = 1
+        inventory_count["diamond-axe"] = 1
     for item_type, item_count in inventory_count.items():
         if item_type != "netherportal":
             init_conds.append(f"( = ( agent-num-{item_type} {agent_name} ) {item_count} )")
@@ -399,21 +399,21 @@ def make_instance(start_with_pick = True, use_bedrock_boundaries = False, add_ir
     init_conds.append("(= (agent-num-daisy-flower steve) 0)")
 
 
-    diamond_pick_name = object_names["diamond-pickaxe"][0]
+    diamond_pick_name = object_names["diamond-axe"][0]
     init_conds.extend(get_init_location_conds((0,0,0), diamond_pick_name))
     init_conds.append(f"( not ( present {diamond_pick_name} ) )")
     
     item_locations = OrderedDict()
     item_locations["stick"] = []
     for i, s in enumerate(object_names["stick"]):
-        loc = (1,i,0)
+        loc = (0,2+i,0)
         item_locations["stick"].append(loc)
         init_conds.extend(get_init_location_conds(loc,s))
         init_conds.append(f"( present {s} )")
     
     item_locations["diamond"] = []
     for i, s in enumerate(object_names["diamond"]):
-        loc = (2,i,0)
+        loc = (1,i+2,0)
         item_locations["diamond"].append(loc)
         init_conds.extend(get_init_location_conds(loc,s))
         init_conds.append(f"(present {s})")
@@ -524,7 +524,8 @@ if __name__ == "__main__":
         f.write(malmo_s)
 
 # TODO: 
-# Find actual wooden blocks and plop them down
+# Put the diamond and sticks among the flowers
 # Import house and add to initial conditions!
 # Make the correct goal for make_bed
+# Find actual wooden blocks and plop them down
 # Start debugging the PDDL domain once you're happy with the MALMO version

@@ -6,11 +6,8 @@ from functools import reduce
 import copy
 from malmo_writer import make_malmo_domain
 
-item_types = ["diamond", "stick", "diamond-axe", "apple", "potato"
-    , "rabbit"]
+item_types = ["diamond", "stick", "diamond-axe", "white-dye", "blue-dye", "red-dye"]
 destructible_item_types = ["orchid-flower", "daisy-flower", "red-tulip"]
-
-
 
 def get_object_declarations(objects):
     prefix = "(:objects\n\t"
@@ -59,12 +56,10 @@ def make_init_conds_str(init_conds):
 def get_inventory_funcs(item_types):
     inventory_count_vars = []
     for t in item_types:
-        if t != "netherportal":
+        if t != "netherportal" and t != "destructible-item":
             inventory_count_vars.append(f"(agent-num-{t} ?ag - agent)")
     return inventory_count_vars
     
-def get_pickup_actions(item_types):
-    pass
 
 def invert_dict(d):
     d_new = OrderedDict()
@@ -90,7 +85,44 @@ def get_predicates_str(predicates):
 
 def get_move_actions():
     # TODO block can't be at same z or higher z
-    s = "(:action move-north\n :parameters (?ag - agent)\n :precondition (and (agent-alive ?ag)\n                    (not (exists (?bl - block) (and (= (x ?bl) (x ?ag))\n                                                    (= (y ?bl) (+ (y ?ag) 1))\n                                                    (= (z ?bl) (+ (z ?ag) 1))))))\n :effect (and (increase (y ?ag) 1))\n)\n\n(:action move-south\n :parameters (?ag - agent)\n :precondition (and (agent-alive ?ag)\n                    (not (exists (?bl - block) (and (= (x ?bl) (x ?ag))\n                                                    (= (y ?bl) (- (y ?ag) 1))\n                                                    (= (z ?bl) (+ (z ?ag) 1))))))\n :effect (and (decrease (y ?ag) 1))\n)\n\n(:action move-east\n :parameters (?ag - agent)\n :precondition (and (agent-alive ?ag)\n                    (not (exists (?bl - block) (and (= (x ?bl) (+ (x ?ag) 1))\n                                                    (= (y ?bl) (y ?ag))\n                                                    (= (z ?bl) (+ (z ?ag) 1))))))\n :effect (and (increase (x ?ag) 1))\n)\n\n(:action move-west\n :parameters (?ag - agent)\n :precondition (and (agent-alive ?ag)\n                    (not (exists (?bl - block) (and (= (x ?bl) (- (x ?ag) 1))\n                                                    (= (y ?bl) (y ?ag))\n                                                    (= (z ?bl) (+ (z ?ag) 1))))))\n :effect (and (decrease (x ?ag) 1))\n)"
+    s = """(:action move-north\n :parameters (?ag - agent)
+            :precondition (and (agent-alive ?ag)
+                         (not (exists (?bl - block) (and (block-present ?bl) 
+                                                         (= (x ?bl) (x ?ag))
+                                                         (= (y ?bl) (+ (y ?ag) 1))
+                                                         (= (z ?bl) (z ?ag)))))) 
+            :effect (and (increase (y ?ag) 1))
+)
+                        
+(:action move-south 
+:parameters (?ag - agent) 
+:precondition (and (agent-alive ?ag)
+                    (not (exists (?bl - block) (and (block-present ?bl)
+                                                    (= (x ?bl) (x ?ag))
+                                                    (= (y ?bl) (- (y ?ag) 1))
+                                                    (= (z ?bl) (z ?ag)))))) 
+:effect (and (decrease (y ?ag) 1))
+)
+            
+(:action move-east
+    :parameters (?ag - agent)
+    :precondition (and (agent-alive ?ag)
+                        (not (exists (?bl - block) (and (block-present ?bl)
+                                                        (= (x ?bl) (+ (x ?ag) 1))
+                                                        (= (y ?bl) (y ?ag))
+                                                        (= (z ?bl) (z ?ag)))))) 
+    :effect (and (increase (x ?ag) 1))
+    )
+             
+(:action move-west
+    :parameters (?ag - agent)
+    :precondition (and (agent-alive ?ag)
+                    (not (exists (?bl - block) (and (block-present ?bl)
+                                                    (= (x ?bl) (- (x ?ag) 1))
+                                                    (= (y ?bl) (y ?ag))
+                                                    (= (z ?bl) (z ?ag))))))
+    :effect (and (decrease (x ?ag) 1))
+)"""
     return s
 
 def make_pickup_actions(item_types):
@@ -106,7 +138,7 @@ def make_pickup_actions(item_types):
 """
     actions = []
     for t in item_types:
-        if(t != "netherportal"):
+        if(t != "netherportal" and t != "destructible-item"):
             actions.append(action_template.format(t=t))
     return actions
 
@@ -137,10 +169,9 @@ def make_drop_actions(item_types, item_or_block=True):
          )
 )
 """
-
     actions = []
     for t in item_types:
-        if(t != "netherportal" and t != "diamond-axe"):
+        if(t != "netherportal" and t != "diamond-axe" and t != "destructible-item"):
             actions.append(action_template.format(t=t))
     return actions
 
@@ -155,7 +186,7 @@ def get_destructible_block_action(block_type, needed_tool = None):
     :parameters (?ag - agent ?b - {block_type})
     :precondition (and (= (x ?b) (x ?ag))
                         (= (y ?b) (+ (y ?ag) 1))
-                        (= (z ?b) (+ (z ?ag) 1))
+                        (= (z ?b) (z ?ag))
                         (block-present ?b)
                         (< (block-hits ?b) 2){tool_precond})
     :effect (and (increase (block-hits ?b) 1))
@@ -164,7 +195,7 @@ def get_destructible_block_action(block_type, needed_tool = None):
     :parameters (?ag - agent ?b - {block_type})
     :precondition (and (= (x ?b) (x ?ag))
                         (= (y ?b) (+ (y ?ag) 1))
-                        (= (z ?b) (+ (z ?ag) 1))
+                        (= (z ?b) (z ?ag))
                         (block-present ?b)
                         (= (block-hits ?b) 2){tool_precond})
     :effect (and (not (block-present ?b))
@@ -184,7 +215,7 @@ def get_destructible_item_action(item_type, needed_tool = None):
     :parameters (?ag - agent ?b - {item_type})
     :precondition (and (= (x ?b) (x ?ag))
                         (= (y ?b) (+ (y ?ag) 1))
-                        (= (z ?b) (+ (z ?ag) 1))
+                        (= (z ?b) (z ?ag))
                         (present ?b)
                         (= (item-hits ?b) 0){tool_precond})
     :effect (and (not (present ?b))
@@ -225,6 +256,28 @@ def get_crafting_action(name, inputs, outputs, extra_preconditions = tuple()):
 
     return "\n".join([prefix, precond_s, effects_s, suffix])
 
+def get_wool_coloring_actions(coloring_dict):
+    """ Returns strings representing actions that enable wool to be dyed 
+    
+    input:
+        coloring_dict: a dict mapping strings of dye-names to ints representing an enum
+                       of that color. e.g. {['white-dye' -> 0,'blue-dye' -> 1, 'red-dye' -> 2]}
+    
+    output:
+        string representing the coloring actions
+    """
+    
+    wool_coloring_actions = ''
+    for dye_name in coloring_dict.keys():
+        dye_color = coloring_dict[dye_name]
+        wool_coloring_str = f"""(:action apply-{dye_name}
+ :parameters (?ag - agent ?woolb - wool-block)
+ :precondition (and (not (block-present ?woolb)) (>= (agent-num-wool-block ?ag) 1) (>= (agent-num-{dye_name} ?ag) 1))
+ :effect (and (decrease (agent-num-{dye_name} ?ag) 1) (assign (color ?woolb) {dye_color})))"""
+        wool_coloring_actions += wool_coloring_str + '\n\n'
+
+    return wool_coloring_actions
+
 def make_domain():
     sections = []
     header = "(define (domain minecraft-contrived)\n(:requirements :typing :fluents :negative-preconditions :universal-preconditions :existential-preconditions)"
@@ -260,8 +313,14 @@ def make_domain():
     predicates.append("(agent-alive ?ag - agent)")
     functions = []
     functions.extend(get_inventory_funcs(inverse_type_hierarchy["item"]))
-    functions.append("(block-hits ?b - destructible-block)")
+    functions.extend(get_inventory_funcs(inverse_type_hierarchy['destructible-item']))
+    functions.append("(item-hits ?it - destructible-item)")
     functions.extend(get_inventory_funcs(inverse_type_hierarchy["destructible-block"]))
+    functions.append("(block-hits ?b - destructible-block)")
+
+    # Add a color enum for wool blocks 0 = white, 1 = blue, 2 = red
+    functions.append("(color ?woolb - wool-block)")
+    
     for d in ["x","y","z"]:
         functions.append(f"({d} ?l - locatable)")
 
@@ -270,12 +329,23 @@ def make_domain():
     functions_s = get_functions_str(functions)
     sections.append(functions_s)
 
+    # Create actions
     actions = []
     actions.append(get_move_actions())
     actions.extend(make_pickup_actions(inverse_type_hierarchy["item"]))
     actions.extend(make_drop_actions(inverse_type_hierarchy["item"], True))
     actions.extend(make_drop_actions(inverse_type_hierarchy["destructible-block"], False))
-
+    
+    # Create wool coloring actions
+    coloring_dict = {}
+    color_enum = 0
+    for item in item_types:
+        if 'dye' in item:
+            coloring_dict[item] = color_enum
+            color_enum += 1
+    actions.append(get_wool_coloring_actions(coloring_dict))
+    
+    # Create crafting actions
     diamond_pick_inputs = OrderedDict([("stick",2),("diamond",3)])
     diamond_pick_outputs = OrderedDict([("diamond-axe",1)])
     craft_diamond_pickaxe = get_crafting_action("craft-diamond-axe", diamond_pick_inputs, diamond_pick_outputs)
@@ -300,7 +370,7 @@ def make_domain():
         actions.extend(get_destructible_block_action(block_type, needed_tool = "diamond-axe"))
 
     for item_type in inverse_type_hierarchy["destructible-item"]:
-        actions.extend(get_destructible_item_action(block_type, needed_tool = "diamond-axe"))
+        actions.extend(get_destructible_item_action(item_type, needed_tool = "diamond-axe"))
 
     sections.extend(actions)
     sections.append(footer)
@@ -309,7 +379,7 @@ def make_domain():
     return domain_s
 
 
-def make_instance(start_with_pick = True, use_bedrock_boundaries = False, add_irrel_items = False, goal_var = ""):
+def make_instance(start_with_pick = True, use_bedrock_boundaries = False, goal_var = ""):
     object_names = OrderedDict()
     object_names["agent"] = ["steve"]
     object_names["diamond-axe"] = ["old-pointy"]
@@ -325,10 +395,6 @@ def make_instance(start_with_pick = True, use_bedrock_boundaries = False, add_ir
                                     "wb17","wb18","wb19","wb20","wb21","wb22","wb23","wb24","wb25",
                                     "wb26","wb27","wb28","wb29","wb30"]
     object_names["wool-block"] = ["woolb1", "woolb2","woolb3"]
-    if(add_irrel_items):
-        object_names["apple"] = ["apple1", "apple2", "apple3"]
-        object_names["potato"] = ["potato1", "potato2", "potato3", "potato4", "potato5"]
-        object_names["rabbit"] = ["rabbit1", "rabbit2", "rabbit3", "rabbit4", "rabbit5"]
 
     agent_name = "steve"
 
@@ -337,9 +403,9 @@ def make_instance(start_with_pick = True, use_bedrock_boundaries = False, add_ir
 
     if (goal_var == "dye_wool"):
         goal = f"""(:goal (and
-                (= (x {agent_name}) 3)
-                (= (y {agent_name}) 4)
-                (= (z {agent_name}) 0)
+                (= (color woolb1) 1)
+                (= (color woolb2) 1)
+                (= (color woolb2) 1)
             )
         )
         """
@@ -394,6 +460,8 @@ def make_instance(start_with_pick = True, use_bedrock_boundaries = False, add_ir
 
     for s in object_names["wool-block"]:
         init_conds.append(f"( = ( block-hits {s} ) 0 )")
+        init_conds.append(f"( = ( color {s} ) 0 )")
+        init_conds.append(f"(not (block-present {s}))")
     init_conds.append("(= (agent-num-wool-block steve) 3)")
 
     for s in object_names["red-tulip"]:
@@ -438,7 +506,7 @@ def make_instance(start_with_pick = True, use_bedrock_boundaries = False, add_ir
         item_locations["red-tulip"].append(loc)
         s = object_names["red-tulip"][i]
         init_conds.extend(get_init_location_conds(loc,s))
-        init_conds.append(f"( present {s} )")
+        init_conds.append(f"(present {s})")
         i += 1
     item_locations["daisy-flower"] = []
     i = 0
@@ -460,28 +528,6 @@ def make_instance(start_with_pick = True, use_bedrock_boundaries = False, add_ir
         init_conds.extend(get_init_location_conds(loc,s))
         init_conds.append(f"( present {s} )")
         i += 1
-
-    if(add_irrel_items):
-        item_locations["apple"] = []
-        for i, s in enumerate(object_names["apple"]):
-            loc = (3,i,0)
-            item_locations["apple"].append(loc)
-            init_conds.extend(get_init_location_conds(loc,s))
-            init_conds.append(f"( present {s} )")
-
-        item_locations["potato"] = []
-        for i, s in enumerate(object_names["potato"]):
-            loc = (4,i,0)
-            item_locations["potato"].append(loc)
-            init_conds.extend(get_init_location_conds(loc,s))
-            init_conds.append(f"( present {s} )")
-
-        item_locations["rabbit"] = []
-        for i, s in enumerate(object_names["rabbit"]):
-            loc = (7,i,0)
-            item_locations["rabbit"].append(loc)
-            init_conds.extend(get_init_location_conds(loc,s))
-            init_conds.append(f"( present {s} )")
 
     # End initial conditions
 
@@ -527,13 +573,22 @@ if __name__ == "__main__":
     dom_s = make_domain()
     with open("examples/minecraft3/minecraft-contrived3.pddl","w") as f:
         f.write(dom_s)
-    prob_s, malmo_s = make_instance(start_with_pick=True, add_irrel_items=False, goal_var="dye_wool")
+    prob_s, malmo_s = make_instance(start_with_pick=True, goal_var="dye_wool")
     with open("examples/minecraft3/prob_get_dyed_wool.pddl","w") as f:
         f.write(prob_s)
     with open("examples/malmo/problems/prob_dyed_wool.xml","w") as f:
         f.write(malmo_s)
 
 # TODO: 
-# Start debugging the PDDL domain once you're happy with the MALMO version
-# Put goal in the right place
-# Make the correct goal for make_bed
+# Start debugging the PDDL domain
+    # Sub-tasks
+    # 1. Dye 3 wools
+    # 2. Mine the wood block and craft 3 wood planks
+    # 3. Craft a bed and place it in the house!
+
+
+# Things to do now:
+# IMPORTANT: Try to make it such that blocks cannot be dropped atop other blocks?
+# See if planner is able to find solution to dye goal 
+# Add dye items for instance (maybe)
+# Make correct goal for get_wooden_planks

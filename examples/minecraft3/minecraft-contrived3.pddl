@@ -5,7 +5,7 @@
 	locatable - object
 	agent item block - locatable
 	bedrock destructible-block - block
-	wooden-block wool-block - destructible-block
+	wooden-block wooden-planks wool-block - destructible-block
 	destructible-item diamond stick diamond-axe white-dye blue-dye red-dye - item
 	orchid-flower daisy-flower red-tulip - destructible-item
 )
@@ -28,6 +28,7 @@
 	(agent-num-red-tulip ?ag - agent)
 	(item-hits ?it - destructible-item)
 	(agent-num-wooden-block ?ag - agent)
+	(agent-num-wooden-planks ?ag - agent)
 	(agent-num-wool-block ?ag - agent)
 	(block-hits ?b - destructible-block)
 	(color ?woolb - wool-block)
@@ -220,6 +221,19 @@
 )
 
 
+(:action drop-wooden-planks
+ :parameters (?ag - agent ?b - wooden-planks)
+ :precondition (and (>= (agent-num-wooden-planks ?ag) 1)
+                    (not (block-present ?b)))
+ :effect (and (block-present ?b)
+              (assign (x ?b) (x ?ag))
+              (assign (y ?b) (+ (y ?ag) 1))
+              (assign (z ?b) (z ?ag))
+              (decrease (agent-num-wooden-planks ?ag) 1)
+         )
+)
+
+
 (:action drop-wool-block
  :parameters (?ag - agent ?b - wool-block)
  :precondition (and (>= (agent-num-wool-block ?ag) 1)
@@ -261,6 +275,11 @@
         (decrease (agent-num-diamond ?ag) 3))
 
 )
+
+(:action craft-wooden-planks
+ :parameters (?ag - agent ?wb - wooden-block)
+ :precondition (and (not (block-present ?wb)) (>= (agent-num-wooden-block ?ag) 1) )
+ :effect (and (decrease (agent-num-wooden-block ?ag) 1) (increase (agent-num-wooden-planks ?ag) 4)))
 
 (:action craft-red-dye
     :parameters ( ?ag - agent )
@@ -313,6 +332,30 @@
                         ( >= ( agent-num-diamond-axe ?ag ) 1 ))
     :effect (and (not (block-present ?b))
                  (increase (agent-num-wooden-block ?ag) 1)
+            )
+    )
+
+(:action hit-wooden-planks
+    :parameters (?ag - agent ?b - wooden-planks)
+    :precondition (and (= (x ?b) (x ?ag))
+                        (= (y ?b) (+ (y ?ag) 1))
+                        (= (z ?b) (z ?ag))
+                        (block-present ?b)
+                        (< (block-hits ?b) 2)
+                        ( >= ( agent-num-diamond-axe ?ag ) 1 ))
+    :effect (and (increase (block-hits ?b) 1))
+    )
+
+(:action destroy-wooden-planks
+    :parameters (?ag - agent ?b - wooden-planks)
+    :precondition (and (= (x ?b) (x ?ag))
+                        (= (y ?b) (+ (y ?ag) 1))
+                        (= (z ?b) (z ?ag))
+                        (block-present ?b)
+                        (= (block-hits ?b) 2)
+                        ( >= ( agent-num-diamond-axe ?ag ) 1 ))
+    :effect (and (not (block-present ?b))
+                 (increase (agent-num-wooden-planks ?ag) 1)
             )
     )
 

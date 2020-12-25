@@ -256,6 +256,13 @@ def get_crafting_action(name, inputs, outputs, extra_preconditions = tuple()):
 
     return "\n".join([prefix, precond_s, effects_s, suffix])
 
+def get_wood_plank_crafting_action():
+    wood_plank_action = f"""(:action craft-wooden-planks
+ :parameters (?ag - agent ?wb - wooden-block)
+ :precondition (and (not (block-present ?wb)) (>= (agent-num-wooden-block ?ag) 1) )
+ :effect (and (decrease (agent-num-wooden-block ?ag) 1) (increase (agent-num-wooden-planks ?ag) 4)))"""
+    return wood_plank_action
+
 def get_wool_coloring_actions(coloring_dict):
     """ Returns strings representing actions that enable wool to be dyed 
     
@@ -294,6 +301,7 @@ def make_domain():
     type_hierarchy["bedrock"] = "block"
     type_hierarchy["destructible-block"] = "block"
     type_hierarchy["wooden-block"] = "destructible-block"
+    type_hierarchy["wooden-planks"] = "destructible-block"
     type_hierarchy["wool-block"] = "destructible-block"
     type_hierarchy["destructible-item"] = "item"
 
@@ -350,6 +358,8 @@ def make_domain():
     diamond_pick_outputs = OrderedDict([("diamond-axe",1)])
     craft_diamond_pickaxe = get_crafting_action("craft-diamond-axe", diamond_pick_inputs, diamond_pick_outputs)
     actions.append(craft_diamond_pickaxe)
+
+    actions.append(get_wood_plank_crafting_action())
 
     red_dye_inputs = OrderedDict([("red-tulip",1)])
     red_dye_outputs = OrderedDict([("red-dye",1)])
@@ -409,6 +419,8 @@ def make_instance(start_with_pick = True, use_bedrock_boundaries = False, goal_v
             )
         )
         """
+    elif goal_var == "get_planks":
+        goal = f"""(:goal (>= (agent-num-wooden-planks {agent_name}) 3))"""
     else:
         print("Not a valid goal specification!")
         exit(1)
@@ -457,6 +469,8 @@ def make_instance(start_with_pick = True, use_bedrock_boundaries = False, goal_v
     for s in object_names["wooden-block"]:
         init_conds.append(f"( = ( block-hits {s} ) 0 )")
     init_conds.append("(= (agent-num-wooden-block steve) 0)")
+
+    init_conds.append("(= (agent-num-wooden-planks steve) 0)")
 
     for s in object_names["wool-block"]:
         init_conds.append(f"( = ( block-hits {s} ) 0 )")
@@ -579,6 +593,10 @@ if __name__ == "__main__":
     with open("examples/malmo/problems/prob_dyed_wool.xml","w") as f:
         f.write(malmo_s)
 
+    prob_s, malmo_s = make_instance(start_with_pick=True, goal_var="get_planks")
+    with open("examples/minecraft3/prob_make_wooden_planks.pddl","w") as f:
+        f.write(prob_s)
+
 # TODO: 
 # Start debugging the PDDL domain
     # Sub-tasks
@@ -588,7 +606,11 @@ if __name__ == "__main__":
 
 
 # Things to do now:
-# IMPORTANT: Try to make it such that blocks cannot be dropped atop other blocks?
-# See if planner is able to find solution to dye goal 
-# Add dye items for instance (maybe)
+# IMPORTANT notes: 
+# 1. Try to make it such that blocks cannot be dropped atop other blocks?
+# 2. Right now, there are no wooden plank blocks or dye items instantiated in the problem.
+# As a result, even though the agent can increase its count of these items, it can't actually
+# drop them. Consider remedying this.. 
+
+
 # Make correct goal for get_wooden_planks

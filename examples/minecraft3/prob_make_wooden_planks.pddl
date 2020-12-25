@@ -419,13 +419,7 @@
 )
 
 
-(:goal (and
-                (= (color woolb1) 1)
-                (= (color woolb2) 1)
-                (= (color woolb2) 1)
-            )
-        )
-        
+(:goal (>= (agent-num-wooden-planks steve) 3))
 
 
 )

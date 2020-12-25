@@ -1,11 +1,11 @@
-(define (domain minecraft-contrived)
-(:requirements :typing :fluents :negative-preconditions :universal-preconditions :existential-preconditions)
+(define (domain minecraft-bedmaking)
+(:requirements :equality :typing :fluents :negative-preconditions :universal-preconditions :existential-preconditions)
 
 (:types 
 	locatable - object
 	agent item block - locatable
 	bedrock destructible-block - block
-	wooden-block wooden-planks wool-block - destructible-block
+	wooden-block wooden-planks wool-block bed - destructible-block
 	destructible-item diamond stick diamond-axe white-dye blue-dye red-dye - item
 	orchid-flower daisy-flower red-tulip - destructible-item
 )
@@ -30,8 +30,10 @@
 	(agent-num-wooden-block ?ag - agent)
 	(agent-num-wooden-planks ?ag - agent)
 	(agent-num-wool-block ?ag - agent)
+	(agent-num-bed ?ag - agent)
 	(block-hits ?b - destructible-block)
-	(color ?woolb - wool-block)
+	(wool-color ?woolb - wool-block)
+	(bed-color ?bd - bed)
 	(x ?l - locatable)
 	(y ?l - locatable)
 	(z ?l - locatable)
@@ -247,20 +249,59 @@
 )
 
 
+(:action drop-bed
+ :parameters (?ag - agent ?b - bed)
+ :precondition (and (>= (agent-num-bed ?ag) 1)
+                    (not (block-present ?b)))
+ :effect (and (block-present ?b)
+              (assign (x ?b) (x ?ag))
+              (assign (y ?b) (+ (y ?ag) 1))
+              (assign (z ?b) (z ?ag))
+              (decrease (agent-num-bed ?ag) 1)
+         )
+)
+
+
 (:action apply-white-dye
  :parameters (?ag - agent ?woolb - wool-block)
  :precondition (and (not (block-present ?woolb)) (>= (agent-num-wool-block ?ag) 1) (>= (agent-num-white-dye ?ag) 1))
- :effect (and (decrease (agent-num-white-dye ?ag) 1) (assign (color ?woolb) 0)))
+ :effect (and (decrease (agent-num-white-dye ?ag) 1) (assign (wool-color ?woolb) 0)))
 
 (:action apply-blue-dye
  :parameters (?ag - agent ?woolb - wool-block)
  :precondition (and (not (block-present ?woolb)) (>= (agent-num-wool-block ?ag) 1) (>= (agent-num-blue-dye ?ag) 1))
- :effect (and (decrease (agent-num-blue-dye ?ag) 1) (assign (color ?woolb) 1)))
+ :effect (and (decrease (agent-num-blue-dye ?ag) 1) (assign (wool-color ?woolb) 1)))
 
 (:action apply-red-dye
  :parameters (?ag - agent ?woolb - wool-block)
  :precondition (and (not (block-present ?woolb)) (>= (agent-num-wool-block ?ag) 1) (>= (agent-num-red-dye ?ag) 1))
- :effect (and (decrease (agent-num-red-dye ?ag) 1) (assign (color ?woolb) 2)))
+ :effect (and (decrease (agent-num-red-dye ?ag) 1) (assign (wool-color ?woolb) 2)))
+
+
+
+(:action craft-bed-white-dye
+ :parameters (?ag - agent ?woolb1 - wool-block ?woolb2 - wool-block ?woolb3 - wool-block ?bd - bed)
+ :precondition (and (not (block-present ?woolb1)) (not (block-present ?woolb2)) (not (block-present ?woolb3)) 
+                (= (wool-color ?woolb1) 0) (= (wool-color ?woolb2) 0) (= (wool-color ?woolb3) 0) 
+                (not (= ?woolb1 ?woolb2)) (not (= ?woolb1 ?woolb3)) (not (= ?woolb2 ?woolb3))
+                (not (block-present ?bd)) (>= (agent-num-wool-block ?ag) 3) (>= (agent-num-wooden-planks ?ag) 3))
+ :effect (and (decrease (agent-num-wooden-planks ?ag) 3) (decrease (agent-num-wool-block ?ag) 3) (increase (agent-num-bed ?ag) 1) (assign (bed-color ?bd) 0)))
+
+(:action craft-bed-blue-dye
+ :parameters (?ag - agent ?woolb1 - wool-block ?woolb2 - wool-block ?woolb3 - wool-block ?bd - bed)
+ :precondition (and (not (block-present ?woolb1)) (not (block-present ?woolb2)) (not (block-present ?woolb3)) 
+                (= (wool-color ?woolb1) 1) (= (wool-color ?woolb2) 1) (= (wool-color ?woolb3) 1) 
+                (not (= ?woolb1 ?woolb2)) (not (= ?woolb1 ?woolb3)) (not (= ?woolb2 ?woolb3))
+                (not (block-present ?bd)) (>= (agent-num-wool-block ?ag) 3) (>= (agent-num-wooden-planks ?ag) 3))
+ :effect (and (decrease (agent-num-wooden-planks ?ag) 3) (decrease (agent-num-wool-block ?ag) 3) (increase (agent-num-bed ?ag) 1) (assign (bed-color ?bd) 1)))
+
+(:action craft-bed-red-dye
+ :parameters (?ag - agent ?woolb1 - wool-block ?woolb2 - wool-block ?woolb3 - wool-block ?bd - bed)
+ :precondition (and (not (block-present ?woolb1)) (not (block-present ?woolb2)) (not (block-present ?woolb3)) 
+                (= (wool-color ?woolb1) 2) (= (wool-color ?woolb2) 2) (= (wool-color ?woolb3) 2) 
+                (not (= ?woolb1 ?woolb2)) (not (= ?woolb1 ?woolb3)) (not (= ?woolb2 ?woolb3))
+                (not (block-present ?bd)) (>= (agent-num-wool-block ?ag) 3) (>= (agent-num-wooden-planks ?ag) 3))
+ :effect (and (decrease (agent-num-wooden-planks ?ag) 3) (decrease (agent-num-wool-block ?ag) 3) (increase (agent-num-bed ?ag) 1) (assign (bed-color ?bd) 2)))
 
 
 
@@ -380,6 +421,30 @@
                         ( >= ( agent-num-diamond-axe ?ag ) 1 ))
     :effect (and (not (block-present ?b))
                  (increase (agent-num-wool-block ?ag) 1)
+            )
+    )
+
+(:action hit-bed
+    :parameters (?ag - agent ?b - bed)
+    :precondition (and (= (x ?b) (x ?ag))
+                        (= (y ?b) (+ (y ?ag) 1))
+                        (= (z ?b) (z ?ag))
+                        (block-present ?b)
+                        (< (block-hits ?b) 2)
+                        ( >= ( agent-num-diamond-axe ?ag ) 1 ))
+    :effect (and (increase (block-hits ?b) 1))
+    )
+
+(:action destroy-bed
+    :parameters (?ag - agent ?b - bed)
+    :precondition (and (= (x ?b) (x ?ag))
+                        (= (y ?b) (+ (y ?ag) 1))
+                        (= (z ?b) (z ?ag))
+                        (block-present ?b)
+                        (= (block-hits ?b) 2)
+                        ( >= ( agent-num-diamond-axe ?ag ) 1 ))
+    :effect (and (not (block-present ?b))
+                 (increase (agent-num-bed ?ag) 1)
             )
     )
 

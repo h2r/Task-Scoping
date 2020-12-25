@@ -427,11 +427,12 @@
 )
 
 
-(:goal (and
-                (= (wool-color woolb1) 1)
-                (= (wool-color woolb2) 1)
-                (= (wool-color woolb2) 1)
-            )
+(:goal (and 
+                ; (= (x bed1) 7)
+                ; (= (y bed1) 9)
+                ; (= (z bed1) 0)
+                (= (bed-color bed1) 1)
+                )
         )
         
 

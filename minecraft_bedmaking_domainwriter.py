@@ -280,14 +280,37 @@ def get_wool_coloring_actions(coloring_dict):
         wool_coloring_str = f"""(:action apply-{dye_name}
  :parameters (?ag - agent ?woolb - wool-block)
  :precondition (and (not (block-present ?woolb)) (>= (agent-num-wool-block ?ag) 1) (>= (agent-num-{dye_name} ?ag) 1))
- :effect (and (decrease (agent-num-{dye_name} ?ag) 1) (assign (color ?woolb) {dye_color})))"""
+ :effect (and (decrease (agent-num-{dye_name} ?ag) 1) (assign (wool-color ?woolb) {dye_color})))"""
         wool_coloring_actions += wool_coloring_str + '\n\n'
 
     return wool_coloring_actions
 
+def get_bed_color_crafting_actions(coloring_dict):
+    """ Returns strings representing actions that enable wool to be dyed 
+    
+    input:
+        coloring_dict: a dict mapping strings of dye-names to ints representing an enum
+                       of that color. e.g. {['white-dye' -> 0,'blue-dye' -> 1, 'red-dye' -> 2]}
+    
+    output:
+        string representing the actions to craft different-colored beds
+    """
+    bed_crafting_actions = ''
+    for dye_name in coloring_dict.keys():
+        dye_color = coloring_dict[dye_name]
+        bed_color_crafting_str = f"""(:action craft-bed-{dye_name}
+ :parameters (?ag - agent ?woolb1 - wool-block ?woolb2 - wool-block ?woolb3 - wool-block ?bd - bed)
+ :precondition (and (not (block-present ?woolb1)) (not (block-present ?woolb2)) (not (block-present ?woolb3)) 
+                (= (wool-color ?woolb1) {dye_color}) (= (wool-color ?woolb2) {dye_color}) (= (wool-color ?woolb3) {dye_color}) 
+                (not (= ?woolb1 ?woolb2)) (not (= ?woolb1 ?woolb3)) (not (= ?woolb2 ?woolb3))
+                (not (block-present ?bd)) (>= (agent-num-wool-block ?ag) 3) (>= (agent-num-wooden-planks ?ag) 3))
+ :effect (and (decrease (agent-num-wooden-planks ?ag) 3) (decrease (agent-num-wool-block ?ag) 3) (increase (agent-num-bed ?ag) 1) (assign (bed-color ?bd) {dye_color})))"""
+        bed_crafting_actions += bed_color_crafting_str + '\n\n'    
+    return bed_crafting_actions
+
 def make_domain():
     sections = []
-    header = "(define (domain minecraft-contrived)\n(:requirements :typing :fluents :negative-preconditions :universal-preconditions :existential-preconditions)"
+    header = "(define (domain minecraft-bedmaking)\n(:requirements :equality :typing :fluents :negative-preconditions :universal-preconditions :existential-preconditions)"
     footer = ")"
     sections.append(header)
     type_hierarchy = OrderedDict()
@@ -303,6 +326,7 @@ def make_domain():
     type_hierarchy["wooden-block"] = "destructible-block"
     type_hierarchy["wooden-planks"] = "destructible-block"
     type_hierarchy["wool-block"] = "destructible-block"
+    type_hierarchy["bed"] = "destructible-block"
     type_hierarchy["destructible-item"] = "item"
 
     for i in item_types:
@@ -326,8 +350,9 @@ def make_domain():
     functions.extend(get_inventory_funcs(inverse_type_hierarchy["destructible-block"]))
     functions.append("(block-hits ?b - destructible-block)")
 
-    # Add a color enum for wool blocks 0 = white, 1 = blue, 2 = red
-    functions.append("(color ?woolb - wool-block)")
+    # Add a color enum for wool blocks and beds 0 = white, 1 = blue, 2 = red
+    functions.append("(wool-color ?woolb - wool-block)")
+    functions.append("(bed-color ?bd - bed)")
     
     for d in ["x","y","z"]:
         functions.append(f"({d} ?l - locatable)")
@@ -352,6 +377,9 @@ def make_domain():
             coloring_dict[item] = color_enum
             color_enum += 1
     actions.append(get_wool_coloring_actions(coloring_dict))
+
+    # Create bed crafting actions
+    actions.append(get_bed_color_crafting_actions(coloring_dict))
     
     # Create crafting actions
     diamond_pick_inputs = OrderedDict([("stick",2),("diamond",3)])
@@ -405,22 +433,32 @@ def make_instance(start_with_pick = True, use_bedrock_boundaries = False, goal_v
                                     "wb17","wb18","wb19","wb20","wb21","wb22","wb23","wb24","wb25",
                                     "wb26","wb27","wb28","wb29","wb30"]
     object_names["wool-block"] = ["woolb1", "woolb2","woolb3"]
+    object_names["bed"] = ["bed1"]
 
     agent_name = "steve"
 
     header = """(define (problem MINECRAFTCONTRIVED-3)
-    (:domain minecraft-contrived)"""
+    (:domain minecraft-bedmaking)"""
 
     if (goal_var == "dye_wool"):
         goal = f"""(:goal (and
-                (= (color woolb1) 1)
-                (= (color woolb2) 1)
-                (= (color woolb2) 1)
+                (= (wool-color woolb1) 1)
+                (= (wool-color woolb2) 1)
+                (= (wool-color woolb2) 1)
             )
         )
         """
     elif goal_var == "get_planks":
         goal = f"""(:goal (>= (agent-num-wooden-planks {agent_name}) 3))"""
+    elif goal_var == "make_bed":
+        goal = f"""(:goal (and 
+                (= (x bed1) 7)
+                (= (y bed1) 9)
+                (= (z bed1) 0)
+                (= (bed-color bed1) 1)
+                )
+        )
+        """
     else:
         print("Not a valid goal specification!")
         exit(1)
@@ -474,9 +512,16 @@ def make_instance(start_with_pick = True, use_bedrock_boundaries = False, goal_v
 
     for s in object_names["wool-block"]:
         init_conds.append(f"( = ( block-hits {s} ) 0 )")
-        init_conds.append(f"( = ( color {s} ) 0 )")
+        init_conds.append(f"( = ( wool-color {s} ) 0 )")
         init_conds.append(f"(not (block-present {s}))")
     init_conds.append("(= (agent-num-wool-block steve) 3)")
+
+    for s in object_names["bed"]:
+        init_conds.extend(get_init_location_conds((0,0,0),s))
+        init_conds.append(f"( = ( block-hits {s} ) 0 )")
+        init_conds.append(f"( = ( bed-color {s} ) 0 )")
+        init_conds.append(f"(not (block-present {s}))")
+    init_conds.append("(= (agent-num-bed steve) 0)")
 
     for s in object_names["red-tulip"]:
         init_conds.append(f"( = ( item-hits {s} ) 0 )")
@@ -585,16 +630,25 @@ def make_types_declaration(type_hierarchy):
         
 if __name__ == "__main__":
     dom_s = make_domain()
+    # Create domain file
     with open("examples/minecraft3/minecraft-contrived3.pddl","w") as f:
         f.write(dom_s)
+    # Create problem file and MALMO file for domain including all irrelevant
+    # items. This is for dye_wool task
     prob_s, malmo_s = make_instance(start_with_pick=True, goal_var="dye_wool")
     with open("examples/minecraft3/prob_get_dyed_wool.pddl","w") as f:
         f.write(prob_s)
     with open("examples/malmo/problems/prob_dyed_wool.xml","w") as f:
         f.write(malmo_s)
 
+    # Create problem file for get_planks task
     prob_s, malmo_s = make_instance(start_with_pick=True, goal_var="get_planks")
     with open("examples/minecraft3/prob_make_wooden_planks.pddl","w") as f:
+        f.write(prob_s)
+
+    # Create problem file for make_bed task
+    prob_s, malmo_s = make_instance(start_with_pick=True, goal_var="make_bed")
+    with open("examples/minecraft3/prob_make_bed.pddl","w") as f:
         f.write(prob_s)
 
 # TODO: 
@@ -607,10 +661,10 @@ if __name__ == "__main__":
 
 # Things to do now:
 # IMPORTANT notes: 
+# Agent cannot achieve bedmaking and placing goal in full PDDL. See if it can do it on the 
+# scoped problem???
 # 1. Try to make it such that blocks cannot be dropped atop other blocks?
 # 2. Right now, there are no wooden plank blocks or dye items instantiated in the problem.
 # As a result, even though the agent can increase its count of these items, it can't actually
 # drop them. Consider remedying this.. 
-
-
-# Make correct goal for get_wooden_planks
+# 3. Right now, beds only take up one block of space in the PDDL version

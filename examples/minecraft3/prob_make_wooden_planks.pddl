@@ -1,5 +1,5 @@
 (define (problem MINECRAFTCONTRIVED-3)
-    (:domain minecraft-contrived)
+    (:domain minecraft-bedmaking)
 
 
 (:objects
@@ -12,6 +12,7 @@
 	of0 of1 of2 - orchid-flower
 	wb0 wb1 wb2 wb3 wb4 wb5 wb6 wb7 wb8 wb9 wb10 wb11 wb12 wb13 wb14 wb15 wb16 wb17 wb18 wb19 wb20 wb21 wb22 wb23 wb24 wb25 wb26 wb27 wb28 wb29 wb30 - wooden-block
 	woolb1 woolb2 woolb3 - wool-block
+	bed1 - bed
 )
 
 
@@ -185,15 +186,22 @@
 	(= (agent-num-wooden-block steve) 0)
 	(= (agent-num-wooden-planks steve) 0)
 	( = ( block-hits woolb1 ) 0 )
-	( = ( color woolb1 ) 0 )
+	( = ( wool-color woolb1 ) 0 )
 	(not (block-present woolb1))
 	( = ( block-hits woolb2 ) 0 )
-	( = ( color woolb2 ) 0 )
+	( = ( wool-color woolb2 ) 0 )
 	(not (block-present woolb2))
 	( = ( block-hits woolb3 ) 0 )
-	( = ( color woolb3 ) 0 )
+	( = ( wool-color woolb3 ) 0 )
 	(not (block-present woolb3))
 	(= (agent-num-wool-block steve) 3)
+	(= (x bed1) 0)
+	(= (y bed1) 0)
+	(= (z bed1) 0)
+	( = ( block-hits bed1 ) 0 )
+	( = ( bed-color bed1 ) 0 )
+	(not (block-present bed1))
+	(= (agent-num-bed steve) 0)
 	( = ( item-hits rt0 ) 0 )
 	( = ( item-hits rt1 ) 0 )
 	( = ( item-hits rt2 ) 0 )

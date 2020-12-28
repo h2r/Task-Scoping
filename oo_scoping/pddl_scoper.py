@@ -57,7 +57,7 @@ def scope_pddl(domain, problem, **kwargs):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("domain")
-    parser.add_argument("problem")
+    parser.add_argument("--domain",type=str,help="Path location of the PDDL domain file")
+    parser.add_argument("--problem",type=str,help="Path location of the PDDL problem file corresponding to the specified domain")
     args = parser.parse_args()
-    scope_pddl(args.domain, args.problem)
+    scope_pddl(args.domain, args.problem, **{'verbose': 1})

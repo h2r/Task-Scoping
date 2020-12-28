@@ -516,7 +516,7 @@ def make_instance(start_with_pick = True, use_bedrock_boundaries = False, add_ir
     y_min, y_max = 0, 12
     z_min, z_max = 0, 1
     
-    # Position in which everything worked (7,3,0)
+    # Position in which everything worked (7,3,0), (7,2,0) with opt-blind for first 2 tasks and opt-hrmax for bedmaking
     agent_start_pos = (7,1,0)
     init_conds.extend(get_init_location_conds(agent_start_pos,agent_name))
     inventory_count = OrderedDict()

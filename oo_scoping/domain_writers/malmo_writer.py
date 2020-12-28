@@ -7,13 +7,17 @@ import copy
 
 type_replacements = {
     "obsidian-block":"obsidian",
+    "wool-block":"wool",
+    "wooden-block": "log",
     "netherportal":"portal",
-    'daisy-flower': 'oxeye_daisy',
     'diamond-pickaxe': 'diamond_pickaxe',
+    'diamond-axe': 'diamond_axe',
     'flint-and-steel': 'flint_and_steel',
     'iron-ingot': 'iron_ingot',
     'iron-ore': 'iron_ore',
-    'orchid-flower': 'blue_orchid'
+    'daisy-flower': 'oxeye_daisy',
+    'orchid-flower': 'blue_orchid',
+    'red-tulip': 'red_tulip'
 }
 
 with open("domains/malmo/block_types.txt", "r") as f:
@@ -58,8 +62,8 @@ def make_inventory(inventory_counts):
     inventory_lines = []
     slot_id = 0
     for item_type, item_count in inventory_counts.items():
-        for _ in range(item_count):
-            inventory_lines.append(f'<InventoryItem type="{item_type}" slot="{slot_id}"/>')
+        if item_count > 0:
+            inventory_lines.append(f'<InventoryItem type="{item_type}" slot="{slot_id}" quantity="{item_count}"/>')
             slot_id += 1
     inventory = "\n\t".join(inventory_lines)
     return inventory
@@ -160,7 +164,7 @@ def make_malmo_domain(blocks, items, start_pos, inventory_counts
             drawing_lines.append(draw_block(t,*p))
     # Place items in the world
     for t, positions in items.items():
-        if t in ["daisy-flower", "orchid-flower", "oxeye_daisy", "blue_orchid"]:
+        if t in ["daisy-flower", "orchid-flower", "oxeye_daisy", "blue_orchid", "red_tulip"]:
             draw_func = draw_flower
         else:
             draw_func = draw_item

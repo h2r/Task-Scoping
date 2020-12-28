@@ -4,11 +4,12 @@ import math
 import operator as op
 from functools import reduce
 import copy
-from oo_scoping.domains.malmo_writer import make_malmo_domain
+from oo_scoping.domain_writers.malmo_writer import make_malmo_domain
 
 item_types = ["wool","diamond", "stick", "diamond-pickaxe", "apple", "potato"
-    , "rabbit", "orchid-flower", "daisy-flower", "flint", "coal", "iron-ore", "iron-ingot", "netherportal",
-    "flint-and-steel"]
+    , "rabbit", "flint", "coal", "iron-ore", "iron-ingot", 
+    "netherportal", "flint-and-steel"]
+destructible_item_types = ["orchid-flower", "daisy-flower", "red-tulip"]
 
 def ncr(n, r):
     # https://stackoverflow.com/a/4941932
@@ -305,7 +306,6 @@ def make_netherportal_action():
 
 def get_destructible_block_action(block_type, needed_tool = None):
     # TODO either set x,y,z to far away, or check for block existence in movement actions
-    # TODO both hit and destroy are possible when block-hits = 3. Bug?
     if needed_tool is None:
         tool_precond = ""
     else:
@@ -332,6 +332,26 @@ def get_destructible_block_action(block_type, needed_tool = None):
     )"""
     return [hit_s, destroy_s]
 
+def get_destructible_item_action(item_type, needed_tool = None):
+    # TODO either set x,y,z to far away, or check for block existence in movement actions
+    if needed_tool is None:
+        tool_precond = ""
+    else:
+        tool_precond = f"\n                        ( >= ( agent-num-{needed_tool} ?ag ) 1 )"
+
+    destroy_s = f"""(:action destroy-{item_type}
+    :parameters (?ag - agent ?b - {item_type})
+    :precondition (and (= (x ?b) (x ?ag))
+                        (= (y ?b) (+ (y ?ag) 1))
+                        (= (z ?b) (+ (z ?ag) 1))
+                        (present ?b)
+                        (= (item-hits ?b) 0){tool_precond})
+    :effect (and (not (present ?b))
+                 (increase (agent-num-{item_type} ?ag) 1)
+            )
+    )"""
+    return [destroy_s]
+
 def make_domain():
     sections = []
     header = "(define (domain minecraft-contrived)\n(:requirements :typing :fluents :negative-preconditions :universal-preconditions :existential-preconditions)"
@@ -342,17 +362,20 @@ def make_domain():
     # items have agent count and present, in addition to location
     type_hierarchy["object"] = None
     type_hierarchy["locatable"] = "object"
-    # type_hierarchy["item"] = "object"
     type_hierarchy["agent"] = "locatable"
     type_hierarchy["item"] = "locatable"
     type_hierarchy["block"] = "locatable"
     type_hierarchy["bedrock"] = "block"
     type_hierarchy["destructible-block"] = "block"
     type_hierarchy["obsidian-block"] = "destructible-block"
-    # item_types_irrelevant = ["apple", "potato", "rabbit", "diamond-axe", "orchid-flower", "daisy-flower"]
-    # item_types = ["diamond", "stick", "iron", "diamond-pickaxe", "shears", "wool"]
+    type_hierarchy["destructible-item"] = "item"
+
     for i in item_types:
         type_hierarchy[i] = "item"
+
+    for i in destructible_item_types:
+        type_hierarchy[i] = "destructible-item"
+    
     inverse_type_hierarchy = invert_dict(type_hierarchy)
     types_s = make_types_declaration(type_hierarchy)
     sections.append(types_s)
@@ -376,7 +399,7 @@ def make_domain():
     actions = []
     actions.append(get_move_actions())
     actions.extend(make_pickup_actions(inverse_type_hierarchy["item"]))
-    actions.extend(make_drop_actions(inverse_type_hierarchy["item"]))
+    actions.extend(make_drop_actions(inverse_type_hierarchy["item"], True))
     actions.extend(make_drop_actions(inverse_type_hierarchy["destructible-block"], False))
 
     diamond_pick_inputs = OrderedDict([("stick",2),("diamond",3)])
@@ -394,8 +417,26 @@ def make_domain():
     craft_flint_and_steel = get_crafting_action("craft-flint-and-steel", flint_and_steel_inputs, flint_and_steel_outputs)
     actions.append(craft_flint_and_steel)
 
+    red_dye_inputs = OrderedDict([("red-tulip",1)])
+    red_dye_outputs = OrderedDict([("red-dye",1)])
+    craft_red_dye = get_crafting_action("craft-red-dye", red_dye_inputs, red_dye_outputs)
+    actions.append(craft_red_dye)
+
+    blue_dye_inputs = OrderedDict([("orchid-flower",1)])
+    blue_dye_outputs = OrderedDict([("blue-dye",1)])
+    craft_blue_dye = get_crafting_action("craft-blue-dye", blue_dye_inputs, blue_dye_outputs)
+    actions.append(craft_blue_dye)
+
+    white_dye_inputs = OrderedDict([("daisy-flower",1)])
+    white_dye_outputs = OrderedDict([("white-dye",1)])
+    craft_white_dye = get_crafting_action("craft-white-dye", white_dye_inputs, white_dye_outputs)
+    actions.append(craft_white_dye)
+
     for block_type in inverse_type_hierarchy["destructible-block"]:
         actions.extend(get_destructible_block_action(block_type, needed_tool = "diamond-pickaxe"))
+
+    for item_type in inverse_type_hierarchy["destructible-item"]:
+        actions.extend(get_destructible_item_action(block_type, needed_tool = "diamond-pickaxe"))
 
     actions.append(make_netherportal_action())
 
@@ -437,7 +478,7 @@ def get_crafting_action(name, inputs, outputs, extra_preconditions = tuple()):
 
     return "\n".join([prefix, precond_s, effects_s, suffix])
 
-def make_instance_1(start_with_pick = True, use_bedrock_boundaries = False, add_irrel_items = False, goal_var = ""):
+def make_instance(start_with_pick = True, use_bedrock_boundaries = False, add_irrel_items = False, goal_var = ""):
     object_names = OrderedDict()
     # object_names["obsidian-block"] = ["obsidian0", "obsidian1", "obsidian2", "obsidian3", "obsidian4", "obsidian5", "obsidian6", "obsidian7", "obsidian8", "obsidian9"]
     object_names["obsidian-block"] = ["obsidian0", "obsidian1"]
@@ -451,12 +492,13 @@ def make_instance_1(start_with_pick = True, use_bedrock_boundaries = False, add_
     object_names["iron-ingot"] = ["iron-ingot0"]
     object_names["netherportal"] = ["netherportal0"]
     object_names["flint-and-steel"] = ["flint-and-steel0"]
+    object_names["red-tulip"] = ["rt0","rt1","rt2","rt3","rt4","rt5","rt6","rt7","rt8"]
+    object_names["daisy-flower"] = ["df0","df1","df2","df3","df4","df5","df6","df7","df8"]
+    object_names["orchid-flower"] = ["of0","of1","of2","of3","of4","of5","of6","of7","of8"]
 
     if(add_irrel_items):
         object_names["apple"] = ["apple1", "apple2", "apple3"]
         object_names["potato"] = ["potato1", "potato2", "potato3", "potato4", "potato5"]
-        object_names["orchid-flower"] = ["orchid-flower1", "orchid-flower2", "orchid-flower3", "orchid-flower4", "orchid-flower5"]
-        object_names["daisy-flower"] = ["daisy-flower1", "daisy-flower2", "daisy-flower3", "daisy-flower4", "daisy-flower5"]
         object_names["rabbit"] = ["rabbit1", "rabbit2", "rabbit3", "rabbit4", "rabbit5"]
 
     tgt_obsidian = object_names["obsidian-block"][0]
@@ -493,13 +535,14 @@ def make_instance_1(start_with_pick = True, use_bedrock_boundaries = False, add_
                 )
             )"""
 
-    x_min, x_max = 0, 11
-    y_min, y_max = 0, 8
+    x_min, x_max = 0, 12
+    y_min, y_max = 0, 12
     z_min, z_max = 0, 1
 
     # item_counts = OrderedDict([("apple",2),("potato",1)])
     # item_counts = OrderedDict([("apple",1)])
     
+    # Setting up initial conditions block
     init_conds = [f"(agent-alive {agent_name})"]
     agent_start_pos = (0,0,0)
     init_conds.extend(get_init_location_conds(agent_start_pos,agent_name))
@@ -528,10 +571,24 @@ def make_instance_1(start_with_pick = True, use_bedrock_boundaries = False, add_
     for s in object_names["obsidian-block"]:
         init_conds.append(f"( = ( block-hits {s} ) 0 )")
     init_conds.append("(= (agent-num-obsidian-block steve) 0)")
+
+    for s in object_names["red-tulip"]:
+        init_conds.append(f"( = ( item-hits {s} ) 0 )")
+    init_conds.append("(= (agent-num-red-tulip steve) 0)")
+
+    for s in object_names["orchid-flower"]:
+        init_conds.append(f"( = ( item-hits {s} ) 0 )")
+    init_conds.append("(= (agent-num-orchid-flower steve) 0)")
+
+    for s in object_names["daisy-flower"]:
+        init_conds.append(f"( = ( item-hits {s} ) 0 )")
+    init_conds.append("(= (agent-num-daisy-flower steve) 0)")
+
+
     diamond_pick_name = object_names["diamond-pickaxe"][0]
     init_conds.extend(get_init_location_conds((0,0,0), diamond_pick_name))
     init_conds.append(f"( not ( present {diamond_pick_name} ) )")
-
+    
     item_locations = OrderedDict()
     item_locations["stick"] = []
     for i, s in enumerate(object_names["stick"]):
@@ -568,23 +625,56 @@ def make_instance_1(start_with_pick = True, use_bedrock_boundaries = False, add_
         init_conds.extend(get_init_location_conds(loc,s))
         init_conds.append(f"(present {s})")
 
-    # item_locations["iron-ingot"] = []
+    item_locations["iron-ingot"] = []
     for i, s in enumerate(object_names["iron-ingot"]):
         loc = (0,i,0)
-        # item_locations["iron-ingot"].append(loc)
+        item_locations["iron-ingot"].append(loc)
         init_conds.extend(get_init_location_conds(loc,s))
         init_conds.append(f"(not ( present {s} ))")
 
-    # item_locations["flint-and-steel"] = []
+    item_locations["flint-and-steel"] = []
     for i, s in enumerate(object_names["flint-and-steel"]):
         loc = (0,i,0)
-        # item_locations["flint-and-steel"].append(loc)
+        item_locations["flint-and-steel"].append(loc)
         init_conds.extend(get_init_location_conds(loc,s))
         init_conds.append(f"(not ( present {s} ))")
 
+    item_locations["netherportal"] = []
     for i, s in enumerate(object_names["netherportal"]):
+        item_locations["flint-and-steel"].append((0,i,0))
         init_conds.extend(get_init_location_conds((0,i,0),s))
         init_conds.append(f"(not ( present {s} ))")
+
+    item_locations["red-tulip"] = []
+    i = 0
+    for x in range(6,9):
+        for y in range(3,6):
+            loc = (x,y,0)
+            item_locations["red-tulip"].append(loc)
+            s = object_names["red-tulip"][i]
+            init_conds.extend(get_init_location_conds(loc,s))
+            init_conds.append(f"( present {s} )")
+            i += 1
+    item_locations["daisy-flower"] = []
+    i = 0
+    for x in range(1,4):
+        for y in range(3,6):
+            loc = (x,y,0)
+            item_locations["daisy-flower"].append(loc)
+            s = object_names["daisy-flower"][i]
+            init_conds.extend(get_init_location_conds(loc,s))
+            init_conds.append(f"( present {s} )")
+            i += 1
+    item_locations["orchid-flower"] = []
+    i = 0
+    for x in range(4,7):
+        for y in range(6,9):
+            loc = (x,y,0)
+            item_locations["orchid-flower"].append(loc)
+            s = object_names["orchid-flower"][i]
+            init_conds.extend(get_init_location_conds(loc,s))
+            init_conds.append(f"( present {s} )")
+            i += 1
 
     if(add_irrel_items):
         item_locations["apple"] = []
@@ -601,20 +691,6 @@ def make_instance_1(start_with_pick = True, use_bedrock_boundaries = False, add_
             init_conds.extend(get_init_location_conds(loc,s))
             init_conds.append(f"( present {s} )")
 
-        item_locations["daisy-flower"] = []
-        for i, s in enumerate(object_names["daisy-flower"]):
-            loc = (5,i,0)
-            item_locations["daisy-flower"].append(loc)
-            init_conds.extend(get_init_location_conds(loc,s))
-            init_conds.append(f"( present {s} )")
-
-        item_locations["orchid-flower"] = []
-        for i, s in enumerate(object_names["orchid-flower"]):
-            loc = (6,i,0)
-            item_locations["orchid-flower"].append(loc)
-            init_conds.extend(get_init_location_conds(loc,s))
-            init_conds.append(f"( present {s} )")
-
         item_locations["rabbit"] = []
         for i, s in enumerate(object_names["rabbit"]):
             loc = (7,i,0)
@@ -624,7 +700,8 @@ def make_instance_1(start_with_pick = True, use_bedrock_boundaries = False, add_
 
     for s in object_names["obsidian-block"]:
         init_conds.append(f"(block-present {s})")
-
+    
+    # End initial conditions
 
     if use_bedrock_boundaries:
         boundary_positions = get_boundary_positions(x_min, x_max, y_min, y_max, z_min, z_max)
@@ -634,9 +711,10 @@ def make_instance_1(start_with_pick = True, use_bedrock_boundaries = False, add_
             s = object_names["bedrock"][i]
             init_conds.extend(get_init_location_conds(boundary_positions[i], s))
             init_conds.append(f"(block-present {s})")
+
+
     init_conds = make_init_conds_str(init_conds)
     object_declaration = get_object_declarations(object_names)
-
 
 
     # bedrock_path_str = "-bedrock" if use_bedrock_boundaries else ""
@@ -697,38 +775,38 @@ if __name__ == "__main__":
     dom_s = make_domain()
     with open("domains/minecraft2/minecraft-contrived2.pddl","w") as f:
         f.write(dom_s)
-    prob_s, malmo_s = make_instance_1(start_with_pick=True, add_irrel_items=False, goal_var="make_netherportal")
-    with open("domains/minecraft2/prob_nether_with_pick.pddl","w") as f:
+    prob_s, malmo_s = make_instance(start_with_pick=True, add_irrel_items=False, goal_var="make_netherportal")
+    with open("examples/minecraft2/prob_nether_with_pick.pddl","w") as f:
         f.write(prob_s)
     with open("domains/malmo/problems/prob_nether_with_pick.xml","w") as f:
         f.write(malmo_s)
 
-    # prob_ir, malmo_ir = make_instance_1(start_with_pick=True, add_irrel_items=True, goal_var="make_netherportal")
-    # with open("domains/minecraft2/prob_irrel_nether_with_pick.pddl","w") as f:
+    # prob_ir, malmo_ir = make_instance(start_with_pick=True, add_irrel_items=True, goal_var="make_netherportal")
+    # with open("examples/minecraft2/prob_irrel_nether_with_pick.pddl","w") as f:
     #     f.write(prob_ir)
     # with open("domains/malmo/problems/prob_irrel_nether_with_pick.xml","w") as f:
     #     f.write(malmo_ir)
 
-    # prob_s, malmo_s = make_instance_1(start_with_pick=True, add_irrel_items=False, goal_var="break_obsidian")
-    # with open("domains/minecraft2/prob_obsidian_with_pick.pddl","w") as f:
+    # prob_s, malmo_s = make_instance(start_with_pick=True, add_irrel_items=False, goal_var="break_obsidian")
+    # with open("examples/minecraft2/prob_obsidian_with_pick.pddl","w") as f:
     #     f.write(prob_s)
     # with open("domains/malmo/problems/prob_obsidian_with_pick.xml","w") as f:
     #     f.write(malmo_s)
 
-    # prob_ir, malmo_ir = make_instance_1(start_with_pick=True, add_irrel_items=True, goal_var="break_obsidian")
-    # with open("domains/minecraft2/prob_irrel_obsidian_with_pick.pddl","w") as f:
+    # prob_ir, malmo_ir = make_instance(start_with_pick=True, add_irrel_items=True, goal_var="break_obsidian")
+    # with open("examples/minecraft2/prob_irrel_obsidian_with_pick.pddl","w") as f:
     #     f.write(prob_ir)
     # with open("domains/malmo/problems/prob_irrel_obsidian_with_pick.xml","w") as f:
     #     f.write(malmo_ir)
     
-    # prob_s, malmo_s = make_instance_1(start_with_pick=True, add_irrel_items=False, goal_var="make_flint_and_steel")
-    # with open("domains/minecraft2/prob_flint_with_pick.pddl","w") as f:
+    # prob_s, malmo_s = make_instance(start_with_pick=True, add_irrel_items=False, goal_var="make_flint_and_steel")
+    # with open("examples/minecraft2/prob_flint_with_pick.pddl","w") as f:
     #     f.write(prob_s)
     # with open("domains/malmo/problems/prob_flint_with_pick.xml","w") as f:
     #     f.write(malmo_s)
 
-    # prob_ir, malmo_ir = make_instance_1(start_with_pick=True, add_irrel_items=True, goal_var="make_flint_and_steel")
-    # with open("domains/minecraft2/prob_irrel_flint_with_pick.pddl","w") as f:
+    # prob_ir, malmo_ir = make_instance(start_with_pick=True, add_irrel_items=True, goal_var="make_flint_and_steel")
+    # with open("examples/minecraft2/prob_irrel_flint_with_pick.pddl","w") as f:
     #     f.write(prob_ir)
     # with open("domains/malmo/problems/prob_irrel_flint_with_pick.xml","w") as f:
     #     f.write(malmo_ir)

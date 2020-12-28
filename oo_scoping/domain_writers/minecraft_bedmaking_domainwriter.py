@@ -5,6 +5,7 @@ import operator as op
 from functools import reduce
 import copy
 from oo_scoping.domain_writers.malmo_writer import make_malmo_domain
+from oo_scoping.examples import domains_dir
 
 item_types = ["diamond", "stick", "diamond-axe", "white-dye", "blue-dye", "red-dye"]
 destructible_item_types = ["orchid-flower", "daisy-flower", "red-tulip"]
@@ -676,37 +677,37 @@ def make_types_declaration(type_hierarchy):
 if __name__ == "__main__":
     dom_s = make_domain()
     # Create domain file
-    with open("examples/minecraft3/minecraft-contrived3.pddl","w") as f:
+    with open(f"{domains_dir}/minecraft3/minecraft-contrived3.pddl","w") as f:
         f.write(dom_s)
     # Create problem file and MALMO file for domain including all irrelevant
     # items. This is for dye_wool task
     prob_s, malmo_s = make_instance(start_with_pick=True, goal_var="dye_wool")
-    with open("examples/minecraft3/prob_get_dyed_wool_irrel.pddl","w") as f:
+    with open(f"{domains_dir}/minecraft3/prob_get_dyed_wool_irrel.pddl","w") as f:
         f.write(prob_s)
-    with open("examples/malmo/problems/prob_dyed_wool.xml","w") as f:
+    with open(f"{domains_dir}/malmo/problems/prob_dyed_wool.xml","w") as f:
         f.write(malmo_s)
     # Create a problem file for dye_wool that excludes all the irrelevant stuff
     prob_s, malmo_s = make_instance(start_with_pick=True, goal_var="dye_wool", add_irrel_items=False)
-    with open("examples/minecraft3/prob_get_dyed_wool_rel.pddl","w") as f:
+    with open(f"{domains_dir}/minecraft3/prob_get_dyed_wool_rel.pddl","w") as f:
         f.write(prob_s)
 
     # Create problem file for get_planks task
     prob_s, malmo_s = make_instance(start_with_pick=True, goal_var="get_planks")
-    with open("examples/minecraft3/prob_make_wooden_planks_irrel.pddl","w") as f:
+    with open(f"{domains_dir}/minecraft3/prob_make_wooden_planks_irrel.pddl","w") as f:
         f.write(prob_s)
     # Create a problem file for get_planks that excludes irrelevant stuff
     prob_s, malmo_s = make_instance(start_with_pick=True, goal_var="get_planks",add_irrel_items=False)
-    with open("examples/minecraft3/prob_make_wooden_planks_rel.pddl","w") as f:
+    with open(f"{domains_dir}/minecraft3/prob_make_wooden_planks_rel.pddl","w") as f:
         f.write(prob_s)
 
     # Create problem file for make_bed task
     prob_s, malmo_s = make_instance(start_with_pick=True, goal_var="make_bed")
-    with open("examples/minecraft3/prob_make_bed_irrel.pddl","w") as f:
+    with open(f"{domains_dir}/minecraft3/prob_make_bed_irrel.pddl","w") as f:
         f.write(prob_s)
 
     # Create a problem file for the make_bed task excluding all the irrelevant items
     prob_s, malmo_s = make_instance(start_with_pick=True, goal_var="make_bed", add_irrel_items=False)
-    with open("examples/minecraft3/prob_make_bed_rel.pddl","w") as f:
+    with open(f"{domains_dir}/minecraft3/prob_make_bed_rel.pddl","w") as f:
         f.write(prob_s)
 
 # TODO: 

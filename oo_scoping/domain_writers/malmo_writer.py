@@ -4,6 +4,7 @@ import math
 import operator as op
 from functools import reduce
 import copy
+from oo_scoping.examples import domains_dir
 
 type_replacements = {
     "obsidian-block":"obsidian",
@@ -20,9 +21,9 @@ type_replacements = {
     'red-tulip': 'red_tulip'
 }
 
-with open("domains/malmo/block_types.txt", "r") as f:
+with open(f"{domains_dir}/malmo/block_types.txt", "r") as f:
     valid_block_types = f.read().splitlines()
-with open("domains/malmo/item_types.txt", "r") as f:
+with open(f"{domains_dir}/malmo/item_types.txt", "r") as f:
     valid_item_types = f.read().splitlines()
 
 def pddl2malmo_coords(x,y,z, z_offset = 209):
@@ -136,7 +137,7 @@ def make_malmo_domain(blocks, items, start_pos, inventory_counts
         x_max, y_max, z_max = max_new
         # x_min, y_min, z_min = pddl2malmo_coords(x_min, y_max, z_min)
         # x_max, y_max, z_max = pddl2malmo_coords(x_max, y_min, z_max)
-    with open("domains/malmo/templates/main_template.xml","r") as f:
+    with open(f"{domains_dir}/malmo/templates/main_template.xml","r") as f:
         domain = f.read()
 
     

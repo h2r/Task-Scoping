@@ -1,2 +1,3 @@
 import pathlib
-domains_dir = pathlib.Path(__file__).parent.absolute() / 'domains'
+examples_dir = pathlib.Path(__file__).parent.absolute()
+domains_dir = examples_dir / 'domains'

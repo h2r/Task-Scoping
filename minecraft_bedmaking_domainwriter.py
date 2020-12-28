@@ -200,6 +200,7 @@ def get_destructible_block_action(block_type, needed_tool = None):
                         (= (block-hits ?b) 2){tool_precond})
     :effect (and (not (block-present ?b))
                  (increase (agent-num-{block_type} ?ag) 1)
+                 (assign (block-hits ?b) 0)
             )
     )"""
     return [hit_s, destroy_s]
@@ -220,6 +221,7 @@ def get_destructible_item_action(item_type, needed_tool = None):
                         (= (item-hits ?b) 0){tool_precond})
     :effect (and (not (present ?b))
                  (increase (agent-num-{item_type} ?ag) 1)
+                 (assign (item-hits ?b) 0)
             )
     )"""
     return [destroy_s]
@@ -417,16 +419,12 @@ def make_domain():
     return domain_s
 
 
-def make_instance(start_with_pick = True, use_bedrock_boundaries = False, goal_var = ""):
+def make_instance(start_with_pick = True, use_bedrock_boundaries = False, add_irrel_items = True, goal_var = ""):
+    agent_name = "steve"
+    
     object_names = OrderedDict()
     object_names["agent"] = ["steve"]
     object_names["diamond-axe"] = ["old-pointy"]
-    object_names["diamond"] = ["dmd0","dmd1","dmd2","dmd3","dmd4",]
-    object_names["stick"] = ["stick0","stick1","stick2","stick3","stick4"]
-    object_names["red-tulip"] = ["rt0","rt1","rt2","rt3","rt4","rt5","rt6",
-                                "rt7","rt8","rt9","rt10","rt11","rt12","rt13",
-                                "rt14","rt15","rt16","rt17","rt18","rt19"]
-    object_names["daisy-flower"] = ["df0","df1","df2","df3","df4","df5","df6","df7","df8","df9","df10","df11"]
     object_names["orchid-flower"] = ["of0","of1","of2"]
     object_names["wooden-block"] = ["wb0","wb1","wb2","wb3","wb4","wb5","wb6","wb7",
                                     "wb8","wb9","wb10","wb11","wb12","wb13","wb14","wb15","wb16",
@@ -434,8 +432,51 @@ def make_instance(start_with_pick = True, use_bedrock_boundaries = False, goal_v
                                     "wb26","wb27","wb28","wb29","wb30"]
     object_names["wool-block"] = ["woolb1", "woolb2","woolb3"]
     object_names["bed"] = ["bed1"]
+    if add_irrel_items:
+        object_names["diamond"] = ["dmd0","dmd1","dmd2","dmd3","dmd4",]
+        object_names["stick"] = ["stick0","stick1","stick2","stick3","stick4"]
+        object_names["red-tulip"] = ["rt0","rt1","rt2","rt3","rt4","rt5","rt6",
+                                    "rt7","rt8","rt9","rt10","rt11","rt12","rt13",
+                                    "rt14","rt15","rt16","rt17","rt18","rt19"]
+        object_names["daisy-flower"] = ["df0","df1","df2","df3","df4","df5","df6","df7","df8","df9","df10","df11"]
 
-    agent_name = "steve"
+    # Create a list of locations for all the blocks that are used to build the house
+    # The first block is the only non-house block that will be needed to craft
+    # wooden planks
+    block_locations = OrderedDict()
+    block_locations["wooden-block"] = [  (7,7,0),#(2,7,0),
+                                        (6,7,0), (8,7,0),
+                                        (5,8,0), (9,8,0),
+                                        (5,9,0), (9,9,0),
+                                        (6,10,0),(7,11,0),(8,10,0),
+                                        (6,7,1), (8,7,1),
+                                        (5,8,1), (9,8,1),
+                                        (5,9,1), (9,9,1),
+                                        (6,10,1),(7,11,1),(8,10,1),
+                                        (6,7,2),(7,7,2),(8,7,2),
+                                        (6,8,2),(8,8,2),
+                                        (6,9,2),(8,9,2),
+                                        (6,10,2),(8,10,2),
+                                        (6,10,2),(7,10,2),(8,10,2)
+                                        ]
+    # Start of setting up of initial conditions
+    init_conds = [f"(agent-alive {agent_name})"]
+
+    goal_wood_block_conds = []
+    # Create the inital conditions for all the wooden blocks and 
+    # leverage these to create the goal conditions for these blocks
+    for i,loc in enumerate(block_locations["wooden-block"]):
+        s = object_names["wooden-block"][i]
+        block_init_loc = get_init_location_conds(loc,s)
+        block_present_cond = f"(block-present {s})"
+        init_conds.extend(block_init_loc)
+        init_conds.append(block_present_cond)
+        if i == 0:
+            goal_wood_block_conds.append("(not " + block_present_cond + ")")
+        else:
+            goal_wood_block_conds.append(block_present_cond)
+
+    # from IPython import embed; embed()
 
     header = """(define (problem MINECRAFTCONTRIVED-3)
     (:domain minecraft-bedmaking)"""
@@ -444,33 +485,38 @@ def make_instance(start_with_pick = True, use_bedrock_boundaries = False, goal_v
         goal = f"""(:goal (and
                 (= (wool-color woolb1) 1)
                 (= (wool-color woolb2) 1)
-                (= (wool-color woolb2) 1)
-            )
-        )
-        """
-    elif goal_var == "get_planks":
-        goal = f"""(:goal (>= (agent-num-wooden-planks {agent_name}) 3))"""
-    elif goal_var == "make_bed":
-        goal = f"""(:goal (and 
-                (= (x bed1) 7)
-                (= (y bed1) 9)
-                (= (z bed1) 0)
-                (= (bed-color bed1) 1)
+                (= (wool-color woolb3) 1)
                 )
-        )
+            )
         """
     else:
-        print("Not a valid goal specification!")
-        exit(1)
+        if goal_var == "get_planks":
+            goal_header = f"""(:goal (and (>= (agent-num-wooden-planks {agent_name}) 3)"""
+        
+        elif goal_var == "make_bed":
+            goal_header = f"""(:goal (and 
+                    (= (x bed1) 7)
+                    (= (y bed1) 9)
+                    (= (z bed1) 0)
+                    (= (bed-color bed1) 1)
+            """
+        else:
+            print("Not a valid goal specification!")
+            exit(1)
+        
+        goal_wood_conds_str = '\n                '.join(goal_wood_block_conds)
 
+        goal_parts = [goal_header, goal_wood_conds_str ,')\n)']
+        goal = ''.join(goal_parts)
+
+
+    # These constants are for state-space size counting purposes
     x_min, x_max = 0, 12
     y_min, y_max = 0, 12
     z_min, z_max = 0, 1
-
     
-    # Setting up initial conditions block
-    init_conds = [f"(agent-alive {agent_name})"]
-    agent_start_pos = (5,0,0)
+    # Position in which everything worked (7,3,0)
+    agent_start_pos = (7,1,0)
     init_conds.extend(get_init_location_conds(agent_start_pos,agent_name))
     inventory_count = OrderedDict()
     for item_type in item_types:
@@ -482,27 +528,6 @@ def make_instance(start_with_pick = True, use_bedrock_boundaries = False, goal_v
         if item_type != "netherportal":
             init_conds.append(f"( = ( agent-num-{item_type} {agent_name} ) {item_count} )")
 
-    block_locations = OrderedDict()
-    block_locations["wooden-block"] = [(2,10,0),
-                                        (6,8,0), (8,8,0),
-                                        (5,9,0), (9,9,0),
-                                        (5,10,0), (9,10,0),
-                                        (6,11,0),(7,12,0),(8,11,0),
-                                        (6,8,1), (8,8,1),
-                                        (5,9,1), (9,9,1),
-                                        (5,10,1), (9,10,1),
-                                        (6,11,1),(7,12,1),(8,11,1),
-                                        (6,8,2),(7,8,2),(8,8,2),
-                                        (6,9,2),(8,9,2),
-                                        (6,10,2),(8,10,2),
-                                        (6,11,2),(8,11,2),
-                                        (6,11,2),(7,11,2),(8,11,2)
-                                        ]
-
-    for i,loc in enumerate(block_locations["wooden-block"]):
-        s = object_names["wooden-block"][i]
-        init_conds.extend(get_init_location_conds(loc,s))
-        init_conds.append(f"(block-present {s})")
 
     for s in object_names["wooden-block"]:
         init_conds.append(f"( = ( block-hits {s} ) 0 )")
@@ -510,10 +535,16 @@ def make_instance(start_with_pick = True, use_bedrock_boundaries = False, goal_v
 
     init_conds.append("(= (agent-num-wooden-planks steve) 0)")
 
+    i = 0
     for s in object_names["wool-block"]:
         init_conds.append(f"( = ( block-hits {s} ) 0 )")
-        init_conds.append(f"( = ( wool-color {s} ) 0 )")
         init_conds.append(f"(not (block-present {s}))")
+        if i == 0:
+            init_conds.append(f"( = ( wool-color {s} ) 0 )")
+        else:
+            init_conds.append(f"( = ( wool-color {s} ) 1 )")
+        i += 1
+
     init_conds.append("(= (agent-num-wool-block steve) 3)")
 
     for s in object_names["bed"]:
@@ -523,61 +554,25 @@ def make_instance(start_with_pick = True, use_bedrock_boundaries = False, goal_v
         init_conds.append(f"(not (block-present {s}))")
     init_conds.append("(= (agent-num-bed steve) 0)")
 
-    for s in object_names["red-tulip"]:
-        init_conds.append(f"( = ( item-hits {s} ) 0 )")
-    init_conds.append("(= (agent-num-red-tulip steve) 0)")
-
     for s in object_names["orchid-flower"]:
         init_conds.append(f"( = ( item-hits {s} ) 0 )")
     init_conds.append("(= (agent-num-orchid-flower steve) 0)")
 
-    for s in object_names["daisy-flower"]:
-        init_conds.append(f"( = ( item-hits {s} ) 0 )")
-    init_conds.append("(= (agent-num-daisy-flower steve) 0)")
+    if add_irrel_items:
+        for s in object_names["red-tulip"]:
+            init_conds.append(f"( = ( item-hits {s} ) 0 )")
+        init_conds.append("(= (agent-num-red-tulip steve) 0)")
 
+        for s in object_names["daisy-flower"]:
+            init_conds.append(f"( = ( item-hits {s} ) 0 )")
+        init_conds.append("(= (agent-num-daisy-flower steve) 0)")
 
     diamond_pick_name = object_names["diamond-axe"][0]
     init_conds.extend(get_init_location_conds((0,0,0), diamond_pick_name))
     init_conds.append(f"( not ( present {diamond_pick_name} ) )")
-    
+
     item_locations = OrderedDict()
-    item_locations["stick"] = []
-    for i, s in enumerate(object_names["stick"]):
-        loc = (0,2+i,0)
-        item_locations["stick"].append(loc)
-        init_conds.extend(get_init_location_conds(loc,s))
-        init_conds.append(f"( present {s} )")
-    
-    item_locations["diamond"] = []
-    for i, s in enumerate(object_names["diamond"]):
-        loc = (1,i+2,0)
-        item_locations["diamond"].append(loc)
-        init_conds.extend(get_init_location_conds(loc,s))
-        init_conds.append(f"(present {s})")
 
-
-    item_locations["red-tulip"] = []
-    i = 0
-    for loc in [(2,6,0),(3,6,0),(4,6,0),(5,6,0),(6,6,0),(7,6,0),(8,6,0),
-                (8,5,0),(8,4,0),(8,3,0),
-                (8,2,0),(7,2,0),(6,2,0),(5,2,0),(4,2,0),(3,2,0),(2,2,0),
-                (2,3,0),(2,4,0),(2,5,0)]:
-        item_locations["red-tulip"].append(loc)
-        s = object_names["red-tulip"][i]
-        init_conds.extend(get_init_location_conds(loc,s))
-        init_conds.append(f"(present {s})")
-        i += 1
-    item_locations["daisy-flower"] = []
-    i = 0
-    for loc in [(3,5,0),(4,5,0),(5,5,0),(6,5,0),(7,5,0),
-                (7,4,0),
-                (7,3,0),(6,3,0),(5,3,0),(4,3,0),(3,3,0),
-                (3,4,0)]:
-        item_locations["daisy-flower"].append(loc)
-        s = object_names["daisy-flower"][i]
-        init_conds.extend(get_init_location_conds(loc,s))
-        init_conds.append(f"( present {s} )")
-        i += 1
     item_locations["orchid-flower"] = []
     i = 0
     for x in range(4,7):
@@ -587,6 +582,56 @@ def make_instance(start_with_pick = True, use_bedrock_boundaries = False, goal_v
         init_conds.extend(get_init_location_conds(loc,s))
         init_conds.append(f"( present {s} )")
         i += 1
+    # item_locations["orchid-flower"] = []
+    # i = 0
+    # for x in range(4,7):
+    #     loc = (x,4,0)
+    #     item_locations["orchid-flower"].append(loc)
+    #     s = object_names["orchid-flower"][i]
+    #     init_conds.extend(get_init_location_conds(loc,s))
+    #     if i == 0 or i == 2:
+    #         init_conds.append(f"(not( present {s} ))")
+    #     else:
+    #         init_conds.append(f"( present {s} )")
+    #     i += 1
+    
+    if add_irrel_items:
+        item_locations["stick"] = []
+        for i, s in enumerate(object_names["stick"]):
+            loc = (0,2+i,0)
+            item_locations["stick"].append(loc)
+            init_conds.extend(get_init_location_conds(loc,s))
+            init_conds.append(f"( present {s} )")
+        
+        item_locations["diamond"] = []
+        for i, s in enumerate(object_names["diamond"]):
+            loc = (1,i+2,0)
+            item_locations["diamond"].append(loc)
+            init_conds.extend(get_init_location_conds(loc,s))
+            init_conds.append(f"(present {s})")
+
+        item_locations["red-tulip"] = []
+        i = 0
+        for loc in [(2,6,0),(3,6,0),(4,6,0),(5,6,0),(6,6,0),(7,6,0),(8,6,0),
+                    (8,5,0),(8,4,0),(8,3,0),
+                    (8,2,0),(7,2,0),(6,2,0),(5,2,0),(4,2,0),(3,2,0),(2,2,0),
+                    (2,3,0),(2,4,0),(2,5,0)]:
+            item_locations["red-tulip"].append(loc)
+            s = object_names["red-tulip"][i]
+            init_conds.extend(get_init_location_conds(loc,s))
+            init_conds.append(f"(present {s})")
+            i += 1
+        item_locations["daisy-flower"] = []
+        i = 0
+        for loc in [(3,5,0),(4,5,0),(5,5,0),(6,5,0),(7,5,0),
+                    (7,4,0),
+                    (7,3,0),(6,3,0),(5,3,0),(4,3,0),(3,3,0),
+                    (3,4,0)]:
+            item_locations["daisy-flower"].append(loc)
+            s = object_names["daisy-flower"][i]
+            init_conds.extend(get_init_location_conds(loc,s))
+            init_conds.append(f"( present {s} )")
+            i += 1
 
     # End initial conditions
 
@@ -636,33 +681,49 @@ if __name__ == "__main__":
     # Create problem file and MALMO file for domain including all irrelevant
     # items. This is for dye_wool task
     prob_s, malmo_s = make_instance(start_with_pick=True, goal_var="dye_wool")
-    with open("examples/minecraft3/prob_get_dyed_wool.pddl","w") as f:
+    with open("examples/minecraft3/prob_get_dyed_wool_irrel.pddl","w") as f:
         f.write(prob_s)
     with open("examples/malmo/problems/prob_dyed_wool.xml","w") as f:
         f.write(malmo_s)
+    # Create a problem file for dye_wool that excludes all the irrelevant stuff
+    prob_s, malmo_s = make_instance(start_with_pick=True, goal_var="dye_wool", add_irrel_items=False)
+    with open("examples/minecraft3/prob_get_dyed_wool_rel.pddl","w") as f:
+        f.write(prob_s)
 
     # Create problem file for get_planks task
     prob_s, malmo_s = make_instance(start_with_pick=True, goal_var="get_planks")
-    with open("examples/minecraft3/prob_make_wooden_planks.pddl","w") as f:
+    with open("examples/minecraft3/prob_make_wooden_planks_irrel.pddl","w") as f:
+        f.write(prob_s)
+    # Create a problem file for get_planks that excludes irrelevant stuff
+    prob_s, malmo_s = make_instance(start_with_pick=True, goal_var="get_planks",add_irrel_items=False)
+    with open("examples/minecraft3/prob_make_wooden_planks_rel.pddl","w") as f:
         f.write(prob_s)
 
     # Create problem file for make_bed task
     prob_s, malmo_s = make_instance(start_with_pick=True, goal_var="make_bed")
-    with open("examples/minecraft3/prob_make_bed.pddl","w") as f:
+    with open("examples/minecraft3/prob_make_bed_irrel.pddl","w") as f:
+        f.write(prob_s)
+
+    # Create a problem file for the make_bed task excluding all the irrelevant items
+    prob_s, malmo_s = make_instance(start_with_pick=True, goal_var="make_bed", add_irrel_items=False)
+    with open("examples/minecraft3/prob_make_bed_rel.pddl","w") as f:
         f.write(prob_s)
 
 # TODO: 
 # Start debugging the PDDL domain
     # Sub-tasks
-    # 1. Dye 3 wools
+    # 1. Dye 1 wool
     # 2. Mine the wood block and craft 3 wood planks
     # 3. Craft a bed and place it in the house!
 
 
 # Things to do now:
 # IMPORTANT notes: 
-# Agent cannot achieve bedmaking and placing goal in full PDDL. See if it can do it on the 
-# scoped problem???
+# Agent can achieve bedmaking given 2 colored woolen blocks to start with!
+# See if it can do so while still keeping the house in place!!!
+# See if planning on the irrel domain is worse, and if so, whether the first task
+# (i.e, just having all 3 woolen blocks colored)
+
 # 1. Try to make it such that blocks cannot be dropped atop other blocks?
 # 2. Right now, there are no wooden plank blocks or dye items instantiated in the problem.
 # As a result, even though the agent can increase its count of these items, it can't actually

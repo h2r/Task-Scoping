@@ -373,6 +373,7 @@
                         ( >= ( agent-num-diamond-axe ?ag ) 1 ))
     :effect (and (not (block-present ?b))
                  (increase (agent-num-wooden-block ?ag) 1)
+                 (assign (block-hits ?b) 0)
             )
     )
 
@@ -397,6 +398,7 @@
                         ( >= ( agent-num-diamond-axe ?ag ) 1 ))
     :effect (and (not (block-present ?b))
                  (increase (agent-num-wooden-planks ?ag) 1)
+                 (assign (block-hits ?b) 0)
             )
     )
 
@@ -421,6 +423,7 @@
                         ( >= ( agent-num-diamond-axe ?ag ) 1 ))
     :effect (and (not (block-present ?b))
                  (increase (agent-num-wool-block ?ag) 1)
+                 (assign (block-hits ?b) 0)
             )
     )
 
@@ -445,6 +448,7 @@
                         ( >= ( agent-num-diamond-axe ?ag ) 1 ))
     :effect (and (not (block-present ?b))
                  (increase (agent-num-bed ?ag) 1)
+                 (assign (block-hits ?b) 0)
             )
     )
 
@@ -458,6 +462,7 @@
                         ( >= ( agent-num-diamond-axe ?ag ) 1 ))
     :effect (and (not (present ?b))
                  (increase (agent-num-orchid-flower ?ag) 1)
+                 (assign (item-hits ?b) 0)
             )
     )
 
@@ -471,6 +476,7 @@
                         ( >= ( agent-num-diamond-axe ?ag ) 1 ))
     :effect (and (not (present ?b))
                  (increase (agent-num-daisy-flower ?ag) 1)
+                 (assign (item-hits ?b) 0)
             )
     )
 
@@ -484,6 +490,7 @@
                         ( >= ( agent-num-diamond-axe ?ag ) 1 ))
     :effect (and (not (present ?b))
                  (increase (agent-num-red-tulip ?ag) 1)
+                 (assign (item-hits ?b) 0)
             )
     )
 

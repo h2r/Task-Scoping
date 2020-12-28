@@ -5,14 +5,14 @@
 (:objects
 	steve - agent
 	old-pointy - diamond-axe
-	dmd0 dmd1 dmd2 dmd3 dmd4 - diamond
-	stick0 stick1 stick2 stick3 stick4 - stick
-	rt0 rt1 rt2 rt3 rt4 rt5 rt6 rt7 rt8 rt9 rt10 rt11 rt12 rt13 rt14 rt15 rt16 rt17 rt18 rt19 - red-tulip
-	df0 df1 df2 df3 df4 df5 df6 df7 df8 df9 df10 df11 - daisy-flower
 	of0 of1 of2 - orchid-flower
 	wb0 wb1 wb2 wb3 wb4 wb5 wb6 wb7 wb8 wb9 wb10 wb11 wb12 wb13 wb14 wb15 wb16 wb17 wb18 wb19 wb20 wb21 wb22 wb23 wb24 wb25 wb26 wb27 wb28 wb29 wb30 - wooden-block
 	woolb1 woolb2 woolb3 - wool-block
 	bed1 - bed
+	dmd0 dmd1 dmd2 dmd3 dmd4 - diamond
+	stick0 stick1 stick2 stick3 stick4 - stick
+	rt0 rt1 rt2 rt3 rt4 rt5 rt6 rt7 rt8 rt9 rt10 rt11 rt12 rt13 rt14 rt15 rt16 rt17 rt18 rt19 - red-tulip
+	df0 df1 df2 df3 df4 df5 df6 df7 df8 df9 df10 df11 - daisy-flower
 )
 
 
@@ -202,6 +202,10 @@
 	( = ( bed-color bed1 ) 0 )
 	(not (block-present bed1))
 	(= (agent-num-bed steve) 0)
+	( = ( item-hits of0 ) 0 )
+	( = ( item-hits of1 ) 0 )
+	( = ( item-hits of2 ) 0 )
+	(= (agent-num-orchid-flower steve) 0)
 	( = ( item-hits rt0 ) 0 )
 	( = ( item-hits rt1 ) 0 )
 	( = ( item-hits rt2 ) 0 )
@@ -223,10 +227,6 @@
 	( = ( item-hits rt18 ) 0 )
 	( = ( item-hits rt19 ) 0 )
 	(= (agent-num-red-tulip steve) 0)
-	( = ( item-hits of0 ) 0 )
-	( = ( item-hits of1 ) 0 )
-	( = ( item-hits of2 ) 0 )
-	(= (agent-num-orchid-flower steve) 0)
 	( = ( item-hits df0 ) 0 )
 	( = ( item-hits df1 ) 0 )
 	( = ( item-hits df2 ) 0 )
@@ -244,6 +244,18 @@
 	(= (y old-pointy) 0)
 	(= (z old-pointy) 0)
 	( not ( present old-pointy ) )
+	(= (x of0) 4)
+	(= (y of0) 4)
+	(= (z of0) 0)
+	( present of0 )
+	(= (x of1) 5)
+	(= (y of1) 4)
+	(= (z of1) 0)
+	( present of1 )
+	(= (x of2) 6)
+	(= (y of2) 4)
+	(= (z of2) 0)
+	( present of2 )
 	(= (x stick0) 0)
 	(= (y stick0) 2)
 	(= (z stick0) 0)
@@ -412,25 +424,13 @@
 	(= (y df11) 4)
 	(= (z df11) 0)
 	( present df11 )
-	(= (x of0) 4)
-	(= (y of0) 4)
-	(= (z of0) 0)
-	( present of0 )
-	(= (x of1) 5)
-	(= (y of1) 4)
-	(= (z of1) 0)
-	( present of1 )
-	(= (x of2) 6)
-	(= (y of2) 4)
-	(= (z of2) 0)
-	( present of2 )
 )
 
 
 (:goal (and 
-                ; (= (x bed1) 7)
-                ; (= (y bed1) 9)
-                ; (= (z bed1) 0)
+                (= (x bed1) 7)
+                (= (y bed1) 9)
+                (= (z bed1) 0)
                 (= (bed-color bed1) 1)
                 )
         )

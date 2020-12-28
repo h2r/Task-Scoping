@@ -139,7 +139,7 @@
 	(= (z wb30) 2)
 	(block-present wb30)
 	(= (x steve) 7)
-	(= (y steve) 3)
+	(= (y steve) 1)
 	(= (z steve) 0)
 	( = ( agent-num-diamond steve ) 0 )
 	( = ( agent-num-stick steve ) 0 )

@@ -139,7 +139,7 @@
 	(= (z wb30) 2)
 	(block-present wb30)
 	(= (x steve) 7)
-	(= (y steve) 3)
+	(= (y steve) 1)
 	(= (z steve) 0)
 	( = ( agent-num-diamond steve ) 0 )
 	( = ( agent-num-stick steve ) 0 )
@@ -221,7 +221,12 @@
 )
 
 
-(:goal (and (>= (agent-num-wooden-planks steve) 3)(not (block-present wb0))
+(:goal (and 
+                    (= (x bed1) 7)
+                    (= (y bed1) 9)
+                    (= (z bed1) 0)
+                    (= (bed-color bed1) 1)
+            (not (block-present wb0))
                 (block-present wb1)
                 (block-present wb2)
                 (block-present wb3)

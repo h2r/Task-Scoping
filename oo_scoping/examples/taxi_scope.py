@@ -5,11 +5,11 @@ from typing import List, Tuple, Dict, Iterable
 import re, copy
 import itertools
 import z3
-from oo_scoping.skill_classes import EffectTypePDDL, SkillPDDL
-from oo_scoping.utils import product_dict, nested_list_replace, get_atoms, get_all_objects, condition_str2objects
-from oo_scoping.scoping import scope
-from oo_scoping.PDDLz3 import PDDL_Parser_z3
-from oo_scoping.action import Action
+
+from oo_scoping.pddl_scoper import scope_pddl
+from oo_scoping.examples import domains_dir
+from oo_scoping.utils import make_dir
+
 
 
 def remove_objects(input_path, output_path, objects):
@@ -46,16 +46,9 @@ def get_scoped_path(p):
     return base + "_scoped." + p_split[-1]
 
 if __name__ == '__main__':
-    # zeno_dom = "domains/zeno/zeno.pddl"
-    # zeno_prob = "domains/zeno/pb1.pddl"
-    # domain, problem = zeno_dom, zeno_prob
-
-    # taxi_dom = "domains/infinite-taxi-numeric/taxi-domain.pddl"
-    # taxi_prob = "domains/infinite-taxi-numeric/prob02.pddl"
-
     start_time = time.time()
-    domain =  "domains/existential-taxi/taxi-domain.pddl"
-    problem =  "domains/existential-taxi/prob-02.pddl"
+    domain =  f"{domains_dir}/existential-taxi/taxi-domain.pddl"
+    problem =  f"{domains_dir}/existential-taxi/prob-02.pddl"
 
     parser = PDDL_Parser_z3()
     parser.parse_domain(domain)

@@ -5,7 +5,9 @@ import re, copy
 import time
 import pathlib
 
+from oo_scoping.scoping import scope
 from oo_scoping.pddl_scoper import scope_pddl
+from oo_scoping.PDDLz3 import PDDL_Parser_z3
 from oo_scoping.examples import domains_dir
 from oo_scoping.utils import make_dir
 
@@ -33,12 +35,12 @@ def get_profile_path(domain, problem, suffix=""):
 
 if __name__ == '__main__':
     start_time = time.time()
-    domain = f"{domains_dir}/minecraft2/minecraft-contrived2.pddl"
+    domain = f"{domains_dir}/minecraft3/minecraft-contrived3.pddl"
     # problems = ["domains/minecraft2/prob_obsidian_with_pick.pddl", "domains/minecraft2/prob_obsidian_without_pick.pddl"]
     problems = [
         # "domains/minecraft2/prob_irrel_obsidian_with_pick.pddl"
         # "domains/minecraft2/prob_irrel_flint_with_pick.pddl"
-        f"{domains_dir}/minecraft2/prob_irrel_nether_with_pick.pddl"
+        f"{domains_dir}/minecraft3/prob_get_dyed_wool_irrel.pddl"
     ]
 
     for problem in problems:

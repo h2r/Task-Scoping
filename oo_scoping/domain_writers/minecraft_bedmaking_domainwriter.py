@@ -411,7 +411,7 @@ def make_domain():
         actions.extend(get_destructible_block_action(block_type, needed_tool = "diamond-axe"))
 
     for item_type in inverse_type_hierarchy["destructible-item"]:
-        actions.extend(get_destructible_item_action(item_type, needed_tool = "diamond-axe"))
+        actions.extend(get_destructible_item_action(item_type))
 
     sections.extend(actions)
     sections.append(footer)

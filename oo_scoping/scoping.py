@@ -128,7 +128,9 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 		pvars_rel = pvars_rel_new
 		i += 1
 		if verbose > 0:
+			print("~~~Pvars Rel~~~")
 			print(pvars_rel)
+
 		print("Done 1 iteration.")
 		# print(pvars_rel)
 		# from IPython import embed; embed()
@@ -150,4 +152,6 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 	pvars_cl = get_unique_z3_vars(pvars_cl)
 	# We only care about the pvars that are causally linked AND used in preconditions
 	pvars_cl = [c for c in pvars_cl if c in skills_conds_pvars]
+	print("~~~Pvars Causally Linked~~~")
+	print(pvars_cl)
 	return pvars_rel, pvars_cl, skills_rel

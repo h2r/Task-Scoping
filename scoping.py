@@ -22,8 +22,9 @@ def get_unlinked_pvars(skills, causal_links, dummy_goal, solver):
 		for prec in split_conj(s.precondition):
 			if not solver_implies_condition(solver, prec):
 				pvars_rel_new.extend(get_atoms(prec))
-			# if(s.action == "turn_on_greenbutton"):
-			# 	from IPython import embed; embed()
+				
+				if(s.action == "destroy-orchid-flower"):
+					from IPython import embed; embed()
 
 		# from IPython import embed; embed()
 
@@ -92,16 +93,16 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 		# Get pvars not guaranteed by causal links
 		pvars_rel_new = get_unlinked_pvars(skills_rel, causal_links, dummy_goal, solver)
 
+		# from IPython import embed; embed()
+
 		# Check convergence
 		converged = (pvars_rel == pvars_rel_new)
 
 		pvars_rel = pvars_rel_new
 		i += 1
+		print("~~~Pvars Rel~~~")
 		print(pvars_rel)
 		print("Done 1 iteration")
-		# print(pvars_rel)
-		# from IPython import embed; embed()
-		# from IPython.core.debugger import set_trace; set_trace()
 
 	# Remove the dummy pvar and skill
 	pvars_rel.remove(dummy_goal)
@@ -143,7 +144,7 @@ def scope_pddl(domain, problem):
         all_pvars.extend(s.params)
     all_pvars = get_unique_z3_vars(all_pvars)
     irrel_pvars = [p for p in map(str,all_pvars) if p not in map(str,rel_pvars)]
-	
+    print("~~~Irrel Pvars~~~")
     print(irrel_pvars)
 
     all_objects = pvars2objects(all_pvars)

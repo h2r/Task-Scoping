@@ -126,8 +126,8 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 			print("~" * 10 + "Pvars Rel" + "~" * 10)
 			print("\n\n".join(map(str,pvars_rel)))
 		# Get causal links
-		# causal_links = get_causal_links(start_condition, skills_rel)
-		causal_links = get_causal_links_old(start_condition, skills)
+		causal_links = get_causal_links(start_condition, skills_rel)
+		# causal_links = get_causal_links_old(start_condition, skills)
 
 		print("Got new causal links!!!")
 		# Get pvars not guaranteed by causal links

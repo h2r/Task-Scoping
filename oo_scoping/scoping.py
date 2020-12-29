@@ -44,6 +44,15 @@ def get_causal_links(start_condition, skills):
 	causal_links = get_unthreatened_conditions(start_condition, all_effected_pvars)
 	return causal_links
 
+def get_causal_links_old(start_condition, skills):
+	all_effects = sorted(list(set(chain(*[s.all_effects for s in skills]))))
+	all_effected_pvars = sorted(list(set([x.pvar for x in all_effects])), key=lambda x: str(x))
+	causal_links = []
+	for c in start_condition:
+		threatened_pvars = [x for x in get_atoms(c) if x in all_effected_pvars]
+		if len(threatened_pvars) == 0: causal_links.append(c)
+	return causal_links
+
 def get_unlinked_pvars(skills, causal_links, dummy_goal, solver):
 	solver.push()
 	solver.add(*causal_links)
@@ -117,7 +126,8 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 			print("~" * 10 + "Pvars Rel" + "~" * 10)
 			print("\n\n".join(map(str,pvars_rel)))
 		# Get causal links
-		causal_links = get_causal_links(start_condition, skills_rel)
+		# causal_links = get_causal_links(start_condition, skills_rel)
+		causal_links = get_causal_links_old(start_condition, skills)
 
 		print("Got new causal links!!!")
 		# Get pvars not guaranteed by causal links

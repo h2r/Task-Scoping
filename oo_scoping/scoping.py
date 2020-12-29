@@ -100,7 +100,8 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 	dummy_final_skill = SkillPDDL(z3.And(*goals), "DummyFinalSkill",dummy_goal_et)
 	skills = skills + [dummy_final_skill]
 	pvars_rel = [dummy_goal]
-
+	# Debug
+	stevewashere = False
 	print("Done grounding! Starting to scope!!!")
 	converged = False
 	i = 0
@@ -121,7 +122,13 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 		print("Got new causal links!!!")
 		# Get pvars not guaranteed by causal links
 		pvars_rel_new = get_unlinked_pvars(skills_rel, causal_links, dummy_goal, solver)
-
+		# Debug
+		if "z(steve)" in map(str, pvars_rel_new):
+			stevewashere = True
+		else:
+			if stevewashere:
+				print("Steve vanished!")
+				print("\n".join(map(str,pvars_rel_new)))
 		# Check convergence
 		converged = (pvars_rel == pvars_rel_new)
 

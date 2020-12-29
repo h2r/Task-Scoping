@@ -1,2 +1,19 @@
-# IPC
-This is a repository containing step-by-step instructions on how to get planners submitted to the International Planning Competition up-and-runnning. This is extremely useful if you'd like to compare your algorithm to these state-of-the-art planners to get baseline results.
+# scoping
+
+## Usage
+Use python 3.7.9 (other versions may work)
+
+    pip install -r requirements.txt
+    python scoping_cli.py <domain_path> <problem_path>
+
+Example:
+
+    python pddl_scoper.py "domains/multi_monkeys_playroom copy/multi_monkeys_playroom.pddl" "domains/multi_monkeys_playroom copy/prob-02.pddl"
+
+The scoped domain and problem will be placed in the same directories as the input domain and problem. Use the scoped problem that ends with "with_cl". The file that says "sans_cl" may remove some causally-linked objects that, in principle, can be ignored, but due to limitations of PDDL we cannot always remove them safely.
+
+## Steps
+
+1. Run your planner on the scoped pddl files
+1. ?
+1. Profit

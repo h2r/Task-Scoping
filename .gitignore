@@ -1,0 +1,12 @@
+/ipc2018-domains
+/.idea
+taxi_trace_bleh.txt
+/docs
+.ds_store
+.ruby-version
+.vscode/settings.json
+.vscode
+__pycache__/
+.ipynb_checkpoints
+*.py[cod]
+oo_scoping.egg-info

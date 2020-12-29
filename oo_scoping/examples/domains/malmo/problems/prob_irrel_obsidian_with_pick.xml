@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+    <Mission xmlns="http://ProjectMalmo.microsoft.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <About>
+            <Summary>{summary}</Summary>
+        </About>
+
+        <ModSettings>
+            <MsPerTick>50</MsPerTick>
+        </ModSettings>
+        <ServerSection>
+            <ServerInitialConditions>
+                <Time>
+                    <StartTime>1000</StartTime>
+                    <AllowPassageOfTime>false</AllowPassageOfTime>
+                </Time>
+                <Weather>clear</Weather>
+                <AllowSpawning>false</AllowSpawning>
+                <AllowedMobs>Sheep</AllowedMobs>
+            </ServerInitialConditions>
+            <ServerHandlers>
+                <FlatWorldGenerator generatorString="3;7,202*1,5*3,2;3;,biome_1" />
+                <!-- <DrawingDecorator> -->
+                    <!-- <DrawCuboid x1="-1" y1="199" z1="-9" x2="12" y2="202" z2="1" type="bedrock"/>
+					<DrawCuboid x1="-1" y1="202" z1="-9" x2="12" y2="202" z2="1" type="glowstone"/> -->
+					<!-- <DrawCuboid x1="-2" y1="300" z1="-8" x2="13" y2="300" z2="5" type="air"/> -->
+					<!-- <DrawCuboid x1="11" y1="201" z1="-8" x2="11" y2="201" z2="-8" type="obsidian"/>
+					<DrawCuboid x1="10" y1="200" z1="-8" x2="10" y2="200" z2="-8" type="obsidian"/>
+					<DrawCuboid x1="10" y1="200" z1="0" x2="10" y2="200" z2="0" type="iron_ore"/>
+					<DrawItem x="1" y="200" z="0" type="stick"/>
+					<DrawItem x="1" y="200" z="-1" type="stick"/>
+					<DrawItem x="8" y="200" z="0" type="flint"/>
+					<DrawItem x="8" y="200" z="-1" type="flint"/>
+					<DrawItem x="8" y="200" z="-2" type="flint"/>
+					<DrawItem x="9" y="200" z="0" type="coal"/>
+					<DrawItem x="2" y="200" z="0" type="diamond"/>
+					<DrawItem x="2" y="200" z="-1" type="diamond"/>
+					<DrawItem x="2" y="200" z="-2" type="diamond"/>
+					<DrawItem x="3" y="200" z="0" type="apple"/>
+					<DrawItem x="3" y="200" z="-1" type="apple"/>
+					<DrawItem x="3" y="200" z="-2" type="apple"/>
+					<DrawItem x="4" y="200" z="0" type="potato"/>
+					<DrawItem x="4" y="200" z="-1" type="potato"/>
+					<DrawItem x="4" y="200" z="-2" type="potato"/>
+					<DrawItem x="4" y="200" z="-3" type="potato"/>
+					<DrawItem x="4" y="200" z="-4" type="potato"/>
+					<DrawCuboid x1="5" y1="200" z1="0" x2="5" y2="200" z2="0" type="red_flower" variant="oxeye_daisy"/>
+					<DrawCuboid x1="5" y1="200" z1="-1" x2="5" y2="200" z2="-1" type="red_flower" variant="oxeye_daisy"/>
+					<DrawCuboid x1="5" y1="200" z1="-2" x2="5" y2="200" z2="-2" type="red_flower" variant="oxeye_daisy"/>
+					<DrawCuboid x1="5" y1="200" z1="-3" x2="5" y2="200" z2="-3" type="red_flower" variant="oxeye_daisy"/>
+					<DrawCuboid x1="5" y1="200" z1="-4" x2="5" y2="200" z2="-4" type="red_flower" variant="oxeye_daisy"/>
+					<DrawCuboid x1="6" y1="200" z1="0" x2="6" y2="200" z2="0" type="red_flower" variant="blue_orchid"/>
+					<DrawCuboid x1="6" y1="200" z1="-1" x2="6" y2="200" z2="-1" type="red_flower" variant="blue_orchid"/>
+					<DrawCuboid x1="6" y1="200" z1="-2" x2="6" y2="200" z2="-2" type="red_flower" variant="blue_orchid"/>
+					<DrawCuboid x1="6" y1="200" z1="-3" x2="6" y2="200" z2="-3" type="red_flower" variant="blue_orchid"/>
+					<DrawCuboid x1="6" y1="200" z1="-4" x2="6" y2="200" z2="-4" type="red_flower" variant="blue_orchid"/>
+					<DrawItem x="7" y="200" z="0" type="rabbit"/>
+					<DrawItem x="7" y="200" z="-1" type="rabbit"/>
+					<DrawItem x="7" y="200" z="-2" type="rabbit"/>
+					<DrawItem x="7" y="200" z="-3" type="rabbit"/>
+					<DrawItem x="7" y="200" z="-4" type="rabbit"/> -->
+                <!-- </DrawingDecorator> -->
+               <ServerQuitWhenAnyAgentFinishes />
+               <ServerQuitFromTimeUp timeLimitMs="120000"/>
+            </ServerHandlers>
+        </ServerSection>
+
+        <AgentSection mode="Survival">
+            <Name>The Q-Learner</Name>
+            <AgentStart>
+                <Placement x="0.5" y="209" z="0.5" pitch="10" yaw="180"/>
+                <Inventory>
+                    <InventoryItem type="diamond_pickaxe" slot="0"/>
+                </Inventory>
+            </AgentStart>
+            <AgentHandlers>
+                <!-- <ContinuousMovementCommands turnSpeedDegs="420"/> -->
+                <DiscreteMovementCommands>
+                    <ModifierList type="deny-list">
+                        <command>attack</command>
+                    </ModifierList>
+                </DiscreteMovementCommands>
+                <ContinuousMovementCommands>
+                    <ModifierList type="allow-list">
+                        <command>attack</command>
+                    </ModifierList>
+                </ContinuousMovementCommands>
+                <ObservationFromRay/>
+                <RewardForDamagingEntity>
+                    <Mob type="Sheep" reward="1"/>
+                    <Mob type="Pig" reward="-1"/>
+                </RewardForDamagingEntity>
+                <SimpleCraftCommands/>
+                <ObservationFromNearbyEntities>
+                    <Range name="entities" xrange="12" yrange="2" zrange="9" />
+                </ObservationFromNearbyEntities>
+                <ObservationFromFullStats/>{video_requirements}
+            </AgentHandlers>
+        </AgentSection>
+
+        <!-- <AgentSection mode="Creative">
+            <Name>The Watcher</Name>
+            <AgentStart>
+            <Placement x="5.0" y="200.0" z="0.0" pitch="10" yaw="270"/>
+            </AgentStart>
+            <AgentHandlers>
+            <ContinuousMovementCommands turnSpeedDegs="360"/>
+            <MissionQuitCommands/>
+            <VideoProducer>
+                <Width>640</Width>
+                <Height>640</Height>
+            </VideoProducer>
+            </AgentHandlers>
+        </AgentSection> -->
+
+    </Mission>

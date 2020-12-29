@@ -1,0 +1,74 @@
+OR(
+	And(And(Not(in-taxi(curly, t0)),
+        Not(in-taxi(s`mo`ov, t0)),
+        Not(in-taxi(edison, t0)),
+        Not(in-taxi(isbell, t0)))),
+	And(in-taxi(smoov, t0),
+    Not(Or(And(Not(False), in-taxi(curly, t0)),
+           And(Not(True), in-taxi(smoov, t0)),
+           And(Not(False), in-taxi(edison, t0)),
+           And(Not(False), in-taxi(isbell, t0))))),
+	And(in-taxi(edison, t0),
+    Not(Or(And(Not(False), in-taxi(curly, t0)),
+           And(Not(False), in-taxi(smoov, t0)),
+           And(Not(True), in-taxi(edison, t0)),
+           And(Not(False), in-taxi(isbell, t0))))),
+	And(in-taxi(isbell, t0),
+    Not(Or(And(Not(False), in-taxi(curly, t0)),
+           And(Not(False), in-taxi(smoov, t0)),
+           And(Not(False), in-taxi(edison, t0)),
+           And(Not(True), in-taxi(isbell, t0)))))
+)
+
+Hand simplified to 
+OR(
+	Nobody in taxi,
+	One of smoov, isbell, edison in taxi
+)
+
+
+code 'simplified' to
+
+Or(
+	Not(
+		Or(
+			Not(in-taxi(isbell, t0)),
+			Or(in-taxi(edison, t0),
+			Or(in-taxi(curly, t0),
+			in-taxi(smoov, t0)))
+		)
+	),
+	Or(
+		Not(
+			Or(Not(in-taxi(edison, t0)),
+			Or(in-taxi(isbell, t0),
+			Or(in-taxi(curly, t0),
+			in-taxi(smoov, t0))))
+		),
+		Or(
+			Not(
+				Or(
+					in-taxi(isbell, t0),
+					Or(
+						in-taxi(edison, t0),
+						Or(
+							in-taxi(curly, t0),
+							in-taxi(smoov, t0)
+						)
+					)
+				)
+			)
+
+			,Not(
+				Or(
+					Not(in-taxi(smoov, t0)),
+					Or(
+						in-taxi(isbell, t0),
+						Or(in-taxi(curly, t0),
+						in-taxi(edison, t0))
+					)
+				)
+			)
+		)
+	)
+)

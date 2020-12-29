@@ -720,10 +720,8 @@ if __name__ == "__main__":
 
 # Things to do now:
 # IMPORTANT notes: 
-# Agent can achieve bedmaking given 2 colored woolen blocks to start with!
-# See if it can do so while still keeping the house in place!!!
-# See if planning on the irrel domain is worse, and if so, whether the first task
-# (i.e, just having all 3 woolen blocks colored)
+# PROBLEM! All flowers are relevant because wool-color is an int, and if it's relevant
+# then all the things touching it are relevant in turn...
 
 # 1. Try to make it such that blocks cannot be dropped atop other blocks?
 # 2. Right now, there are no wooden plank blocks or dye items instantiated in the problem.

@@ -6,9 +6,8 @@
 	steve - agent
 	old-pointy - diamond-axe
 	; of0 of1 of2 - orchid-flower
-	; wb1 wb2 wb3 wb4 wb5 wb6 wb7 wb8 wb9 wb10 wb11 wb12 wb13 wb14 wb15 wb16 wb17 wb18 wb19 wb20 wb21 wb22 wb23 wb24 wb25 wb26 wb27 wb28 wb29 wb30 - wooden-block
-;	wb0 - wooden-block
-;	wb0 - wooden-block
+	; wb0 wb1 wb2 wb3 wb4 wb5 wb6 wb7 wb8 wb9 wb10 wb11 wb12 wb13 wb14 wb15 wb16 wb17 wb18 wb19 wb20 wb21 wb22 wb23 wb24 wb25 wb26 wb27 wb28 wb29 wb30 - wooden-block
+	wb0 - wooden-block
 ;	woolb1 woolb2 woolb3 - wool-block
 ;	bed1 - bed
 	dmd0 dmd1 dmd2 dmd3 dmd4 - diamond
@@ -20,10 +19,10 @@
 
 (:init
 	(agent-alive steve)
-;	(= (x wb0) 7)
-;	(= (y wb0) 7)
-;	(= (z wb0) 0)
-;	(block-present wb0)
+	(= (x wb0) 7)
+	(= (y wb0) 7)
+	(= (z wb0) 0)
+	(block-present wb0)
 	; (= (x wb1) 6)
 	; (= (y wb1) 7)
 	; (= (z wb1) 0)
@@ -154,7 +153,7 @@
 	( = ( agent-num-blue-dye steve ) 0 )
 	( = ( agent-num-red-dye steve ) 0 )
 	( = ( agent-num-wool-block steve ) 3 )
-;	( = ( block-hits wb0 ) 0 )
+	( = ( block-hits wb0 ) 0 )
 	; ( = ( block-hits wb1 ) 0 )
 	; ( = ( block-hits wb2 ) 0 )
 	; ( = ( block-hits wb3 ) 0 )

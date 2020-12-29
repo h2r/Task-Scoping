@@ -25,13 +25,26 @@ def get_unthreatened_conditions(conditions, effected_pvars):
 	Created as separate function for profiling purposes.
 	"""
 	# Map effected_pvars to str to make equality checking faster
-	effected_pvars = map(str,effected_pvars)
+	effected_pvars_s = [str(x) for x in effected_pvars]
 	causal_links = []
 	for c in conditions:
-		threatened_pvars = [x for x in map(str,get_atoms(c)) if x in effected_pvars]
+		atoms_z3 = get_atoms(c)
+		atoms_s = [str(x) for x in atoms_z3]
+		threatened_pvars = [x for x in atoms_s if x in effected_pvars_s]
 		if len(threatened_pvars) == 0: causal_links.append(c)
 	return causal_links
 
+def get_unthreatened_conditions_slow(conditions, effected_pvars):
+	"""
+	Return list of conditions that are unthreatened by effected_pvars.
+	Created as separate function for profiling purposes.
+	This version keeps z(steve)
+	"""
+	causal_links = []
+	for c in conditions:
+		threatened_pvars = [x for x in get_atoms(c) if x in effected_pvars]
+		if len(threatened_pvars) == 0: causal_links.append(c)
+	return causal_links
 
 def get_causal_links(start_condition, skills):
 	"""
@@ -41,7 +54,12 @@ def get_causal_links(start_condition, skills):
 	"""
 	all_effects = skills2effects(skills)
 	all_effected_pvars = effects2pvars(all_effects)
-	causal_links = get_unthreatened_conditions(start_condition, all_effected_pvars)
+	# causal_links = get_unthreatened_conditions(start_condition, all_effected_pvars)
+	causal_links = get_unthreatened_conditions_slow(start_condition, all_effected_pvars)
+	# causal_links = []
+	# for c in start_condition:
+	# 	threatened_pvars = [x for x in get_atoms(c) if x in all_effected_pvars]
+	# 	if len(threatened_pvars) == 0: causal_links.append(c)
 	return causal_links
 
 def get_causal_links_old(start_condition, skills):

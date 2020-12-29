@@ -379,7 +379,7 @@ def get_unique_z3_vars(args):
     vars = sort_z3_vars(vars)
     return vars
 
-def get_unique_z3_vars_unsorted(args, fast=False):
+def get_unique_z3_vars_unsorted(args, fast=True):
     """
     :param args: List of z3 vars
     :param fast: When True, check for equality based on string equality only

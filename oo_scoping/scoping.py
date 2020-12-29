@@ -138,7 +138,7 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 			print("~~~Pvars Rel~~~")
 			print(pvars_rel)
 
-		print("Done 1 iteration.")
+		print(f"Finished iteration {i}.")
 		# print(pvars_rel)
 		# from IPython import embed; embed()
 		# from IPython.core.debugger import set_trace; set_trace()

@@ -320,7 +320,12 @@
 )
 
 
-(:goal (and (>= (agent-num-wooden-planks steve) 3)(not (block-present wb0))
+(:goal (and 
+                    (= (x bed1) 7)
+                    (= (y bed1) 9)
+                    (= (z bed1) 0)
+                    (= (bed-color bed1) 1)
+            (not (block-present wb0))
                 (block-present wb1)
                 (block-present wb2)
                 (block-present wb3)

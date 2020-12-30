@@ -18,7 +18,9 @@ type_replacements = {
     'iron-ore': 'iron_ore',
     'daisy-flower': 'oxeye_daisy',
     'orchid-flower': 'blue_orchid',
-    'red-tulip': 'red_tulip'
+    'red-tulip': 'red_tulip',
+    'oak-sapling': 'oak',
+    'birch-sapling': 'birch'
 }
 
 with open(f"{domains_dir}/malmo/block_types.txt", "r") as f:
@@ -45,6 +47,8 @@ def draw_block(object_type, x, y, z):
     # return 'x'+index+'="'+x+'" y'+index+'="' +str(y)+'" z'+index+'="'+z+'"'
 def draw_flower(object_type, x, y, z):
     return f'<DrawCuboid x1="{x}" y1="{y}" z1="{z}" x2="{x}" y2="{y}" z2="{z}" type="red_flower" variant="{object_type}"/>'
+def draw_sapling(object_type, x, y, z):
+    return f'<DrawCuboid x1="{x}" y1="{y}" z1="{z}" x2="{x}" y2="{y}" z2="{z}" type="sapling" variant="{object_type}"/>'
 
 def add_decimal(x: int):
     return str(x) + ".0"
@@ -167,6 +171,8 @@ def make_malmo_domain(blocks, items, start_pos, inventory_counts
     for t, positions in items.items():
         if t in ["daisy-flower", "orchid-flower", "oxeye_daisy", "blue_orchid", "red_tulip"]:
             draw_func = draw_flower
+        elif t in ["birch", "oak"]:
+            draw_func = draw_sapling
         else:
             draw_func = draw_item
         for p in positions:

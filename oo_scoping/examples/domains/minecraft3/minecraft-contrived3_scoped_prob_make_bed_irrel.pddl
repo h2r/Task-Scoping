@@ -199,17 +199,17 @@
 )
 
 
-;(:action drop-bed
-; :parameters (?ag - agent ?b - bed)
-; :precondition (and (>= (agent-num-bed ?ag) 1)
-;                    (not (block-present ?b)))
-; :effect (and (block-present ?b)
-;              (assign (x ?b) (x ?ag))
-;              (assign (y ?b) (+ (y ?ag) 1))
-;              (assign (z ?b) (z ?ag))
-;              (decrease (agent-num-bed ?ag) 1)
-;         )
-;)
+(:action drop-bed
+ :parameters (?ag - agent ?b - bed)
+ :precondition (and (>= (agent-num-bed ?ag) 1)
+                    (not (block-present ?b)))
+ :effect (and (block-present ?b)
+              (assign (x ?b) (x ?ag))
+              (assign (y ?b) (+ (y ?ag) 1))
+              (assign (z ?b) (z ?ag))
+              (decrease (agent-num-bed ?ag) 1)
+         )
+)
 
 
 (:action apply-blue-dye
@@ -331,30 +331,30 @@
             )
     )
 
-;(:action hit-bed
-;    :parameters (?ag - agent ?b - bed)
-;    :precondition (and (= (x ?b) (x ?ag))
-;                        (= (y ?b) (+ (y ?ag) 1))
-;                        (= (z ?b) (z ?ag))
-;                        (block-present ?b)
-;                        (< (block-hits ?b) 2)
-;                        ( >= ( agent-num-diamond-axe ?ag ) 1 ))
-;    :effect (and (increase (block-hits ?b) 1))
-;    )
+(:action hit-bed
+    :parameters (?ag - agent ?b - bed)
+    :precondition (and (= (x ?b) (x ?ag))
+                        (= (y ?b) (+ (y ?ag) 1))
+                        (= (z ?b) (z ?ag))
+                        (block-present ?b)
+                        (< (block-hits ?b) 2)
+                        ( >= ( agent-num-diamond-axe ?ag ) 1 ))
+    :effect (and (increase (block-hits ?b) 1))
+    )
 
-;(:action destroy-bed
-;    :parameters (?ag - agent ?b - bed)
-;    :precondition (and (= (x ?b) (x ?ag))
-;                        (= (y ?b) (+ (y ?ag) 1))
-;                        (= (z ?b) (z ?ag))
-;                        (block-present ?b)
-;                        (= (block-hits ?b) 2)
-;                        ( >= ( agent-num-diamond-axe ?ag ) 1 ))
-;    :effect (and (not (block-present ?b))
-;                 (increase (agent-num-bed ?ag) 1)
-;                 (assign (block-hits ?b) 0)
-;            )
-;    )
+(:action destroy-bed
+    :parameters (?ag - agent ?b - bed)
+    :precondition (and (= (x ?b) (x ?ag))
+                        (= (y ?b) (+ (y ?ag) 1))
+                        (= (z ?b) (z ?ag))
+                        (block-present ?b)
+                        (= (block-hits ?b) 2)
+                        ( >= ( agent-num-diamond-axe ?ag ) 1 ))
+    :effect (and (not (block-present ?b))
+                 (increase (agent-num-bed ?ag) 1)
+                 (assign (block-hits ?b) 0)
+            )
+    )
 
 (:action destroy-orchid-flower
     :parameters (?ag - agent ?b - orchid-flower)

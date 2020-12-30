@@ -6,8 +6,8 @@
 	agent item block - locatable
 	bedrock destructible-block - block
 	wooden-block wooden-planks wool-block bed - destructible-block
-	destructible-item diamond stick diamond-axe white-dye blue-dye red-dye - item
-	orchid-flower daisy-flower red-tulip - destructible-item
+	destructible-item diamond stick diamond-axe blue-dye - item
+	orchid-flower oak-sapling birch-sapling - destructible-item
 )
 
 (:predicates
@@ -20,12 +20,10 @@
 	(agent-num-diamond ?ag - agent)
 	(agent-num-stick ?ag - agent)
 	(agent-num-diamond-axe ?ag - agent)
-	(agent-num-white-dye ?ag - agent)
 	(agent-num-blue-dye ?ag - agent)
-	(agent-num-red-dye ?ag - agent)
 	(agent-num-orchid-flower ?ag - agent)
-	(agent-num-daisy-flower ?ag - agent)
-	(agent-num-red-tulip ?ag - agent)
+	(agent-num-oak-sapling ?ag - agent)
+	(agent-num-birch-sapling ?ag - agent)
 	(item-hits ?it - destructible-item)
 	(agent-num-wooden-block ?ag - agent)
 	(agent-num-wooden-planks ?ag - agent)
@@ -112,17 +110,6 @@
 )
 
 
-(:action pickup-white-dye
- :parameters (?ag - agent ?i - white-dye)
- :precondition (and (present ?i)
-                    (= (x ?i) (x ?ag))
-                    (= (y ?i) (y ?ag))
-                    (= (z ?i) (z ?ag)))
- :effect (and (increase (agent-num-white-dye ?ag) 1)
-              (not (present ?i)))
-)
-
-
 (:action pickup-blue-dye
  :parameters (?ag - agent ?i - blue-dye)
  :precondition (and (present ?i)
@@ -130,17 +117,6 @@
                     (= (y ?i) (y ?ag))
                     (= (z ?i) (z ?ag)))
  :effect (and (increase (agent-num-blue-dye ?ag) 1)
-              (not (present ?i)))
-)
-
-
-(:action pickup-red-dye
- :parameters (?ag - agent ?i - red-dye)
- :precondition (and (present ?i)
-                    (= (x ?i) (x ?ag))
-                    (= (y ?i) (y ?ag))
-                    (= (z ?i) (z ?ag)))
- :effect (and (increase (agent-num-red-dye ?ag) 1)
               (not (present ?i)))
 )
 
@@ -171,19 +147,6 @@
 )
 
 
-(:action drop-white-dye
- :parameters (?ag - agent ?i - white-dye)
- :precondition (and (>= (agent-num-white-dye ?ag) 1)
-                    (not (present ?i)))
- :effect (and (present ?i)
-              (assign (x ?i) (x ?ag))
-              (assign (y ?i) (+ (y ?ag) 1))
-              (assign (z ?i) (z ?ag))
-              (decrease (agent-num-white-dye ?ag) 1)
-         )
-)
-
-
 (:action drop-blue-dye
  :parameters (?ag - agent ?i - blue-dye)
  :precondition (and (>= (agent-num-blue-dye ?ag) 1)
@@ -193,19 +156,6 @@
               (assign (y ?i) (+ (y ?ag) 1))
               (assign (z ?i) (z ?ag))
               (decrease (agent-num-blue-dye ?ag) 1)
-         )
-)
-
-
-(:action drop-red-dye
- :parameters (?ag - agent ?i - red-dye)
- :precondition (and (>= (agent-num-red-dye ?ag) 1)
-                    (not (present ?i)))
- :effect (and (present ?i)
-              (assign (x ?i) (x ?ag))
-              (assign (y ?i) (+ (y ?ag) 1))
-              (assign (z ?i) (z ?ag))
-              (decrease (agent-num-red-dye ?ag) 1)
          )
 )
 
@@ -262,46 +212,20 @@
 )
 
 
-(:action apply-white-dye
- :parameters (?ag - agent ?woolb - wool-block)
- :precondition (and (not (block-present ?woolb)) (>= (agent-num-wool-block ?ag) 1) (>= (agent-num-white-dye ?ag) 1))
- :effect (and (decrease (agent-num-white-dye ?ag) 1) (assign (wool-color ?woolb) 0)))
-
 (:action apply-blue-dye
  :parameters (?ag - agent ?woolb - wool-block)
  :precondition (and (not (block-present ?woolb)) (>= (agent-num-wool-block ?ag) 1) (>= (agent-num-blue-dye ?ag) 1))
- :effect (and (decrease (agent-num-blue-dye ?ag) 1) (assign (wool-color ?woolb) 1)))
-
-(:action apply-red-dye
- :parameters (?ag - agent ?woolb - wool-block)
- :precondition (and (not (block-present ?woolb)) (>= (agent-num-wool-block ?ag) 1) (>= (agent-num-red-dye ?ag) 1))
- :effect (and (decrease (agent-num-red-dye ?ag) 1) (assign (wool-color ?woolb) 2)))
+ :effect (and (decrease (agent-num-blue-dye ?ag) 1) (assign (wool-color ?woolb) 0)))
 
 
 
-(:action craft-bed-white-dye
+(:action craft-bed-blue-dye
  :parameters (?ag - agent ?woolb1 - wool-block ?woolb2 - wool-block ?woolb3 - wool-block ?bd - bed)
  :precondition (and (not (block-present ?woolb1)) (not (block-present ?woolb2)) (not (block-present ?woolb3)) 
                 (= (wool-color ?woolb1) 0) (= (wool-color ?woolb2) 0) (= (wool-color ?woolb3) 0) 
                 (not (= ?woolb1 ?woolb2)) (not (= ?woolb1 ?woolb3)) (not (= ?woolb2 ?woolb3))
                 (not (block-present ?bd)) (>= (agent-num-wool-block ?ag) 3) (>= (agent-num-wooden-planks ?ag) 3))
  :effect (and (decrease (agent-num-wooden-planks ?ag) 3) (decrease (agent-num-wool-block ?ag) 3) (increase (agent-num-bed ?ag) 1) (assign (bed-color ?bd) 0)))
-
-(:action craft-bed-blue-dye
- :parameters (?ag - agent ?woolb1 - wool-block ?woolb2 - wool-block ?woolb3 - wool-block ?bd - bed)
- :precondition (and (not (block-present ?woolb1)) (not (block-present ?woolb2)) (not (block-present ?woolb3)) 
-                (= (wool-color ?woolb1) 1) (= (wool-color ?woolb2) 1) (= (wool-color ?woolb3) 1) 
-                (not (= ?woolb1 ?woolb2)) (not (= ?woolb1 ?woolb3)) (not (= ?woolb2 ?woolb3))
-                (not (block-present ?bd)) (>= (agent-num-wool-block ?ag) 3) (>= (agent-num-wooden-planks ?ag) 3))
- :effect (and (decrease (agent-num-wooden-planks ?ag) 3) (decrease (agent-num-wool-block ?ag) 3) (increase (agent-num-bed ?ag) 1) (assign (bed-color ?bd) 1)))
-
-(:action craft-bed-red-dye
- :parameters (?ag - agent ?woolb1 - wool-block ?woolb2 - wool-block ?woolb3 - wool-block ?bd - bed)
- :precondition (and (not (block-present ?woolb1)) (not (block-present ?woolb2)) (not (block-present ?woolb3)) 
-                (= (wool-color ?woolb1) 2) (= (wool-color ?woolb2) 2) (= (wool-color ?woolb3) 2) 
-                (not (= ?woolb1 ?woolb2)) (not (= ?woolb1 ?woolb3)) (not (= ?woolb2 ?woolb3))
-                (not (block-present ?bd)) (>= (agent-num-wool-block ?ag) 3) (>= (agent-num-wooden-planks ?ag) 3))
- :effect (and (decrease (agent-num-wooden-planks ?ag) 3) (decrease (agent-num-wool-block ?ag) 3) (increase (agent-num-bed ?ag) 1) (assign (bed-color ?bd) 2)))
 
 
 
@@ -322,16 +246,6 @@
  :precondition (and (not (block-present ?wb)) (>= (agent-num-wooden-block ?ag) 1) )
  :effect (and (decrease (agent-num-wooden-block ?ag) 1) (increase (agent-num-wooden-planks ?ag) 4)))
 
-(:action craft-red-dye
-    :parameters ( ?ag - agent )
-    :precondition ( and
-                      ( >= (agent-num-red-tulip ?ag) 1 )
-                  )
-    :effect (and (increase (agent-num-red-dye ?ag) 1)
-        (decrease (agent-num-red-tulip ?ag) 1))
-
-)
-
 (:action craft-blue-dye
     :parameters ( ?ag - agent )
     :precondition ( and
@@ -339,16 +253,6 @@
                   )
     :effect (and (increase (agent-num-blue-dye ?ag) 1)
         (decrease (agent-num-orchid-flower ?ag) 1))
-
-)
-
-(:action craft-white-dye
-    :parameters ( ?ag - agent )
-    :precondition ( and
-                      ( >= (agent-num-daisy-flower ?ag) 1 )
-                  )
-    :effect (and (increase (agent-num-white-dye ?ag) 1)
-        (decrease (agent-num-daisy-flower ?ag) 1))
 
 )
 
@@ -465,28 +369,28 @@
             )
     )
 
-(:action destroy-daisy-flower
-    :parameters (?ag - agent ?b - daisy-flower)
+(:action destroy-oak-sapling
+    :parameters (?ag - agent ?b - oak-sapling)
     :precondition (and (= (x ?b) (x ?ag))
                         (= (y ?b) (+ (y ?ag) 1))
                         (= (z ?b) (z ?ag))
                         (present ?b)
                         (= (item-hits ?b) 0))
     :effect (and (not (present ?b))
-                 (increase (agent-num-daisy-flower ?ag) 1)
+                 (increase (agent-num-oak-sapling ?ag) 1)
                  (assign (item-hits ?b) 0)
             )
     )
 
-(:action destroy-red-tulip
-    :parameters (?ag - agent ?b - red-tulip)
+(:action destroy-birch-sapling
+    :parameters (?ag - agent ?b - birch-sapling)
     :precondition (and (= (x ?b) (x ?ag))
                         (= (y ?b) (+ (y ?ag) 1))
                         (= (z ?b) (z ?ag))
                         (present ?b)
                         (= (item-hits ?b) 0))
     :effect (and (not (present ?b))
-                 (increase (agent-num-red-tulip ?ag) 1)
+                 (increase (agent-num-birch-sapling ?ag) 1)
                  (assign (item-hits ?b) 0)
             )
     )

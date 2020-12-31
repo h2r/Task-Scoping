@@ -62,8 +62,8 @@ def get_unlinked_pvars(skills, causal_links, dummy_goal, solver):
 		for prec in split_conj(s.precondition):
 			if not solver_implies_condition(solver, prec):
 				pvars_rel_new.extend(get_atoms(prec))
-			# if(s.action == "turn_on_greenbutton"):
-			# 	from IPython import embed; embed()
+				# if("destroy-wooden-block" == s.action):
+				# 	from IPython import embed; embed()
 
 		# from IPython import embed; embed()
 
@@ -133,13 +133,16 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 		print("Got new causal links!!!")
 		# Get pvars not guaranteed by causal links
 		pvars_rel_new = get_unlinked_pvars(skills_rel, causal_links, dummy_goal, solver)
-		# Debug
-		if "z(steve)" in map(str, pvars_rel_new):
-			stevewashere = True
-		else:
-			if stevewashere:
-				print("Steve vanished!")
-				print("\n".join(map(str,pvars_rel_new)))
+
+		# from IPython import embed; embed()
+
+		# # Debug
+		# if "z(steve)" in map(str, pvars_rel_new):
+		# 	stevewashere = True
+		# else:
+		# 	if stevewashere:
+		# 		print("Steve vanished!")
+		# 		print("\n".join(map(str,pvars_rel_new)))
 		# Check convergence
 		converged = (pvars_rel == pvars_rel_new)
 

@@ -77,37 +77,37 @@
     :effect (and (decrease (x ?ag) 1))
 )
 
-(:action pickup-diamond
- :parameters (?ag - agent ?i - diamond)
- :precondition (and (present ?i)
-                    (= (x ?i) (x ?ag))
-                    (= (y ?i) (y ?ag))
-                    (= (z ?i) (z ?ag)))
- :effect (and (increase (agent-num-diamond ?ag) 1)
-              (not (present ?i)))
-)
+;(:action pickup-diamond
+; :parameters (?ag - agent ?i - diamond)
+; :precondition (and (present ?i)
+;                    (= (x ?i) (x ?ag))
+;                    (= (y ?i) (y ?ag))
+;                    (= (z ?i) (z ?ag)))
+; :effect (and (increase (agent-num-diamond ?ag) 1)
+;              (not (present ?i)))
+;)
 
 
-(:action pickup-stick
- :parameters (?ag - agent ?i - stick)
- :precondition (and (present ?i)
-                    (= (x ?i) (x ?ag))
-                    (= (y ?i) (y ?ag))
-                    (= (z ?i) (z ?ag)))
- :effect (and (increase (agent-num-stick ?ag) 1)
-              (not (present ?i)))
-)
+;(:action pickup-stick
+; :parameters (?ag - agent ?i - stick)
+; :precondition (and (present ?i)
+;                    (= (x ?i) (x ?ag))
+;                    (= (y ?i) (y ?ag))
+;                    (= (z ?i) (z ?ag)))
+; :effect (and (increase (agent-num-stick ?ag) 1)
+;              (not (present ?i)))
+;)
 
 
-(:action pickup-diamond-axe
- :parameters (?ag - agent ?i - diamond-axe)
- :precondition (and (present ?i)
-                    (= (x ?i) (x ?ag))
-                    (= (y ?i) (y ?ag))
-                    (= (z ?i) (z ?ag)))
- :effect (and (increase (agent-num-diamond-axe ?ag) 1)
-              (not (present ?i)))
-)
+;(:action pickup-diamond-axe
+; :parameters (?ag - agent ?i - diamond-axe)
+; :precondition (and (present ?i)
+;                    (= (x ?i) (x ?ag))
+;                    (= (y ?i) (y ?ag))
+;                    (= (z ?i) (z ?ag)))
+; :effect (and (increase (agent-num-diamond-axe ?ag) 1)
+;              (not (present ?i)))
+;)
 
 
 ;(:action pickup-blue-dye
@@ -121,30 +121,30 @@
 ;)
 
 
-(:action drop-diamond
- :parameters (?ag - agent ?i - diamond)
- :precondition (and (>= (agent-num-diamond ?ag) 1)
-                    (not (present ?i)))
- :effect (and (present ?i)
-              (assign (x ?i) (x ?ag))
-              (assign (y ?i) (+ (y ?ag) 1))
-              (assign (z ?i) (z ?ag))
-              (decrease (agent-num-diamond ?ag) 1)
-         )
-)
+;(:action drop-diamond
+; :parameters (?ag - agent ?i - diamond)
+; :precondition (and (>= (agent-num-diamond ?ag) 1)
+;                    (not (present ?i)))
+; :effect (and (present ?i)
+;              (assign (x ?i) (x ?ag))
+;              (assign (y ?i) (+ (y ?ag) 1))
+;              (assign (z ?i) (z ?ag))
+;              (decrease (agent-num-diamond ?ag) 1)
+;         )
+;)
 
 
-(:action drop-stick
- :parameters (?ag - agent ?i - stick)
- :precondition (and (>= (agent-num-stick ?ag) 1)
-                    (not (present ?i)))
- :effect (and (present ?i)
-              (assign (x ?i) (x ?ag))
-              (assign (y ?i) (+ (y ?ag) 1))
-              (assign (z ?i) (z ?ag))
-              (decrease (agent-num-stick ?ag) 1)
-         )
-)
+;(:action drop-stick
+; :parameters (?ag - agent ?i - stick)
+; :precondition (and (>= (agent-num-stick ?ag) 1)
+;                    (not (present ?i)))
+; :effect (and (present ?i)
+;              (assign (x ?i) (x ?ag))
+;              (assign (y ?i) (+ (y ?ag) 1))
+;              (assign (z ?i) (z ?ag))
+;              (decrease (agent-num-stick ?ag) 1)
+;         )
+;)
 
 
 ;(:action drop-blue-dye
@@ -199,17 +199,17 @@
 )
 
 
-;(:action drop-bed
-; :parameters (?ag - agent ?b - bed)
-; :precondition (and (>= (agent-num-bed ?ag) 1)
-;                    (not (block-present ?b)))
-; :effect (and (block-present ?b)
-;              (assign (x ?b) (x ?ag))
-;              (assign (y ?b) (+ (y ?ag) 1))
-;              (assign (z ?b) (z ?ag))
-;              (decrease (agent-num-bed ?ag) 1)
-;         )
-;)
+(:action drop-bed
+ :parameters (?ag - agent ?b - bed)
+ :precondition (and (>= (agent-num-bed ?ag) 1)
+                    (not (block-present ?b)))
+ :effect (and (block-present ?b)
+              (assign (x ?b) (x ?ag))
+              (assign (y ?b) (+ (y ?ag) 1))
+              (assign (z ?b) (z ?ag))
+              (decrease (agent-num-bed ?ag) 1)
+         )
+)
 
 
 (:action apply-blue-dye
@@ -229,17 +229,17 @@
 
 
 
-(:action craft-diamond-axe
-    :parameters ( ?ag - agent )
-    :precondition ( and
-                      ( >= (agent-num-stick ?ag) 2 )
-                      ( >= (agent-num-diamond ?ag) 3 )
-                  )
-    :effect (and (increase (agent-num-diamond-axe ?ag) 1)
-        (decrease (agent-num-stick ?ag) 2)
-        (decrease (agent-num-diamond ?ag) 3))
-
-)
+;(:action craft-diamond-axe
+;    :parameters ( ?ag - agent )
+;    :precondition ( and
+;                      ( >= (agent-num-stick ?ag) 2 )
+;                      ( >= (agent-num-diamond ?ag) 3 )
+;                  )
+;    :effect (and (increase (agent-num-diamond-axe ?ag) 1)
+;        (decrease (agent-num-stick ?ag) 2)
+;        (decrease (agent-num-diamond ?ag) 3))
+;
+;)
 
 (:action craft-wooden-planks
  :parameters (?ag - agent ?wb - wooden-block)
@@ -331,30 +331,30 @@
             )
     )
 
-;(:action hit-bed
-;    :parameters (?ag - agent ?b - bed)
-;    :precondition (and (= (x ?b) (x ?ag))
-;                        (= (y ?b) (+ (y ?ag) 1))
-;                        (= (z ?b) (z ?ag))
-;                        (block-present ?b)
-;                        (< (block-hits ?b) 2)
-;                        ( >= ( agent-num-diamond-axe ?ag ) 1 ))
-;    :effect (and (increase (block-hits ?b) 1))
-;    )
+(:action hit-bed
+    :parameters (?ag - agent ?b - bed)
+    :precondition (and (= (x ?b) (x ?ag))
+                        (= (y ?b) (+ (y ?ag) 1))
+                        (= (z ?b) (z ?ag))
+                        (block-present ?b)
+                        (< (block-hits ?b) 2)
+                        ( >= ( agent-num-diamond-axe ?ag ) 1 ))
+    :effect (and (increase (block-hits ?b) 1))
+    )
 
-;(:action destroy-bed
-;    :parameters (?ag - agent ?b - bed)
-;    :precondition (and (= (x ?b) (x ?ag))
-;                        (= (y ?b) (+ (y ?ag) 1))
-;                        (= (z ?b) (z ?ag))
-;                        (block-present ?b)
-;                        (= (block-hits ?b) 2)
-;                        ( >= ( agent-num-diamond-axe ?ag ) 1 ))
-;    :effect (and (not (block-present ?b))
-;                 (increase (agent-num-bed ?ag) 1)
-;                 (assign (block-hits ?b) 0)
-;            )
-;    )
+(:action destroy-bed
+    :parameters (?ag - agent ?b - bed)
+    :precondition (and (= (x ?b) (x ?ag))
+                        (= (y ?b) (+ (y ?ag) 1))
+                        (= (z ?b) (z ?ag))
+                        (block-present ?b)
+                        (= (block-hits ?b) 2)
+                        ( >= ( agent-num-diamond-axe ?ag ) 1 ))
+    :effect (and (not (block-present ?b))
+                 (increase (agent-num-bed ?ag) 1)
+                 (assign (block-hits ?b) 0)
+            )
+    )
 
 (:action destroy-orchid-flower
     :parameters (?ag - agent ?b - orchid-flower)

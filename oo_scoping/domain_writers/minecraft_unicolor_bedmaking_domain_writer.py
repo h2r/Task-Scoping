@@ -418,9 +418,8 @@ def make_instance(start_with_pick = True, use_bedrock_boundaries = False, add_ir
     object_names["agent"] = ["steve"]
     object_names["diamond-axe"] = ["old-pointy"]
     object_names["orchid-flower"] = ["of0","of1","of2"]
-    object_names["wooden-block"] = ["wb0","wb1","wb2","wb3","wb4","wb5","wb6","wb7",
-                                    "wb8","wb9"]
-    object_names["wool-block"] = ["woolb1", "woolb2","woolb3"]
+    object_names["wooden-block"] = ["wb0","wb1"]
+    object_names["wool-block"] = ["woolb1", "woolb2","woolb3","woolb4"]
     object_names["bed"] = ["bed1"]
     if add_irrel_items:
         object_names["diamond"] = ["dmd0","dmd1","dmd2","dmd3","dmd4",]
@@ -434,12 +433,19 @@ def make_instance(start_with_pick = True, use_bedrock_boundaries = False, add_ir
     # The first block is the only non-house block that will be needed to craft
     # wooden planks
     block_locations = OrderedDict()
-    block_locations["wooden-block"] = [  (7,7,0),#(2,7,0),
-                                        (6,7,0), (8,7,0),
-                                        (5,8,0), (9,8,0),
-                                        (5,9,0), (9,9,0),
-                                        (6,10,0),(7,11,0),(8,10,0),
-                                        ]
+    # block_locations["wooden-block"] = [  (7,7,0),#(2,7,0),
+    #                                     (6,7,0), (8,7,0),
+    #                                     (5,8,0), (9,8,0),
+    #                                     (5,9,0), (9,9,0),
+    #                                     (6,10,0),(7,11,0),(8,10,0),
+    #                                     ]
+    # block_locations["wooden-block"] = [  (7,7,0),#(2,7,0),
+    #                                     (6,7,0), (8,7,0),
+    #                                     (6,8,0), (8,8,0),
+    #                                     (6,9,0), (7,9,0), (8,9,0)]
+    block_locations["wooden-block"] = [(7,7,0),
+                                       (7,8,0)]
+    
     # Start of setting up of initial conditions
     init_conds = [f"(agent-alive {agent_name})"]
 

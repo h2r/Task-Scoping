@@ -6,8 +6,8 @@
 	steve - agent
 	old-pointy - diamond-axe
 	of0 of1 of2 - orchid-flower
-	wb0 wb1 wb2 wb3 wb4 wb5 wb6 wb7 wb8 wb9 - wooden-block
-	woolb1 woolb2 woolb3 - wool-block
+	wb0 wb1 - wooden-block
+	woolb1 woolb2 woolb3 woolb4 - wool-block
 	bed1 - bed
 	dmd0 dmd1 dmd2 dmd3 dmd4 - diamond
 	stick0 stick1 stick2 stick3 stick4 - stick
@@ -22,42 +22,10 @@
 	(= (y wb0) 7)
 	(= (z wb0) 0)
 	(block-present wb0)
-	(= (x wb1) 6)
-	(= (y wb1) 7)
+	(= (x wb1) 7)
+	(= (y wb1) 8)
 	(= (z wb1) 0)
 	(block-present wb1)
-	(= (x wb2) 8)
-	(= (y wb2) 7)
-	(= (z wb2) 0)
-	(block-present wb2)
-	(= (x wb3) 5)
-	(= (y wb3) 8)
-	(= (z wb3) 0)
-	(block-present wb3)
-	(= (x wb4) 9)
-	(= (y wb4) 8)
-	(= (z wb4) 0)
-	(block-present wb4)
-	(= (x wb5) 5)
-	(= (y wb5) 9)
-	(= (z wb5) 0)
-	(block-present wb5)
-	(= (x wb6) 9)
-	(= (y wb6) 9)
-	(= (z wb6) 0)
-	(block-present wb6)
-	(= (x wb7) 6)
-	(= (y wb7) 10)
-	(= (z wb7) 0)
-	(block-present wb7)
-	(= (x wb8) 7)
-	(= (y wb8) 11)
-	(= (z wb8) 0)
-	(block-present wb8)
-	(= (x wb9) 8)
-	(= (y wb9) 10)
-	(= (z wb9) 0)
-	(block-present wb9)
 	(= (x steve) 7)
 	(= (y steve) 1)
 	(= (z steve) 0)
@@ -68,14 +36,6 @@
 	( = ( agent-num-wool-block steve ) 3 )
 	( = ( block-hits wb0 ) 0 )
 	( = ( block-hits wb1 ) 0 )
-	( = ( block-hits wb2 ) 0 )
-	( = ( block-hits wb3 ) 0 )
-	( = ( block-hits wb4 ) 0 )
-	( = ( block-hits wb5 ) 0 )
-	( = ( block-hits wb6 ) 0 )
-	( = ( block-hits wb7 ) 0 )
-	( = ( block-hits wb8 ) 0 )
-	( = ( block-hits wb9 ) 0 )
 	(= (agent-num-wooden-block steve) 0)
 	(= (agent-num-wooden-planks steve) 0)
 	( = ( block-hits woolb1 ) 0 )
@@ -87,6 +47,9 @@
 	( = ( block-hits woolb3 ) 0 )
 	(not (block-present woolb3))
 	( = ( wool-color woolb3 ) 1 )
+	( = ( block-hits woolb4 ) 0 )
+	(not (block-present woolb4))
+	( = ( wool-color woolb4 ) 1 )
 	(= (agent-num-wool-block steve) 3)
 	(= (x bed1) 0)
 	(= (y bed1) 0)
@@ -321,15 +284,7 @@
 
 
 (:goal (and (>= (agent-num-wooden-planks steve) 3)(not (block-present wb0))
-                (block-present wb1)
-                (block-present wb2)
-                (block-present wb3)
-                (block-present wb4)
-                (block-present wb5)
-                (block-present wb6)
-                (block-present wb7)
-                (block-present wb8)
-                (block-present wb9))
+                (block-present wb1))
 )
 
 

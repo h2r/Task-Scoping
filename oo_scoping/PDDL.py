@@ -8,7 +8,7 @@ from oo_scoping.action import Action
 import copy
 from oo_scoping.utils import product_dict, nested_list_replace
 from typing import Dict
-# TODO CAN WE HANDLE OBJECTS DEFINED ON MULTIPLE LINES?
+
 class PDDL_Parser:
     # TODO convert type hierarchy to ordered dict (parent: [children])
 

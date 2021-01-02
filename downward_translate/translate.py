@@ -700,6 +700,10 @@ def main():
                     del action.effects[index]
 
     sas_task = pddl_to_sas(task)
+
+    # Cycle Gap in which to perform Scoping!
+    from IPython import embed; embed()
+
     dump_statistics(sas_task)
 
     with timers.timing("Writing output"):

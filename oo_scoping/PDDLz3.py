@@ -47,7 +47,7 @@ class PDDL_Parser_z3(PDDL_Parser):
         # print("Got action groundings")
         skill_list = self.str_grounded_actions2skills(str_grounded_actions, str2var_dict)
         # print("Got skill list")
-        from IPython import embed; embed()
+        # from IPython import embed; embed()
         return skill_list
     def get_goal_cond(self):
         str2var_dict = self.make_str2var_dict()

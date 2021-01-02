@@ -20,20 +20,8 @@
 (define (domain multi_monkeys_playroom_strips)
 (:requirements :typing :negative-preconditions :universal-preconditions)
 
-(:types ball bell redbutton greenbutton lightswitch monkey x-loc y-loc color - object)
-(:predicates (rbutton-on ?rb - redbutton)
-             (gbutton-on ?gb - greenbutton)
-             (light-on ?lt - lightswitch)
-             (monkey-screaming ?mo - monkey)
-             (monkey-watching-bell ?mo - monkey ?be - bell)
-             (monkey-watching-lights ?mo - monkey ?ls - lightswitch)
-             (connected-buttons ?rb - redbutton ?gb - greenbutton)
-             
-             (rbutton-x ?rb - redbutton ?xl - x-loc)
-             (rbutton-y ?rb - redbutton ?yl - y-loc)
-
-             (gbutton-x ?gb - greenbutton ?xl - x-loc)
-             (gbutton-y ?gb - greenbutton ?yl - y-loc)
+(:types lightswitch x-loc y-loc color - object)
+(:predicates (light-on ?lt - lightswitch) 
 
              (lightswitch-x ?ls - lightswitch ?xl - x-loc)
              (lightswitch-y ?ls - lightswitch ?yl - y-loc)
@@ -45,19 +33,10 @@
              (hand-x ?xl - x-loc)
              (hand-y ?yl - y-loc)
 
-             (marker-x ?ma - marker)
-             (marker-y ?ma - marker)
-
-             (ball-x ?ba - ball)
-             (ball-y ?ba - ball)
-
-             (bell-x ?be - bell)
-             (bell-y ?be - bell)
-
              (adjacent-x ?x1 ?x2 - xloc)
              (adjacent-y ?y1 ?y2 - yloc)
 
-             )
+)
 
 
 ; Movement actions for the eye
@@ -100,28 +79,6 @@
          )
 )
 
-; Movement actions for the marker
-; (:action move-north-marker
-;  :parameters (?ma - marker)
-;  :precondition ()
-;  :effect (and (increase (marker-y ?ma) 1))
-; )
-; (:action move-south-marker
-;  :parameters (?ma - marker)
-;  :precondition ()
-;  :effect (and (decrease (marker-y ?ma) 1))
-; )
-; (:action move-east-marker
-;  :parameters (?ma - marker)
-;  :precondition ()
-;  :effect (and (increase (marker-x ?ma) 1))
-; )
-; (:action move-west-marker
-;  :parameters (?ma - marker)
-;  :precondition ()
-;  :effect (and (decrease (marker-x ?ma) 1))
-; )
-
 ; Turn on and off lights
 (:action turn_on_light
  :parameters (?ls - lightswitch ?xl - x-loc ?yl - y-loc)
@@ -146,49 +103,7 @@
  :effect (not (light-on ?ls))
 )
 
-; Toggle red and green buttons
-(:action turn_on_redbutton
- :parameters (?rb - redbutton ?gb - greenbutton ?xl - x-loc ?yl - y-loc)
- :precondition (and (forall (?ls - lightswitch) (light-on ?ls) )
-                    (rbutton-x ?rb ?xl)
-                    (rbutton-y ?rb ?yl)
-                    (hand-x ?xl)
-                    (hand-y ?yl)
-                    (eye-x ?xl)
-                    (eye-y ?yl)
-                    (connected-buttons ?rb ?gb)
-                    (not (rbutton-on ?rb))
-                    (gbutton-on ?gb))
- :effect (and (rbutton-on ?rb)
-              (not (gbutton-on ?gb)))
-)
-(:action turn_on_greenbutton
- :parameters (?rb - redbutton ?gb - greenbutton ?xl - x-loc ?yl - y-loc)
- :precondition (and (forall (?ls - lightswitch) (light-on ?ls) )
-                    (gbutton-x ?rb ?xl)
-                    (gbutton-y ?rb ?yl)
-                    (hand-x ?xl)
-                    (hand-y ?yl)
-                    (eye-x ?xl)
-                    (eye-y ?yl)
-                    (connected-buttons ?rb ?gb)
-                    (not (gbutton-on ?rb))
-                    (rbutton-on ?gb))
- :effect (and (gbutton-on ?rb)
-              (not (rbutton-on ?gb)))
-)
 
-; Random irrelevant actions
-(:action poke_monkey
- :parameters (?mo - monkey ?ls - lightswitch ?xl - x-loc ?yl - y-loc)
- :precondition (and (lightswitch-x ?ls ?xl)
-                    (lightswitch-y ?ls ?yl)
-                    (light-on ?ls)
-                    (monkey-watching-lights ?mo ?ls)
-                    (not (monkey-screaming ?mo))
-               )
- :effect (monkey-screaming ?mo)
-)
 (:action change_light_color
  :parameters (?ls - lightswitch ?currco - color ?nextco - color)
  :precondition (lightswitch-color ?ls ?currco)
@@ -196,33 +111,5 @@
               (not (lightswitch-color ?ls ?currco))
          )
 )
-
-; Throw balls
-; (:action throw_ball_miss_bell
-;     :parameters (?ba - ball ?ma - marker ?be - bell)
-;     :precondition (and (forall (?gb - greenbutton) (gbutton-on ?gb))
-;                        (= (eye-x ?e) (ball-x ?ba))
-;                        (= (eye-y ?e) (ball-y ?ba))
-;                        (= (hand-x ?ha) (ball-x ?ba))
-;                        (= (hand-y ?ha) (ball-y ?ba))
-;                        (not (= (marker-x ?ma) (bell-x ?be)))
-;                        (not (= (marker-y ?ma) (bell-y ?be))))
-;     :effect (and (assign (ball-x ?ba) (marker-x ?ma))
-;                  (assign (ball-y ?ba) (marker-y ?ma)))
-; )
-; (:action throw_ball_hit_bell
-; :parameters (?ba - ball ?e - eye ?ha - hand ?ma - marker ?be - bell ?mo - monkey)
-; :precondition (and (forall (?gb - greenbutton) (gbutton-on ?gb))
-;                     (= (eye-x ?e) (ball-x ?ba))
-;                     (= (eye-y ?e) (ball-y ?ba))
-;                     (= (hand-x ?ha) (ball-x ?ba))
-;                     (= (hand-y ?ha) (ball-y ?ba))
-;                     (= (marker-x ?ma) (bell-x ?be))
-;                     (= (marker-y ?ma) (bell-y ?be))
-;                     (monkey-watching-bell ?mo ?be))
-; :effect (and (assign (ball-x ?ba) (marker-x ?ma))
-;              (assign (ball-y ?ba) (marker-y ?ma))
-;              (monkey-screaming ?mo))
-; )
 
 )

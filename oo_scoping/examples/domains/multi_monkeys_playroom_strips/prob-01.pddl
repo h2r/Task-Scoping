@@ -1,11 +1,11 @@
 (define (problem MULTIMONKEY-01)
 (:domain multi_monkeys_playroom_strips)
 (:objects
-	jack - monkey
-    bell1 - bell
-    ball1 - ball
-    rb1 - redbutton
-    gb1 - greenbutton
+	; jack - monkey
+    ; bell1 - bell
+    ; ball1 - ball
+    ; rb1 - redbutton
+    ; gb1 - greenbutton
     ls1 ls2 ls3 - lightswitch
     x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 - x-loc
     y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 - y-loc
@@ -76,17 +76,17 @@
     (lightswitch-color ls3 green)
 
     ; red and green buttons initial conditions
-    (rbutton-x rb1 x3)
-    (rbutton-y rb1 y3)
-    (gbutton-x gb1 x3)
-    (gbutton-y gb1 y4)
-    (not (gbutton-on gb1))
-    (rbutton-on rb1)
-    (connected-buttons rb1 gb1)
+    ; (rbutton-x rb1 x3)
+    ; (rbutton-y rb1 y3)
+    ; (gbutton-x gb1 x3)
+    ; (gbutton-y gb1 y4)
+    ; (not (gbutton-on gb1))
+    ; (rbutton-on rb1)
+    ; (connected-buttons rb1 gb1)
 
-    ; monkey initial conditions
-    (not (monkey-screaming jack))
-    (monkey-watching-lights jack ls1)
+    ; ; monkey initial conditions
+    ; (not (monkey-screaming jack))
+    ; (monkey-watching-lights jack ls1)
 
 )
 

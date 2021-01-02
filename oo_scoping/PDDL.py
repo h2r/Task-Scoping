@@ -113,7 +113,7 @@ class PDDL_Parser:
                 elif t == ':types':
                     # self.types = group
                     # This parser does the right thing when passed the entires types string
-                    # The token scanner with types doens't currenlty work, so for now we just set types to the
+                    # The token scanner with types doens't currently work, so for now we just set types to the
                     # group list
                     # self.parse_types(group)
                     self.domain2types(domain_filename)

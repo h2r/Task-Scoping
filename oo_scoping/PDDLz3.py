@@ -16,23 +16,18 @@ class PDDL_Parser_z3(PDDL_Parser):
             str2var = OrderedDict()
         for p_name, p_args in things_dict.items():
             groundings = product_dict(**OrderedDict([(varnm, self.get_objects_of_type(vartype)) for (varnm, vartype) in p_args.items()]))
-            # if("located-at" in p_name):
-            #     from IPython import embed; embed()
             for x in groundings:
                 s = p_name + "(" + ", ".join(x.values()) + ")"
                 grounded_predicate = z3_class(s)
                 assert s not in str2var.keys(), f"{s}: {str2var[s]}, {grounded_predicate}"
                 str2var[s] = grounded_predicate
         return str2var
-
     # TODO make this a property?
     def make_str2var_dict(self):
         str2var_dict = OrderedDict()
         str2var_dict = self.make_z3_atoms(self.predicates, z3.Bool, str2var_dict)
         str2var_dict = self.make_z3_atoms(self.functions, z3.Int, str2var_dict)
-        # from IPython import embed; embed()
         return str2var_dict
-
     def str_grounded_actions2skills(self, str_grounded_actions, str2var_dict):
         skill_list = []
         for action_class in str_grounded_actions:
@@ -52,6 +47,7 @@ class PDDL_Parser_z3(PDDL_Parser):
         # print("Got action groundings")
         skill_list = self.str_grounded_actions2skills(str_grounded_actions, str2var_dict)
         # print("Got skill list")
+        from IPython import embed; embed()
         return skill_list
     def get_goal_cond(self):
         str2var_dict = self.make_str2var_dict()

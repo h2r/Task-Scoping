@@ -10,3 +10,4 @@ __pycache__/
 .ipynb_checkpoints
 *.py[cod]
 oo_scoping.egg-info
+*.sas

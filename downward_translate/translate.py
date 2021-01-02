@@ -701,7 +701,7 @@ def main():
 
     sas_task = pddl_to_sas(task)
 
-    # Cycle Gap in which to perform Scoping!
+    # TODO: This is where we should call functions from scoping_sas_parser!
     from IPython import embed; embed()
 
     dump_statistics(sas_task)

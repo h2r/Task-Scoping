@@ -30,6 +30,8 @@ import timers
 import tools
 import variable_order
 
+import scoping_sas_parser
+
 # TODO: The translator may generate trivial derived variables which are always
 # true, for example if there ia a derived predicate in the input that only
 # depends on (non-derived) variables which are detected as always true.
@@ -702,6 +704,8 @@ def main():
     sas_task = pddl_to_sas(task)
 
     # TODO: This is where we should call functions from scoping_sas_parser!
+    str2var_dict = scoping_sas_parser.make_str2var_dict(sas_task.variables)
+    str_grounded_action_list = scoping_sas_parser.make_str_grounded_actions(sas_task.operators)
     from IPython import embed; embed()
 
     dump_statistics(sas_task)

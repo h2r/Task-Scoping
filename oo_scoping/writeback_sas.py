@@ -1,6 +1,3 @@
-import re, os, copy
-
-
 # TODO! Prune the initial and goal condition sections!!!!
 # Right now, you've just pruned the variable definitions and 
 # operator sections...

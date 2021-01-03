@@ -4,8 +4,11 @@ from PDDLz3 import PDDL_Parser_z3
 from collections import OrderedDict
 from typing import List, Tuple, Dict, Iterable
 from skill_classes import EffectTypePDDL, SkillPDDL
-from utils import product_dict, nested_list_replace, get_atoms, get_all_objects, condition_str2objects, writeback_problem, get_scoped_problem_path
+from utils import product_dict, nested_list_replace, get_atoms, get_all_objects, condition_str2objects
+from writeback_pddl import writeback_problem, get_scoped_problem_path
 from scoping import scope
+
+#TODO: Refactor to match library format?
 
 if __name__ == '__main__':
     # zeno_dom = "domains/zeno/zeno.pddl"

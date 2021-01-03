@@ -43,7 +43,7 @@ def make_str2var_dict(sas_vars):
     #         from IPython import embed; embed()
     #         exit(1)
         z3_func = z3.Int
-        var_str = "v"+str(i)+'()'
+        var_str = "var"+str(i)+'()'
         z3_var = z3_func(var_str)
         str2var[var_str] = z3_var
 
@@ -66,7 +66,7 @@ def make_str_grounded_actions(sas_ops):
         action_precond_list = []
         for precond in op_precond_list:
             var_num, var_val = precond
-            action_precond_list.append(['=',['v'+str(var_num)], str(var_val)])
+            action_precond_list.append(['=',['var'+str(var_num)], str(var_val)])
         # Next, extract the effect
         pre_post_conds_list = op.pre_post
         action_effect_list = []
@@ -78,7 +78,7 @@ def make_str_grounded_actions(sas_ops):
                 from IPython import embed; embed()
                 exit(1)
             else:
-                action_effect_list.append(['assign',['v'+str(var_num)], str(var_val)])
+                action_effect_list.append(['assign',['var'+str(var_num)], str(var_val)])
         # Finally construct an Action and append it to the list to be returned
         list_of_actions.append(Action(op.name,[],action_precond_list,[],action_effect_list,[]))
     return list_of_actions
@@ -96,7 +96,7 @@ def make_init_cond_list(sas_init_vals, str2var_dict):
     """
     str_init_cond_list = []
     for i in range(len(sas_init_vals)):
-        str_init_cond_list.append(['=', ['v'+str(i)], str(sas_init_vals[i])])
+        str_init_cond_list.append(['=', ['var'+str(i)], str(sas_init_vals[i])])
     z3_init_conds = [compile_expression(init_cond, str2var_dict) for init_cond in str_init_cond_list]
     return z3_init_conds
 
@@ -112,7 +112,7 @@ def make_goal_cond(sas_goal_pairs, str2var_dict):
     str_goal_list = []
     for goal_cond in sas_goal_pairs:
         var_num, var_val = goal_cond
-        str_goal_list.append(['=', ['v'+str(var_num)], str(var_val)])
+        str_goal_list.append(['=', ['var'+str(var_num)], str(var_val)])
     goal_cond_list = [compile_expression(goal_cond_str, str2var_dict) for goal_cond_str in str_goal_list]
     goal_cond = z3.And(*goal_cond_list)
     return goal_cond

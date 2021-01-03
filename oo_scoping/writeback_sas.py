@@ -1,6 +1,3 @@
-# TODO! Prune the initial and goal condition sections!!!!
-# Right now, you've just pruned the variable definitions and 
-# operator sections...
 def writeback_scoped_sas(rel_ops, rel_pvars, problem_file_path):
     """
     Function that writes out a scoped SAS+ problem file
@@ -14,6 +11,9 @@ def writeback_scoped_sas(rel_ops, rel_pvars, problem_file_path):
     """
     scoped_domain_lines = []
     skip_lines = False
+    inside_init_state = False
+    lines_inside_init_state_counter = 0
+    inside_goal_conds = False
     with open(problem_file_path, "r") as f:
         sas_domain_lines = f.readlines()
         i_line = 0
@@ -52,6 +52,36 @@ def writeback_scoped_sas(rel_ops, rel_pvars, problem_file_path):
                 # from the next line onwards
                 skip_lines = False
                 i_line += 1
+            elif "begin_state" in sas_domain_lines[i_line]:
+                # If you see 'begin_state', then set the inside_init_state bool flag to True
+                inside_init_state = True
+                scoped_domain_lines.append(sas_domain_lines[i_line])
+                i_line += 1
+            elif inside_init_state and "end_state" not in sas_domain_lines[i_line]:
+                # Once inside the init state, delete lines that don't correspond to relevant pvars
+                if ('var'+str(lines_inside_init_state_counter)) in rel_pvars:
+                    scoped_domain_lines.append(sas_domain_lines[i_line])
+                i_line += 1
+                lines_inside_init_state_counter += 1
+            elif "end_state" in sas_domain_lines[i_line] and inside_init_state:
+                # Set the 'inside_init_state' bool flag to false
+                inside_init_state = False
+                scoped_domain_lines.append(sas_domain_lines[i_line])
+                i_line += 1
+            elif "begin_goal" in sas_domain_lines[i_line]:
+                # Set the 'inside_goal_conds' bool flag to true
+                inside_goal_conds = True
+                scoped_domain_lines.append(sas_domain_lines[i_line])
+                i_line += 1
+            elif inside_goal_conds and "end_goal" not in sas_domain_lines[i_line]:
+                goal_vars_and_vals = sas_domain_lines[i_line].split(' ')
+                if 'var'+goal_vars_and_vals[0] in rel_pvars:
+                    scoped_domain_lines.append(sas_domain_lines[i_line])
+                i_line += 1
+            elif inside_goal_conds and "end_goal" in sas_domain_lines[i_line]:
+                inside_goal_conds = False
+                scoped_domain_lines.append(sas_domain_lines[i_line])
+                i_line += 1            
             else:
                 if not skip_lines:
                     scoped_domain_lines.append(sas_domain_lines[i_line])

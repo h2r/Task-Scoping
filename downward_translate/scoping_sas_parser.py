@@ -85,7 +85,7 @@ def make_str_grounded_actions(sas_ops):
 
 def make_init_cond_list(sas_init_vals, str2var_dict):
     """
-    Returns a list of strings representing initial conditions
+    Returns a list of z3 exprs representing initial conditions
 
     :param sas_init_vals - a list of ints. The len of this list should be the number of state-variables in the 
     SAS+ problem, and each value in the list should be the initial state value of the state-variable corresponding to
@@ -99,6 +99,23 @@ def make_init_cond_list(sas_init_vals, str2var_dict):
         str_init_cond_list.append(['=', ['v'+str(i)], str(sas_init_vals[i])])
     z3_init_conds = [compile_expression(init_cond, str2var_dict) for init_cond in str_init_cond_list]
     return z3_init_conds
+
+def make_goal_cond(sas_goal_pairs, str2var_dict):
+    """
+    Returns a z3 And expr representing goal conditions
+
+    :param sas_init_vals - a list of tuples corresponding to the goal conditions. This can be obtained from an instantiated SASGoal.pairs
+    :param str2var_dict - a dict of str(var_names) -> z3Var(var_names)
+    
+    Output - a z3 And expr representing the goal conds
+    """
+    str_goal_list = []
+    for goal_cond in sas_goal_pairs:
+        var_num, var_val = goal_cond
+        str_goal_list.append(['=', ['v'+str(var_num)], str(var_val)])
+    goal_cond_list = [compile_expression(goal_cond_str, str2var_dict) for goal_cond_str in str_goal_list]
+    goal_cond = z3.And(*goal_cond_list)
+    return goal_cond
 
 
 # Note: Function taken directly from PDDLz3.py

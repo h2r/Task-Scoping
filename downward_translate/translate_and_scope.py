@@ -31,6 +31,7 @@ import tools
 import variable_order
 
 import scoping_sas_parser
+from oo_scoping.scoping import scope
 
 # TODO: The translator may generate trivial derived variables which are always
 # true, for example if there ia a derived predicate in the input that only
@@ -703,14 +704,13 @@ def main():
 
     sas_task = pddl_to_sas(task)
 
-    # TODO: This is where we should call functions from scoping_sas_parser!
+    # This below block of code performs task scoping on the SAS+ domain.
     str2var_dict = scoping_sas_parser.make_str2var_dict(sas_task.variables)
     str_grounded_action_list = scoping_sas_parser.make_str_grounded_actions(sas_task.operators)
     cae_triples = scoping_sas_parser.str_grounded_actions2skills(str_grounded_action_list,str2var_dict)
     init_cond_list = scoping_sas_parser.make_init_cond_list(sas_task.init.values,str2var_dict)
     goal_cond = scoping_sas_parser.make_goal_cond(sas_task.goal.pairs,str2var_dict)
-
-    from IPython import embed; embed()
+    rel_pvars, cl_pvars, rel_skills = scope(goals=goal_cond, skills=cae_triples, start_condition=init_cond_list)
 
     dump_statistics(sas_task)
 

@@ -83,6 +83,24 @@ def make_str_grounded_actions(sas_ops):
         list_of_actions.append(Action(op.name,[],action_precond_list,[],action_effect_list,[]))
     return list_of_actions
 
+def make_init_cond_list(sas_init_vals, str2var_dict):
+    """
+    Returns a list of strings representing initial conditions
+
+    :param sas_init_vals - a list of ints. The len of this list should be the number of state-variables in the 
+    SAS+ problem, and each value in the list should be the initial state value of the state-variable corresponding to
+    that particular index in the list. This can be obtained from an instantiated SASInit.values
+    :param str2var_dict - a dict of str(var_names) -> z3Var(var_names)
+    
+    Output - a list of z3 exprs representing the initial state
+    """
+    str_init_cond_list = []
+    for i in range(len(sas_init_vals)):
+        str_init_cond_list.append(['=', ['v'+str(i)], str(sas_init_vals[i])])
+    z3_init_conds = [compile_expression(init_cond, str2var_dict) for init_cond in str_init_cond_list]
+    return z3_init_conds
+
+
 # Note: Function taken directly from PDDLz3.py
 def list2var_str(x):
     return x[0] + "(" + ", ".join(x[1:]) + ")"
@@ -118,6 +136,7 @@ def action2effect_types(a, str_var_dict, parser = None):
         effect_types.append(effect_type)
     return tuple(effect_types)
 
+# This function makes all the actual CAE triples
 def str_grounded_actions2skills(str_grounded_actions, str2var_dict):
     skill_list = []
     for grounded_action in str_grounded_actions:

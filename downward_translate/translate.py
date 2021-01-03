@@ -706,6 +706,9 @@ def main():
     # TODO: This is where we should call functions from scoping_sas_parser!
     str2var_dict = scoping_sas_parser.make_str2var_dict(sas_task.variables)
     str_grounded_action_list = scoping_sas_parser.make_str_grounded_actions(sas_task.operators)
+    cae_triples = scoping_sas_parser.str_grounded_actions2skills(str_grounded_action_list,str2var_dict)
+    init_cond_list = scoping_sas_parser.make_init_cond_list(sas_task.init.values,str2var_dict)
+
     from IPython import embed; embed()
 
     dump_statistics(sas_task)

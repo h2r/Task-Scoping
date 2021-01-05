@@ -115,6 +115,8 @@
 )
 
 (:goal (and (not (light-on ls1))
+            (not (light-on ls2))
+            (not (light-on ls3))
             (lightswitch-color ls1 red)
         )
 )

@@ -26,9 +26,12 @@ def writeback_scoped_sas(rel_ops, rel_pvars, problem_file_path):
     scoped_domain_lines = []
     skip_lines = False
     first_operator_encountered = False
+    # inside_init_state = False
+    # lines_inside_init_state_counter = 0
 
     with open(problem_file_path, "r") as f:
         sas_domain_lines = f.readlines()
+        
         i_line = 0
         while i_line < len(sas_domain_lines):
             if "begin_operator" in sas_domain_lines[i_line]:
@@ -49,10 +52,11 @@ def writeback_scoped_sas(rel_ops, rel_pvars, problem_file_path):
                 # from the next line onwards
                 skip_lines = False
                 i_line += 1
-            
+
+
             # # The line below 'end_metric' is the number of state variables in the 
             # # problem, so write this out there.
-            # if "end_metric" in sas_domain_lines[i_line]:
+            # elif "end_metric" in sas_domain_lines[i_line]:
             #     scoped_domain_lines.append(sas_domain_lines[i_line])
             #     scoped_domain_lines.append(str(len(rel_pvars))+'\n')
             #     i_line += 2
@@ -70,7 +74,6 @@ def writeback_scoped_sas(rel_ops, rel_pvars, problem_file_path):
             #     # from the next line onwards
             #     skip_lines = False
             #     i_line += 1
-            
             # elif "begin_state" in sas_domain_lines[i_line]:
             #     # If you see 'begin_state', then set the inside_init_state bool flag to True
             #     inside_init_state = True
@@ -87,6 +90,8 @@ def writeback_scoped_sas(rel_ops, rel_pvars, problem_file_path):
             #     inside_init_state = False
             #     scoped_domain_lines.append(sas_domain_lines[i_line])
             #     i_line += 1
+
+
             elif "begin_goal" in sas_domain_lines[i_line]:
                 # Append the begin_goal statement
                 scoped_domain_lines.append(sas_domain_lines[i_line])

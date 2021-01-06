@@ -219,10 +219,13 @@ def get_atoms(*args: Union[bool, z3.ExprRef, z3.Goal], remove_constants = True) 
     if remove_constants:
         atoms_filtered = []
         for a in atoms:
-            if not isinstance(a, z3.IntNumRef) and str(a) not in ["And", "Or"]:
+            if not isinstance(a, z3.IntNumRef) and str_in_atoms(a) not in ["And", "Or"]:
                 atoms_filtered.append(a)
         atoms = atoms_filtered
     return atoms
+
+def str_in_atoms(x):
+    return str(x)
 
 def get_atoms_test():
     A = z3.Bool('A')

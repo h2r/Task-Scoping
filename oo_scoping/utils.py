@@ -219,8 +219,12 @@ def get_atoms(*args: Union[bool, z3.ExprRef, z3.Goal], remove_constants = True) 
     if remove_constants:
         atoms_filtered = []
         for a in atoms:
-            if not isinstance(a, z3.IntNumRef) and str_in_atoms(a) not in ["And", "Or"]:
-                atoms_filtered.append(a)
+            if not isinstance(a, z3.IntNumRef):
+                s = str_in_atoms(a)
+                if s not in ["And", "Or"]:
+                    atoms_filtered.append(a)
+                else:
+                    print(f"moo? {s}")
         atoms = atoms_filtered
     return atoms
 

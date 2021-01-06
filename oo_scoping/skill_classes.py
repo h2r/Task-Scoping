@@ -80,7 +80,7 @@ class SkillPDDL(): #Skills are Immutable
 		return self.action_str < other.action_str
 		# return str(self) < str(other)
 	
-	def move_irrelevant2side_effects(self, relevant_pvars):
+	def move_irrelevant2side_effects(self, rel_pvars):
 		"""Returns a new skill with irrelevant pvars moved to side effects"""
 		# Check that no relevant vars are in side effects
 		# for e in self.side_effects:
@@ -89,7 +89,7 @@ class SkillPDDL(): #Skills are Immutable
 
 		new_effects = []
 		new_side_effects = move_copy_se(self.side_effects)
-		move_inner_loop(self.effects, relevant_pvars, new_effects, new_side_effects)
+		move_inner_loop(self.effects, rel_pvars, new_effects, new_side_effects)
 		return SkillPDDL(self.precondition, self.action, new_effects, new_side_effects)
 	@property
 	def params(self):
@@ -103,28 +103,28 @@ class SkillPDDL(): #Skills are Immutable
 
 def move_copy_se(x):
 	return list(copy.copy(x))
-def move_inner_loop(effects, relevant_pvars, new_effects, new_side_effects):
+def move_inner_loop(effects, rel_pvars, new_effects, new_side_effects):
 	for e in effects:
 			# if e.pvar in relevant_pvars:
-			if move_inner_if(relevant_pvars, e):
+			if move_inner_if(rel_pvars, e):
 				new_effects.append(e)
 			else:
 				new_side_effects.append(e)
-def move_inner_if(relevant_pvars, e):
-	pvar = move_inner_get_pvar(e)
-	return move_inner_dict_get(relevant_pvars, pvar) is not None
+def move_inner_if(rel_pvars, e):
+	pvar_str = move_inner_get_pvar(e)
+	return move_inner_dict_get(rel_pvars, pvar_str) is not None
 
 def move_inner_get_pvar(e):
-	return e.pvar
-def move_inner_dict_get(relevant_pvars, pvar):
-	return relevant_pvars.get(pvar)
+	return e.pvar_str
+def move_inner_dict_get(rel_pvars, pvar_str):
+	return pvar_str in rel_pvars
 
 
 
-def group_skills_by_effects(skills, rel_pvar_dict):
+def group_skills_by_effects(skills, rel_pvars):
 	hashed_skills = OrderedDict()
 	for s in skills:
-		s = s.move_irrelevant2side_effects(rel_pvar_dict)
+		s = s.move_irrelevant2side_effects(rel_pvars)
 		k = (s.effects)
 		if k not in hashed_skills.keys(): hashed_skills[k] = []
 		hashed_skills[k].append(s)
@@ -154,12 +154,13 @@ def merge_skills_pddl(skills: Iterable[SkillPDDL], relevant_pvars: Iterable[z3.E
 	:param solver: A z3 solver. Use this arg to assume state constraints when simplifying disjunctions
 	"""
 	# TODO What is the point of rel_pvar_dict ?
-	rel_pvar_dict = {}
-	for rel_pvar in relevant_pvars:
-		rel_pvar_dict[rel_pvar] = True
+	rel_pvar_set = set(map(str,relevant_pvars))
+	# rel_pvar_dict = {}
+	# for rel_pvar in relevant_pvars:
+	# 	rel_pvar_dict[rel_pvar] = True
 
 	# Move irrelevant pvars to side effects and group skills by actions and effect types
-	hashed_skills = group_skills_by_effects(skills, rel_pvar_dict)
+	hashed_skills = group_skills_by_effects(skills, rel_pvar_set)
 
 	print("Done getting skills according to effect")
 

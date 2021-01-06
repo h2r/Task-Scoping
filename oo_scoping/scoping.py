@@ -1,7 +1,7 @@
 from itertools import chain
 from typing import Iterable, Union
 import z3
-from oo_scoping.skill_classes import Skill, EffectType, SkillPDDL, EffectTypePDDL, merge_skills_pddl
+from oo_scoping.skill_classes import SkillPDDL, EffectTypePDDL, merge_skills_pddl
 from oo_scoping.utils import split_conj, get_atoms, solver_implies_condition, simplify_disjunction, get_unique_z3_vars, pvars2objects
 from oo_scoping.writeback_pddl import writeback_domain, writeback_problem
 
@@ -77,7 +77,7 @@ def get_unlinked_pvars(skills, causal_links, dummy_goal, solver):
 	solver.pop()
 	return pvars_rel_new
 
-def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill]
+def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[SkillPDDL]
 		  , start_condition: Union[Iterable[z3.ExprRef], z3.ExprRef], state_constraints: z3.ExprRef = None
 		  , verbose=0):
 	if isinstance(goals, z3.ExprRef):

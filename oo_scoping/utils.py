@@ -224,7 +224,7 @@ def get_atoms(*args: Union[bool, z3.ExprRef, z3.Goal], remove_constants = True) 
                 # NOTE: We used to check this thing here, but believe that 
                 # it is impossible for this to be triggered (DEBUG)
 
-                # s = str_in_atoms(a)
+                # s = str(a)
                 # if s not in ["And", "Or"]:
                 #     atoms_filtered.append(a)
                 # else:
@@ -233,8 +233,7 @@ def get_atoms(*args: Union[bool, z3.ExprRef, z3.Goal], remove_constants = True) 
         atoms = atoms_filtered
     return atoms
 
-def str_in_atoms(x):
-    return str(x)
+
 
 def get_atoms_test():
     A = z3.Bool('A')

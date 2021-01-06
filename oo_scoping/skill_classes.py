@@ -57,7 +57,7 @@ class SkillPDDL(): #Skills are Immutable
 	def all_effects(self) -> Tuple[EffectTypePDDL]:
 		return tuple(set(self.effects + self.side_effects))
 	def __eq__(self, other):
-		if not isinstance(other, Skill): return False
+		if not isinstance(other, SkillPDDL): return False
 		same_prec = z3.eq(self.precondition,other.precondition)
 		same_action = (self.action == other.action)
 		same_effects = self.effects == other.effects

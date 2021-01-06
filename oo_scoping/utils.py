@@ -220,11 +220,16 @@ def get_atoms(*args: Union[bool, z3.ExprRef, z3.Goal], remove_constants = True) 
         atoms_filtered = []
         for a in atoms:
             if not isinstance(a, z3.IntNumRef):
-                s = str_in_atoms(a)
-                if s not in ["And", "Or"]:
-                    atoms_filtered.append(a)
-                else:
-                    print(f"moo? {s}")
+                atoms_filtered.append(a)
+                # NOTE: We used to check this thing here, but believe that 
+                # it is impossible for this to be triggered (DEBUG)
+
+                # s = str_in_atoms(a)
+                # if s not in ["And", "Or"]:
+                #     atoms_filtered.append(a)
+                # else:
+                #     from IPython import embed; embed()
+                #     print(f"moo? {s}")
         atoms = atoms_filtered
     return atoms
 

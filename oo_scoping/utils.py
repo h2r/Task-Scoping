@@ -206,7 +206,7 @@ def get_atoms(*args: Union[bool, z3.ExprRef, z3.Goal], remove_constants = True) 
     atoms = []
     for expr in args:
         if isinstance(expr, (bool, int)): return []
-        if isinstance(expr, z3.Goal):
+        if isinstance(expr, z3.Goal): #What is a z3.Goal ?
             expr = expr.as_expr()
         children = expr.children()
         # An expression is an atom iff it has no children

@@ -766,8 +766,8 @@ if __name__ == "__main__":
         emergency_memory = b"x" * 10**7
 
         # PROFILE START
-        profile_path = "fd_profile"
-        # Path to save huma n-readable profile stats
+        profile_path = "spedup_fd_profile"
+        # Path to save human-readable profile stats
         profile_path_txt = profile_path + ".txt"
         print(f"Human-readable profile output: {profile_path_txt}")
         # Create folder containing profile path, if it does not yet exist
@@ -781,8 +781,6 @@ if __name__ == "__main__":
         # Save output to stats_reasable_file
         p.strip_dirs().sort_stats(SortKey.CUMULATIVE).print_stats()
         # PROFILE END
-
-
 
         # main()
     except MemoryError:

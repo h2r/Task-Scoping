@@ -28,13 +28,23 @@ class EffectTypePDDL():  #EffectTypes are Immutable
 		# These params are NOT the same as pddl params, and should probably be renamed
 		# These params are vars on which the effect relies - ex. in p.y <- t.y, t.y is a param
 		self.params = params if params is not None else tuple()
+		# Also save str()-cast versions of pvar, index and params because we end up 
+		# needing these strs a lot for comparison
+		self.pvar_str = str(self.pvar)
+		self.index_str = str(self.index)
+		self.params_str = str(self.params)
 	def __eq__(self, other):
 		return z3.eq(self.pvar, other.pvar) and self.index == other.index and self.params == other.params
 	def __lt__(self, other):
 		# TODO incorporate pvar type into sort.
-		if str(self.pvar) > str(other.pvar): return False
-		if str(self.pvar) == str(other.pvar) and str(self.index) >= str(other.index): return False
-		if str(self.pvar) == str(other.pvar) and str(self.index) >= str(other.index) and str(self.params) >= str(other.params): return False
+		if self.pvar_str > other.pvar_str:
+			return False
+		elif self.pvar_str == other.pvar_str:
+			if self.index_str >= other.index_str:
+				return False
+			elif self.index_str == other.index_str:
+				if self.params_str >= other.params_str:
+					return False
 		return True
 	def __repr__(self):
 		# return f"ET({self.pvar},{self.index},{self.params})"
@@ -58,6 +68,8 @@ class SkillPDDL(): #Skills are Immutable
 		if isinstance(effects, EffectTypePDDL): effects = [effects]
 		self.effects: Tuple[EffectType] = tuple(sorted(set(effects)))
 		self.side_effects: Tuple[EffectType] = tuple(sorted(set(side_effects)))
+		self.action_str = str(action)
+
 	@property
 	def all_effects(self) -> Tuple[EffectType]:
 		return tuple(set(self.effects + self.side_effects))
@@ -66,8 +78,8 @@ class SkillPDDL(): #Skills are Immutable
 		same_prec = z3.eq(self.precondition,other.precondition)
 		same_action = (self.action == other.action)
 		same_effects = self.effects == other.effects
-		same_side_effets = self.side_effects == other.side_effects
-		return  same_prec and same_action and same_effects and same_side_effets
+		same_side_effects = self.side_effects == other.side_effects
+		return  same_prec and same_action and same_effects and same_side_effects
 	def __repr__(self):
 		s = f"{self.action}\nPrecondition: {self.precondition}\nEffects: {self.effects}" \
 			f"\nSide Effects: {self.side_effects}"
@@ -81,9 +93,9 @@ class SkillPDDL(): #Skills are Immutable
 		return hash(tuple(part_hashes))
 	def __lt__(self, other):
 		# NOTE: This sort is arbitrary. We are defining it just to get a canonical ordering.
-		return str(self) < str(other)
-		# if self.action < other.action: return True
-		# elif self.action > other.action: return False
+		# return self.str_repr < other.str_repr
+		return self.action_str < other.action_str
+		# return str(self) < str(other)
 	
 	def move_irrelevant2side_effects(self, relevant_pvars):
 		"""Returns a new skill with irrelevant pvars moved to side effects"""
@@ -149,7 +161,8 @@ class Skill(): #Skills are Immutable
 		return hash(tuple(part_hashes))
 	def __lt__(self, other):
 		# NOTE: This sort is arbitrary. We are defining it just to get a canonical ordering.
-		return str(self) < str(other)
+		return self.action < other.action
+		# return str(self) < str(other)
 		# if self.action < other.action: return True
 		# elif self.action > other.action: return False
 	def move_irrelevant2side_effects(self, relevant_pvars):
@@ -172,7 +185,6 @@ class Skill(): #Skills are Immutable
 def group_skills_by_effects(skills, rel_pvar_dict):
 	hashed_skills = OrderedDict()
 	for s in skills:
-		# s = s.move_irrelevant2side_effects(relevant_pvars)
 		s = s.move_irrelevant2side_effects(rel_pvar_dict)
 		k = (s.effects)
 		if k not in hashed_skills.keys(): hashed_skills[k] = []

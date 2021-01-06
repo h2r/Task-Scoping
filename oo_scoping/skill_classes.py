@@ -100,21 +100,13 @@ class SkillPDDL(): #Skills are Immutable
 	def move_irrelevant2side_effects(self, relevant_pvars):
 		"""Returns a new skill with irrelevant pvars moved to side effects"""
 		# Check that no relevant vars are in side effects
-		"""
-		TODO side effects should be list of EffectTypes. We can extract pvars from these as needed.
-		"""
 		# for e in self.side_effects:
 		# 	if e.pvar in relevant_pvars:
 		# 		raise ValueError(f"Skill has relevant pvar in side effects:\n{self}")
 
 		new_effects = []
-		new_side_effects = list(copy.copy(self.side_effects))
-		for e in self.effects:
-			# if e.pvar in relevant_pvars:
-			if(relevant_pvars.get(e.pvar) is not None):
-				new_effects.append(e)
-			else:
-				new_side_effects.append(e)
+		new_side_effects = move_copy_se(self.side_effects)
+		move_inner_loop(self.effects, relevant_pvars, new_effects, new_side_effects)
 		return SkillPDDL(self.precondition, self.action, new_effects, new_side_effects)
 	@property
 	def params(self):
@@ -125,6 +117,24 @@ class SkillPDDL(): #Skills are Immutable
 		return get_unique_z3_vars(params)
 		# return tuple(sorted(list(set(params))))
 		# return tuple(chain(*[x.params for x in self.effects]))
+
+def move_copy_se(x):
+	return list(copy.copy(x))
+def move_inner_loop(effects, relevant_pvars, new_effects, new_side_effects):
+	for e in effects:
+			# if e.pvar in relevant_pvars:
+			if move_inner_if(relevant_pvars, e):
+				new_effects.append(e)
+			else:
+				new_side_effects.append(e)
+def move_inner_if(relevant_pvars, e):
+	pvar = move_inner_get_pvar(e)
+	return move_inner_dict_get(relevant_pvars, pvar) is not None
+	
+def move_inner_get_pvar(e):
+	return e.pvar
+def move_inner_dict_get(relevant_pvars, pvar):
+	return relevant_pvars.get(pvar)
 
 class Skill(): #Skills are Immutable
 	def __init__(self, precondition: z3.ExprRef, action: str, effects: Union[Iterable[EffectType], EffectType]

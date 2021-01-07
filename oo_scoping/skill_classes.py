@@ -112,13 +112,12 @@ def move_inner_loop(effects, rel_pvars, new_effects, new_side_effects):
 				new_side_effects.append(e)
 def move_inner_if(rel_pvars, e):
 	pvar_str = move_inner_get_pvar(e)
-	return move_inner_dict_get(rel_pvars, pvar_str) is not None
+	return move_inner_dict_get(rel_pvars, pvar_str)
 
 def move_inner_get_pvar(e):
 	return e.pvar_str
 def move_inner_dict_get(rel_pvars, pvar_str):
 	return pvar_str in rel_pvars
-
 
 
 def group_skills_by_effects(skills, rel_pvars):

@@ -55,35 +55,52 @@ def get_causal_links_old(start_condition, skills):
 		if len(threatened_pvars) == 0: causal_links.append(c)
 	return causal_links
 
+# Start profiling block
+
 def get_unlinked_pvars(skills, causal_links, dummy_goal, solver):
+	# TODO: Instead of making it a set before returning, what if we just always keep pvars_rel_new as a set
 	solver.push()
 	solver.add(*causal_links)
 	pvars_rel_new = [dummy_goal]
 	for s in skills:
-		for prec in split_conj(s.precondition):
-			if not solver_implies_condition(solver, prec):
-				pvars_rel_new.extend(get_atoms(prec))
+		get_unlinked_pvars_prec_loop(s, solver, pvars_rel_new)
+		# for prec in split_conj(s.precondition):
+			# if not solver_implies_condition(solver, prec):
+			# 	pvars_rel_new.extend(get_atoms(prec))
+			# get_unlinked_pvars_inner_check(solver, pvars_rel_new, prec)
 
 		# params are pvars that influence the effects of the skill. Ex. if a skill has effect (person.y += person.leg_length),
 		# then leg_length is a parameter. params are different from preconditions in that a param can not be implied
 		# by the start condition, so we always consider them unlinked. 
 		if isinstance(s, SkillPDDL):
 			pvars_rel_new.extend(s.params)
-	pvars_rel_new = sorted(list(set(pvars_rel_new)), key=lambda x: str(x))
+	pvars_rel_new = get_rel_pvars_new(pvars_rel_new)
 	solver.pop()
 	return pvars_rel_new
+
+def get_unlinked_pvars_prec_loop(s, solver, pvars_rel_new):
+	for prec in split_conj(s.precondition):
+		# if not solver_implies_condition(solver, prec):
+		# 	pvars_rel_new.extend(get_atoms(prec))
+		get_unlinked_pvars_inner_check(solver, pvars_rel_new, prec)
+
+def get_unlinked_pvars_inner_check(solver, pvars_rel_new, prec):
+	if not solver_implies_condition(solver, prec):
+		pvars_rel_new.extend(get_atoms(prec))
+
+def get_rel_pvars_new(pvars_rel_new):
+	return sorted(list(set(pvars_rel_new)), key=lambda x: str(x))
+
+
+# End profiling block	
 
 def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[SkillPDDL]
 		  , start_condition: Union[Iterable[z3.ExprRef], z3.ExprRef], state_constraints: z3.ExprRef = None
 		  , verbose=0):
 	if isinstance(goals, z3.ExprRef):
-		# print("Splitting goals")
 		goals = split_conj(goals)
-		# print("Split goals")
 	if isinstance(start_condition, z3.ExprRef):
-		# print("Splitting initial condition")
 		start_condition = split_conj(start_condition)
-		# print("Split initial conditions")
 	solver = z3.Solver()
 	if state_constraints is not None:
 		state_constraints_simple = simplify_disjunction(state_constraints)
@@ -103,6 +120,7 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 	# We make a dummy goal and dummy final skill a la LCP because it simplifies the beginning of the algorithm.
 	# We will remove the dummy goal and skill before returning the final results
 	dummy_goal = z3.Bool("dummy_goal") #TODO make sure this var does not already exist
+
 	dummy_goal_et = EffectTypePDDL(dummy_goal,0)
 	dummy_final_skill = SkillPDDL(z3.And(*goals), "DummyFinalSkill",dummy_goal_et)
 	skills = skills + [dummy_final_skill]
@@ -130,8 +148,6 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 		print("Got new causal links!!!")
 		# Get pvars not guaranteed by causal links
 		pvars_rel_new = get_unlinked_pvars(skills_rel, causal_links, dummy_goal, solver)
-
-		# from IPython import embed; embed()
 
 		# # Debug
 		# if "z(steve)" in map(str, pvars_rel_new):

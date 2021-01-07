@@ -152,11 +152,7 @@ def merge_skills_pddl(skills: Iterable[SkillPDDL], relevant_pvars: Iterable[z3.E
 	:param relevant_pvars: Iterable of pvars, where each pvar is a z3 expression
 	:param solver: A z3 solver. Use this arg to assume state constraints when simplifying disjunctions
 	"""
-	# TODO What is the point of rel_pvar_dict ?
 	rel_pvar_set = set(map(str,relevant_pvars))
-	# rel_pvar_dict = {}
-	# for rel_pvar in relevant_pvars:
-	# 	rel_pvar_dict[rel_pvar] = True
 
 	# Move irrelevant pvars to side effects and group skills by actions and effect types
 	hashed_skills = group_skills_by_effects(skills, rel_pvar_set)

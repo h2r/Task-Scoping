@@ -397,6 +397,7 @@ Wed Jan  6 18:38:25 2021    spedup_fd_profile
       503    0.001    0.000    0.001    0.000 greedy_join.py:57(compute_join_cost)
         1    0.000    0.000    0.001    0.001 translate_and_scope.py:612(build_mutex_key)
         1    0.000    0.000    0.001    0.001 z3.py:6493(__del__)
+       84    0.000    0.000    0.001    0.000 constraints.py:105(_all_clauses_satisfiable)
         1    0.001    0.001    0.001    0.001 z3core.py:3733(Z3_solver_dec_ref)
        82    0.000    0.000    0.001    0.000 constraints.py:105(_all_clauses_satisfiable)
         1    0.000    0.000    0.001    0.001 fact_groups.py:92(collect_all_mutex_groups)
@@ -561,6 +562,10 @@ Wed Jan  6 18:38:25 2021    spedup_fd_profile
       202    0.000    0.000    0.000    0.000 invariants.py:213(__hash__)
       464    0.000    0.000    0.000    0.000 conditions.py:254(<genexpr>)
        17    0.000    0.000    0.000    0.000 invariant_finder.py:78(get_initial_invariants)
+      224    0.000    0.000    0.000    0.000 constraints.py:26(__init__)
+        1    0.000    0.000    0.000    0.000 tools.py:20(get_peak_memory_in_kb)
+      464    0.000    0.000    0.000    0.000 conditions.py:254(<genexpr>)
+       24    0.000    0.000    0.000    0.000 contextlib.py:81(__init__)
         5    0.000    0.000    0.000    0.000 parsing_functions.py:195(<listcomp>)
        21    0.000    0.000    0.000    0.000 parsing_functions.py:7(parse_typed_list)
        22    0.000    0.000    0.000    0.000 build_model.py:152(<listcomp>)
@@ -845,7 +850,6 @@ Wed Jan  6 18:38:25 2021    spedup_fd_profile
         1    0.000    0.000    0.000    0.000 greedy_join.py:6(OccurrencesTracker)
         1    0.000    0.000    0.000    0.000 {built-in method _heapq.heapify}
         4    0.000    0.000    0.000    0.000 {built-in method _thread.get_ident}
-        2    0.000    0.000    0.000    0.000 {built-in method _imp.is_frozen}
         2    0.000    0.000    0.000    0.000 {built-in method _imp._fix_co_filename}
         1    0.000    0.000    0.000    0.000 axiom_rules.py:123(get_axioms_by_atom)
         1    0.000    0.000    0.000    0.000 pddl_to_prolog.py:151(<dictcomp>)
@@ -865,7 +869,8 @@ Wed Jan  6 18:38:25 2021    spedup_fd_profile
         2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:719(create_module)
         1    0.000    0.000    0.000    0.000 translate_and_scope.py:408(translate_strips_axioms)
         1    0.000    0.000    0.000    0.000 graph.py:31(<setcomp>)
-        1    0.000    0.000    0.000    0.000 variable_order.py:62(weight_graph_from_axioms)
         1    0.000    0.000    0.000    0.000 scoping.py:176(<listcomp>)
+        1    0.000    0.000    0.000    0.000 translate_and_scope.py:408(translate_strips_axioms)
+        1    0.000    0.000    0.000    0.000 variable_order.py:62(weight_graph_from_axioms)
 
 

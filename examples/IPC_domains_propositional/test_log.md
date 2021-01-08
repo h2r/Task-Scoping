@@ -23,3 +23,4 @@
 - Logistics (on prob15, Scoped FD currently outperforms FD even with the LM-Cut heuristic!)
 - Satellite (on prob5, ScopedFD performs as well as FD with LM-Cut. You can increase problem difficulty arbitrarily by adding satellites with random instruments and then having their goal condition already fulfilled in the initial state)
 - Driverlog (on prob01, without me doing ANYTHING, scoping just worked by default. It seems that adding packages that are already in the right position creates conditional irrelevance! We can blow this up arbitrarily to win even with LM-Cut heuristic!)
+- ZenoTravel(same as Driverlog, though still need to blow up)

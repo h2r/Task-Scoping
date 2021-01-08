@@ -4,11 +4,20 @@
 - Miconic (too simple - FD just scopes everything)
 - Rovers (z3 can't simplify preconds down enough for substantial scoping, and FD scopes most of the stuff itself)
 - Movie (too simple)
+- Woodworking (has metric)
+- Barman (too complicated and interconnected)
+- ChildSnack (too complicated and interconnected)
+- Agricola (Action costs)
+- DataNetwork (Functions)
+- Freecell (too interconnected)
+- Grid (too complicated and interconnected)
+- Hiking (too interconnected...)
 
 ## Could work, but not immediately obvious how
 - Depot (the transition dynamics allow the agent to drive from one place to another easily, so hard to exploit this to introduce conditional irrelevance)
 - Gripper (due to the way the translator converts to SAS+, there is one pvar per gripper state [i.e, one pvar that says gripper1 could be holding any one of the 55 possible balls, for example]. Basically all actions affect this, and so this is an 'interconnected' domain...)
 - Blocks (similar issue to gripper)
+- Tidybot (problem 1 breaks z3's recursion depth)
 
 ## Working
 - Logistics (on prob15, Scoped FD currently outperforms FD even with the LM-Cut heuristic!)

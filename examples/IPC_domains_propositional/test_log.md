@@ -2,6 +2,7 @@
 ## Failures
 - Spider (conditional effects)
 - Miconic (too simple - FD just scopes everything)
+- Rovers (z3 can't simplify preconds down enough for substantial scoping, and FD scopes most of the stuff itself)
 
 ## Could work, but not immediately obvious how
 - Depot (the transition dynamics allow the agent to drive from one place to another easily, so hard to exploit this to introduce conditional irrelevance)

@@ -89,7 +89,8 @@ def get_unlinked_pvars_inner_check(solver, pvars_rel_new, prec):
 		pvars_rel_new.extend(get_atoms(prec))
 
 def get_rel_pvars_new(pvars_rel_new):
-	return sorted(list(set(pvars_rel_new)), key=lambda x: str(x))
+	# return sorted(list(set(pvars_rel_new)), key=lambda x: str(x))
+	return set(pvars_rel_new)
 
 
 # End profiling block	

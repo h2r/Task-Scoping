@@ -55,10 +55,10 @@ def get_causal_links_old(start_condition, skills):
 		if len(threatened_pvars) == 0: causal_links.append(c)
 	return causal_links
 
+
 # Start profiling block
 
 def get_unlinked_pvars(skills, causal_links, dummy_goal, solver):
-	# TODO: Instead of making it a set before returning, what if we just always keep pvars_rel_new as a set
 	solver.push()
 	solver.add(*causal_links)
 	pvars_rel_new = [dummy_goal]
@@ -68,7 +68,7 @@ def get_unlinked_pvars(skills, causal_links, dummy_goal, solver):
 		precs.extend(split_conj(s.precondition))
 		# params are pvars that influence the effects of the skill. Ex. if a skill has effect (person.y += person.leg_length),
 		# then leg_length is a parameter. params are different from preconditions in that a param can not be implied
-		# by the start condition, so we always consider them unlinked. 		if isinstance(s, SkillPDDL):
+		# by the start condition, so we always consider them unlinked.
 		if isinstance(s, SkillPDDL):
 			pvars_rel_new.extend(s.params)
 	# Remove duplicate precs. This (hopefully) speeds up the algorithm
@@ -143,6 +143,7 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 		print("Got new causal links!!!")
 		# Get pvars not guaranteed by causal links
 		pvars_rel_new = get_unlinked_pvars(skills_rel, causal_links, dummy_goal, solver)
+
 
 		# # Debug
 		# if "z(steve)" in map(str, pvars_rel_new):

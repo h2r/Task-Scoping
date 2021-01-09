@@ -12,7 +12,7 @@ import sas_tasks
 """
 General Notes on current implementation of SAS+ -> z3 for scoping purposes.
 
-- All pvars are ints (this may not hold true for problems other than Monkeys)
+- All pvars are treated as ints
 - Actions only have "positive effects" as a result
 
 """

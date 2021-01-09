@@ -739,6 +739,15 @@ def main():
     # Now, writeback the scoped SAS file
     writeback_scoped_sas(rel_skill_names,rel_pvars_names,options.sas_file)
 
+    # TODO handle option for comparing against "Correct" answer
+    if options.sas_file_correct is not None:
+        with open(options.sas_file_correct, "r") as f:
+            sas_correct_str = f.read()
+        with open(options.sas_file, "r") as f:
+            sas_scoped_str = f.read()
+        scoped_correctly = (sas_correct_str == sas_scoped_str)
+        print(f"Scoped correctly: {scoped_correctly}")
+
     # from IPython import embed; embed()
 
     print("Done! %s" % timer)

@@ -62,34 +62,28 @@ def get_unlinked_pvars(skills, causal_links, dummy_goal, solver):
 	solver.push()
 	solver.add(*causal_links)
 	pvars_rel_new = [dummy_goal]
+	precs = []
 	for s in skills:
-		get_unlinked_pvars_prec_loop(s, solver, pvars_rel_new)
-		# for prec in split_conj(s.precondition):
-			# if not solver_implies_condition(solver, prec):
-			# 	pvars_rel_new.extend(get_atoms(prec))
-			# get_unlinked_pvars_inner_check(solver, pvars_rel_new, prec)
-
+		# Add precondition clauses to list to check later
+		precs.extend(split_conj(s.precondition))
 		# params are pvars that influence the effects of the skill. Ex. if a skill has effect (person.y += person.leg_length),
 		# then leg_length is a parameter. params are different from preconditions in that a param can not be implied
-		# by the start condition, so we always consider them unlinked. 
+		# by the start condition, so we always consider them unlinked. 		if isinstance(s, SkillPDDL):
 		if isinstance(s, SkillPDDL):
 			pvars_rel_new.extend(s.params)
+	# Remove duplicate precs. This (hopefully) speeds up the algorithm
+	precs = set(precs)
+	for prec in precs:
+		get_unlinked_pvars_inner_check(solver, pvars_rel_new, prec)
 	pvars_rel_new = get_rel_pvars_new(pvars_rel_new)
 	solver.pop()
 	return pvars_rel_new
-
-def get_unlinked_pvars_prec_loop(s, solver, pvars_rel_new):
-	for prec in split_conj(s.precondition):
-		# if not solver_implies_condition(solver, prec):
-		# 	pvars_rel_new.extend(get_atoms(prec))
-		get_unlinked_pvars_inner_check(solver, pvars_rel_new, prec)
 
 def get_unlinked_pvars_inner_check(solver, pvars_rel_new, prec):
 	if not solver_implies_condition(solver, prec):
 		pvars_rel_new.extend(get_atoms(prec))
 
 def get_rel_pvars_new(pvars_rel_new):
-	# return sorted(list(set(pvars_rel_new)), key=lambda x: str(x))
 	return set(pvars_rel_new)
 
 

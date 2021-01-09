@@ -56,8 +56,6 @@ def get_causal_links_old(start_condition, skills):
 	return causal_links
 
 
-# Start profiling block
-
 def get_unlinked_pvars(skills, causal_links, dummy_goal, solver):
 	solver.push()
 	solver.add(*causal_links)
@@ -86,8 +84,6 @@ def get_unlinked_pvars_inner_check(solver, pvars_rel_new, prec):
 def get_rel_pvars_new(pvars_rel_new):
 	return set(pvars_rel_new)
 
-
-# End profiling block	
 
 def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[SkillPDDL]
 		  , start_condition: Union[Iterable[z3.ExprRef], z3.ExprRef], state_constraints: z3.ExprRef = None
@@ -120,9 +116,7 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 	dummy_final_skill = SkillPDDL(z3.And(*goals), "DummyFinalSkill",dummy_goal_et)
 	skills = skills + [dummy_final_skill]
 	pvars_rel = [dummy_goal]
-	# Debug
-	stevewashere = False
-	print("Done grounding! Starting to scope!!!")
+	print("Done grounding! Starting to scope.")
 	converged = False
 	i = 0
 	while not converged:
@@ -138,21 +132,10 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 			print("\n\n".join(map(str,pvars_rel)))
 		# Get causal links
 		causal_links = get_causal_links(start_condition, skills_rel)
-		# causal_links = get_causal_links_old(start_condition, skills)
 
-		print("Got new causal links!!!")
 		# Get pvars not guaranteed by causal links
 		pvars_rel_new = get_unlinked_pvars(skills_rel, causal_links, dummy_goal, solver)
 
-
-		# # Debug
-		# if "z(steve)" in map(str, pvars_rel_new):
-		# 	stevewashere = True
-		# else:
-		# 	if stevewashere:
-		# 		print("Steve vanished!")
-		# 		print("\n".join(map(str,pvars_rel_new)))
-		# Check convergence
 		converged = (pvars_rel == pvars_rel_new)
 
 		pvars_rel = pvars_rel_new
@@ -161,7 +144,7 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 			print("~~~Pvars Rel~~~")
 			print(pvars_rel)
 
-		print(f"Finished iteration {i}.")
+		# print(f"Finished iteration {i}.")
 		# print(pvars_rel)
 		# from IPython import embed; embed()
 		# from IPython.core.debugger import set_trace; set_trace()
@@ -182,6 +165,7 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 	pvars_cl = get_unique_z3_vars(pvars_cl)
 	# We only care about the pvars that are causally linked AND used in preconditions
 	pvars_cl = [c for c in pvars_cl if c in skills_conds_pvars]
-	print("~~~Pvars Causally Linked~~~")
-	print(pvars_cl)
+	# print("~~~Pvars Causally Linked~~~")
+	# print(pvars_cl)
+	print("Done Scoping!")
 	return pvars_rel, pvars_cl, skills_rel

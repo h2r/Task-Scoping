@@ -157,12 +157,9 @@ def merge_skills_pddl(skills: Iterable[SkillPDDL], relevant_pvars: Iterable[z3.E
 	# Move irrelevant pvars to side effects and group skills by actions and effect types
 	hashed_skills = group_skills_by_effects(skills, rel_pvar_set)
 
-	print("Done getting skills according to effect")
-
 	# Merge skills that share a key
 	new_skills = merge_skills_inner(hashed_skills, solver)
 	
-	print("Done Quotienting!")
 	def sort_in_merge_skills(x):
 		"""
 		Used for profiling

@@ -35,9 +35,9 @@ from oo_scoping.scoping import scope
 from oo_scoping.writeback_sas import writeback_scoped_sas
 
 # Profile imports
-import cProfile
-import pstats
-from pstats import SortKey
+# import cProfile
+# import pstats
+# from pstats import SortKey
 
 # TODO: The translator may generate trivial derived variables which are always
 # true, for example if there ia a derived predicate in the input that only
@@ -773,23 +773,7 @@ if __name__ == "__main__":
         # Reserve about 10 MB of emergency memory.
         # https://stackoverflow.com/questions/19469608/
         emergency_memory = b"x" * 10**7
-
-        # PROFILE START
-        profile_path = "spedup_fd_profile"
-        # Path to save human-readable profile stats
-        profile_path_txt = profile_path + ".txt"
-        print(f"Human-readable profile output: {profile_path_txt}")
-        # Create folder containing profile path, if it does not yet exist
-        # make_dir(profile_path, is_file=True)
-        # Run the profiler and save the full, non-human-readable results
-        cProfile.run('main()', profile_path)
-        # Get the file object for outputting human-readable profile stats
-        stats_readable_file = open(profile_path_txt,"w")
-        # Get stats object from saves profile, and set it to stream output to stats_readable_file
-        p = pstats.Stats(profile_path, stream = stats_readable_file)
-        # Save output to stats_reasable_file
-        p.strip_dirs().sort_stats(SortKey.CUMULATIVE).print_stats()
-        # PROFILE END
+        main()
 
         # main()
     except MemoryError:

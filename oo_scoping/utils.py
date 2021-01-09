@@ -202,6 +202,10 @@ def get_possible_values(expr_list, obj, solver = None):
     return vals
 
 def get_atoms(*args: Union[bool, z3.ExprRef, z3.Goal], remove_constants = True) -> List[z3.ExprRef]:
+    """
+    Returns list of base-level z3 expressions from list of (potentially) high level z3 expressions.
+    Ex. 'a == b' would be returned as [a,b], where a and b are baselevel z3 expressions (intref, boolref, etc)
+    """
     #TODO remove duplicates
     atoms = []
     for expr in args:
@@ -213,27 +217,30 @@ def get_atoms(*args: Union[bool, z3.ExprRef, z3.Goal], remove_constants = True) 
         if len(children) == 0:
             atoms.append(expr)
         else:
-            # atoms = []
             for c in children:
                 atoms.extend(get_atoms(c))
     if remove_constants:
-        atoms_filtered = []
-        for a in atoms:
-            if not isinstance(a, z3.IntNumRef):
-                atoms_filtered.append(a)
-                # NOTE: We used to check this thing here, but believe that 
-                # it is impossible for this to be triggered (DEBUG)
-
-                # s = str(a)
-                # if s not in ["And", "Or"]:
-                #     atoms_filtered.append(a)
-                # else:
-                #     from IPython import embed; embed()
-                #     print(f"moo? {s}")
-        atoms = atoms_filtered
+        atoms = remove_constant_atoms(atoms)
     return atoms
 
+def remove_constant_atoms(atoms):
+    """
+    Remove z3 expressions that refer to a constant
+    """
+    atoms_filtered = []
+    for a in atoms:
+        if not isinstance(a, z3.IntNumRef):
+            atoms_filtered.append(a)
+            # NOTE: We used to check this thing here, but believe that 
+            # it is impossible for this to be triggered (DEBUG)
 
+            # s = str(a)
+            # if s not in ["And", "Or"]:
+            #     atoms_filtered.append(a)
+            # else:
+            #     from IPython import embed; embed()
+            #     print(f"moo? {s}")
+    return atoms_filtered
 
 def get_atoms_test():
     A = z3.Bool('A')

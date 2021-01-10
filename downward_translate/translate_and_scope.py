@@ -710,34 +710,36 @@ def main():
 
     sas_task = pddl_to_sas(task)
 
-    # This below block of code performs task scoping on the SAS+ domain.
-    str2var_dict = scoping_sas_parser.make_str2var_dict(sas_task.variables)
-    str_grounded_action_list = scoping_sas_parser.make_str_grounded_actions(sas_task.operators)
-    cae_triples = scoping_sas_parser.str_grounded_actions2skills(str_grounded_action_list,str2var_dict)
-    init_cond_list = scoping_sas_parser.make_init_cond_list(sas_task.init.values,str2var_dict)
-    goal_cond = scoping_sas_parser.make_goal_cond(sas_task.goal.pairs,str2var_dict)
-    rel_pvars, cl_pvars, rel_skills = scope(goals=goal_cond, skills=cae_triples, start_condition=init_cond_list)
-    # End task scoping block
-
     dump_statistics(sas_task)
 
     with timers.timing("Writing output SAS file"):
         with open(options.sas_file, "w") as output_file:
             sas_task.output(output_file)
 
-    # Make a set for rel pvars and rel actions so that we can lookup amongst these quickly during writeback
-    rel_skill_names = set()
-    for rel_skill in rel_skills:
-        if type(rel_skill.action) == str:
-            rel_skill_names.add(rel_skill.action[1:-1])
-        elif type(rel_skill.action) == list:
-            for skill_name in rel_skill.action:
-                rel_skill_names.add(skill_name[1:-1])
-    rel_pvars_names = set()
-    for pvar in rel_pvars:
-        rel_pvars_names.add(str(pvar)[:-2])
-    # Now, writeback the scoped SAS file
-    writeback_scoped_sas(rel_skill_names,rel_pvars_names,options.sas_file)
+    if options.scope:
+        # This below block of code performs task scoping on the SAS+ domain.
+        str2var_dict = scoping_sas_parser.make_str2var_dict(sas_task.variables)
+        str_grounded_action_list = scoping_sas_parser.make_str_grounded_actions(sas_task.operators)
+        cae_triples = scoping_sas_parser.str_grounded_actions2skills(str_grounded_action_list,str2var_dict)
+        init_cond_list = scoping_sas_parser.make_init_cond_list(sas_task.init.values,str2var_dict)
+        goal_cond = scoping_sas_parser.make_goal_cond(sas_task.goal.pairs,str2var_dict)
+        rel_pvars, cl_pvars, rel_skills = scope(goals=goal_cond, skills=cae_triples, start_condition=init_cond_list)
+    
+        # Make a set for rel pvars and rel actions so that we can lookup amongst these quickly during writeback
+        rel_skill_names = set()
+        for rel_skill in rel_skills:
+            if type(rel_skill.action) == str:
+                rel_skill_names.add(rel_skill.action[1:-1])
+            elif type(rel_skill.action) == list:
+                for skill_name in rel_skill.action:
+                    rel_skill_names.add(skill_name[1:-1])
+        rel_pvars_names = set()
+        for pvar in rel_pvars:
+            rel_pvars_names.add(str(pvar)[:-2])
+        # Now, writeback the scoped SAS file
+        writeback_scoped_sas(rel_skill_names,rel_pvars_names,options.sas_file)
+        # End task scoping block
+
 
     # TODO handle option for comparing against "Correct" answer
     if options.sas_file_correct is not None:

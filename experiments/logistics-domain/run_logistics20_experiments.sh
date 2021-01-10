@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Usage: (from repository root, run) ./experiments/logistics-domain/run_logistics_experiments.sh <num_trials> <path to FD installation>
-# Example: 
+# Example: ./experiments/logistics-domain/run_logistics20_experiments.sh 5 /Documents/downward/fast-downward.py
 TIMEFORMAT=%R
-declare -a sruntimes
+declare -a truntimes
 user_arg="$1"
 
 # The counter needs to be 1 + num_trials you want for the experiment, because the first trial is slightly slower due to needing to execute
@@ -13,6 +13,17 @@ until [ $COUNTER -lt 1 ]; do
     echo RUN_NUMBER $COUNTER
     exec 3>&1 4>&2
     foo=$( { time python downward_translate/translate_and_scope.py examples/IPC_domains_propositional/logistics00/domain.pddl examples/IPC_domains_propositional/logistics00/prob20.pddl --sas-file logistics20.sas 1>&3 2>&4; } 2>&1 )  # Captures time only.
+    exec 3>&- 4>&-
+    truntimes+=("$foo")
+    let COUNTER-=1
+done
+
+declare -a sruntimes
+COUNTER="$user_arg + 1"
+until [ $COUNTER -lt 1 ]; do
+    echo RUN_NUMBER $COUNTER
+    exec 3>&1 4>&2
+    foo=$( { time python downward_translate/translate_and_scope.py examples/IPC_domains_propositional/logistics00/domain.pddl examples/IPC_domains_propositional/logistics00/prob20.pddl --sas-file logistics20.sas --scope True 1>&3 2>&4; } 2>&1 )  # Captures time only.
     exec 3>&- 4>&-
     sruntimes+=("$foo")
     let COUNTER-=1
@@ -40,6 +51,10 @@ until [ $COUNTER -lt 1 ]; do
     let COUNTER-=1
 done
 
+echo
+echo TIME_TAKEN_FOR_TRANSLATING_FOR_EACH_TRIAL
+# Print the times taken for scoping valid trials
+echo "${truntimes[@]:1}"
 echo
 echo TIME_TAKEN_FOR_SCOPING_FOR_EACH_TRIAL
 # Print the times taken for scoping valid trials

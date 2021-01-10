@@ -32,6 +32,9 @@ def parse_args():
         "--sas-file-correct", default=None,
         help="path to the correctly scoped SAS output file. When not None, we check that our output matches this correct output. (default: %(default)s)")
     argparser.add_argument(
+        "--scope", default=False,
+        help="Whether or not to run scoping (default: %(default)s)")
+    argparser.add_argument(
         "--invariant-generation-max-time", default=300, type=int,
         help="max time for invariant generation (default: %(default)ds)")
     argparser.add_argument(

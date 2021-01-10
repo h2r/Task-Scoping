@@ -11,3 +11,4 @@ __pycache__/
 *.py[cod]
 oo_scoping.egg-info
 *.sas
+sas_plan

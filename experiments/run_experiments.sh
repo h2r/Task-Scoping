@@ -1,9 +1,8 @@
 #!/bin/bash
 
-COUNTER=10
+COUNTER=1
 until [ $COUNTER -lt 1 ]; do
     echo RUN_NUMBER $COUNTER
-    ./time_planner.sh
-    ./time_scoper_and_planner.sh
+    python ./downward_translate/translate_and_scope.py examples/IPC_domains_propositional/logistics00/domain.pddl examples/IPC_domains_propositional/logistics00/prob15.pddl --sas-file logistics15.sas
     let COUNTER-=1
 done

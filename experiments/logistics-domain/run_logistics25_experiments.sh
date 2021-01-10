@@ -56,7 +56,7 @@ echo TIME_TAKEN_FOR_TRANSLATING_FOR_EACH_TRIAL
 # Print the times taken for scoping valid trials
 echo "${truntimes[@]:1}"
 echo
-echo TIME_TAKEN_FOR_SCOPING_FOR_EACH_TRIAL
+echo TIME_TAKEN_FOR_TRANSLATING_AND_SCOPING_EACH_TRIAL
 # Print the times taken for scoping valid trials
 echo "${sruntimes[@]:1}"
 echo

@@ -12,7 +12,7 @@ COUNTER="$user_arg + 1"
 until [ $COUNTER -lt 1 ]; do
     echo RUN_NUMBER $COUNTER
     exec 3>&1 4>&2
-    foo=$( { time python downward_translate/translate_and_scope.py examples/IPC_domains_propositional/logistics00/domain.pddl examples/IPC_domains_propositional/logistics00/prob15.pddl --sas-file logistics15.sas 1>&3 2>&4; } 2>&1 )  # Captures time only.
+    foo=$( { time python downward_translate/translate_and_scope.py examples/IPC_domains_propositional/satellite/domain.pddl examples/IPC_domains_propositional/satellite/prob07.pddl --sas-file satellite07.sas 1>&3 2>&4; } 2>&1 )  # Captures time only.
     exec 3>&- 4>&-
     truntimes+=("$foo")
     let COUNTER-=1
@@ -23,7 +23,7 @@ COUNTER="$user_arg + 1"
 until [ $COUNTER -lt 1 ]; do
     echo RUN_NUMBER $COUNTER
     exec 3>&1 4>&2
-    foo=$( { time python downward_translate/translate_and_scope.py examples/IPC_domains_propositional/logistics00/domain.pddl examples/IPC_domains_propositional/logistics00/prob15.pddl --sas-file logistics15.sas --scope True 1>&3 2>&4; } 2>&1 )  # Captures time only.
+    foo=$( { time python downward_translate/translate_and_scope.py examples/IPC_domains_propositional/satellite/domain.pddl examples/IPC_domains_propositional/satellite/prob07.pddl --sas-file satellite07.sas --scope True 1>&3 2>&4; } 2>&1 )  # Captures time only.
     exec 3>&- 4>&-
     sruntimes+=("$foo")
     let COUNTER-=1
@@ -34,7 +34,7 @@ COUNTER="$user_arg + 1"
 until [ $COUNTER -lt 1 ]; do
     echo RUN_NUMBER $COUNTER
     exec 3>&1 4>&2
-    foo=$( { time python $2 --alias seq-opt-lmcut /home/nishanth/Documents/planutils_stuff/OO-Scoping-IPC/logistics15.sas 1>&3 2>&4; } 2>&1 )  # Captures time only.
+    foo=$( { time python $2 --alias seq-opt-lmcut /home/nishanth/Documents/planutils_stuff/OO-Scoping-IPC/satellite07.sas 1>&3 2>&4; } 2>&1 )  # Captures time only.
     exec 3>&- 4>&-
     fd_runtimes+=("$foo")
     let COUNTER-=1
@@ -45,7 +45,7 @@ COUNTER="$user_arg + 1"
 until [ $COUNTER -lt 1 ]; do
     echo RUN_NUMBER $COUNTER
     exec 3>&1 4>&2
-    foo=$( { time python $2 --alias seq-opt-lmcut /home/nishanth/Documents/planutils_stuff/OO-Scoping-IPC/logistics15_scoped.sas 1>&3 2>&4; } 2>&1 )  # Captures time only.
+    foo=$( { time python $2 --alias seq-opt-lmcut /home/nishanth/Documents/planutils_stuff/OO-Scoping-IPC/satellite07_scoped.sas 1>&3 2>&4; } 2>&1 )  # Captures time only.
     exec 3>&- 4>&-
     sfd_runtimes+=("$foo")
     let COUNTER-=1

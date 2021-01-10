@@ -29,6 +29,18 @@
 	Planet9
 	Planet10
 	Planet11
+	; Irrelevant Items
+	satellite4
+	satellite5
+	satellite6
+	instrument8
+	instrument9
+	instrument10
+	instrument11
+	instrument12
+	instrument13
+	
+
 )
 (:init
 	(satellite satellite0)
@@ -100,17 +112,44 @@
 	(direction Planet9)
 	(direction Planet10)
 	(direction Planet11)
+	; Conditionally irrelevant propositions
+	(instrument instrument8)
+	(instrument instrument9)
+	(instrument instrument10)
+	(instrument instrument11)
+	(instrument instrument12)
+	(instrument instrument13)	
+	(satellite satellite4)
+	(power_avail satellite4)
+	(pointing satellite4 Star3)
+	(on_board instrument8 satellite4)
+	(on_board instrument9 satellite4)
+	(satellite satellite5)
+	(power_avail satellite5)
+	(on_board instrument10 satellite5)
+	(on_board instrument11 satellite5)
+	(pointing satellite5 GroundStation2)
+	(satellite satellite6)
+	(power_avail satellite6)
+	(pointing satellite6 Star1)
+	(on_board instrument12 satellite6)
+	(on_board instrument13 satellite6)
 )
 (:goal (and
-	(pointing satellite1 Star1)
-	(pointing satellite2 Phenomenon5)
-	(have_image Phenomenon5 image0)
-	(have_image Star6 image1)
-	(have_image Star7 image0)
-	(have_image Planet8 image0)
-	(have_image Planet9 image3)
-	(have_image Planet10 image0)
-	(have_image Planet11 image2)
-))
+		(pointing satellite1 Star1)
+		(pointing satellite2 Phenomenon5)
+		(have_image Phenomenon5 image0)
+		(have_image Star6 image1)
+		(have_image Star7 image0)
+		(have_image Planet8 image0)
+		(have_image Planet9 image3)
+		(have_image Planet10 image0)
+		(have_image Planet11 image2)
+		; Causally linked goal facts
+		(pointing satellite4 Star3)
+		(pointing satellite5 GroundStation2)
+		(pointing satellite6 Star1)
+	   )
+)
 
 )

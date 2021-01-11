@@ -288,11 +288,11 @@
 	(at package1 s2)
 	(at package2 s5)
 	(at package3 s1)
-	(at package4 s7)
-	(at package5 s0)
-	(at package6 s11)
-	(at package7 s2)
-	(at package8 s0)
+	(at package4 s11) ; Note: If you change this one line, scoping will win against raw FD by quite a bit!
+	(at package5 s1)
+	(at package6 s8)
+	(at package7 s9)
+	(at package8 s10)
 	))
 
 

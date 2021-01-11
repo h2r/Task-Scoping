@@ -28,6 +28,6 @@
 ## Working
 - Logistics (problems and bash scripts created, ready to run experiments!)
 - Satellite (problems and bash scripts created, ready to run experiments!)
-- Driverlog (on prob01, without me doing ANYTHING, scoping just worked by default. It seems that adding packages that are already in the right position creates conditional irrelevance! We can blow this up arbitrarily to win even with LM-Cut heuristic!)
+- Driverlog (problems and bash scripts created, ready to run experiments!)
 - ZenoTravel(same as Driverlog, though still need to blow up)
 - NoMystery (prob01 shows conditional irrelevance, just need to blow up domain now!)

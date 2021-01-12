@@ -14,7 +14,6 @@
 		     (not (at-robby ?from))))
 
 
-
    (:action pick
        :parameters (?obj ?room ?gripper)
        :precondition  (and  (ball ?obj) (room ?room) (gripper ?gripper)

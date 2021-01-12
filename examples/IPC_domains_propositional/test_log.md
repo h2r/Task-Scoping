@@ -26,8 +26,8 @@
 - TPP (looks too simple, didn't put too much effort into checking)
 
 ## Working
-- Logistics (problems and bash scripts created, ready to run experiments!)
-- Satellite (problems and bash scripts created, ready to run experiments!)
-- Driverlog (problems and bash scripts created, ready to run experiments!)
-- ZenoTravel(same as Driverlog, though still need to blow up)
-- NoMystery (prob01 shows conditional irrelevance, just need to blow up domain now!)
+- Logistics
+- Satellite
+- Driverlog
+- ZenoTravel
+- NoMystery

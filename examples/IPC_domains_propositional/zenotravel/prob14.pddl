@@ -94,19 +94,22 @@
 	(flevel fl5)
 	(flevel fl6)
 )
+
 (:goal (and
-	(at plane2 city3)
+	; 358, 
+	(at plane2 city1)
 	(at plane4 city5)
 	(at plane5 city8)
 	(at person2 city8)
 	(at person3 city2)
 	(at person4 city7)
-	(at person5 city1)
+	; Causally-linked goal statements
+	(at person5 city6)
 	(at person6 city6)
-	(at person7 city5)
-	(at person8 city1)
-	(at person9 city5)
-	(at person10 city9)
+	(at person7 city7)
+	(at person8 city6)
+	(at person9 city4)
+	(at person10 city7)
 	))
 
 )

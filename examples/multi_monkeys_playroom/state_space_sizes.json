@@ -1,0 +1,12 @@
+{
+    "prob01.pddl": 32.0,
+    "prob01_scoped.pddl": 32.0,
+    "prob03.pddl": 2048.0,
+    "prob03_scoped.pddl": 2048.0,
+    "prob05.pddl": 131072.0,
+    "prob05_scoped.pddl": 131072.0,
+    "prob07.pddl": 8388608.0,
+    "prob07_scoped.pddl": 8388608.0,
+    "prob09.pddl": 536870912.0,
+    "prob09_scoped.pddl": 536870912.0
+}

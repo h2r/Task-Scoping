@@ -19,14 +19,14 @@ def errorfill(x, y, yerr, color=None, alpha_fill=0.3, ax=None, linestyle=None, p
 def plot():
     plt.figure(1)
 
-    domain_num = np.log10(np.array([2.68*(10 ** 16),4.29*(10 ** 17),6.87 * (10 ** 18),1.01 * (10 ** 20),31.76 * (10 ** 21)]))
+    domain_num = np.log10(np.array([16.0*(10 ** 32),10.24*(10 ** 34),65.546 * (10 ** 35),41.943 * (10 ** 37),26.844 * (10 ** 39)]))
 
-    planner_time = np.array([10.4528, 17.9689, 23.0667, 28.284, 29.4582])
-    planner_stddev = np.array([0.3371968762,0.4784970568,0.8237816661,0.3609755301,0.6369407438])
+    planner_time = np.array([8.38, 13.0, 19.2, 27.6, 38.7])
+    planner_stddev = np.array([0.3,0.4,0.3,0.8,0.7])
     planner_with_error = [planner_time - planner_stddev, planner_time + planner_stddev]
 
-    planner_and_scoper_time = np.array([10.8319,11.3166,11.7695,13.016,13.9471])
-    planner_and_scoper_stddev = np.array([0.4240753209,0.3971817944,0.5309587241,0.4835011203,0.2006885093])
+    planner_and_scoper_time = np.array([6.91,7.30,7.37,8.12,8.53])
+    planner_and_scoper_stddev = np.array([0.07,0.08,0.2,0.05,0.04])
     pands_with_error = [planner_and_scoper_time - planner_and_scoper_stddev, planner_and_scoper_time + planner_and_scoper_stddev]
 
     errorfill(domain_num, planner_time, yerr=planner_with_error, color='red', linestyle='-', plt_label='ENHSP-2020', marker='o')

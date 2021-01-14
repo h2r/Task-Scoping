@@ -188,7 +188,6 @@
 	( = ( block-hits woolb3 ) 0 )
 	(not (block-present woolb3))
 	( = ( wool-color woolb3 ) 1 )
-	(= (agent-num-wool-block steve) 4)
 	(= (x bed1) 0)
 	(= (y bed1) 0)
 	(= (z bed1) 0)

@@ -418,7 +418,7 @@ def make_instance(start_with_pick = True, use_bedrock_boundaries = False, add_ir
     object_names["agent"] = ["steve"]
     object_names["diamond-axe"] = ["old-pointy"]
     object_names["orchid-flower"] = ["of0","of1","of2"]
-    # object_names["wooden-block"] = ["wb0","wb1"]
+    object_names["wooden-block"] = ["wb0","wb1"]
     # object_names["wooden-block"] = ["wb0","wb1","wb2","wb3","wb4","wb5","wb6","wb7","wb8","wb9"]
     object_names["wooden-block"] = ["wb0","wb1","wb2","wb3","wb4","wb5","wb6","wb7",
                                     "wb8","wb9","wb10","wb11","wb12","wb13","wb14","wb15","wb16",
@@ -550,8 +550,6 @@ def make_instance(start_with_pick = True, use_bedrock_boundaries = False, add_ir
         else:
             init_conds.append(f"( = ( wool-color {s} ) 1 )")
         i += 1
-
-    init_conds.append("(= (agent-num-wool-block steve) 4)")
 
     for s in object_names["bed"]:
         init_conds.extend(get_init_location_conds((0,0,0),s))

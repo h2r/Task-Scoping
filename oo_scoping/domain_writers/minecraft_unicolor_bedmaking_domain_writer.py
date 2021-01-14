@@ -419,11 +419,6 @@ def make_instance(start_with_pick = True, use_bedrock_boundaries = False, add_ir
     object_names["diamond-axe"] = ["old-pointy"]
     object_names["orchid-flower"] = ["of0","of1","of2"]
     object_names["wooden-block"] = ["wb0","wb1"]
-    # object_names["wooden-block"] = ["wb0","wb1","wb2","wb3","wb4","wb5","wb6","wb7","wb8","wb9"]
-    object_names["wooden-block"] = ["wb0","wb1","wb2","wb3","wb4","wb5","wb6","wb7",
-                                    "wb8","wb9","wb10","wb11","wb12","wb13","wb14","wb15","wb16",
-                                    "wb17","wb18","wb19","wb20","wb21","wb22","wb23","wb24","wb25",
-                                    "wb26","wb27","wb28","wb29","wb30"]
     object_names["wool-block"] = ["woolb1", "woolb2","woolb3"]
     object_names["bed"] = ["bed1"]
     if add_irrel_items:
@@ -438,32 +433,8 @@ def make_instance(start_with_pick = True, use_bedrock_boundaries = False, add_ir
     # The first block is the only non-house block that will be needed to craft
     # wooden planks
     block_locations = OrderedDict()
-    block_locations["wooden-block"] = [  (7,7,0),#(2,7,0),
-                                        (6,7,0), (8,7,0),
-                                        (5,8,0), (9,8,0),
-                                        (5,9,0), (9,9,0),
-                                        (6,10,0),(7,11,0),(8,10,0),
-                                        (6,7,1), (8,7,1),
-                                        (5,8,1), (9,8,1),
-                                        (5,9,1), (9,9,1),
-                                        (6,10,1),(7,11,1),(8,10,1),
-                                        (6,7,2),(7,7,2),(8,7,2),
-                                        (6,8,2),(8,8,2),
-                                        (6,9,2),(8,9,2),
-                                        (6,10,2),(8,10,2),
-                                        (6,10,2),(7,10,2),(8,10,2) ]
-    # block_locations["wooden-block"] = [  (7,7,0),#(2,7,0),
-    #                                     (6,7,0), (8,7,0),
-    #                                     (5,8,0), (9,8,0),
-    #                                     (5,9,0), (9,9,0),
-    #                                     (6,10,0),(7,11,0),(8,10,0),
-    #                                     ]
-    # block_locations["wooden-block"] = [  (7,7,0),#(2,7,0),
-    #                                     (6,7,0), (8,7,0),
-    #                                     (6,8,0), (8,8,0),
-    #                                     (6,9,0), (7,9,0), (8,9,0)]
-    # block_locations["wooden-block"] = [(7,12,0),
-    #                                    (7,13,0)]
+    block_locations["wooden-block"] = [(7,12,0),
+                                       (7,13,0)]
     
     # Start of setting up of initial conditions
     init_conds = [f"(agent-alive {agent_name})"]
@@ -545,7 +516,7 @@ def make_instance(start_with_pick = True, use_bedrock_boundaries = False, add_ir
     for s in object_names["wool-block"]:
         init_conds.append(f"( = ( block-hits {s} ) 0 )")
         init_conds.append(f"(not (block-present {s}))")
-        if i == 0 or i == 1:
+        if i == 0 or i == 1 or i == 2:
             init_conds.append(f"( = ( wool-color {s} ) 0 )")
         else:
             init_conds.append(f"( = ( wool-color {s} ) 1 )")

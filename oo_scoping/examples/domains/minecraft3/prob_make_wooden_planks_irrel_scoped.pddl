@@ -8,7 +8,7 @@
 	of0 of1 of2 - orchid-flower
 	wb0 wb1 - wooden-block
 	woolb1 woolb2 woolb3 - wool-block
-	bed1 - bed
+;	bed1 - bed
 	dmd0 dmd1 dmd2 dmd3 dmd4 - diamond
 	stick0 stick1 stick2 stick3 stick4 - stick
 ;	bs0 bs1 bs2 bs3 bs4 bs5 bs6 bs7 bs8 bs9 bs10 bs11 bs12 bs13 bs14 bs15 bs16 bs17 bs18 bs19 - birch-sapling
@@ -47,12 +47,12 @@
 	( = ( block-hits woolb3 ) 0 )
 	(not (block-present woolb3))
 	( = ( wool-color woolb3 ) 0 )
-	(= (x bed1) 0)
-	(= (y bed1) 0)
-	(= (z bed1) 0)
-	( = ( block-hits bed1 ) 0 )
-	( = ( bed-color bed1 ) 0 )
-	(not (block-present bed1))
+;	(= (x bed1) 0)
+;	(= (y bed1) 0)
+;	(= (z bed1) 0)
+;	( = ( block-hits bed1 ) 0 )
+;	( = ( bed-color bed1 ) 0 )
+;	(not (block-present bed1))
 	(= (agent-num-bed steve) 0)
 	( = ( item-hits of0 ) 0 )
 	( = ( item-hits of1 ) 0 )
@@ -279,12 +279,7 @@
 )
 
 
-(:goal (and 
-                    (= (x bed1) 7)
-                    (= (y bed1) 9)
-                    (= (z bed1) 0)
-                    (= (bed-color bed1) 1)
-            
+(:goal (and (>= (agent-num-wooden-planks steve) 3)
        (not (block-present wb0))
                 (block-present wb1))
 )

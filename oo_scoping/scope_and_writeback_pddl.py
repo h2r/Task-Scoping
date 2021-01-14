@@ -28,7 +28,7 @@ def scope_pddl(domain, problem):
     init_cond_list = parser.get_init_cond_list()
 
     # Run the scoper on the constructed goal, skills and initial condition
-    rel_pvars, cl_pvars, rel_skills = scope(goals=goal_cond, skills=skill_list, start_condition=init_cond_list,verbose=2)
+    rel_pvars, cl_pvars, rel_skills = scope(goals=goal_cond, skills=skill_list, start_condition=init_cond_list,verbose=0)
     
     all_pvars = []
     for s in skill_list:

@@ -73,7 +73,6 @@ def get_unlinked_pvars(skills, causal_links, dummy_goal, solver):
 	# Remove duplicate precs. This (hopefully) speeds up the algorithm
 	precs = set(precs)
 	for prec in precs:
-		# from IPython import embed; embed()
 		get_unlinked_pvars_inner_check(solver, pvars_rel_new, prec)
 	pvars_rel_new = get_rel_pvars_new(pvars_rel_new)
 	solver.pop()

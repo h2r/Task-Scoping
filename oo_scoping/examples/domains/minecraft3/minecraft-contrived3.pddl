@@ -215,17 +215,17 @@
 (:action apply-blue-dye
  :parameters (?ag - agent ?woolb - wool-block)
  :precondition (and (not (block-present ?woolb)) (>= (agent-num-wool-block ?ag) 1) (>= (agent-num-blue-dye ?ag) 1))
- :effect (and (decrease (agent-num-blue-dye ?ag) 1) (assign (wool-color ?woolb) 0)))
+ :effect (and (decrease (agent-num-blue-dye ?ag) 1) (assign (wool-color ?woolb) 1)))
 
 
 
 (:action craft-bed-blue-dye
  :parameters (?ag - agent ?woolb1 - wool-block ?woolb2 - wool-block ?woolb3 - wool-block ?bd - bed)
  :precondition (and (not (block-present ?woolb1)) (not (block-present ?woolb2)) (not (block-present ?woolb3)) 
-                (= (wool-color ?woolb1) 0) (= (wool-color ?woolb2) 0) (= (wool-color ?woolb3) 0) 
+                (= (wool-color ?woolb1) 1) (= (wool-color ?woolb2) 1) (= (wool-color ?woolb3) 1) 
                 (not (= ?woolb1 ?woolb2)) (not (= ?woolb1 ?woolb3)) (not (= ?woolb2 ?woolb3))
                 (not (block-present ?bd)) (>= (agent-num-wool-block ?ag) 3) (>= (agent-num-wooden-planks ?ag) 3))
- :effect (and (decrease (agent-num-wooden-planks ?ag) 3) (decrease (agent-num-wool-block ?ag) 3) (increase (agent-num-bed ?ag) 1) (assign (bed-color ?bd) 0)))
+ :effect (and (decrease (agent-num-wooden-planks ?ag) 3) (decrease (agent-num-wool-block ?ag) 3) (increase (agent-num-bed ?ag) 1) (assign (bed-color ?bd) 1)))
 
 
 

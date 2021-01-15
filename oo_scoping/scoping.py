@@ -137,6 +137,8 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 		# Get pvars not guaranteed by causal links
 		pvars_rel_new = get_unlinked_pvars(skills_rel, causal_links, dummy_goal, solver)
 
+		# from IPython import embed; embed()
+
 		converged = (pvars_rel == pvars_rel_new)
 
 		pvars_rel = pvars_rel_new
@@ -153,7 +155,6 @@ def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[Skill
 	# Remove the dummy pvar and skill
 	pvars_rel.remove(dummy_goal)
 	skills_rel = [x for x in skills_rel if dummy_goal_et not in x.effects]
-	# TODO set pvars_cl to only include pvars that matter in preconditions of rel_skills
 	skills_conds_pvars = []
 	for s in skills_rel:
 		skills_conds_pvars.extend(get_atoms(s.precondition))

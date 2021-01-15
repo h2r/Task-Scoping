@@ -306,31 +306,6 @@
 ;            )
 ;    )
 
-;(:action hit-wool-block
-;    :parameters (?ag - agent ?b - wool-block)
-;    :precondition (and (= (x ?b) (x ?ag))
-;                        (= (y ?b) (+ (y ?ag) 1))
-;                        (= (z ?b) (z ?ag))
-;                        (block-present ?b)
-;                        (< (block-hits ?b) 2)
-;                        ( >= ( agent-num-diamond-axe ?ag ) 1 ))
-;    :effect (and (increase (block-hits ?b) 1))
-;    )
-
-;(:action destroy-wool-block
-;    :parameters (?ag - agent ?b - wool-block)
-;    :precondition (and (= (x ?b) (x ?ag))
-;                        (= (y ?b) (+ (y ?ag) 1))
-;                        (= (z ?b) (z ?ag))
-;                        (block-present ?b)
-;                        (= (block-hits ?b) 2)
-;                        ( >= ( agent-num-diamond-axe ?ag ) 1 ))
-;    :effect (and (not (block-present ?b))
-;                 (increase (agent-num-wool-block ?ag) 1)
-;                 (assign (block-hits ?b) 0)
-;            )
-;    )
-
 ;(:action hit-bed
 ;    :parameters (?ag - agent ?b - bed)
 ;    :precondition (and (= (x ?b) (x ?ag))

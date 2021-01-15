@@ -399,7 +399,8 @@ def make_domain():
 
 
     for block_type in inverse_type_hierarchy["destructible-block"]:
-        actions.extend(get_destructible_block_action(block_type, needed_tool = "diamond-axe"))
+        if block_type != "wool-block":
+            actions.extend(get_destructible_block_action(block_type, needed_tool = "diamond-axe"))
 
     for item_type in inverse_type_hierarchy["destructible-item"]:
         actions.extend(get_destructible_item_action(item_type))
@@ -492,8 +493,10 @@ def make_instance(start_with_pick = True, use_bedrock_boundaries = False, add_ir
     y_min, y_max = 0, 12
     z_min, z_max = 0, 1
     
-    # Position in which everything worked (7,3,0), (7,2,0) with opt-blind for first 2 tasks and opt-hrmax for bedmaking
-    agent_start_pos = (-3,-3,0)
+    # At position (7,0,0), scoped bedmaking takes 726807, scoped planking takes 730, and scoped wool dyeing takes 1115
+    #                                                       unscoped takes 915, and unscoped takes 592873
+    # agent_start_pos = (7,0,0)
+    agent_start_pos = (3,0,0)
     init_conds.extend(get_init_location_conds(agent_start_pos,agent_name))
     inventory_count = OrderedDict()
     for item_type in item_types:
@@ -658,16 +661,16 @@ if __name__ == "__main__":
     prob_s, malmo_s = make_instance(start_with_pick=True, goal_var="dye_wool")
     with open(f"{domains_dir}/minecraft3/prob_get_dyed_wool_irrel.pddl","w") as f:
         f.write(prob_s)
-    # with open(f"{domains_dir}/malmo/problems/prob_dyed_wool.xml","w") as f:
-    #     f.write(malmo_s)
+    with open(f"{domains_dir}/malmo/problems/prob_dyed_wool.xml","w") as f:
+        f.write(malmo_s)
 
     # Create a problem file for dye_wool that excludes all the irrelevant stuff
     prob_s, malmo_s = make_instance(start_with_pick=True, goal_var="dye_wool", add_irrel_items=False)
     with open(f"{domains_dir}/minecraft3/prob_get_dyed_wool_rel.pddl","w") as f:
         f.write(prob_s)
     # Write MALMO viz without saplings so that they don't grow and look ugly...
-    with open(f"{domains_dir}/malmo/problems/prob_dyed_wool.xml","w") as f:
-        f.write(malmo_s)
+    # with open(f"{domains_dir}/malmo/problems/prob_dyed_wool.xml","w") as f:
+    #     f.write(malmo_s)
 
     # Create problem file for get_planks task
     prob_s, malmo_s = make_instance(start_with_pick=True, goal_var="get_planks")

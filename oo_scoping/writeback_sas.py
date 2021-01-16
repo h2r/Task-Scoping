@@ -35,13 +35,16 @@ def writeback_scoped_sas(rel_ops, rel_pvars, problem_file_path):
         i_line = 0
         while i_line < len(sas_domain_lines):
             if "begin_operator" in sas_domain_lines[i_line]:
+                # Replace the count of operators.
+                # We do this here because the operator count is the line before the first operator.
                 if not first_operator_encountered:
                     scoped_domain_lines.pop(-1)
                     scoped_domain_lines.append(str(len(rel_ops))+'\n')
                     first_operator_encountered = True
-                # If the next line after a begin_variable statement is
+                # If the next line after a begin_operator statement is
                 # not in the rel_ops set, then just keep skipping lines until
                 # you hit the next end_line
+                # Why do we stop at -1?
                 if sas_domain_lines[i_line + 1][:-1] not in rel_ops:
                     skip_lines = True
                 else:

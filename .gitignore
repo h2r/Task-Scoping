@@ -12,3 +12,4 @@ __pycache__/
 oo_scoping.egg-info
 *.sas
 sas_plan
+ignore

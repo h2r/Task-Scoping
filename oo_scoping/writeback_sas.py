@@ -45,6 +45,7 @@ def writeback_scoped_sas(rel_ops, rel_pvars, problem_file_path):
                 # not in the rel_ops set, then just keep skipping lines until
                 # you hit the next end_line
                 # Note: we stop at -1 to exclude the '\n' character
+                # This may cause odd bugs depending on OS or changes to the SAS+ writer. It may be safer to use .strip()
                 if sas_domain_lines[i_line + 1][:-1] not in rel_ops:
                     skip_lines = True
                 else:

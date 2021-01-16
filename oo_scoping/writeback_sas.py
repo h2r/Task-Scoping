@@ -44,7 +44,7 @@ def writeback_scoped_sas(rel_ops, rel_pvars, problem_file_path):
                 # If the next line after a begin_operator statement is
                 # not in the rel_ops set, then just keep skipping lines until
                 # you hit the next end_line
-                # Why do we stop at -1?
+                # Note: we stop at -1 to exclude the '\n' character
                 if sas_domain_lines[i_line + 1][:-1] not in rel_ops:
                     skip_lines = True
                 else:

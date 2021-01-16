@@ -741,7 +741,6 @@ def main():
         # End task scoping block
 
 
-    # TODO handle option for comparing against "Correct" answer
     if options.sas_file_correct is not None:
         with open(options.sas_file_correct, "r") as f:
             sas_correct_str = f.read()

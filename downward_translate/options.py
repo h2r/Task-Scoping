@@ -4,10 +4,11 @@ import sys
 
 def parse_args():
     argparser = argparse.ArgumentParser()
+    # Made these two args optional so that we can run translate_and_scope.main_from_other_script()
     argparser.add_argument(
-        "domain", help="path to domain pddl file")
+        "domain", help="path to domain pddl file", nargs="?", default=None)
     argparser.add_argument(
-        "task", help="path to task pddl file")
+        "task", help="path to task pddl file", nargs="?", default=None)
     argparser.add_argument(
         "--relaxed", dest="generate_relaxed_task", action="store_true",
         help="output relaxed task (no delete effects)")

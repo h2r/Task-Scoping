@@ -1,0 +1,15 @@
+python downward_translate/translate_and_scope.py examples/IPC_domains_propositional/driverlog/domain.pddl examples/IPC_domains_propositional/driverlog/prob15.pddl --sas-file driverlog15.sas --scope True
+python downward_translate/translate_and_scope.py examples/IPC_domains_propositional/driverlog/domain.pddl examples/IPC_domains_propositional/driverlog/prob16.pddl --sas-file driverlog16.sas --scope True
+python downward_translate/translate_and_scope.py examples/IPC_domains_propositional/driverlog/domain.pddl examples/IPC_domains_propositional/driverlog/prob17.pddl --sas-file driverlog17.sas --scope True
+python downward_translate/translate_and_scope.py examples/IPC_domains_propositional/gripper/domain.pddl examples/IPC_domains_propositional/gripper/prob04.pddl --sas-file gripper04.sas --scope True
+python downward_translate/translate_and_scope.py examples/IPC_domains_propositional/gripper/domain.pddl examples/IPC_domains_propositional/gripper/prob05.pddl --sas-file gripper05.sas --scope True
+python downward_translate/translate_and_scope.py examples/IPC_domains_propositional/gripper/domain.pddl examples/IPC_domains_propositional/gripper/prob06.pddl --sas-file gripper06.sas --scope True
+python downward_translate/translate_and_scope.py examples/IPC_domains_propositional/logistics00/domain.pddl examples/IPC_domains_propositional/logistics00/prob15.pddl --sas-file logistics15.sas --scope True
+python downward_translate/translate_and_scope.py examples/IPC_domains_propositional/logistics00/domain.pddl examples/IPC_domains_propositional/logistics00/prob20.pddl --sas-file logistics20.sas --scope True
+python downward_translate/translate_and_scope.py examples/IPC_domains_propositional/logistics00/domain.pddl examples/IPC_domains_propositional/logistics00/prob25.pddl --sas-file logistics25.sas --scope True
+python downward_translate/translate_and_scope.py examples/IPC_domains_propositional/satellite/domain.pddl examples/IPC_domains_propositional/satellite/prob05.pddl --sas-file satellite05.sas --scope True
+python downward_translate/translate_and_scope.py examples/IPC_domains_propositional/satellite/domain.pddl examples/IPC_domains_propositional/satellite/prob06.pddl --sas-file satellite06.sas --scope True
+python downward_translate/translate_and_scope.py examples/IPC_domains_propositional/satellite/domain.pddl examples/IPC_domains_propositional/satellite/prob07.pddl --sas-file satellite07.sas --scope True
+python downward_translate/translate_and_scope.py examples/IPC_domains_propositional/zenotravel/domain.pddl examples/IPC_domains_propositional/zenotravel/prob10.pddl --sas-file zenotravel10.sas --scope True
+python downward_translate/translate_and_scope.py examples/IPC_domains_propositional/zenotravel/domain.pddl examples/IPC_domains_propositional/zenotravel/prob12.pddl --sas-file zenotravel12.sas --scope True
+python downward_translate/translate_and_scope.py examples/IPC_domains_propositional/zenotravel/domain.pddl examples/IPC_domains_propositional/zenotravel/prob14.pddl --sas-file zenotravel14.sas --scope True

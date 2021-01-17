@@ -33,6 +33,10 @@ import variable_order
 import scoping_sas_parser
 from oo_scoping.scoping import scope
 from oo_scoping.writeback_sas import writeback_scoped_sas
+from oo_scoping.utils import get_atoms
+from oo_scoping.skill_classes import SkillPDDL
+from oo_scoping.paths import get_effectively_relevant_fluents_file_path, get_scoped_file_path
+from typing import Iterable
 
 # Profile imports
 # import cProfile
@@ -724,6 +728,7 @@ def main():
         init_cond_list = scoping_sas_parser.make_init_cond_list(sas_task.init.values,str2var_dict)
         goal_cond = scoping_sas_parser.make_goal_cond(sas_task.goal.pairs,str2var_dict)
         rel_pvars, cl_pvars, rel_skills = scope(goals=goal_cond, skills=cae_triples, start_condition=init_cond_list)
+        sas_file_scoped = get_scoped_file_path(options.sas_file)
     
         # Make a set for rel pvars and rel actions so that we can lookup amongst these quickly during writeback
         rel_skill_names = set()
@@ -736,12 +741,46 @@ def main():
         rel_pvars_names = set()
         for pvar in rel_pvars:
             rel_pvars_names.add(str(pvar)[:-2])
-        # TODO Get 'effectively relevant' pvars - pvars that appear in at least one precondition and at least one effect. 
+
+        if options.write_erfs:
+        # Get 'effectively relevant' pvars - pvars that appear in at least one precondition and at least one effect. 
         # These are used to estimate size of effective state space of scoped domain.
         # We do this because we do not in fact remove fluents from the sas+ domain, we only remove operators
+            def get_effectively_relevant_pvars(cae_triples: Iterable[SkillPDDL], action_names = None):
+                """
+                :param cae_triples: operators from original domain
+                :param action_names: names of operators in scoped domain
+                Return 'effectively relevant' pvars - pvars that are both conditioned on and affected.
+                The reasoning is that if a pvar is never conditioned on, we don't care about it. If it is never affected, we can't care about it.
+                Hopefully this let's us estimate the effective state space of a domain.
+                """
+                affected_pvars_str = []
+                conditioned_pvars_str = []
+                for cae in cae_triples:
+                    if action_names is None or cae.action in action_names:
+                        for eff in cae.all_effects: # cae is concrete, so we could just use .effects
+                            affected_pvars_str.append(eff.pvar_str)
+                            conditioned_pvars_str.extend(get_atoms(cae.precondition))
+                affected_pvars_str = set(affected_pvars_str)
+                conditioned_pvars_str = set(map(str,conditioned_pvars_str))
+                effectively_relevant_pvars = sorted([x for x in affected_pvars_str if x in conditioned_pvars_str])
+                return effectively_relevant_pvars
+
+            erf = get_effectively_relevant_pvars(cae_triples)
+            with open(get_effectively_relevant_fluents_file_path(options.sas_file), "w") as f:
+                f.write("\n".join(erf))
+
+            # Add parentheses around skill name to match with cae action names
+            rel_skill_names_with_parens = ["(" + a + ")" for a in rel_skill_names]
+            erf_scoped = get_effectively_relevant_pvars(cae_triples, rel_skill_names_with_parens)
+            with open(get_effectively_relevant_fluents_file_path(sas_file_scoped), "w") as f:
+                f.write("\n".join(erf_scoped))
+                
+            print(f"Original efectively relevant fluents: {len(erf)}")
+            print(f"Scoped efectively relevant fluents: {len(erf_scoped)}")
 
         # Now, writeback the scoped SAS file
-        writeback_scoped_sas(rel_skill_names,rel_pvars_names,options.sas_file)
+        writeback_scoped_sas(rel_skill_names,rel_pvars_names,options.sas_file, sas_file_scoped)
         # End task scoping block
 
 

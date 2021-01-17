@@ -12,7 +12,7 @@ def prune_goal_conds(i_line, sas_domain_lines, rel_pvars):
         i_line += 1
     return goal_cond_list, i_line
 
-def writeback_scoped_sas(rel_ops, rel_pvars, problem_file_path):
+def writeback_scoped_sas(rel_ops, rel_pvars, problem_file_path, scoped_path = None):
     """
     Function that writes out a scoped SAS+ problem file
 
@@ -117,5 +117,7 @@ def writeback_scoped_sas(rel_ops, rel_pvars, problem_file_path):
 
     # The filepath will always be <file_name>.sas at the end, so create a file
     # named <file_name>_scoped.sas
-    with open(problem_file_path[:-4]+'_scoped'+problem_file_path[-4:],'w+') as f_scoped:
+    if scoped_path is None:
+        scoped_path = problem_file_path[:-4]+'_scoped'+problem_file_path[-4:]
+    with open(scoped_path,'w+') as f_scoped:
         f_scoped.writelines(scoped_domain_lines)

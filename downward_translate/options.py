@@ -60,7 +60,7 @@ def parse_args():
         "--dump-task", action="store_true",
         help="dump human-readable SAS+ representation of the task")
     argparser.add_argument(
-        "--write-erf", default=False,
+        "--write-erfs", default=False,
         help="Whether or not to save file listing effectively relevant fluents (default: %(default)s)")
     return argparser.parse_args()
 

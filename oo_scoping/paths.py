@@ -14,3 +14,7 @@ def get_scoped_file_path(unscoped_file):
 def add_path_suffix(p, s):
     basename, ext = os.path.splitext(p)
     return basename + s + ext
+
+def replace_extension(p, s):
+    basename, ext = os.path.splitext(p)
+    return basename + "." + s

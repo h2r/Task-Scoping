@@ -764,7 +764,12 @@ def main():
                 affected_pvars_str = set(affected_pvars_str)
                 conditioned_pvars_str = set(map(str,conditioned_pvars_str))
                 effectively_relevant_pvars = sorted([x for x in affected_pvars_str if x in conditioned_pvars_str])
-                return effectively_relevant_pvars
+                erf = []
+                for x in effectively_relevant_pvars:
+                    if x[-2:] == "()":
+                        x = x[:-2]
+                    erf.append(x)
+                return erf
 
             erf = get_effectively_relevant_pvars(cae_triples)
             with open(get_effectively_relevant_fluents_file_path(options.sas_file), "w") as f:

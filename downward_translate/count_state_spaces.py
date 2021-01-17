@@ -3,7 +3,7 @@ import os, re, json
 from oo_scoping.paths import repo_dir, get_effectively_relevant_fluents_file_path, get_scoped_file_path, replace_extension, add_path_suffix
 from translate_and_scope import main_from_other_script
 import pandas as pd
-
+# This file is a mess. It could be much cleaner - it's conceptually pretty simple.
 
 def get_var_sizes(sas_file = None, sas_str = None):
     # Read file if it is passed instead of string
@@ -137,5 +137,39 @@ def merge_statespace_jsons():
         # json.dump(sizes_dict, f, indent=4)
     
 
+def get_operator_counts():
+    cmds_path = f"{repo_dir}/downward_translate/scope_cmds.txt"
+    with open(cmds_path, "r") as f:
+        cmds = f.read().splitlines()
+
+    df_sizes = pd.read_csv(f"{repo_dir}/examples/sas_generated/all_sizes.csv", index_col="task")
+    for cmd_str in cmds:
+        tas_kwargs = cmd2kwargs(cmd_str)
+        print(cmd_str)
+        # Change output path to a subdirectory for cleanliness
+        tas_kwargs["sas_file"] = repo_dir + "/examples/sas_generated/" + tas_kwargs["sas_file"]
+        tas_kwargs["write_erfs"] = True
+        print(tas_kwargs)
+        taskname, _ = os.path.splitext(os.path.split(tas_kwargs["sas_file"])[1])
+        unscoped_operators = get_operator_count(tas_kwargs["sas_file"])
+        scoped_operators = get_operator_count(get_scoped_file_path(tas_kwargs["sas_file"]))
+        print(f"Unscoped operators: {unscoped_operators}")
+        print(f"Scoped operators: {scoped_operators}")
+        df_sizes.loc[taskname, "unscoped_operators"] = unscoped_operators
+        df_sizes.loc[taskname, "scoped_operators"] = scoped_operators
+        # # Get effectively relevant fluents, both scoped and unscoped
+        # size_path = replace_extension(add_path_suffix(tas_kwargs["sas_file"], "_sizes"), "json")
+        # with open(size_path, "r") as f:
+        #     size_dict = json.load(f)
+        # for k, v in size_dict.items():
+        #     df_sizes.loc[taskname, k] = v
+    df_sizes.to_csv(f"{repo_dir}/examples/sas_generated/all_sizes.csv", index=True)
+
+def get_operator_count(sas_file):
+    with open(sas_file, "r") as f:
+        sas_str = f.read()
+    return int(re.search("([0-9]+)\nbegin_operator", sas_str).groups()[0])
+
 if __name__ == "__main__":
-    merge_statespace_jsons()
+    # merge_statespace_jsons()
+    get_operator_counts()

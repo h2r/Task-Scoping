@@ -736,6 +736,10 @@ def main():
         rel_pvars_names = set()
         for pvar in rel_pvars:
             rel_pvars_names.add(str(pvar)[:-2])
+        # TODO Get 'effectively relevant' pvars - pvars that appear in at least one precondition and at least one effect. 
+        # These are used to estimate size of effective state space of scoped domain.
+        # We do this because we do not in fact remove fluents from the sas+ domain, we only remove operators
+
         # Now, writeback the scoped SAS file
         writeback_scoped_sas(rel_skill_names,rel_pvars_names,options.sas_file)
         # End task scoping block

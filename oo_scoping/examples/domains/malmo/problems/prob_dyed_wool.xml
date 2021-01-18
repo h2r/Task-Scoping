@@ -111,7 +111,7 @@
         <AgentSection mode="Creative">
             <Name>The Watcher</Name>
             <AgentStart>
-            <Placement x="3.5" y="209" z="-10" pitch="10" yaw="360"/>
+            <Placement x="3.5" y="209" z="-15" pitch="10" yaw="90"/>
             </AgentStart>
             <AgentHandlers>
             <ContinuousMovementCommands turnSpeedDegs="360"/>

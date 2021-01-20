@@ -3,7 +3,7 @@
 # Usage: (from repository root, run) ./experiments/minecraft-domain/run_minecraftPlankMaking_experiments.sh <num_trials> <optional scope_true_or_false>
 # If the second (optional) arg is not provided, only planning commands will be run
 # if the second arg is the string "scope_true" (or really anything that's not null), this script will run scoping num_trials times and report times
-# Example:  ./experiments/minecraft-domain/run_minecraftPlankMaking_experiments.sh 5 scope_tru
+# Example:  ./experiments/minecraft-domain/run_minecraftPlankMaking_experiments.sh 5 scope_true
 TIMEFORMAT=%R
 user_arg="$1"
 

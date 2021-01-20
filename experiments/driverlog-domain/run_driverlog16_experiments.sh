@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Usage: (from repository root, run) ./experiments/logistics-domain/run_logistics_experiments.sh <num_trials> <path to FD installation>
-# Example: ./experiments/logistics-domain/run_logistics16_experiments.sh 5 /Documents/downward/fast-downward.py
+# Usage instructions: see README.md
+
 TIMEFORMAT=%R
 declare -a truntimes
 user_arg="$1"

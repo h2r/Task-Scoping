@@ -691,19 +691,15 @@ if __name__ == "__main__":
     with open(f"{domains_dir}/minecraft3/prob_make_bed_rel.pddl","w") as f:
         f.write(prob_s)
 
-# TODO: 
-# Start debugging the PDDL domain
-    # Sub-tasks
-    # 1. Dye 1 wool
-    # 2. Mine the wood block and craft 3 wood planks
-    # 3. Craft a bed and place it in the house!
-
-
-# Things to do now:
-# IMPORTANT notes: 
-
-# 1. Try to make it such that blocks cannot be dropped atop other blocks?
-# 2. Right now, there are no wooden plank blocks or dye items instantiated in the problem.
-# As a result, even though the agent can increase its count of these items, it can't actually
-# drop them. Consider remedying this.. 
-# 3. Right now, beds only take up one block of space in the PDDL version
+# NOTE:
+# For the state space counts for these problems, we assume a 12 x 12 grid even though the area is
+# technically infinite.
+# The state-space count is done rather simply: for every binary fluent, we multiply the count by 2,
+# and for every numeric fluent, we multiply the count by the number of values the fluent can take on
+# For the original, irrel domain for all tasks, the state-space count calculation is thus:
+# =(2^51)*(144^52)*5*2*5*3*20*12*2*6*3*2*(4!)*(2!)
+# For scoped wool_dyeing, the count is:
+# =(2^8)*(144^9)*3*2*6*3*2*(4!) [8 objects, 9 locatables (including steve), 3 orchids, 2 wood, 6 planks, 3 wool, 2 wool colors, 4! wood hits]
+# For scoped plank_making, the count is the exact same
+# For scoped bed_making, the count is the exact same except for the fact that there's a bed
+# =(2^9)*(144^10)*3*2*6*3*2*(4!)

@@ -17,7 +17,7 @@ General library for setting up linux-based environments for developing, running,
     ```
 5. To allow the planners to access domain and problem files you might have locally, you need to use a docker bind-mount like so:
     ```bash
-    sudo docker run --privileged -v /home/nishanth/Documents/planutils_stuff:/mnt/ -it aiplanning/planutils bash
+    sudo docker run --privileged -v /home/<user>/Documents/planutils_stuff:/mnt/ -it aiplanning/planutils bash
     ```
     Here, the `/home/planutils_stuff` folder of your local machine will be connected to the `/mnt` folder of your Docker install. You can now read from and write to this local folder.
 

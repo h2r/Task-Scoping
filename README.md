@@ -17,7 +17,7 @@ Note: PDDL to SAS+ translator copied directly from the Fast Downward Planner cod
 
 Example command for monkeys domain:
 ```
-python downward_translate/translate.py /home/nishanth/Documents/planutils_stuff/OO-Scoping-IPC/oo_scoping/examples/domains/multi_monkeys_playroom_strips/domain.pddl /home/nishanth/Documents/planutils_stuff/OO-Scoping-IPC/oo_scoping/examples/domains/multi_monkeys_playroom_strips/prob-01.pddl --sas-file output.sas
+python downward_translate/translate.py /home/<user>/Documents/planutils_stuff/OO-Scoping-IPC/oo_scoping/examples/domains/multi_monkeys_playroom_strips/domain.pddl /home/<user>/Documents/planutils_stuff/OO-Scoping-IPC/oo_scoping/examples/domains/multi_monkeys_playroom_strips/prob-01.pddl --sas-file output.sas
 ```
 
 ## Running Experiments

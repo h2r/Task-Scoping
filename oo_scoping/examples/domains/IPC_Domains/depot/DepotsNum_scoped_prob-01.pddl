@@ -1,4 +1,4 @@
-; Note (njkumar): Replaced 'at' with 'located-at' so ENHSP works
+; Note (<taskscoping>): Replaced 'at' with 'located-at' so ENHSP works
 
 (define (domain Depot)
 (:requirements :typing :fluents)

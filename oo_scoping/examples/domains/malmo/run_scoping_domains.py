@@ -126,13 +126,11 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--goal", type=str, help="name of a txt file (without the .txt extension) that contains a plan for a minecraft domain")
 parser.add_argument("--problem_name", type=str, help="name of the xml problem file you'd like to display")
 parser.add_argument("--use_watcher", type=bool, default=False, help="whether or not to spawn a Watcher to record video of what the main agent is doing")
-parser.add_argument("--malmo_scoping_dir", type=str, default="/home/nishanth/Documents/planutils_stuff/OO-Scoping-IPC/examples/malmo", help="absolute path location to the MALMO scoping directory")
+parser.add_argument("--malmo_scoping_dir", type=str, default="/home/<redacted>/Documents/planutils_stuff/OO-Scoping-IPC/examples/malmo", help="absolute path location to the MALMO scoping directory")
 parser.add_argument("--execute_plan", type=bool, default=False, help="whether or not the agent should execute the given plan")
 args = parser.parse_args()
 
 # Set location of files from scoping project
-# malmo_scoping_directory = "/home/nishanth/Documents/planutils_stuff/OO-Scoping-IPC/examples/malmo"
-# malmo_scoping_directory = "/Users/michaelfishman/repos/scoping/OO-Scoping-IPC/examples/malmo"
 plan_directory = f"{args.malmo_scoping_dir}/plans"
 plan_path = f"{plan_directory}/{args.goal}.txt"
 problem_directory = f"{args.malmo_scoping_dir}/problems"

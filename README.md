@@ -4,16 +4,19 @@
 Use python 3.7.9 (other versions may work)
 
     pip install -r requirements.txt
-    python scoping_cli.py <domain_path> <problem_path>
+    pip install -e .
 
-Example:
+## Scoping PDDL
+Example command for minecraft domain:
 
-    python pddl_scoper.py "domains/multi_monkeys_playroom copy/multi_monkeys_playroom.pddl" "domains/multi_monkeys_playroom copy/prob-02.pddl"
+    python oo_scoping/scope_and_writeback_pddl.py --domain oo_scoping/examples/domains/minecraft3/minecraft-contrived3.pddl --prob oo_scoping/examples/domains/minecraft3/prob_make_bed_irrel.pddl
 
 The scoped domain and problem will be placed in the same directories as the input domain and problem. Use the scoped problem that ends with "with_cl". The file that says "sans_cl" may remove some causally-linked objects that, in principle, can be ignored, but due to limitations of PDDL we cannot always remove them safely.
 
+See the experiments directory for more examples.
+
 ### Scoping SAS+
-Note: PDDL to SAS+ translator copied directly from the Fast Downward Planner codebase. All 
+Note: PDDL to SAS+ translator copied directly from the Fast Downward Planner codebase. 
 
 Example command for monkeys domain:
 ```

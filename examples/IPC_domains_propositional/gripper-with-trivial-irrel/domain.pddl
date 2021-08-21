@@ -33,12 +33,25 @@
 		    (free ?gripper)
 		    (not (carry ?obj ?gripper))))
 
+
     (:action paint-ball
         :parameters (?ball ?col1 ?col2)
         :precondition (and (ball ?ball) (ball-color ?ball ?col1) (color ?col1) (color ?col2))
         :effect (and (not (ball-color ?ball ?col1))
                      (ball-color ?ball ?col2)
                 )
+    )
+
+
+    (:action drop-and-paint
+       :parameters  (?obj  ?room ?gripper ?col1 ?col2)
+       :precondition  (and  (ball ?obj) (room ?room) (gripper ?gripper)
+			    (carry ?obj ?gripper) (at-robby ?room) (ball-color ?obj ?col1) (color ?col1) (color ?col2))
+       :effect (and (at ?obj ?room)
+		    (free ?gripper)
+		    (not (carry ?obj ?gripper))
+            (not (ball-color ?obj ?col1))
+            (ball-color ?obj ?col2))
     )
 )
 

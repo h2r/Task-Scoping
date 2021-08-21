@@ -11,7 +11,7 @@ setup(name='oo_scoping',
       description='Object-Oriented state abstraction',
       long_description=(here / 'README.md').read_text(encoding='utf-8'),
       author='Michael Fishman and Nishanth Kumar',
-      author_email='michaeljfishman@protonmail.com, nishanth_kumar@brown.edu',
+      author_email='michaeljfishman@protonmail.com, nishanth.kumar20@gmail.com',
       url='https://github.com/h2r/OO-Scoping-IPC',
       install_requires=[
           'z3-solver'

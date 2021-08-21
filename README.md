@@ -1,9 +1,13 @@
 # Task Scoping
 
+## Installation
+From the root of the directory, run:
+
+    pip install -e .
+
 ## Usage
 Use python 3.7.9 (other versions may work)
     
-    pip install -r requirements.txt
     python scoping_cli.py <domain_path> <problem_path>
     
 

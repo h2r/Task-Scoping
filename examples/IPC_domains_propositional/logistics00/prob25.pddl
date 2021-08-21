@@ -1,5 +1,3 @@
-; FD can't solve this problem, and Scoping discovers conditional irrelevance right off the bat!!!
-
 (define (problem logistics-25-0)
 (:domain logistics)
 (:objects apn2 apn1 apt5 pos5 apt4 pos4 apt3 pos3 apt2 pos2 apt1 pos1 cit5 cit4 cit3 cit2 cit1 tru5 tru4 tru3 tru2 tru1 

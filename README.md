@@ -1,31 +1,41 @@
-# Task Scoping
+# Task Scoping with VaPAR
 
 ## Installation
-From the root of the directory, run:
+Make sure to have python 3.7.9 installed (we recommend a virtual or conda environment!). Then, from the root of this repo's directory, run:
 
-    pip install -e .
+```pip install -e .```
 
 ## Usage
-Use python 3.7.9 (other versions may work)
-    
-    python scoping_cli.py <domain_path> <problem_path>
-    
+You will need to run a different command depending on whether your domain and problem PDDL files are propositional or numeric. 
+
+### Propositional Domains
+For these domains, we first convert the problem into the SAS+ representation, then run VaPAR to scope the domain and problem.
+
+```python downward_translate/translate_and_scope.py <domain_path> <problem_path> --sas-file <desired_sas_file_name> --scope True```
+
+This will generate 2 files in the current directory: 1 `.sas` file with the name `<desired_sas_file_name>` and 1 with `_scoped` inserted into the name. The latter is the file after VaPAR has been used to scope the original file. Each of these files can then directly be used for planning with Fast Downward or any other planner that uses SAS+ files.
+
+Note: this leverages a PDDL to SAS+ translator taken directly from the [Fast Downward codebase](https://github.com/aibasel/downward).
+
 
 Example:
 
-    python pddl_scoper.py "domains/multi_monkeys_playroom copy/multi_monkeys_playroom.pddl" "domains/multi_monkeys_playroom copy/prob-02.pddl"
+```python downward_translate/translate_and_scope.py examples/IPC_domains_propositional/gripper-painting/domain.pddl examples/IPC_domains_propositional/gripper-painting/prob04.pddl --sas-file gripper-painting.sas --scope True```
 
-The scoped domain and problem will be placed in the same directories as the input domain and problem. Use the scoped problem that ends with "with_cl". The file that says "sans_cl" may remove some causally-linked objects that, in principle, can be ignored, but due to limitations of PDDL we cannot always remove them safely.
+### Numeric Domains
+For these domains, we first ground all variables and operators, then run VaPAR on the grounded problem and use this to return "scoped" domain and problem PDDL files.
 
-### Scoping SAS+
-Note: PDDL to SAS+ translator copied directly from the Fast Downward Planner codebase. All 
+```python oo_scoping/pddl_scoper.py --domain <path_to_domain_file> --prob <path_to_problem_file>```
 
-Example command for monkeys domain:
-```
-python downward_translate/translate.py /home/nishanth/Documents/planutils_stuff/OO-Scoping-IPC/oo_scoping/examples/domains/multi_monkeys_playroom_strips/domain.pddl /home/nishanth/Documents/planutils_stuff/OO-Scoping-IPC/oo_scoping/examples/domains/multi_monkeys_playroom_strips/prob-01.pddl --sas-file output.sas
-```
+Note that this assumes the domain and problem file are within the same directory.
 
-## Running Experiments
+The scoped domain and problem will be placed in the same directories as the input domain and problem. Use the scoped problem that ends with "with_cl". The file that says "sans_cl" may remove some causally-linked objects that, in principle, can be ignored, but maybe unsafe to remove (this discrepancy arises because VaPAR identifies *grounded* state-variables and operators to remove, whereas PDDL files are lifted by default).
+
+Example:
+
+```python oo_scoping/pddl_scoper.py --domain examples/multi_monkeys_playroom/multi_monkeys_playroom.pddl --prob examples/multi_monkeys_playroom/prob01.pddl```
+
+## Running Experiments from paper
 1. There is a sub-folder under the `experiments/` folder for every domain that we evaluated task scoping on for our paper
 1. Within each of these sub-folders, there is a bash script that contains the name of the problem file it runs experiments on.
     1. For the IPC domains (`driverlog-domain`,`logistics-domain`,`gripper-domain`,`satellite-domain`,`zenotravel-domain`), each bash script takes exactly 2 arguments:

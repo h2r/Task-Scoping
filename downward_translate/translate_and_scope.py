@@ -797,8 +797,6 @@ def main():
         scoped_correctly = (sas_correct_str == sas_scoped_str)
         print(f"Scoped correctly: {scoped_correctly}")
 
-    # from IPython import embed; embed()
-
     print("Done! %s" % timer)
 
 

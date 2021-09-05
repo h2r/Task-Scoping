@@ -1,6 +1,7 @@
 from matplotlib import pyplot as plt
 import numpy as np
 
+plt.rcParams.update({'font.size': 22})
 
 def errorfill(x, y, yerr, color=None, alpha_fill=0.3, ax=None, linestyle=None, plt_label=None, marker=None, alpha=None, linewidth=None):
     ax = ax if ax is not None else plt.gca()

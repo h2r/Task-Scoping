@@ -1,2 +1,3 @@
 z3-solver==4.8.9.0
-malmo==0.37.0.0
+# malmo==0.37.0.0 #Commented out because we are having trouble installing it
+planutils==0.2.8 # ENHSP-2020

@@ -36,6 +36,8 @@ Example:
 ```python oo_scoping/pddl_scoper.py --domain examples/multi_monkeys_playroom/multi_monkeys_playroom.pddl --prob examples/multi_monkeys_playroom/prob01.pddl```
 
 ## Running Experiments from paper
+Prerequisite: Clone the Fast Downward repository from [here](https://github.com/aibasel/downward). Make sure the `fast-downward.py` file at the root of the repo can run properly - you will need to specify the path to this file to run experiments (explained below).
+
 1. There is a sub-folder under the `experiments/` folder for every domain that we evaluated task scoping on for our paper
 1. Within each of these sub-folders, there is a bash script that contains the name of the problem file it runs experiments on.
     1. For the IPC domains (`driverlog-domain`,`logistics-domain`,`gripper-domain`,`satellite-domain`,`zenotravel-domain`), each bash script takes exactly 2 arguments:

@@ -9,7 +9,7 @@ echo ""
 
 # The counter needs to be 1 + num_trials you want for the experiment, because the first trial is slightly slower due to needing to execute
 # some of the setup bash commands. Thus, take all readings except the first!
-COUNTER="$user_arg + 1"
+let COUNTER=$user_arg+1
 until [ $COUNTER -lt 1 ]; do
     echo RUN_NUMBER $COUNTER
     # What is this exec?
@@ -22,7 +22,7 @@ done
 
 declare -a sruntimes
 # Array of scoping runtimes
-COUNTER="$user_arg + 1"
+let COUNTER=$user_arg+1
 until [ $COUNTER -lt 1 ]; do
     echo RUN_NUMBER $COUNTER
     exec 3>&1 4>&2
@@ -34,7 +34,7 @@ done
 
 # Array of planning on unscoped domain runtimes
 declare -a fd_runtimes
-COUNTER="$user_arg + 1"
+let COUNTER=$user_arg+1
 until [ $COUNTER -lt 1 ]; do
     echo RUN_NUMBER $COUNTER
     exec 3>&1 4>&2
@@ -46,7 +46,7 @@ done
 
 # Array of planning on scoped domain runtimes
 declare -a sfd_runtimes
-COUNTER="$user_arg + 1"
+let COUNTER=$user_arg+1
 until [ $COUNTER -lt 1 ]; do
     echo RUN_NUMBER $COUNTER
     exec 3>&1 4>&2

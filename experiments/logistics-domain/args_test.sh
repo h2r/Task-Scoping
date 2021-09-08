@@ -9,7 +9,7 @@ echo user_arg is $user_arg
 
 # The counter needs to be 1 + num_trials you want for the experiment, because the first trial is slightly slower due to needing to execute
 # some of the setup bash commands. Thus, take all readings except the first!
-COUNTER="$user_arg + 1"
+let COUNTER=$user_arg+1
 echo COUNTER is $COUNTER
 # until [ $COUNTER -lt 1 ]; do
 #     echo RUN_NUMBER $COUNTER

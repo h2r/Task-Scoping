@@ -129,7 +129,7 @@ def translate_and_scope(domain, problem, unscoped_sas_path):
     return cmd_output
 
 def plan(sas_path, fd_path):
-    cmd_pieces = ["python", "$2", "--alias", "seq-opt-lmcut", "logistics15.sas"]
+    cmd_pieces = ["python", fd_path, "--alias", "seq-opt-lmcut", sas_path]
     cmd_output = subprocess.run(cmd_pieces, capture_output=True)
     return cmd_output
 

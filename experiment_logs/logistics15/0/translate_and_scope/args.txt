@@ -1,1 +1,0 @@
-['python', 'downward_translate/translate_and_scope.py', 'examples/IPC_domains_propositional/logistics00/domain.pddl', 'examples/IPC_domains_propositional/logistics00/prob15.pddl', '--sas-file', 'experiment_logs/logistics15/0/unscoped2.sas', '--scope', 'True']

@@ -33,7 +33,7 @@ def run_experiment(n_runs, domain, problem, fd_path, log_dir):
         "log_dir":log_dir
     }
     with open(f"{log_dir}/args.json", "w") as f:
-        json.dump({k: str(v) for v in args_dict}, f)
+        json.dump({k: str(v) for k, v in args_dict.items()}, f)
 
     timings_dict = {
         "translate":[],

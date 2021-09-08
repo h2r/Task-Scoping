@@ -13,11 +13,11 @@ def add_path_suffix(p, s):
     basename, ext = os.path.splitext(p)
     return basename + s + ext
 
-def dir_path(path):
-    if os.path.isdir(path):
-        return path
-    else:
-        raise argparse.ArgumentTypeError(f"readable_dir:{path} is not a valid path")
+# def dir_path(path):
+#     if os.path.isdir(path):
+#         return path
+#     else:
+#         raise argparse.ArgumentTypeError(f"readable_dir:{path} is not a valid path")
 
 # Main function
 def run_experiment(n_runs, domain, problem, fd_path, log_dir):
@@ -137,7 +137,7 @@ if __name__ == "__main__":
     parser.add_argument("domain", type=argparse.FileType('r'))
     parser.add_argument("problem", type=argparse.FileType('r'))
     parser.add_argument("fd_path", type=argparse.FileType('r'))
-    parser.add_argument("log_dir", type=dir_path)
+    parser.add_argument("log_dir", type=str)
 
     args = parser.parse_args()
 

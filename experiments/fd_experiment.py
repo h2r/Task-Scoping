@@ -137,9 +137,9 @@ def plan(sas_path, fd_path):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("n_runs" ,type=int)
-    parser.add_argument("domain", type=argparse.FileType('r'))
-    parser.add_argument("problem", type=argparse.FileType('r'))
-    parser.add_argument("fd_path", type=argparse.FileType('r'))
+    parser.add_argument("domain", type=str)
+    parser.add_argument("problem", type=str)
+    parser.add_argument("fd_path", type=str)
     parser.add_argument("log_dir", type=str)
     parser.add_argument("--force_clear_log_dir", default=False, action='store_true')
 

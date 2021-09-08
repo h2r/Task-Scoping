@@ -1,0 +1,1 @@
+['python', '../downward/fast-downward.py', '--alias', 'seq-opt-lmcut', 'experiment_logs/logistics15/1/unscoped2.sas']

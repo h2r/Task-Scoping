@@ -20,7 +20,7 @@ Note: this leverages a PDDL to SAS+ translator taken directly from the [Fast Dow
 
 Example:
 
-```python downward_translate/translate_and_scope.py examples/IPC_domains_propositional/gripper-painting/domain.pddl examples/IPC_domains_propositional/gripper-painting/prob04.pddl --sas-file gripper-painting.sas --scope True```
+```python downward_translate/translate_and_scope.py examples/gripper-painting-domain/domain.pddl examples/gripper-painting-domain/prob04.pddl --sas-file gripper-painting.sas --scope True```
 
 ### Numeric Domains
 For these domains, we first ground all variables and operators, then run VaPAR on the grounded problem and use this to return "scoped" domain and problem PDDL files.

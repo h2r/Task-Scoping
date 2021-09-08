@@ -2,14 +2,17 @@
 
 # Usage instructions: see README.md
 TIMEFORMAT=%R
+# array of translation runtimes
 declare -a truntimes
 user_arg="$1"
+echo ""
 
 # The counter needs to be 1 + num_trials you want for the experiment, because the first trial is slightly slower due to needing to execute
 # some of the setup bash commands. Thus, take all readings except the first!
 COUNTER="$user_arg + 1"
 until [ $COUNTER -lt 1 ]; do
     echo RUN_NUMBER $COUNTER
+    # What is this exec?
     exec 3>&1 4>&2
     foo=$( { time python downward_translate/translate_and_scope.py examples/IPC_domains_propositional/logistics00/domain.pddl examples/IPC_domains_propositional/logistics00/prob15.pddl --sas-file logistics15.sas 1>&3 2>&4; } 2>&1 )  # Captures time only.
     exec 3>&- 4>&-
@@ -18,6 +21,7 @@ until [ $COUNTER -lt 1 ]; do
 done
 
 declare -a sruntimes
+# Array of scoping runtimes
 COUNTER="$user_arg + 1"
 until [ $COUNTER -lt 1 ]; do
     echo RUN_NUMBER $COUNTER
@@ -28,6 +32,7 @@ until [ $COUNTER -lt 1 ]; do
     let COUNTER-=1
 done
 
+# Array of planning on unscoped domain runtimes
 declare -a fd_runtimes
 COUNTER="$user_arg + 1"
 until [ $COUNTER -lt 1 ]; do
@@ -39,6 +44,7 @@ until [ $COUNTER -lt 1 ]; do
     let COUNTER-=1
 done
 
+# Array of planning on scoped domain runtimes
 declare -a sfd_runtimes
 COUNTER="$user_arg + 1"
 until [ $COUNTER -lt 1 ]; do

@@ -1,4 +1,4 @@
-import os, time, argparse, subprocess, json
+import os, time, argparse, subprocess, json, shutil
 """
 TODO:
 Get state-visited counts
@@ -20,8 +20,11 @@ def add_path_suffix(p, s):
 #         raise argparse.ArgumentTypeError(f"readable_dir:{path} is not a valid path")
 
 # Main function
-def run_experiment(n_runs, domain, problem, fd_path, log_dir):
+def run_experiment(n_runs, domain, problem, fd_path, log_dir, force_clear=False):
     start_time_exp = time.time()
+    # Clear log dir if force_clear is True
+    if force_clear and os.path.exists(log_dir):
+        shutil.rmtree(log_dir)
     # Make the log directory. Throws an error if the directory already exists
     os.makedirs(log_dir, exist_ok=False)
     # Save arguments to log_dir
@@ -138,7 +141,8 @@ if __name__ == "__main__":
     parser.add_argument("problem", type=argparse.FileType('r'))
     parser.add_argument("fd_path", type=argparse.FileType('r'))
     parser.add_argument("log_dir", type=str)
+    parser.add_argument("--force_clear_log_dir", default=False, action='store_true')
 
     args = parser.parse_args()
 
-    run_experiment(args.n_runs, args.domain, args.problem, args.fd_path, args.log_dir)
+    run_experiment(args.n_runs, args.domain, args.problem, args.fd_path, args.log_dir, args.force_clear_log_dir)

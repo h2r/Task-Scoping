@@ -1,4 +1,5 @@
 import os, time, argparse, subprocess, json, shutil
+import pandas as pd
 """
 TODO:
 Get state-visited counts
@@ -90,7 +91,17 @@ def run_experiment(n_runs, domain, problem, fd_path, log_dir, force_clear=False)
     experiment_duration = end_time_exp - start_time_exp
     print(f"Finished experiment")
     print(f"Ran {n_runs} trials for a total duration of {experiment_duration}")
-    
+    df_times = pd.DataFrame(data=timings_dict)
+    s_times_avg = df_times.avg()
+    s_times_avg.name = 'avg'
+    s_times_std = df_times.std()
+    s_times_std.name = 'std'
+    s_times_cv = s_times_std / s_times_avg
+    s_times_cv.name = "cv"
+    df_time_summary = pd.concat([s_times_avg, s_times_std, s_times_cv], axis=1)
+    print(f"Timing summary:")
+    print(df_time_summary)
+    df_time_summary.to_csv(f"{log_dir}/timing_summary.csv", index=True)    
 
 def save_cmd_output(cmd_output, save_dir):
     os.makedirs(save_dir, exist_ok=False)

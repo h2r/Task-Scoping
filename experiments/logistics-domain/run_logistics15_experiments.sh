@@ -33,7 +33,7 @@ COUNTER="$user_arg + 1"
 until [ $COUNTER -lt 1 ]; do
     echo RUN_NUMBER $COUNTER
     exec 3>&1 4>&2
-    foo=$( { time python $2 --alias seq-opt-lmcut /home/nishanth/Documents/planutils_stuff/OO-Scoping-IPC/logistics15.sas 1>&3 2>&4; } 2>&1 )  # Captures time only.
+    foo=$( { time python $2 --alias seq-opt-lmcut logistics15.sas 1>&3 2>&4; } 2>&1 )  # Captures time only.
     exec 3>&- 4>&-
     fd_runtimes+=("$foo")
     let COUNTER-=1
@@ -44,7 +44,7 @@ COUNTER="$user_arg + 1"
 until [ $COUNTER -lt 1 ]; do
     echo RUN_NUMBER $COUNTER
     exec 3>&1 4>&2
-    foo=$( { time python $2 --alias seq-opt-lmcut /home/nishanth/Documents/planutils_stuff/OO-Scoping-IPC/logistics15_scoped.sas 1>&3 2>&4; } 2>&1 )  # Captures time only.
+    foo=$( { time python $2 --alias seq-opt-lmcut logistics15_scoped.sas 1>&3 2>&4; } 2>&1 )  # Captures time only.
     exec 3>&- 4>&-
     sfd_runtimes+=("$foo")
     let COUNTER-=1

@@ -92,7 +92,7 @@ def run_experiment(n_runs, domain, problem, fd_path, log_dir, force_clear=False)
     print(f"Finished experiment")
     print(f"Ran {n_runs} trials for a total duration of {experiment_duration}")
     df_times = pd.DataFrame(data=timings_dict)
-    s_times_avg = df_times.avg()
+    s_times_avg = df_times.mean()
     s_times_avg.name = 'avg'
     s_times_std = df_times.std()
     s_times_std.name = 'std'

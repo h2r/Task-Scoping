@@ -122,7 +122,7 @@ def save_cmd_output(cmd_output, save_dir):
     with open(outpaths["stderr"], "w") as f:
         f.write(cmd_output.stderr.decode('UTF-8'))
 
-    with open(outpaths["stderr"], "w") as f:
+    with open(outpaths["returncode"], "w") as f:
         f.write(str(cmd_output.returncode))
 
     return outpaths

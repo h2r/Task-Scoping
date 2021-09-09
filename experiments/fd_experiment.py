@@ -3,7 +3,7 @@ import pandas as pd
 """
 TODO:
 Get state-visited counts
-Calculate average metrics
+Use https://gist.github.com/nawatts/e2cdca610463200c12eac2a14efc0bfb to print output
 """
 
 # Helper functions

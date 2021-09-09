@@ -78,7 +78,7 @@ def save_cmd_output(cmd_output, save_dir):
         "args":f"{save_dir}/args.txt",
         "stdout":f"{save_dir}/stdout.txt",
         "stderr":f"{save_dir}/stderr.txt",
-        "returncde":f"{save_dir}/returncode.txt"
+        "returncode":f"{save_dir}/returncode.txt"
     }
 
     with open(outpaths["args"], "w") as f:

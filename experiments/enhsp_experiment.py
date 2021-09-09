@@ -100,12 +100,12 @@ def save_cmd_output(cmd_output, save_dir):
 
 def scope(domain, problem):
     cmd_pieces =["python", "oo_scoping/scope_and_writeback_pddl.py", "--domain", domain, "--prob", problem]
-    cmd_output = subprocess.run(cmd_pieces, capture_output=True)
+    cmd_output = subprocess.run(cmd_pieces, capture_output=True, shell=True)
     return cmd_output
 
 def plan(domain, problem):
     cmd_pieces = ["enhsp-2020", "-o", domain, "-f", problem, "-planner", "opt-hlm"]
-    cmd_output = subprocess.run(cmd_pieces, capture_output=True)
+    cmd_output = subprocess.run(cmd_pieces, capture_output=True, shell=True)
     return cmd_output
 
 

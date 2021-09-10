@@ -1,4 +1,4 @@
-
+print("Starting scope and writeback imports")
 import sys, pprint, time, itertools, re, copy
 from collections import OrderedDict
 from typing import List, Tuple, Dict, Iterable
@@ -13,7 +13,7 @@ from oo_scoping.writeback_pddl import writeback_problem, writeback_domain,\
      get_scoped_problem_path, get_scoped_domain_path
 from oo_scoping.scoping import scope
 
-
+print("Starting scope and writeback")
 def scope_pddl(domain, problem):
     parser = PDDL_Parser_z3()
     parser.parse_domain(domain)

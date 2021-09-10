@@ -1,0 +1,4 @@
+Starting scope and writeback imports
+Starting scope and writeback
+Done grounding! Starting to scope.
+Done Scoping!

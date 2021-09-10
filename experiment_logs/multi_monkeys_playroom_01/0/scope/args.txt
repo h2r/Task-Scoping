@@ -1,0 +1,1 @@
+['python', './oo_scoping/scope_and_writeback_pddl.py', '--domain', 'examples/multi_monkeys_playroom/multi_monkeys_playroom.pddl', '--prob', 'examples/multi_monkeys_playroom/prob01.pddl']

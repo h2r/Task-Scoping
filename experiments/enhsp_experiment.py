@@ -1,7 +1,7 @@
 import os, time, argparse, subprocess, json, shutil
 import pandas as pd
 
-
+root_dir = os.path.dirname(os.path.dirname(__file__))
 # Main function
 def run_experiment(n_runs, domain, problem, log_dir, force_clear=False):
     start_time_exp = time.time()
@@ -21,7 +21,6 @@ def run_experiment(n_runs, domain, problem, log_dir, force_clear=False):
         json.dump({k: str(v) for k, v in args_dict.items()}, f)
 
     timings_dict = {
-        "translate":[],
         "scope":[],
         "plan_unscoped":[],
         "plan_scoped":[]
@@ -29,10 +28,12 @@ def run_experiment(n_runs, domain, problem, log_dir, force_clear=False):
     timings_path = f"{log_dir}/times.json"
     # This would be more precise if we recorded time for multiple iterations of each portion, then divided. TODO consider doing this.
     for i_run in range(n_runs):
+        print(f"Run {i_run}")
         log_dir_this_run = f"{log_dir}/{i_run}"
         os.makedirs(log_dir_this_run)
 
         # Scoping
+        print("Scoping")
         scope_start = time.time()
         scope_cmd_output = scope(domain, problem)
         scope_end = time.time()
@@ -42,6 +43,7 @@ def run_experiment(n_runs, domain, problem, log_dir, force_clear=False):
         save_cmd_output(scope_cmd_output, f"{log_dir_this_run}/scope")
 
         # Planning on unscoped
+        print("Planning (unscoped)")
         plan_unscoped_start_time = time.time()
         plan_unscoped_cmd_output = plan(domain, problem)
         plan_unscoped_end_time = time.time()
@@ -51,15 +53,17 @@ def run_experiment(n_runs, domain, problem, log_dir, force_clear=False):
         save_cmd_output(plan_unscoped_cmd_output, f"{log_dir_this_run}/plan_unscoped")
 
         # Planning on scoped
+        print("Planning (scoped)")
         plan_scoped_start_time = time.time()
         plan_scoped_cmd_output = plan(domain, problem)
         plan_scoped_end_time = time.time()
         timings_dict["plan_scoped"].append(plan_scoped_end_time - plan_scoped_start_time)
-        save_cmd_output(plan_scoped_cmd_output, f"{log_dir_this_run}/plan_scoped")  
+        save_cmd_output(plan_scoped_cmd_output, f"{log_dir_this_run}/plan_scoped")
     end_time_exp = time.time()
     experiment_duration = end_time_exp - start_time_exp
     print(f"Finished experiment")
     print(f"Ran {n_runs} trials for a total duration of {experiment_duration}")
+    print(timings_dict)
     df_times = pd.DataFrame(data=timings_dict)
     s_times_avg = df_times.mean()
     s_times_avg.name = 'avg'
@@ -99,8 +103,10 @@ def save_cmd_output(cmd_output, save_dir):
 
 
 def scope(domain, problem):
-    cmd_pieces =["python", "oo_scoping/scope_and_writeback_pddl.py", "--domain", domain, "--prob", problem]
-    cmd_output = subprocess.run(cmd_pieces, capture_output=True, shell=True)
+    scope_script_pth =  f"{root_dir}/oo_scoping/scope_and_writeback_pddl.py"
+    assert os.path.isfile(scope_script_pth)
+    cmd_pieces =["python", scope_script_pth, "--domain", domain, "--prob", problem]
+    cmd_output = subprocess.run(cmd_pieces, capture_output=True, shell=False)
     return cmd_output
 
 def plan(domain, problem):

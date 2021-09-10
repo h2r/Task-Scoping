@@ -1,8 +1,8 @@
 #!/bin/bash
-# Install fast downwards
-# Can I skip this part?
+apt-get update -y
+# We may not need all of these
+apt-get install git jq cmake g++ make -y
+cd ../
 git clone https://github.com/aibasel/downward.git
-# Change owner to user
-sudo chown -R ubuntu downward/
 cd downward
 ./build.py

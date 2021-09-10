@@ -50,41 +50,57 @@ def run_experiment(n_runs, domain, problem, fd_path, log_dir, force_clear=False)
     for i_run in range(n_runs):
         log_dir_this_run = f"{log_dir}/{i_run}"
         os.makedirs(log_dir_this_run)
-
+        print(f"Run {i_run}")
         # Translation
+        print("Translating")
         sas_path = f"{log_dir_this_run}/unscoped.sas"
         translate_start = time.time()
         trans_cmd_output = translate(domain, problem, sas_path)
         translate_end = time.time()
+        if trans_cmd_output.returncode != 0:
+                    raise ValueError(f"Translation failed with returncode {trans_cmd_output.returncode}\nstderr: {trans_cmd_output.stderr}\nstdout: {trans_cmd_output.stdout}")
+
         timings_dict["translate"].append(translate_end - translate_start)
         with open(timings_path, "w") as f:
             json.dump(timings_dict, f)
         save_cmd_output(trans_cmd_output, f"{log_dir_this_run}/translate")
 
         # Scoping
+        print("Scoping")
         sas_2_path = f"{log_dir_this_run}/unscoped2.sas"
         sas_scoped_path = get_scoped_file_path(sas_2_path)
         translate_and_scope_start = time.time()
         scope_cmd_output = translate_and_scope(domain, problem, sas_2_path)
         translate_and_scope_end = time.time()
+        if scope_cmd_output.returncode != 0:
+            raise ValueError(f"Scoping failed with returncode {scope_cmd_output.returncode}\nstderr: {scope_cmd_output.stderr}\nstdout: {scope_cmd_output.stdout}")
+
         timings_dict["translate_and_scope"].append(translate_and_scope_end - translate_and_scope_start)
         with open(timings_path, "w") as f:
             json.dump(timings_dict, f)
         save_cmd_output(scope_cmd_output, f"{log_dir_this_run}/translate_and_scope")
 
         # Planning on unscoped
+        print("Planning on unscoped")
         plan_unscoped_start_time = time.time()
         plan_unscoped_cmd_output = plan(sas_2_path, fd_path)
         plan_unscoped_end_time = time.time()
+        if plan_unscoped_cmd_output.returncode != 0:
+            raise ValueError(f"Planning on unscoped problem failed with returncode {plan_unscoped_cmd_output.returncode}\nstderr: {plan_unscoped_cmd_output.stderr}\nstdout: {plan_unscoped_cmd_output.stdout}")
+
         timings_dict["plan_unscoped"].append(plan_unscoped_end_time - plan_unscoped_start_time)
         with open(timings_path, "w") as f:
             json.dump(timings_dict, f)
         save_cmd_output(plan_unscoped_cmd_output, f"{log_dir_this_run}/plan_unscoped")
 
         # Planning on scoped
+        print("Planning on scoped")
         plan_scoped_start_time = time.time()
         plan_scoped_cmd_output = plan(sas_scoped_path, fd_path)
         plan_scoped_end_time = time.time()
+        if plan_scoped_cmd_output.returncode != 0:
+            raise ValueError(f"Planning on scoped problem failed with returncode {plan_scoped_cmd_output.returncode}\nstderr: {plan_scoped_cmd_output.stderr}\nstdout: {plan_scoped_cmd_output.stdout}")
+
         timings_dict["plan_scoped"].append(plan_scoped_end_time - plan_scoped_start_time)
         save_cmd_output(plan_scoped_cmd_output, f"{log_dir_this_run}/plan_scoped")  
     end_time_exp = time.time()

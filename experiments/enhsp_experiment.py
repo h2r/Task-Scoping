@@ -37,6 +37,8 @@ def run_experiment(n_runs, domain, problem, log_dir, force_clear=False):
         scope_start = time.time()
         scope_cmd_output = scope(domain, problem)
         scope_end = time.time()
+        if scope_cmd_output.returncode != 0:
+            raise ValueError(f"Scoping failed with returncode {scope_cmd_output.returncode}\nstderr: {scope_cmd_output.stderr}\nstdout: {scope_cmd_output.stdout}")
         timings_dict["scope"].append(scope_end - scope_start)
         with open(timings_path, "w") as f:
             json.dump(timings_dict, f)
@@ -47,6 +49,8 @@ def run_experiment(n_runs, domain, problem, log_dir, force_clear=False):
         plan_unscoped_start_time = time.time()
         plan_unscoped_cmd_output = plan(domain, problem)
         plan_unscoped_end_time = time.time()
+        if plan_unscoped_cmd_output.returncode != 0:
+            raise ValueError(f"Planning on unscoped problem failed with returncode {plan_unscoped_cmd_output.returncode}\nstderr: {plan_unscoped_cmd_output.stderr}\nstdout: {plan_unscoped_cmd_output.stdout}")
         timings_dict["plan_unscoped"].append(plan_unscoped_end_time - plan_unscoped_start_time)
         with open(timings_path, "w") as f:
             json.dump(timings_dict, f)
@@ -55,7 +59,9 @@ def run_experiment(n_runs, domain, problem, log_dir, force_clear=False):
         # Planning on scoped
         print("Planning (scoped)")
         plan_scoped_start_time = time.time()
-        plan_scoped_cmd_output = plan(domain, problem)
+        plan_scoped_cmd_output = plan(domain, problem) 
+        if plan_scoped_cmd_output.returncode != 0:
+            raise ValueError(f"Planning on scoped problem failed with returncode {plan_scoped_cmd_output.returncode}\nstderr: {plan_scoped_cmd_output.stderr}\nstdout: {plan_scoped_cmd_output.stdout}")
         plan_scoped_end_time = time.time()
         timings_dict["plan_scoped"].append(plan_scoped_end_time - plan_scoped_start_time)
         save_cmd_output(plan_scoped_cmd_output, f"{log_dir_this_run}/plan_scoped")
@@ -111,6 +117,8 @@ def scope(domain, problem):
 
 def plan(domain, problem):
     cmd_pieces = ["enhsp-2020", "-o", domain, "-f", problem, "-planner", "opt-hlm"]
+    print(f"planning cmd:\n" + " ".join(cmd_pieces))
+    subprocess.run(["pwd"])
     cmd_output = subprocess.run(cmd_pieces, capture_output=True, shell=True)
     return cmd_output
 

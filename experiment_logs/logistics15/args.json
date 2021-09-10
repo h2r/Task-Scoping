@@ -1,1 +1,0 @@
-{"n_runs": "3", "domain": "examples/IPC_domains_propositional/logistics00/domain.pddl", "problem": "examples/IPC_domains_propositional/logistics00/prob15.pddl", "fd_path": "../downward/fast-downward.py", "log_dir": "experiment_logs/logistics15"}

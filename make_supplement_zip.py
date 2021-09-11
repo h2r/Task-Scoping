@@ -26,4 +26,4 @@ archive_pth = os.path.join(repo_parent, "scoping_supplement")
 archive_pth_with_ext = os.path.join(archive_pth, "zip")
 if os.path.isfile(archive_pth_with_ext):
     os.remove(archive_pth_with_ext)
-shutil.make_archive(archive_pth, format="zip", root_dir=tgt_dir, base_dir=".")
+shutil.make_archive(archive_pth, format="zip", root_dir=repo_parent, base_dir="scoping_supplement")

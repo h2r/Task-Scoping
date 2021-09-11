@@ -1,18 +1,18 @@
 # AWS Readme
 
-These are instructions for running scoping experiments on aws EC2. Note that the results in the paper are from experiments run on a laptop using a different set of scripts, NOT in EC2 using the scripts described here.
+These are instructions for running scoping experiments on aws EC2. Note that the results in the paper are from experiments run on a laptop using a different set of scripts, NOT in EC2 using the scripts described here. You can find a tutorial on using AWS EC2 [here](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EC2_GetStarted.html).
 
 ## Instance parameters
-Other instance configurations should also work.
+These instructions were verified to work using an instance with the following configuration:
 
-Type: t2.large
+- Type: t2.large
 
-AMI ID: ami-0ac5a3737d540e82a
+- AMI
+  - AMI ID: ami-0ac5a3737d540e82a
+  - AMI Name: Deep Learning Base AMI (Ubuntu 16.04) Version 40.0
+  - AMI Location: amazon/Deep Learning Base AMI (Ubuntu 16.04) Version 40.0
 
-AMI Name: Deep Learning Base AMI (Ubuntu 16.04) Version 40.0
-
-AMI Location: amazon/Deep Learning Base AMI (Ubuntu 16.04) Version 40.0
-
+- Network 
 ## Usage
 
 Copy the scoping_supplement.zip to your ec2 instance with scp:

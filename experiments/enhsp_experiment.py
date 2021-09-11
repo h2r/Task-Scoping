@@ -2,6 +2,7 @@ import os, time, argparse, subprocess, json, shutil
 import pandas as pd
 
 root_dir = os.path.dirname(os.path.dirname(__file__))
+
 # Main function
 def run_experiment(n_runs, domain, problem, log_dir, force_clear=False):
     start_time_exp = time.time()
@@ -116,10 +117,8 @@ def scope(domain, problem):
     return cmd_output
 
 def plan(domain, problem):
-    cmd_pieces = ["enhsp-2020", "-o", domain, "-f", problem, "-planner", "opt-hlm"]
-    print(f"planning cmd:\n" + " ".join(cmd_pieces))
-    subprocess.run(["pwd"])
-    cmd_output = subprocess.run(cmd_pieces, capture_output=True, shell=True)
+    cmd_pieces = ["/root/.planutils/bin/enhsp-2020", "--domain", domain, "-f", problem, "-planner", "opt-hlm"]
+    cmd_output = subprocess.run(" ".join(cmd_pieces), capture_output=True, shell=True)
     return cmd_output
 
 

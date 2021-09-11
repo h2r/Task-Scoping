@@ -36,31 +36,8 @@ Example:
 ```python oo_scoping/pddl_scoper.py --domain examples/multi_monkeys_playroom/multi_monkeys_playroom.pddl --prob examples/multi_monkeys_playroom/prob01.pddl```
 
 ## Running Experiments from paper
-Prerequisite: Follow official steps [here](http://www.fast-downward.org/ObtainingAndRunningFastDownward) to obtain the Fast Downward repository, install it's dependencies and compile it to run. Make sure the `fast-downward.py` file at the root of the repo can run properly - you will need to specify the path to this file to run experiments (explained below).
 
-1. There is a sub-folder under the `experiments/` folder for every domain that we evaluated task scoping on for our paper
-1. Within each of these sub-folders, there is a bash script that contains the name of the problem file it runs experiments on.
-    1. For the IPC domains (`driverlog-domain`,`logistics-domain`,`gripper-domain`,`satellite-domain`,`zenotravel-domain`), each bash script takes exactly 2 arguments:
-        1. The number of trials you wish to run (for our paper, we use 5)
-        1. The location of the `fast-downward.py` file that comes with an installation of [The Fast Downward Planning System Repository](http://www.fast-downward.org/ObtainingAndRunningFastDownward)
-    - The script will run the experiment and print out times, along with their labels, to your terminal after completion
-    - For example, to run 5 experiment trials on logistics domain prob 15, simply call:
-        ```
-        ./experiments/logistics-domain/run_logistics15_experiments.sh 5 /home/<user>/Documents/downward/fast-downward.py
-        ```
-    
-    1. For the Numeric PDDL 2.1 domains (`monkeys-playroom-numeric-domain` and `minecraft-domain`), you will require the ENHSP-2020 planner, which you can obtain by installing and launching [planutils](https://pypi.org/project/planutils/) and then running the command: `enhsp-2020` and answering `y` to the prompt to install this planner. To get any results for planning times, you must execute a bash script from within an environment where the `enhsp-2020` command is recognized and works correctly (so if you use planutils, you can execute these bash scripts from within the activated Singularity container!). Each of the bash scripts within these folders will have bash scripts that take the following arguments
-        1. The number of trials you wish to run (for our paper, we use 5)
-        1. `scope_true`: an optional argument. Include this to task scoping before planning
-    - The script will run the experiment and print out times, along with their labels, to your terminal after completion
-    - For example, if you want to run experiments on the plank-making task from the Minecraft domain for 5 trials with task scoping as a preprocessing step, run:
-        ```
-        ./experiments/minecraft-domain/run_minecraftPlankMaking_experiments.sh 5 scope_true
-        ```
-    - And if you'd like to run the same task for the same number of trials without scoping, run:
-        ```
-        ./experiments/minecraft-domain/run_minecraftPlankMaking_experiments.sh 5
-        ```
+Experiments can be run on aws using the instructions in [aws_readme.md](aws_readme.md). Note that the experimental results shown in the paper were run on a laptop using different scripts.
 
 ## Common problems / bugs
 1. Task Scoping commented out everything in my problem and domain files!!!

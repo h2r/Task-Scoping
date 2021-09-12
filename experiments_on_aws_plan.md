@@ -29,6 +29,13 @@ Afterwards, compile the results into csvs. From the csvs generate plots and tabl
 
 ## Deployment Framework Candidates
 
+### Python Script using Boto3
+
+Just write a python script that spins up the instances and tells them to run a command (or 2) using boto3, wait until the commands are done, then compile results.
+
+**Pro:** Simple
+**Con:** Michael doesn't know whether this is in fact simple to do with boto3. It seems like it obviously should be, but sometimes things are weirdly complicated.
+
 ### Ansible
 
 **Pro:** Michael has used Ansible before

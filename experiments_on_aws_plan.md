@@ -12,7 +12,7 @@ We plan to re-run our experiments on AWS to
 
 ## Deployment Plan - Overview
 
-Create docker image that is able to run our experiment scripts with no further modifications to the environment. The image will be (roughly) equivalent to the planutils image after installing fast downward and setting up the scoping conda environment. 
+Create docker image that is able to run our experiment scripts with no further modifications to the environment. The image will be (roughly) equivalent to the planutils image after installing fast downward and setting up the scoping conda environment. We will use [dockerfile](dockerfile) (WIP).
 
 Create a job-template that takes the following parameters:
 

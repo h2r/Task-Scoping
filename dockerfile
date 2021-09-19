@@ -9,9 +9,24 @@ ENV SCOPING_DIR=/scoping_supplement/scoping
 
 COPY ./ ${SCOPING_DIR}
 
-# Install Conda
-RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py37_4.10.3-Linux-x86_64.sh -O ~/miniconda.sh && \
-    /bin/bash ~/miniconda.sh -b -p /opt/conda &&
+# Install Conda (TODO make this work!)
+# RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py37_4.10.3-Linux-x86_64.sh -O ~/miniconda.sh
+
+# RUN sh ~/miniconda.sh -b -p /opt/conda
+
+# # This command lets us use conda without restarting shell. (TODO It doesn't work, probably because each RUN creates a new shell. )
+# RUN eval "$(~/miniconda/bin/conda shell.bash hook)"
+
+# From https://stackoverflow.com/a/57617879
+RUN INSTALL_PATH=~/miniconda \
+    && wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py37_4.10.3-Linux-x86_64.sh -O ~/miniconda.sh\
+    && bash ~/miniconda.sh -fbp $INSTALL_PATH
+
+
+# RUN eval "$(~/miniconda/bin/conda shell.bash hook)"
+ENV PATH="~/miniconda/bin:${PATH}"
+
+
 
 # Setup conda environment
 RUN conda create -n scoping python=3.7

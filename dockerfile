@@ -49,7 +49,8 @@ RUN ./build.py
 
 
 # Install ENHSP-2020 (TODO make this work!)
+# ERROR  : Failed to unshare root file system: Operation not permitted
 
-RUN yes | enhsp-2020
+# RUN yes | enhsp-2020
 
 WORKDIR ${SCOPING_DIR}

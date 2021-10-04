@@ -1,8 +1,10 @@
 FROM aiplanning/planutils
 
 # build command:
-# docker build . -t scoping --progress=plain
+# docker build . -t scoping:sans_enhsp --progress=plain
 # --progress-plain is needed to see echos. See https://stackoverflow.com/a/64932706
+# Run command:
+# docker run -it scoping:sans_enhsp /bin/bash
 
 RUN apt-get update -y && echo "~~apt-get updated"
 

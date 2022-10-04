@@ -15,5 +15,6 @@ setup(name='oo_scoping',
       url='https://github.com/h2r/OO-Scoping-IPC',
       install_requires=[
           'z3-solver'
-      ]
+      ],
+      py_modules=[]
 )

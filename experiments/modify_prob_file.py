@@ -1,6 +1,7 @@
 from oo_scoping.PDDL import PDDL_Parser
 import random
 import argparse
+import tempfile
 
 def find_new_irrel_goal_clauses(domain, problem, **kwargs):
     """
@@ -36,9 +37,33 @@ def find_new_irrel_goal_clauses(domain, problem, **kwargs):
 
     return goal_conds_to_add
 
+
+def add_irrel_goals_to_prob_file(domain, problem, tmp_file_name, **kwargs):
+    goal_conds = find_new_irrel_goal_clauses(domain, problem)
+    wf = tempfile.NamedTemporaryFile(mode="w+t")
+    wf.name = tmp_file_name
+    lines_to_be_written = []
+    with open(problem, 'r') as rf:
+        lines = rf.readlines()
+        in_goal = False
+        for line in lines:
+            if in_goal:
+                for goal_cond in goal_conds:
+                    new_goal_cond_str = '\t(' + ' '.join(goal_cond) + ')\n'
+                    lines_to_be_written.append(new_goal_cond_str)
+                in_goal = False
+            if "goal" in line.strip():
+                in_goal = True
+            lines_to_be_written.append(line)
+    wf.writelines(lines_to_be_written)
+    wf.seek(0)
+    return wf
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--domain",type=str,help="Path location of the PDDL domain file")
     parser.add_argument("--problem",type=str,help="Path location of the PDDL problem file corresponding to the specified domain")
     args = parser.parse_args()
-    find_new_irrel_goal_clauses(args.domain, args.problem, **{'verbose': 1})
+    tmp_file = add_irrel_goals_to_prob_file(args.domain, args.problem, "tmp_prob", **{'verbose': 1})
+    print(tmp_file.read())
+    tmp_file.close()

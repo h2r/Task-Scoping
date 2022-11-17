@@ -1,7 +1,8 @@
 import re, os, copy
+from typing import Optional
 
 
-def get_scoped_problem_path(p, suffix = None):
+def get_scoped_problem_path(p: str, suffix: Optional[str] = None) -> str:
     p_split = p.split(".")
     base = ".".join(p_split[:-1])
     if suffix is None:
@@ -10,7 +11,7 @@ def get_scoped_problem_path(p, suffix = None):
         suffix = "_" + suffix
     return base + "_scoped" + suffix + "." +  p_split[-1]
 
-def get_scoped_domain_path(d, p, suffix = None):
+def get_scoped_domain_path(d: str, p: str, suffix: Optional[str] = None) -> str:
     d_split = d.split(".")
     base = ".".join(d_split[:-1])
     # p_id = re.search("([0-9]+)",p).group()
@@ -24,7 +25,7 @@ def get_scoped_domain_path(d, p, suffix = None):
     d_new = base + "_" + "scoped" + "_"  + p_base + suffix + "." + d_split[-1]
     return d_new
 
-def find_closing_paren(s, start):
+def find_closing_paren(s: str, start: int) -> int:
     lefts_left = 0
     for i in range(start, len(s)):
         c = s[i]
@@ -36,7 +37,7 @@ def find_closing_paren(s, start):
             lefts_left += 1
 
 
-def writeback_domain(input_path, output_path, actions):
+def writeback_domain(input_path: str, output_path: str, actions: list[str]) -> None:
     with open(input_path, "r") as f:
         domain = f.read()
     # TODO find any of a list of action names
@@ -52,7 +53,7 @@ def writeback_domain(input_path, output_path, actions):
         f.write(domain)
 
 # TODO clean this up, maybe make less janky
-def writeback_problem(input_path, output_path, objects):
+def writeback_problem(input_path: str, output_path: str, objects: list[str]) -> None:
     with open(input_path, "r") as f:
         instance_lines = f.read().splitlines()
     scoped_lines = []

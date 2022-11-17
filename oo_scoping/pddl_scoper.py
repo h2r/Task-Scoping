@@ -4,7 +4,7 @@ from oo_scoping.scoping import scope
 from oo_scoping.PDDLz3 import PDDL_Parser_z3
 import argparse
 
-def scope_pddl(domain, problem, **kwargs):
+def scope_pddl(domain: str, problem: str, **kwargs: dict) -> None:
     """
     :param domain: Path of domain file
     :param problem: Path of problem file

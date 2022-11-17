@@ -1,5 +1,5 @@
 import re, os, copy
-from typing import Optional
+from typing import Optional, List
 
 
 def get_scoped_problem_path(p: str, suffix: Optional[str] = None) -> str:
@@ -37,7 +37,7 @@ def find_closing_paren(s: str, start: int) -> int:
             lefts_left += 1
 
 
-def writeback_domain(input_path: str, output_path: str, actions: list[str]) -> None:
+def writeback_domain(input_path: str, output_path: str, actions: List[str]) -> None:
     with open(input_path, "r") as f:
         domain = f.read()
     # TODO find any of a list of action names
@@ -53,7 +53,7 @@ def writeback_domain(input_path: str, output_path: str, actions: list[str]) -> N
         f.write(domain)
 
 # TODO clean this up, maybe make less janky
-def writeback_problem(input_path: str, output_path: str, objects: list[str]) -> None:
+def writeback_problem(input_path: str, output_path: str, objects: List[str]) -> None:
     with open(input_path, "r") as f:
         instance_lines = f.read().splitlines()
     scoped_lines = []

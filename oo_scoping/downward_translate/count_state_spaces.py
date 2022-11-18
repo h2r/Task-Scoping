@@ -2,12 +2,19 @@ import os, re, json
 
 import pandas as pd
 
-from oo_scoping.paths import repo_dir, get_effectively_relevant_fluents_file_path, get_scoped_file_path, replace_extension, add_path_suffix
+from oo_scoping.paths import (
+    repo_dir,
+    get_effectively_relevant_fluents_file_path,
+    get_scoped_file_path,
+    replace_extension,
+    add_path_suffix,
+)
 from oo_scoping.downward_translate.translate_and_scope import main_from_other_script
 
 # This file is a mess. It could be much cleaner - it's conceptually pretty simple.
 
-def get_var_sizes(sas_file = None, sas_str = None):
+
+def get_var_sizes(sas_file=None, sas_str=None):
     # Read file if it is passed instead of string
     if sas_str is None:
         with open(sas_file, "r") as f:
@@ -17,6 +24,8 @@ def get_var_sizes(sas_file = None, sas_str = None):
     for (nm, n) in matches:
         var2size[nm] = int(n)
     return var2size
+
+
 # print("\n".join(cmd_list))
 
 # def filtered_dict_prod(d, keys):
@@ -38,6 +47,7 @@ def prod(iter):
         x *= i
     return x
 
+
 def cmd2kwargs(cmd_s):
     """
     Returns kwargs for translate_and_scope.main_from_other_script() based on the equivalent cl command
@@ -53,8 +63,8 @@ def cmd2kwargs(cmd_s):
         name = parts[i]
         # Check that this i
         assert name[:2] == "--"
-        name = name[2:].replace("-","_")
-        val = parts[i+1]
+        name = name[2:].replace("-", "_")
+        val = parts[i + 1]
         # Convert string to python type if needed
         if val == "True":
             val = True
@@ -68,6 +78,7 @@ def cmd2kwargs(cmd_s):
         tas_kwargs[name] = val
     return tas_kwargs
 
+
 def calculate_statespaces():
     cmds_path = f"{repo_dir}/downward_translate/scope_cmds.txt"
     with open(cmds_path, "r") as f:
@@ -76,15 +87,18 @@ def calculate_statespaces():
         tas_kwargs = cmd2kwargs(cmd_str)
         print(cmd_str)
         # Change output path to a subdirectory for cleanliness
-        tas_kwargs["sas_file"] = repo_dir + "/examples/sas_generated/" + tas_kwargs["sas_file"]
+        tas_kwargs["sas_file"] = (
+            repo_dir + "/examples/sas_generated/" + tas_kwargs["sas_file"]
+        )
         tas_kwargs["write_erfs"] = True
         print(tas_kwargs)
 
-    
         main_from_other_script(**tas_kwargs)
         # Get effectively relevant fluents, both scoped and unscoped
         erf_path = get_effectively_relevant_fluents_file_path(tas_kwargs["sas_file"])
-        erf_path_scoped = get_effectively_relevant_fluents_file_path(get_scoped_file_path(tas_kwargs["sas_file"]))
+        erf_path_scoped = get_effectively_relevant_fluents_file_path(
+            get_scoped_file_path(tas_kwargs["sas_file"])
+        )
 
         with open(erf_path, "r") as f:
             erf = f.read().splitlines()
@@ -99,15 +113,18 @@ def calculate_statespaces():
         print(f"Full size: {full_size}")
         print(f"Unscoped size: {unscoped_size}")
         print(f"Scoped size: {scoped_size}")
-        size_path = replace_extension(add_path_suffix(tas_kwargs["sas_file"], "_sizes"), "json")
+        size_path = replace_extension(
+            add_path_suffix(tas_kwargs["sas_file"], "_sizes"), "json"
+        )
         # Should have written to csv instead of json. Oh well
         sizes_dict = {
             "full": full_size,
             "effectively_relevant_unscoped": unscoped_size,
-            "effectively_relevant_scoped": scoped_size
+            "effectively_relevant_scoped": scoped_size,
         }
         with open(size_path, "w") as f:
             json.dump(sizes_dict, f, indent=4)
+
 
 def merge_statespace_jsons():
     cmds_path = f"{repo_dir}/downward_translate/scope_cmds.txt"
@@ -120,41 +137,51 @@ def merge_statespace_jsons():
         tas_kwargs = cmd2kwargs(cmd_str)
         print(cmd_str)
         # Change output path to a subdirectory for cleanliness
-        tas_kwargs["sas_file"] = repo_dir + "/examples/sas_generated/" + tas_kwargs["sas_file"]
+        tas_kwargs["sas_file"] = (
+            repo_dir + "/examples/sas_generated/" + tas_kwargs["sas_file"]
+        )
         tas_kwargs["write_erfs"] = True
         print(tas_kwargs)
         taskname, _ = os.path.splitext(os.path.split(tas_kwargs["sas_file"])[1])
-    
+
         # Get effectively relevant fluents, both scoped and unscoped
-        size_path = replace_extension(add_path_suffix(tas_kwargs["sas_file"], "_sizes"), "json")
+        size_path = replace_extension(
+            add_path_suffix(tas_kwargs["sas_file"], "_sizes"), "json"
+        )
         with open(size_path, "r") as f:
             size_dict = json.load(f)
         for k, v in size_dict.items():
             df_sizes.loc[taskname, k] = v
-        
+
     df_sizes.to_csv(f"{repo_dir}/examples/sas_generated/all_sizes.csv", index=True)
     print(df_sizes)
     # big_size_path = f"{repo_dir}/examples/sas_generated/all_sizes.json"
     # with open(size_path, "w") as f:
-        # json.dump(sizes_dict, f, indent=4)
-    
+    # json.dump(sizes_dict, f, indent=4)
+
 
 def get_operator_counts():
     cmds_path = f"{repo_dir}/downward_translate/scope_cmds.txt"
     with open(cmds_path, "r") as f:
         cmds = f.read().splitlines()
 
-    df_sizes = pd.read_csv(f"{repo_dir}/examples/sas_generated/all_sizes.csv", index_col="task")
+    df_sizes = pd.read_csv(
+        f"{repo_dir}/examples/sas_generated/all_sizes.csv", index_col="task"
+    )
     for cmd_str in cmds:
         tas_kwargs = cmd2kwargs(cmd_str)
         print(cmd_str)
         # Change output path to a subdirectory for cleanliness
-        tas_kwargs["sas_file"] = repo_dir + "/examples/sas_generated/" + tas_kwargs["sas_file"]
+        tas_kwargs["sas_file"] = (
+            repo_dir + "/examples/sas_generated/" + tas_kwargs["sas_file"]
+        )
         tas_kwargs["write_erfs"] = True
         print(tas_kwargs)
         taskname, _ = os.path.splitext(os.path.split(tas_kwargs["sas_file"])[1])
         unscoped_operators = get_operator_count(tas_kwargs["sas_file"])
-        scoped_operators = get_operator_count(get_scoped_file_path(tas_kwargs["sas_file"]))
+        scoped_operators = get_operator_count(
+            get_scoped_file_path(tas_kwargs["sas_file"])
+        )
         print(f"Unscoped operators: {unscoped_operators}")
         print(f"Scoped operators: {scoped_operators}")
         df_sizes.loc[taskname, "unscoped_operators"] = unscoped_operators
@@ -167,10 +194,12 @@ def get_operator_counts():
         #     df_sizes.loc[taskname, k] = v
     df_sizes.to_csv(f"{repo_dir}/examples/sas_generated/all_sizes.csv", index=True)
 
+
 def get_operator_count(sas_file):
     with open(sas_file, "r") as f:
         sas_str = f.read()
     return int(re.search("([0-9]+)\nbegin_operator", sas_str).groups()[0])
+
 
 if __name__ == "__main__":
     # merge_statespace_jsons()

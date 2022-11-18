@@ -8,6 +8,7 @@ from oo_scoping.downward_translate import pddl_to_prolog
 from oo_scoping.downward_translate import pddl
 from oo_scoping.downward_translate import timers
 
+
 def get_fluent_facts(task, model):
     fluent_predicates = set()
     for action in task.actions:
@@ -15,8 +16,8 @@ def get_fluent_facts(task, model):
             fluent_predicates.add(effect.literal.predicate)
     for axiom in task.axioms:
         fluent_predicates.add(axiom.name)
-    return {fact for fact in model
-            if fact.predicate in fluent_predicates}
+    return {fact for fact in model if fact.predicate in fluent_predicates}
+
 
 def get_objects_by_type(typed_objects, types):
     result = defaultdict(list)
@@ -28,6 +29,7 @@ def get_objects_by_type(typed_objects, types):
         for type in supertypes[obj.type_name]:
             result[type].append(obj.name)
     return result
+
 
 def instantiate(task, model):
     relaxed_reachable = False
@@ -49,33 +51,45 @@ def instantiate(task, model):
         if isinstance(atom.predicate, pddl.Action):
             action = atom.predicate
             parameters = action.parameters
-            inst_parameters = atom.args[:len(parameters)]
+            inst_parameters = atom.args[: len(parameters)]
             # Note: It's important that we use the action object
             # itself as the key in reachable_action_parameters (rather
             # than action.name) since we can have multiple different
             # actions with the same name after normalization, and we
             # want to distinguish their instantiations.
             reachable_action_parameters[action].append(inst_parameters)
-            variable_mapping = {par.name: arg
-                                for par, arg in zip(parameters, atom.args)}
+            variable_mapping = {
+                par.name: arg for par, arg in zip(parameters, atom.args)
+            }
             inst_action = action.instantiate(
-                variable_mapping, init_facts, init_assignments,
-                fluent_facts, type_to_objects,
-                task.use_min_cost_metric)
+                variable_mapping,
+                init_facts,
+                init_assignments,
+                fluent_facts,
+                type_to_objects,
+                task.use_min_cost_metric,
+            )
             if inst_action:
                 instantiated_actions.append(inst_action)
         elif isinstance(atom.predicate, pddl.Axiom):
             axiom = atom.predicate
-            variable_mapping = {par.name: arg
-                                for par, arg in zip(axiom.parameters, atom.args)}
+            variable_mapping = {
+                par.name: arg for par, arg in zip(axiom.parameters, atom.args)
+            }
             inst_axiom = axiom.instantiate(variable_mapping, init_facts, fluent_facts)
             if inst_axiom:
                 instantiated_axioms.append(inst_axiom)
         elif atom.predicate == "@goal-reachable":
             relaxed_reachable = True
 
-    return (relaxed_reachable, fluent_facts, instantiated_actions,
-            sorted(instantiated_axioms), reachable_action_parameters)
+    return (
+        relaxed_reachable,
+        fluent_facts,
+        instantiated_actions,
+        sorted(instantiated_axioms),
+        reachable_action_parameters,
+    )
+
 
 def explore(task):
     prog = pddl_to_prolog.translate(task)
@@ -83,8 +97,10 @@ def explore(task):
     with timers.timing("Completing instantiation"):
         return instantiate(task, model)
 
+
 if __name__ == "__main__":
     import pddl_parser
+
     task = pddl_parser.open()
     relaxed_reachable, atoms, actions, axioms, _ = explore(task)
     print("goal relaxed reachable: %s" % relaxed_reachable)

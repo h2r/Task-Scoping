@@ -9,7 +9,8 @@ def get_scoped_problem_path(p: str, suffix: Optional[str] = None) -> str:
         suffix = ""
     else:
         suffix = "_" + suffix
-    return base + "_scoped" + suffix + "." +  p_split[-1]
+    return base + "_scoped" + suffix + "." + p_split[-1]
+
 
 def get_scoped_domain_path(d: str, p: str, suffix: Optional[str] = None) -> str:
     d_split = d.split(".")
@@ -22,8 +23,9 @@ def get_scoped_domain_path(d: str, p: str, suffix: Optional[str] = None) -> str:
         suffix = ""
     else:
         suffix = "_" + suffix
-    d_new = base + "_" + "scoped" + "_"  + p_base + suffix + "." + d_split[-1]
+    d_new = base + "_" + "scoped" + "_" + p_base + suffix + "." + d_split[-1]
     return d_new
+
 
 def find_closing_paren(s: str, start: int) -> int:
     lefts_left = 0
@@ -52,6 +54,7 @@ def writeback_domain(input_path: str, output_path: str, actions: List[str]) -> N
     with open(output_path, "w") as f:
         f.write(domain)
 
+
 # TODO clean this up, maybe make less janky
 def writeback_problem(input_path: str, output_path: str, objects: List[str]) -> None:
     with open(input_path, "r") as f:
@@ -60,24 +63,24 @@ def writeback_problem(input_path: str, output_path: str, objects: List[str]) -> 
     in_objects_flag = False
     for l in instance_lines:
         if in_objects_flag == True:
-            l_stripped = l.replace("\t","").replace(" ","")
+            l_stripped = l.replace("\t", "").replace(" ", "")
             if len(l_stripped) > 0 and l_stripped[0] == ")":
                 in_objects_flag = False
         elif "(:objects" in l:
             in_objects_flag = True
-        
-        tokens = re.split('[ (),]',l)
-        tokens[0] = tokens[0].strip('\t')
-        
+
+        tokens = re.split("[ (),]", l)
+        tokens[0] = tokens[0].strip("\t")
+
         if not any(o in tokens for o in objects):
             scoped_lines.append(l)
-        
+
         else:
             # from IPython import embed; embed()
             if in_objects_flag:
                 split_l = l.split(" ")
                 obj_type = split_l[-1]
-                objs = [o.replace("\t","") for o in split_l[:-2]]
+                objs = [o.replace("\t", "") for o in split_l[:-2]]
                 objs_kept = []
                 objs_removed = []
                 # objs = [o for o in objs if o not in objects and o != '']
@@ -97,5 +100,5 @@ def writeback_problem(input_path: str, output_path: str, objects: List[str]) -> 
                 # print(l)
                 scoped_lines.append(";" + l)
 
-    with open(output_path, "w")  as f:
+    with open(output_path, "w") as f:
         f.write("\n".join(scoped_lines))

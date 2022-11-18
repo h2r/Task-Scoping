@@ -1,4 +1,4 @@
-from . import conditions
+from oo_scoping.downward_translate.pddl import conditions
 
 
 class Axiom:

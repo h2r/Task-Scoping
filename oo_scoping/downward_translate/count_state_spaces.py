@@ -1,8 +1,10 @@
 import os, re, json
-# import math
-from oo_scoping.paths import repo_dir, get_effectively_relevant_fluents_file_path, get_scoped_file_path, replace_extension, add_path_suffix
-from translate_and_scope import main_from_other_script
+
 import pandas as pd
+
+from oo_scoping.paths import repo_dir, get_effectively_relevant_fluents_file_path, get_scoped_file_path, replace_extension, add_path_suffix
+from oo_scoping.downward_translate.translate_and_scope import main_from_other_script
+
 # This file is a mess. It could be much cleaner - it's conceptually pretty simple.
 
 def get_var_sizes(sas_file = None, sas_str = None):

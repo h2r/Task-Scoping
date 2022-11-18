@@ -4,8 +4,8 @@
 import sys
 import itertools
 
-import pddl
-import timers
+from oo_scoping.downward_translate import pddl
+from oo_scoping.downward_translate import timers
 from functools import reduce
 
 def convert_rules(prog):

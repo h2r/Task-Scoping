@@ -1,4 +1,4 @@
-from . import conditions
+from oo_scoping.downward_translate.pddl import conditions
 
 def cartesian_product(*sequences):
     # TODO: Also exists in tools.py outside the pddl package (defined slightly

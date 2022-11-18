@@ -2,7 +2,7 @@
 
 import copy
 
-import pddl
+from oo_scoping.downward_translate import pddl
 
 class ConditionProxy:
     def clone_owner(self):

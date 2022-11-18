@@ -3,9 +3,9 @@
 
 import itertools
 
-import normalize
-import pddl
-import timers
+from oo_scoping.downward_translate import normalize
+from oo_scoping.downward_translate import pddl
+from oo_scoping.downward_translate import timers
 
 class PrologProgram:
     def __init__(self):
@@ -36,7 +36,8 @@ class PrologProgram:
         self.split_duplicate_arguments()
         self.convert_trivial_rules()
     def split_rules(self):
-        import split_rules
+        # MF: Why do we import it in this function, rather than at the top?
+        from oo_scoping.downward_translate import split_rules
         # Splits rules whose conditions can be partitioned in such a way that
         # the parts have disjoint variable sets, then split n-ary joins into
         # a number of binary joins, introducing new pseudo-predicates for the

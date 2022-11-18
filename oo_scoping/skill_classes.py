@@ -1,4 +1,15 @@
-from typing import List, Iterable, Tuple, Hashable, Union, Optional
+from typing import (
+    List,
+    Iterable,
+    Tuple,
+    Hashable,
+    Union,
+    Optional,
+    Set,
+    Dict,
+    OrderedDict,
+	NewType
+)
 from itertools import chain, product
 from collections import OrderedDict
 import z3
@@ -53,7 +64,7 @@ class SkillPDDL:  # Skills are Immutable
     def __init__(
         self,
         precondition: z3.ExprRef,
-        action: Union[str, List[str], Tuple[str]],
+        action: Union[str, List[str], Tuple[str, ...]],
         effects: Union[Iterable[EffectTypePDDL], EffectTypePDDL],
         side_effects: Union[Iterable[EffectTypePDDL], EffectTypePDDL] = None,
     ):
@@ -72,12 +83,12 @@ class SkillPDDL:  # Skills are Immutable
         )  # Copy in case we are passed a list
         if isinstance(effects, EffectTypePDDL):
             effects = [effects]
-        self.effects: Tuple[EffectTypePDDL] = tuple(sorted(set(effects)))
-        self.side_effects: Tuple[EffectTypePDDL] = tuple(sorted(set(side_effects)))
+        self.effects: Tuple[EffectTypePDDL, ...] = tuple(sorted(set(effects)))
+        self.side_effects: Tuple[EffectTypePDDL, ...] = tuple(sorted(set(side_effects)))
         self.action_str = str(action)
 
     @property
-    def all_effects(self) -> Tuple[EffectTypePDDL]:
+    def all_effects(self) -> Tuple[EffectTypePDDL, ...]:
         return tuple(set(self.effects + self.side_effects))
 
     def __eq__(self, other):
@@ -111,7 +122,7 @@ class SkillPDDL:  # Skills are Immutable
         return self.action_str < other.action_str
         # return str(self) < str(other)
 
-    def move_irrelevant2side_effects(self, rel_pvars):
+    def move_irrelevant2side_effects(self, rel_pvars: Set[str]):
         """Returns a new skill with irrelevant pvars moved to side effects"""
         # Check that no relevant vars are in side effects
         # for e in self.side_effects:
@@ -132,6 +143,8 @@ class SkillPDDL:  # Skills are Immutable
         return get_unique_z3_vars(params)
         # return tuple(sorted(list(set(params))))
         # return tuple(chain(*[x.params for x in self.effects]))
+
+HashedSkills = NewType("HashedSkills", Dict[Tuple[EffectTypePDDL,...], List[SkillPDDL]])
 
 
 def move_copy_se(x):
@@ -160,8 +173,11 @@ def move_inner_dict_get(rel_pvars, pvar_str):
     return pvar_str in rel_pvars
 
 
-def group_skills_by_effects(skills, rel_pvars):
-    hashed_skills = OrderedDict()
+
+def group_skills_by_effects(
+    skills: Iterable[SkillPDDL], rel_pvars: Set[str]
+) -> HashedSkills:
+    hashed_skills: HashedSkills = OrderedDict()
     for s in skills:
         s = s.move_irrelevant2side_effects(rel_pvars)
         k = s.effects
@@ -171,8 +187,8 @@ def group_skills_by_effects(skills, rel_pvars):
     return hashed_skills
 
 
-def merge_skills_inner(hashed_skills, solver):
-    new_skills = []
+def merge_skills_inner(hashed_skills: HashedSkills, solver: z3.Solver) -> List[SkillPDDL]:
+    new_skills: List[SkillPDDL] = []
     for (effects), sks in hashed_skills.items():
         # Skip empty effects
         if len(effects) == 0:
@@ -190,15 +206,17 @@ def merge_skills_inner(hashed_skills, solver):
 
 
 def merge_skills_pddl(
-    skills: Iterable[SkillPDDL], relevant_pvars: Iterable[z3.ExprRef], solver=None
-):
+    skills: Iterable[SkillPDDL],
+    relevant_pvars: Iterable[z3.ExprRef],
+    solver: Optional[z3.Solver] = None,
+) -> List[SkillPDDL]:
     """
     Merges skills that have the same effects on relevant_pvars
     :param skills: Iterable of Skills
     :param relevant_pvars: Iterable of pvars, where each pvar is a z3 expression
     :param solver: A z3 solver. Use this arg to assume state constraints when simplifying disjunctions
     """
-    rel_pvar_set = set(map(str, relevant_pvars))
+    rel_pvar_set: Set[str] = set(map(str, relevant_pvars))
 
     # Move irrelevant pvars to side effects and group skills by actions and effect types
     hashed_skills = group_skills_by_effects(skills, rel_pvar_set)
@@ -206,9 +224,11 @@ def merge_skills_pddl(
     # Merge skills that share a key
     new_skills = merge_skills_inner(hashed_skills, solver)
 
-    def sort_in_merge_skills(x):
+    def sort_in_merge_skills(x: List) -> List:
         """
-        Used for profiling
+        Used for profiling.
+                This is just a wrapper around sorted.
+                We should probably get rid fo this.
         """
         return sorted(x)
 

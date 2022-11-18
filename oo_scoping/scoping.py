@@ -1,5 +1,5 @@
 from itertools import chain
-from typing import Iterable, Union, Optional, List, Tuple
+from typing import Iterable, Union, Optional, List, Tuple, Set
 import z3
 from oo_scoping.skill_classes import SkillPDDL, EffectTypePDDL, merge_skills_pddl
 from oo_scoping.utils import (
@@ -9,6 +9,7 @@ from oo_scoping.utils import (
     simplify_disjunction,
     get_unique_z3_vars,
     pvars2objects,
+    
 )
 from oo_scoping.writeback_pddl import writeback_domain, writeback_problem
 
@@ -29,7 +30,9 @@ def effects2pvars(effects: List[EffectTypePDDL]) -> List[z3.ExprRef]:
     return sorted(list(set([x.pvar for x in effects])), key=lambda x: str(x))
 
 
-def get_unthreatened_conditions(conditions, effected_pvars: List[z3.ExprRef]):
+def get_unthreatened_conditions(
+    conditions: Iterable[z3.ExprRef], effected_pvars: List[z3.ExprRef]
+) -> Iterable[z3.ExprRef]:
     """
     Return list of conditions that are unthreatened by effected_pvars.
     Created as separate function for profiling purposes.
@@ -46,7 +49,9 @@ def get_unthreatened_conditions(conditions, effected_pvars: List[z3.ExprRef]):
     return causal_links
 
 
-def get_causal_links(start_condition, skills):
+def get_causal_links(
+    start_condition: Iterable[z3.ExprRef], skills: List[SkillPDDL]
+) -> Iterable[z3.ExprRef]:
     """
     :param start_condition: Condition we assume is true at start of trajectory
     :param skills: Iterable of Skills
@@ -71,7 +76,12 @@ def get_causal_links_old(start_condition, skills):
     return causal_links
 
 
-def get_unlinked_pvars(skills, causal_links, dummy_goal, solver):
+def get_unlinked_pvars(
+    skills: List[SkillPDDL],
+    causal_links: Iterable[z3.ExprRef],
+    dummy_goal: z3.ExprRef,
+    solver: z3.Solver,
+) -> Set[z3.ExprRef]:
     solver.push()
     solver.add(*causal_links)
     pvars_rel_new = [dummy_goal]
@@ -99,7 +109,8 @@ def get_unlinked_pvars_inner_check(solver, pvars_rel_new, prec):
         pvars_rel_new.extend(get_atoms(prec))
 
 
-def get_rel_pvars_new(pvars_rel_new):
+def get_rel_pvars_new(pvars_rel_new: Iterable[z3.ExprRef]) -> Set[z3.ExprRef]:
+    """MF: Why do we need this? Probably profiling."""
     return set(pvars_rel_new)
 
 
@@ -158,7 +169,16 @@ def scope(
         causal_links = get_causal_links(start_condition, skills_rel)
 
         # Get pvars not guaranteed by causal links
-        pvars_rel_new = get_unlinked_pvars(skills_rel, causal_links, dummy_goal, solver)
+        pvars_rel_new: Set[z3.ExprRef] = get_unlinked_pvars(skills_rel, causal_links, dummy_goal, solver)
+        """DEBUG"""
+        my_vars_strs = ["var3()", "var4()", "var12()", "var16()", "var18()"]
+        my_rel_pvars = [v for v in pvars_rel_new if str(v) in my_vars_strs]
+        if len(my_rel_pvars) > 0:
+            print("These special vars are relevant:")
+            print(my_rel_pvars)
+
+
+        """DEBUG END"""
 
         # from IPython import embed; embed()
 

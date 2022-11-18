@@ -1,3 +1,4 @@
+from __future__ import annotations
 import re, os, copy
 from abc import ABC
 from collections.abc import Iterable
@@ -6,6 +7,9 @@ from itertools import product, chain
 import pathlib
 import pdb
 import z3
+from typing import List
+
+# from oo_scoping.skill_classes import SkillPDDL
 
 # TODO Split this into multiple scripts. Remove unneeded functions.
 
@@ -135,7 +139,7 @@ def expr2pvar_names(expressions):
     return pvars
 
 
-def get_all_objects(skills):
+def get_all_objects(skills: List[SkillPDDL]):
     all_pvars = []
     for s in skills:
         all_pvars.extend(expr2pvar_names_single(s.precondition))

@@ -4,6 +4,8 @@
 import os
 import sys
 import traceback
+from typing import Iterable
+
 
 def python_version_supported():
     return sys.version_info >= (3, 6)
@@ -16,27 +18,28 @@ from collections import defaultdict
 from copy import deepcopy
 from itertools import product
 
-import axiom_rules
-import fact_groups
-import instantiate
-import normalize
-import options
-import pddl
-import pddl_parser
-import sas_tasks
 import signal
-import simplify
-import timers
-import tools
-import variable_order
 
-import scoping_sas_parser
+
+from oo_scoping.downward_translate import axiom_rules
+from oo_scoping.downward_translate import fact_groups
+from oo_scoping.downward_translate import instantiate
+from oo_scoping.downward_translate import normalize
+from oo_scoping.downward_translate import options
+from oo_scoping.downward_translate import pddl
+from oo_scoping.downward_translate import pddl_parser
+from oo_scoping.downward_translate import sas_tasks
+from oo_scoping.downward_translate import simplify
+from oo_scoping.downward_translate import timers
+from oo_scoping.downward_translate import tools
+from oo_scoping.downward_translate import variable_order
+
+from oo_scoping.downward_translate import scoping_sas_parser
 from oo_scoping.scoping import scope
 from oo_scoping.writeback_sas import writeback_scoped_sas
 from oo_scoping.utils import get_atoms
 from oo_scoping.skill_classes import SkillPDDL
 from oo_scoping.paths import get_effectively_relevant_fluents_file_path, get_scoped_file_path
-from typing import Iterable
 
 # Profile imports
 # import cProfile

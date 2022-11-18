@@ -5,10 +5,10 @@ from collections import deque, defaultdict
 import itertools
 import time
 
-import invariants
-import options
-import pddl
-import timers
+from oo_scoping.downward_translate import invariants
+from oo_scoping.downward_translate import options
+from oo_scoping.downward_translate import pddl
+from oo_scoping.downward_translate import timers
 
 class BalanceChecker:
     def __init__(self, task, reachable_action_params):

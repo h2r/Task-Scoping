@@ -36,7 +36,9 @@ def simplify_disjunction(conds, my_solver=None, tactic='aig'):
         disj_simp = z3.And(*disj_simp.children())
     return disj_simp
 
-def split_conj(expr):
+def split_conj(expr: Union[bool, z3.ExprRef]) -> Union[bool, List[z3.ExprRef]]:
+    # MF: Should we just return bool? This may cause an error in scope(),
+    # which expects the result of this to be a list.
     if isinstance(expr, bool):
         return expr
     elif z3.is_expr(expr):

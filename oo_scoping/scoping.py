@@ -1,11 +1,11 @@
 from itertools import chain
-from typing import Iterable, Union
+from typing import Iterable, Union, Optional, List, Tuple
 import z3
 from oo_scoping.skill_classes import SkillPDDL, EffectTypePDDL, merge_skills_pddl
 from oo_scoping.utils import split_conj, get_atoms, solver_implies_condition, simplify_disjunction, get_unique_z3_vars, pvars2objects
 from oo_scoping.writeback_pddl import writeback_domain, writeback_problem
 
-def skills2effects(skills):
+def skills2effects(skills: List[SkillPDDL]) -> List[EffectTypePDDL]:
 	"""
 	Return union of effects from skills.
 	Created as separate function for profiling purposes.
@@ -13,14 +13,14 @@ def skills2effects(skills):
 	return sorted(list(set(chain(*[s.all_effects for s in skills]))))
 
 
-def effects2pvars(effects):
+def effects2pvars(effects: List[EffectTypePDDL]) -> List[z3.ExprRef]:
 	"""
 	Return union of pvars from effects.
 	Created as separate function for profiling purposes.
 	"""
 	return sorted(list(set([x.pvar for x in effects])), key=lambda x: str(x))
 
-def get_unthreatened_conditions(conditions, effected_pvars):
+def get_unthreatened_conditions(conditions, effected_pvars: List[z3.ExprRef]):
 	"""
 	Return list of conditions that are unthreatened by effected_pvars.
 	Created as separate function for profiling purposes.
@@ -87,8 +87,8 @@ def get_rel_pvars_new(pvars_rel_new):
 
 
 def scope(goals: Union[Iterable[z3.ExprRef], z3.ExprRef], skills: Iterable[SkillPDDL]
-		  , start_condition: Union[Iterable[z3.ExprRef], z3.ExprRef], state_constraints: z3.ExprRef = None
-		  , verbose=0):
+		  , start_condition: Union[Iterable[z3.ExprRef], z3.ExprRef], state_constraints: Optional[z3.ExprRef] = None
+		  , verbose=0) -> Tuple[List[z3.ExprRef], List[z3.ExprRef], List[SkillPDDL]]:
 	if isinstance(goals, z3.ExprRef):
 		goals = split_conj(goals)
 	if isinstance(start_condition, z3.ExprRef):

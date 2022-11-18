@@ -6,7 +6,7 @@ import copy
 from oo_scoping.utils import simplify_disjunction, flatten, get_unique_z3_vars
 
 class EffectTypePDDL():  #EffectTypes are Immutable
-	def __init__(self, pvar: z3.ExprRef, index, params: Iterable= None):
+	def __init__(self, pvar: z3.ExprRef, index, params: Optional[Iterable]= None):
 		self.pvar, self.index = pvar, index
 		# These params are NOT the same as pddl params, and should probably be renamed
 		# These params are vars on which the effect relies - ex. in p.y <- t.y, t.y is a param

@@ -1,4 +1,4 @@
-from typing import List, Iterable, Tuple, Hashable, Union
+from typing import List, Iterable, Tuple, Hashable, Union, Optional
 from itertools import chain, product
 from collections import OrderedDict
 import z3

@@ -170,15 +170,6 @@ def scope(
 
         # Get pvars not guaranteed by causal links
         pvars_rel_new: Set[z3.ExprRef] = get_unlinked_pvars(skills_rel, causal_links, dummy_goal, solver)
-        """DEBUG"""
-        my_vars_strs = ["var3()", "var4()", "var12()", "var16()", "var18()"]
-        my_rel_pvars = [v for v in pvars_rel_new if str(v) in my_vars_strs]
-        if len(my_rel_pvars) > 0:
-            print("These special vars are relevant:")
-            print(my_rel_pvars)
-
-
-        """DEBUG END"""
 
         # from IPython import embed; embed()
 

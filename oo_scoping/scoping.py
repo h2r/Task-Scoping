@@ -188,7 +188,8 @@ def scope(
 
     # Remove the dummy pvar and skill
     pvars_rel.remove(dummy_goal)
-    skills_rel = [x for x in skills_rel if dummy_goal_et not in x.effects]
+    skills_rel: List[SkillPDDL]
+    skills_rel: List[SkillPDDL] = [x for x in skills_rel if dummy_goal_et not in x.effects]
     skills_conds_pvars = []
     for s in skills_rel:
         skills_conds_pvars.extend(get_atoms(s.precondition))

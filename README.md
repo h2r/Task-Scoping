@@ -25,7 +25,14 @@ Example:
 ```python oo_scoping/downward_translate/translate_and_scope.py examples/gripper-painting-domain/domain.pddl examples/gripper-painting-domain/prob04.pddl --sas-file gripper-painting.sas --scope True```
 
 
-You can also run this from within a python script by calling `oo_scoping.downward_translate.translate_and_scope.main_from_other_script`. The kwargs to pass are specified in [oo_scoping/downward_translate/options.py](oo_scoping/downward_translate/options.py). The main kwargs are `domain`, `task`, `--scope`, and `sas_file`.
+You can also run this from within a python script by calling 
+
+```python
+from oo_scoping.downward_translate.translate_and_scope import main_from_other_script
+main_from_other_script(**kwargs)
+```
+
+The kwargs to pass are specified in [oo_scoping/downward_translate/options.py](oo_scoping/downward_translate/options.py). The main kwargs are `domain`, `task`, `--scope`, and `sas_file`.
 
 ### Numeric Domains
 For these domains, we first ground all variables and operators, then run task scoping on the grounded problem and use this to return "scoped" domain and problem PDDL files.

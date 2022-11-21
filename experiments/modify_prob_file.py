@@ -38,10 +38,9 @@ def find_new_irrel_goal_clauses(domain, problem, **kwargs):
     return goal_conds_to_add
 
 
-def add_irrel_goals_to_prob_file(domain, problem, tmp_file_name, **kwargs):
+def add_irrel_goals_to_prob_file(domain, problem, **kwargs):
     goal_conds = find_new_irrel_goal_clauses(domain, problem)
     wf = tempfile.NamedTemporaryFile(mode="w+t")
-    wf.name = tmp_file_name
     lines_to_be_written = []
     with open(problem, 'r') as rf:
         lines = rf.readlines()

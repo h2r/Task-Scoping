@@ -1,5 +1,6 @@
 import os, time, argparse, subprocess, json, shutil
 import pandas as pd
+from modify_prob_file import add_irrel_goals_to_prob_file
 """
 TODO:
 Get state-visited counts
@@ -54,6 +55,8 @@ def run_experiment(n_runs, domain, problem, fd_path, log_dir, force_clear=False)
         # Translation
         print("Translating")
         sas_path = f"{log_dir_this_run}/unscoped.sas"
+        tmp_irrel_prob_file = add_irrel_goals_to_prob_file(domain, problem)
+        problem = tmp_irrel_prob_file.name
         translate_start = time.time()
         trans_cmd_output = translate(domain, problem, sas_path)
         translate_end = time.time()
@@ -100,9 +103,9 @@ def run_experiment(n_runs, domain, problem, fd_path, log_dir, force_clear=False)
         plan_scoped_end_time = time.time()
         if plan_scoped_cmd_output.returncode != 0:
             raise ValueError(f"Planning on scoped problem failed with returncode {plan_scoped_cmd_output.returncode}\nstderr: {plan_scoped_cmd_output.stderr}\nstdout: {plan_scoped_cmd_output.stdout}")
-
         timings_dict["plan_scoped"].append(plan_scoped_end_time - plan_scoped_start_time)
-        save_cmd_output(plan_scoped_cmd_output, f"{log_dir_this_run}/plan_scoped")  
+        save_cmd_output(plan_scoped_cmd_output, f"{log_dir_this_run}/plan_scoped")
+        tmp_irrel_prob_file.close()
     end_time_exp = time.time()
     experiment_duration = end_time_exp - start_time_exp
     print(f"Finished experiment")

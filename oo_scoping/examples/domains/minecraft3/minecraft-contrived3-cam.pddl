@@ -39,7 +39,7 @@
 
 
 (:action move-north
-    :parameters (?ag - agent ?ystart ?yend)
+    :parameters (?ag - agent)
     :precondition (and
         (agent-alive ?ag)
         (not (exists (?bl - block) (and

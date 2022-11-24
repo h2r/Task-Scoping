@@ -1,3 +1,4 @@
+from __future__ import annotations
 from collections import OrderedDict
 from typing import List, Tuple, Dict, Iterable
 
@@ -27,7 +28,7 @@ General Notes on current implementation of SAS+ -> z3 for scoping purposes.
 #  Write type-sig and function specification for all the functions below.
 
 
-def make_str2var_dict(sas_vars):
+def make_str2var_dict(sas_vars: sas_tasks.SASVariables):
     """
     Returns a dict of str(var_names) -> z3Var(var_names)
 

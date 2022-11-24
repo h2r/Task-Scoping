@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import (
     List,
     Iterable,
@@ -30,13 +31,15 @@ class EffectTypePDDL:  # EffectTypes are Immutable
         self.params_str = str(self.params)
 
     def __eq__(self, other):
+        if not isinstance(other, EffectTypePDDL):
+            return False
         return (
             z3.eq(self.pvar, other.pvar)
             and self.index == other.index
             and self.params == other.params
         )
 
-    def __lt__(self, other):
+    def __lt__(self, other: EffectTypePDDL):
         # TODO incorporate pvar type into sort.
         if self.pvar_str > other.pvar_str:
             return False
@@ -116,7 +119,7 @@ class SkillPDDL:  # Skills are Immutable
             part_hashes.append(hash(x))
         return hash(tuple(part_hashes))
 
-    def __lt__(self, other):
+    def __lt__(self, other: SkillPDDL):
         # NOTE: This sort is arbitrary. We are defining it just to get a canonical ordering.
         # return self.str_repr < other.str_repr
         return self.action_str < other.action_str

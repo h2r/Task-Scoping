@@ -8,11 +8,13 @@ from oo_scoping.utils import (
     get_atoms,
     get_unique_z3_vars,
 )
-from typing import List, Tuple, Dict, Iterable
+from typing import List, Tuple, Dict, Iterable, Optional, Type, Union
 
 
 class PDDL_Parser_z3(PDDL_Parser):
-    def make_z3_atoms(self, things_dict, z3_class, str2var=None):
+    def make_z3_atoms(
+        self, things_dict: Dict, z3_class: Type, str2var: Optional[Dict] = None
+    ) -> Dict[str, Union[z3.Bool, z3.Int]]:
         """
         things_dict should be parser.predicates or parser.functions
         z3_class should be z3.Bool or z3.Int
@@ -39,7 +41,7 @@ class PDDL_Parser_z3(PDDL_Parser):
         return str2var
 
     # TODO make this a property?
-    def make_str2var_dict(self):
+    def make_str2var_dict(self) -> Dict:
         str2var_dict = OrderedDict()
         str2var_dict = self.make_z3_atoms(self.predicates, z3.Bool, str2var_dict)
         str2var_dict = self.make_z3_atoms(self.functions, z3.Int, str2var_dict)

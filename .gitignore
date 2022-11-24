@@ -10,7 +10,7 @@ __pycache__/
 .ipynb_checkpoints
 *.py[cod]
 oo_scoping.egg-info
-*.sas
+# *.sas
 sas_plan
 .txt
 ignore
@@ -19,3 +19,4 @@ randomly_generated_prob_files
 # Singularity images, eg for enhsp
 *.sif 
 pdfs
+

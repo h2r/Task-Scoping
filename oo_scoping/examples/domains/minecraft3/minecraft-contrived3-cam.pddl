@@ -133,7 +133,7 @@
 )
 
 (:action move-west
-    :parameters (?ag - agent)
+    :parameters (?ag - agent ?x_start - position ?x_end - position ?y - position ?z - position)
     :precondition (and
         (agent-alive ?ag)
         (at-x ?ag ?x_start)
@@ -154,7 +154,15 @@
 )
 
 (:action pickup-diamond
-    :parameters (?ag - agent ?i - diamond ?n_start - count ?n_end - count ?x - position ?y - position ?z - position)
+    :parameters (
+        ?ag - agent
+        ?i - diamond
+        ?n_start - count
+        ?n_end - count
+        ?x - position
+        ?y - position
+        ?z - position
+    )
     :precondition (and
         (present ?i)
         ; (= (x ?i) (x ?ag))
@@ -182,7 +190,15 @@
 
 
 (:action pickup-stick
-    :parameters (?ag - agent ?i - stick)
+    :parameters (
+        ?ag - agent
+        ?i - stick
+        ?n_start - count
+        ?n_end - count
+        ?x - position
+        ?y - position
+        ?z - position
+    )
     :precondition (and
         (present ?i)
         ; (= (x ?i) (x ?ag))
@@ -210,7 +226,15 @@
 
 
 (:action pickup-diamond-axe
-    :parameters (?ag - agent ?i - diamond-axe)
+    :parameters (
+        ?ag - agent
+        ?i - diamond-axe
+        ?n_start - count
+        ?n_end - count
+        ?x - position
+        ?y - position
+        ?z - position
+    )
     :precondition (and
         (present ?i)
         ; (= (x ?i) (x ?ag))
@@ -238,7 +262,15 @@
 
 
 (:action pickup-blue-dye
-    :parameters (?ag - agent ?i - blue-dye)
+    :parameters (
+        ?ag - agent
+        ?i - blue-dye
+        ?n_start - count
+        ?n_end - count
+        ?x - position
+        ?y - position
+        ?z - position
+    )
     :precondition (and
         (present ?i)
         ; (= (x ?i) (x ?ag))
@@ -266,7 +298,16 @@
 
 
 (:action drop-diamond
-    :parameters (?ag - agent ?i - diamond ?n_start - count ?n_end - count ?x - position ?y_start - position ?y_end - position ?x - position)
+    :parameters (
+        ?ag - agent
+        ?i - diamond
+        ?n_start - count
+        ?n_end - count
+        ?x - position
+        ?y_start - position
+        ?y_end - position
+        ?x - position
+    )
     :precondition (and
         ; (>= (agent-num-diamond ?ag) 1)
         (agent-has-n-diamonds ?ag ?n_start)
@@ -294,7 +335,16 @@
 
 
 (:action drop-stick
-    :parameters (?ag - agent ?i - stick)
+    :parameters (
+        ?ag - agent
+        ?i - stick
+        ?n_start - count
+        ?n_end - count
+        ?x - position
+        ?y_start - position
+        ?y_end - position
+        ?x - position
+    )
     :precondition (and
         ; (>= (agent-num-stick ?ag) 1)
         (agent-has-n-sticks ?ag ?n_start)
@@ -321,7 +371,16 @@
 
 
 (:action drop-blue-dye
-    :parameters (?ag - agent ?i - blue-dye)
+    :parameters (
+        ?ag - agent
+        ?i - blue-dye
+        ?n_start - count
+        ?n_end - count
+        ?x - position
+        ?y_start - position
+        ?y_end - position
+        ?x - position
+    )
     :precondition (and
         ; (>= (agent-num-blue-dye ?ag) 1)
         (agent-has-n-blue-dye ?ag ?n_start)
@@ -348,7 +407,16 @@
 
 
 (:action drop-wooden-block
-    :parameters (?ag - agent ?b - wooden-block)
+    :parameters (
+        ?ag - agent
+        ?b - wooden-block
+        ?n_start - count
+        ?n_end - count
+        ?x - position
+        ?y_start - position
+        ?y_end - position
+        ?x - position
+    )
     :precondition (and
         ; (>= (agent-num-wooden-block ?ag) 1)
         (agent-has-n-wooden-blocks ?ag ?n_start)
@@ -375,7 +443,16 @@
 
 
 (:action drop-wooden-planks
-    :parameters (?ag - agent ?b - wooden-planks)
+    :parameters (
+        ?ag - agent
+        ?b - wooden-planks
+        ?n_start - count
+        ?n_end - count
+        ?x - position
+        ?y_start - position
+        ?y_end - position
+        ?x - position
+    )
     :precondition (and
         ; (>= (agent-num-wooden-planks ?ag) 1)
         (agent-has-n-wooden-planks ?ag ?n_start)
@@ -402,7 +479,16 @@
 
 
 (:action drop-wool-block
-    :parameters (?ag - agent ?b - wool-block)
+    :parameters (
+        ?ag - agent
+        ?b - wool-block
+        ?n_start - count
+        ?n_end - count
+        ?x - position
+        ?y_start - position
+        ?y_end - position
+        ?x - position
+    )
     :precondition (and
         ; (>= (agent-num-wool-block ?ag) 1)
         (agent-has-n-wool-blocks ?ag ?n_start)
@@ -429,7 +515,16 @@
 
 
 (:action drop-bed
-    :parameters (?ag - agent ?b - bed)
+    :parameters (
+        ?ag - agent
+        ?b - bed
+        ?n_start - count
+        ?n_end - count
+        ?x - position
+        ?y_start - position
+        ?y_end - position
+        ?x - position
+    )
     :precondition (and
         ; (>= (agent-num-bed ?ag) 1)
         (agent-has-n-beds ?ag ?n_start)

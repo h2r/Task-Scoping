@@ -764,7 +764,10 @@
 
 
 (:action hit-wooden-block
-    :parameters (?ag - agent ?b - wooden-block)
+    :parameters (
+        ?ag - agent
+        ?b - wooden-block
+    )
     :precondition (and
         (= (x ?b) (x ?ag))
         (= (y ?b) (+ (y ?ag) 1))
@@ -778,7 +781,10 @@
 
 
 (:action destroy-wooden-block
-    :parameters (?ag - agent ?b - wooden-block)
+    :parameters (
+        ?ag - agent
+        ?b - wooden-block
+    )
     :precondition (and
         (= (x ?b) (x ?ag))
         (= (y ?b) (+ (y ?ag) 1))
@@ -796,7 +802,10 @@
 
 
 (:action hit-wooden-planks
-    :parameters (?ag - agent ?b - wooden-planks)
+    :parameters (
+        ?ag - agent
+        ?b - wooden-planks
+    )
     :precondition (and
         (= (x ?b) (x ?ag))
         (= (y ?b) (+ (y ?ag) 1))
@@ -810,7 +819,10 @@
 
 
 (:action destroy-wooden-planks
-    :parameters (?ag - agent ?b - wooden-planks)
+    :parameters (
+        ?ag - agent
+        ?b - wooden-planks
+    )
     :precondition (and
         (= (x ?b) (x ?ag))
         (= (y ?b) (+ (y ?ag) 1))
@@ -828,7 +840,10 @@
 
 
 (:action hit-bed
-    :parameters (?ag - agent ?b - bed)
+    :parameters (
+        ?ag - agent
+        ?b - bed
+    )
     :precondition (and
         (= (x ?b) (x ?ag))
         (= (y ?b) (+ (y ?ag) 1))
@@ -842,7 +857,10 @@
 
 
 (:action destroy-bed
-    :parameters (?ag - agent ?b - bed)
+    :parameters (
+        ?ag - agent
+        ?b - bed
+    )
     :precondition (and
         (= (x ?b) (x ?ag))
         (= (y ?b) (+ (y ?ag) 1))
@@ -860,7 +878,10 @@
 
 
 (:action destroy-orchid-flower
-    :parameters (?ag - agent ?b - orchid-flower)
+    :parameters (
+        ?ag - agent
+        ?b - orchid-flower
+    )
     :precondition (and
         (= (x ?b) (x ?ag))
         (= (y ?b) (+ (y ?ag) 1))
@@ -877,7 +898,10 @@
 
 
 (:action destroy-oak-sapling
-    :parameters (?ag - agent ?b - oak-sapling)
+    :parameters (
+        ?ag - agent
+        ?b - oak-sapling
+    )
     :precondition (and
         (= (x ?b) (x ?ag))
         (= (y ?b) (+ (y ?ag) 1))
@@ -894,7 +918,10 @@
 
 
 (:action destroy-birch-sapling
-    :parameters (?ag - agent ?b - birch-sapling)
+    :parameters (
+        ?ag - agent
+        ?b - birch-sapling
+    )
     :precondition (and
         (= (x ?b) (x ?ag))
         (= (y ?b) (+ (y ?ag) 1))

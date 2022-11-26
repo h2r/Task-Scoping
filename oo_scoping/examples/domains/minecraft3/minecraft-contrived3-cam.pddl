@@ -42,9 +42,9 @@
     ;(agent-num-bed ?ag - agent)
     (agent-has-n-beds ?ag - agent ?n - count)
     ;(item-hits ?it - destructible-item)
-    (item-has-n-hits-remaining ?it - destructible-item ?n - count)
+    (item-has-n-hits ?it - destructible-item ?n - count)
     ;(block-hits ?b - destructible-block)
-    (block-has-n-hits-remaining ?b - destructible-block)
+    (block-has-n-hits ?b - destructible-block ?n - count)
     ;(wool-color ?woolb - wool-block)
     (wool-has-color-id ?woolb - wool-block ?c - color)
     ;(bed-color ?bd - bed)
@@ -763,40 +763,105 @@
 )
 
 
+;; TODO: CHECK THIS
 (:action hit-wooden-block
     :parameters (
         ?ag - agent
         ?b - wooden-block
+        ?x - position
+        ?y_ag - position
+        ?y_bl - position
+        ?z - position
+        ?n_hits_start - count
+        ?n_hits_end - count
+        ?n_axes - count
     )
     :precondition (and
-        (= (x ?b) (x ?ag))
-        (= (y ?b) (+ (y ?ag) 1))
-        (= (z ?b) (z ?ag))
+        ; (= (x ?b) (x ?ag))
+        ; (= (y ?b) (+ (y ?ag) 1))
+        ; (= (z ?b) (z ?ag))
+        (at-x ?ag ?x)
+        (at-x ?b ?x)
+        (at-y ?ag ?y_ag)
+        (at-y ?b ?y_bl)
+        (are-seq ?y_ag ?y_bl)
+        (at-z ?ag ?z)
+        (at-z ?b ?z)
         (block-present ?b)
-        (< (block-hits ?b) 2) ;; flip around so you track n-hits-remaining, same mechanism as drop (zero)
-        ( >= ( agent-num-diamond-axe ?ag ) 1) ;; exists a predecessor
+        ; (< (block-hits ?b) 2)
+        (block-has-n-hits ?b ?n_hits_start)
+        (not exists ; we cannot count backwards 3 from n_hits_start (b/c < 2)
+            (?n_hits_minus_one ?n_hits_minus_two ?n_hits_minus_three)
+            (and
+                (are-seq ?n_hits_minus_one ?n_hits_start)
+                (are-seq ?n_hits_minus_two ?n_hits_minus_one)
+                (are-seq ?n_hits_minus_three ?n_hits_minus_two)
+            )
+        )
+        (are-seq ?n_hits_start ?n_hits_end) ; b/c we want to increase n_hits
+        ; ( >= ( agent-num-diamond-axe ?ag ) 1)
+        (agent-has-n-diamond-axes ?ag ?n_axes)
+        (exists (?n_axes_minus_one) (are-seq ?n_axes_minus_one ?n_axes))
     )
-    :effect (and (increase (block-hits ?b) 1))
+    :effect (and
+        ; (increase (block-hits ?b) 1)
+        (not (block-has-n-hits ?b ?n_hits_start))
+        (block-has-n-hits ?b ?n_hits_end)
+    )
 )
 
 
+;; TODO: CHECK THIS
 (:action destroy-wooden-block
     :parameters (
         ?ag - agent
         ?b - wooden-block
+        ?x - position
+        ?y_ag - position
+        ?y_bl - position
+        ?z - position
+        ?n_blocks_start - count
+        ?n_blocks_end - count
+        ?n_hits_start - count
+        ?n_hits_end - count
+        ?n_axes - count
     )
     :precondition (and
-        (= (x ?b) (x ?ag))
-        (= (y ?b) (+ (y ?ag) 1))
-        (= (z ?b) (z ?ag))
+        ; (= (x ?b) (x ?ag))
+        ; (= (y ?b) (+ (y ?ag) 1))
+        ; (= (z ?b) (z ?ag))
+        (at-x ?ag ?x)
+        (at-x ?b ?x)
+        (at-y ?ag ?y_ag)
+        (at-y ?b ?y_bl)
+        (are-seq ?y_ag ?y_bl)
+        (at-z ?ag ?z)
+        (at-z ?b ?z)
         (block-present ?b)
-        (= (block-hits ?b) 2) ;; does not exist successor for n-hits-remaining (because zero)
-        (>= ( agent-num-diamond-axe ?ag ) 1)
+        (agent-has-n-wooden-blocks ?ag ?n_blocks_start)
+        (are-seq ?n_blocks_start ?n_blocks_end)
+        ; (= (block-hits ?b) 2) ;; convert to >= since > is impossible anyway
+        (block-has-n-hits ?b ?n_hits_start)
+        (exists ; we can count backwards 3 from n_hits_start (b/c >= 2)
+            (?n_hits_minus_one ?n_hits_minus_two)
+            (and
+                (are-seq ?n_hits_minus_one ?n_hits_start)
+                (are-seq ?n_hits_minus_two ?n_hits_minus_one)
+                (are-seq ?n_hits_end ?n_hits_minus_two)
+            )
+        )
+        ; (>= ( agent-num-diamond-axe ?ag ) 1)
+        (agent-has-n-diamond-axes ?ag ?n_axes)
+        (exists (?n_axes_minus_one) (are-seq ?n_axes_minus_one ?n_axes))
     )
     :effect (and
         (not (block-present ?b))
-        (increase (agent-num-wooden-block ?ag) 1)
-        (assign (block-hits ?b) 0)
+        ; (increase (agent-num-wooden-block ?ag) 1)
+        (not (agent-has-n-wooden-blocks ?ag ?n_blocks_start))
+        (agent-has-n-wooden-blocks ?ag ?n_blocks_end)
+        ; (assign (block-hits ?b) 0)
+        (not (block-has-n-hits ?b ?n_hits_start))
+        (block-has-n-hits ?b ?n_hits_end)
     )
 )
 
@@ -805,16 +870,46 @@
     :parameters (
         ?ag - agent
         ?b - wooden-planks
+        ?x - position
+        ?y_ag - position
+        ?y_bl - position
+        ?z - position
+        ?n_hits_start - count
+        ?n_hits_end - count
+        ?n_axes - count
     )
     :precondition (and
-        (= (x ?b) (x ?ag))
-        (= (y ?b) (+ (y ?ag) 1))
-        (= (z ?b) (z ?ag))
+        ; (= (x ?b) (x ?ag))
+        ; (= (y ?b) (+ (y ?ag) 1))
+        ; (= (z ?b) (z ?ag))
+        (at-x ?ag ?x)
+        (at-x ?b ?x)
+        (at-y ?ag ?y_ag)
+        (at-y ?b ?y_bl)
+        (are-seq ?y_ag ?y_bl)
+        (at-z ?ag ?z)
+        (at-z ?b ?z)
         (block-present ?b)
-        (< (block-hits ?b) 2)
-        (>= ( agent-num-diamond-axe ?ag ) 1)
+        ; (< (block-hits ?b) 2)
+        (block-has-n-hits ?b ?n_hits_start)
+        (not exists ; we cannot count backwards 3 from n_hits_start (b/c < 2)
+            (?n_hits_minus_one ?n_hits_minus_two ?n_hits_minus_three)
+            (and
+                (are-seq ?n_hits_minus_one ?n_hits_start)
+                (are-seq ?n_hits_minus_two ?n_hits_minus_one)
+                (are-seq ?n_hits_minus_three ?n_hits_minus_two)
+            )
+        )
+        (are-seq ?n_hits_start ?n_hits_end) ; b/c we want to increase n_hits
+        ; (>= ( agent-num-diamond-axe ?ag ) 1)
+        (agent-has-n-diamond-axes ?ag ?n_axes)
+        (exists (?n_axes_minus_one) (are-seq ?n_axes_minus_one ?n_axes))
     )
-    :effect (and (increase (block-hits ?b) 1))
+    :effect (and
+        ; (increase (block-hits ?b) 1)
+        (not (block-has-n-hits ?b ?n_hits_start))
+        (block-has-n-hits ?b ?n_hits_end)
+    )
 )
 
 
@@ -822,19 +917,52 @@
     :parameters (
         ?ag - agent
         ?b - wooden-planks
+        ?x - position
+        ?y_ag - position
+        ?y_bl - position
+        ?z - position
+        ?n_planks_start - count
+        ?n_planks_end - count
+        ?n_hits_start - count
+        ?n_hits_end - count
+        ?n_axes - count
     )
     :precondition (and
-        (= (x ?b) (x ?ag))
-        (= (y ?b) (+ (y ?ag) 1))
-        (= (z ?b) (z ?ag))
+        ; (= (x ?b) (x ?ag))
+        ; (= (y ?b) (+ (y ?ag) 1))
+        ; (= (z ?b) (z ?ag))
+        (at-x ?ag ?x)
+        (at-x ?b ?x)
+        (at-y ?ag ?y_ag)
+        (at-y ?b ?y_bl)
+        (are-seq ?y_ag ?y_bl)
+        (at-z ?ag ?z)
+        (at-z ?b ?z)
         (block-present ?b)
-        (= (block-hits ?b) 2)
-        (>= ( agent-num-diamond-axe ?ag ) 1)
+        (agent-has-n-wooden-planks ?ag ?n_planks_start)
+        (are-seq ?n_planks_start ?n_planks_end)
+        ; (= (block-hits ?b) 2) ;; convert to >= since > is impossible anyway
+        (block-has-n-hits ?b ?n_hits_start)
+        (exists ; we can count backwards 3 from n_hits_start (b/c >= 2)
+            (?n_hits_minus_one ?n_hits_minus_two)
+            (and
+                (are-seq ?n_hits_minus_one ?n_hits_start)
+                (are-seq ?n_hits_minus_two ?n_hits_minus_one)
+                (are-seq ?n_hits_end ?n_hits_minus_two)
+            )
+        )
+        ; (>= ( agent-num-diamond-axe ?ag ) 1)
+        (agent-has-n-diamond-axes ?ag ?n_axes)
+        (exists (?n_axes_minus_one) (are-seq ?n_axes_minus_one ?n_axes))
     )
     :effect (and
         (not (block-present ?b))
-        (increase (agent-num-wooden-planks ?ag) 1)
-        (assign (block-hits ?b) 0)
+        ; (increase (agent-num-wooden-planks ?ag) 1)
+        (not (agent-has-n-wooden-planks ?ag ?n_planks_start))
+        (agent-has-n-wooden-planks ?ag ?n_planks_end)
+        ; (assign (block-hits ?b) 0)
+        (not (block-has-n-hits ?b ?n_hits_start))
+        (block-has-n-hits ?b ?n_hits_end)
     )
 )
 
@@ -843,16 +971,46 @@
     :parameters (
         ?ag - agent
         ?b - bed
+        ?x - position
+        ?y_ag - position
+        ?y_bl - position
+        ?z - position
+        ?n_hits_start - count
+        ?n_hits_end - count
+        ?n_axes - count
     )
     :precondition (and
-        (= (x ?b) (x ?ag))
-        (= (y ?b) (+ (y ?ag) 1))
-        (= (z ?b) (z ?ag))
+        ; (= (x ?b) (x ?ag))
+        ; (= (y ?b) (+ (y ?ag) 1))
+        ; (= (z ?b) (z ?ag))
+        (at-x ?ag ?x)
+        (at-x ?b ?x)
+        (at-y ?ag ?y_ag)
+        (at-y ?b ?y_bl)
+        (are-seq ?y_ag ?y_bl)
+        (at-z ?ag ?z)
+        (at-z ?b ?z)
         (block-present ?b)
-        (< (block-hits ?b) 2)
-        ( >= ( agent-num-diamond-axe ?ag ) 1)
+        ; (< (block-hits ?b) 2)
+        (block-has-n-hits ?b ?n_hits_start)
+        (not exists ; we cannot count backwards 3 from n_hits_start (b/c < 2)
+            (?n_hits_minus_one ?n_hits_minus_two ?n_hits_minus_three)
+            (and
+                (are-seq ?n_hits_minus_one ?n_hits_start)
+                (are-seq ?n_hits_minus_two ?n_hits_minus_one)
+                (are-seq ?n_hits_minus_three ?n_hits_minus_two)
+            )
+        )
+        (are-seq ?n_hits_start ?n_hits_end) ; b/c we want to increase n_hits
+        ; ( >= ( agent-num-diamond-axe ?ag ) 1)
+        (agent-has-n-diamond-axes ?ag ?n_axes)
+        (exists (?n_axes_minus_one) (are-seq ?n_axes_minus_one ?n_axes))
     )
-    :effect (and (increase (block-hits ?b) 1))
+    :effect (and
+        ; (increase (block-hits ?b) 1)
+        (not (block-has-n-hits ?b ?n_hits_start))
+        (block-has-n-hits ?b ?n_hits_end)
+    )
 )
 
 
@@ -860,19 +1018,52 @@
     :parameters (
         ?ag - agent
         ?b - bed
+        ?x - position
+        ?y_ag - position
+        ?y_bl - position
+        ?z - position
+        ?n_beds_start - count
+        ?n_beds_end - count
+        ?n_hits_start - count
+        ?n_hits_end - count
+        ?n_axes - count
     )
     :precondition (and
-        (= (x ?b) (x ?ag))
-        (= (y ?b) (+ (y ?ag) 1))
-        (= (z ?b) (z ?ag))
+        ; (= (x ?b) (x ?ag))
+        ; (= (y ?b) (+ (y ?ag) 1))
+        ; (= (z ?b) (z ?ag))
+        (at-x ?ag ?x)
+        (at-x ?b ?x)
+        (at-y ?ag ?y_ag)
+        (at-y ?b ?y_bl)
+        (are-seq ?y_ag ?y_bl)
+        (at-z ?ag ?z)
+        (at-z ?b ?z)
         (block-present ?b)
-        (= (block-hits ?b) 2)
-        ( >= ( agent-num-diamond-axe ?ag ) 1)
+        (agent-has-n-beds ?ag ?n_beds_start)
+        (are-seq ?n_beds_start ?n_beds_end)
+        ; (= (block-hits ?b) 2) ;; convert to >= since > is impossible anyway
+        (block-has-n-hits ?b ?n_hits_start)
+        (exists ; we can count backwards 3 from n_hits_start (b/c >= 2)
+            (?n_hits_minus_one ?n_hits_minus_two)
+            (and
+                (are-seq ?n_hits_minus_one ?n_hits_start)
+                (are-seq ?n_hits_minus_two ?n_hits_minus_one)
+                (are-seq ?n_hits_end ?n_hits_minus_two)
+            )
+        )
+        ; ( >= ( agent-num-diamond-axe ?ag ) 1)
+        (agent-has-n-diamond-axes ?ag ?n_axes)
+        (exists (?n_axes_minus_one) (are-seq ?n_axes_minus_one ?n_axes))
     )
     :effect (and
         (not (block-present ?b))
-        (increase (agent-num-bed ?ag) 1)
-        (assign (block-hits ?b) 0)
+        ; (increase (agent-num-bed ?ag) 1)
+        (not (agent-has-n-beds ?ag ?n_beds_start))
+        (agent-has-n-beds ?ag ?n_beds_end)
+        ; (assign (block-hits ?b) 0)
+        (not (block-has-n-hits ?b ?n_hits_start))
+        (block-has-n-hits ?b ?n_hits_end)
     )
 )
 
@@ -881,18 +1072,34 @@
     :parameters (
         ?ag - agent
         ?b - orchid-flower
+        ?x - position
+        ?y_ag - position
+        ?y_bl - position
+        ?z - position
+        ?n_start - count
+        ?n_end - count
     )
     :precondition (and
-        (= (x ?b) (x ?ag))
-        (= (y ?b) (+ (y ?ag) 1))
-        (= (z ?b) (z ?ag))
+        ; (= (x ?b) (x ?ag))
+        ; (= (y ?b) (+ (y ?ag) 1))
+        ; (= (z ?b) (z ?ag))
+        (at-x ?ag ?x)
+        (at-x ?b ?x)
+        (at-y ?ag ?y_ag)
+        (at-y ?b ?y_bl)
+        (are-seq ?y_ag ?y_bl)
+        (at-z ?ag ?z)
+        (at-z ?b ?z)
+        (are-seq ?n_start ?n_end)
         (present ?b)
-        (= (item-hits ?b) 0)
+        ; (= (item-hits ?b) 0) ;; REMOVE??
     )
     :effect (and
         (not (present ?b))
-        (increase (agent-num-orchid-flower ?ag) 1)
-        (assign (item-hits ?b) 0)
+        ; (increase (agent-num-orchid-flower ?ag) 1)
+        (not (agent-has-n-orchid-flowers ?ag ?n_flowers_start))
+        (agent-has-n-orchid-flowers ?ag ?n_flowers_end)
+        ; (assign (item-hits ?b) 0) ;; REMOVE??
     )
 )
 
@@ -901,18 +1108,34 @@
     :parameters (
         ?ag - agent
         ?b - oak-sapling
+        ?x - position
+        ?y_ag - position
+        ?y_bl - position
+        ?z - position
+        ?n_start - count
+        ?n_end - count
     )
     :precondition (and
-        (= (x ?b) (x ?ag))
-        (= (y ?b) (+ (y ?ag) 1))
-        (= (z ?b) (z ?ag))
+        ; (= (x ?b) (x ?ag))
+        ; (= (y ?b) (+ (y ?ag) 1))
+        ; (= (z ?b) (z ?ag))
+        (at-x ?ag ?x)
+        (at-x ?b ?x)
+        (at-y ?ag ?y_ag)
+        (at-y ?b ?y_bl)
+        (are-seq ?y_ag ?y_bl)
+        (at-z ?ag ?z)
+        (at-z ?b ?z)
+        (are-seq ?n_start ?n_end)
         (present ?b)
-        (= (item-hits ?b) 0)
+        ; (= (item-hits ?b) 0) ;; REMOVE??
     )
     :effect (and
         (not (present ?b))
-        (increase (agent-num-oak-sapling ?ag) 1)
-        (assign (item-hits ?b) 0)
+        ; (increase (agent-num-oak-sapling ?ag) 1)
+        (not (agent-has-n-oak-saplings ?ag ?n_start))
+        (agent-has-n-oak-saplings ?ag ?n_end)
+        ; (assign (item-hits ?b) 0) ;; REMOVE??
     )
 )
 
@@ -921,18 +1144,34 @@
     :parameters (
         ?ag - agent
         ?b - birch-sapling
+        ?x - position
+        ?y_ag - position
+        ?y_bl - position
+        ?z - position
+        ?n_start - count
+        ?n_end - count
     )
     :precondition (and
-        (= (x ?b) (x ?ag))
-        (= (y ?b) (+ (y ?ag) 1))
-        (= (z ?b) (z ?ag))
+        ; (= (x ?b) (x ?ag))
+        ; (= (y ?b) (+ (y ?ag) 1))
+        ; (= (z ?b) (z ?ag))
+        (at-x ?ag ?x)
+        (at-x ?b ?x)
+        (at-y ?ag ?y_ag)
+        (at-y ?b ?y_bl)
+        (are-seq ?y_ag ?y_bl)
+        (at-z ?ag ?z)
+        (at-z ?b ?z)
+        (are-seq ?n_start ?n_end)
         (present ?b)
-        (= (item-hits ?b) 0)
+        ; (= (item-hits ?b) 0) ;; REMOVE??
     )
     :effect (and
         (not (present ?b))
-        (increase (agent-num-birch-sapling ?ag) 1)
-        (assign (item-hits ?b) 0)
+        ; (increase (agent-num-birch-sapling ?ag) 1)
+        (not (agent-has-n-birch-saplings ?ag ?n_start))
+        (agent-has-n-birch-saplings ?ag ?n_end)
+        ; (assign (item-hits ?b) 0) ;; REMOVE??
     )
 )
 

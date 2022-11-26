@@ -551,90 +551,214 @@
 )
 
 
+;; TODO: CHECK THIS
 (:action apply-blue-dye
-    :parameters (?ag - agent ?woolb - wool-block)
+    :parameters (
+        ?ag - agent
+        ?woolb - wool-block
+        ?n_wool_start - count
+        ?n_dye_start - count
+        ?n_dye_end - count
+        ?color_start - color
+        ?color_end - color
+    )
     :precondition (and
         (not (block-present ?woolb))
-        (>= (agent-num-wool-block ?ag) 1)
-        (>= (agent-num-blue-dye ?ag) 1)
+        ; (>= (agent-num-wool-block ?ag) 1)
+        (agent-has-n-wool-blocks ?ag ?n_wool_start)
+        (exists (?n_wool_end) (and
+            (are-seq ?n_wool_end ?n_wool_start)
+        ))
+        ; (>= (agent-num-blue-dye ?ag) 1)
+        (agent-has-n-blue-dye ?ag ?n_dye_start)
+        (are-seq ?n_dye_end ?n_dye_start)
+        (wool-has-color-id ?woolb ?color_start)
+        (neq ?color_start ?color_end)
     )
     :effect (and
-        (decrease (agent-num-blue-dye ?ag) 1)
-        (assign (wool-color ?woolb) 1)
+        ; (decrease (agent-num-blue-dye ?ag) 1)
+        (not (agent-has-n-blue-dye ?ag ?n_dye_start))
+        (agent-has-n-blue-dye ?ag ?n_dye_end)
+        ; (assign (wool-color ?woolb) 1)
+        (not (wool-has-color-id ?woolb ?color_start))
+        (wool-has-color-id ?woolb ?color_end)
     )
 )
 
-
+;; TODO: CHECK THIS
 (:action craft-bed-blue-dye
-:parameters (?ag - agent ?woolb1 - wool-block ?woolb2 - wool-block ?woolb3 - wool-block ?bd - bed ?n_wool_blocks_start - count ?n_wool_blocks_end - count)
-:precondition (and
-    (not (block-present ?woolb1))
-    (not (block-present ?woolb2))
-    (not (block-present ?woolb3))
-    (= (wool-color ?woolb1) 1)
-    (= (wool-color ?woolb2) 1)
-    (= (wool-color ?woolb3) 1)
-    (not (= ?woolb1 ?woolb2))
-    (not (= ?woolb1 ?woolb3))
-    (not (= ?woolb2 ?woolb3))
-    (not (block-present ?bd))
-    ; (>= (agent-num-wool-block ?ag) 3)
-    (exists
-        (?n_wool_blocks_minus_one - count ?n_wool_blocks_minus_two - count)
-        (and
-            (are-seq ?n_wool_blocks_end ?n_wool_blocks_minus_two)
-            (are-seq ?n_wool_blocks_minus_two ?n_wool_blocks_minus_one)
-            (are-seq ?n_wool_blocks_minus_one ?n_wool_blocks_start)
-        )
+    :parameters (
+        ?ag - agent
+        ?woolb1 - wool-block
+        ?woolb2 - wool-block
+        ?woolb3 - wool-block
+        ?c - color
+        ?bd - bed
+        ?n_wool_start - count
+        ?n_wool_end - count
+        ?n_planks_start - count
+        ?n_planks_end - count
+        ?n_beds_start - count
+        ?n_beds_end - count
     )
-    (>= (agent-num-wooden-planks ?ag) 3)
-    ; (are-three-apart ?x1 ?x4)
-)
-:effect (and
-    (decrease (agent-num-wooden-planks ?ag) 3)
-    ; (decrease (agent-num-wool-block ?ag) 3)
-    (not agent-has-n-wool-blocks ?ag ?n_wool_blocks_start)
-    (agent-has-n-wool-blocks ?ag ?n_wool_blocks_end)
-    (increase (agent-num-bed ?ag) 1)
-    (assign (bed-color ?bd) 1))
+    :precondition (and
+        (not (block-present ?woolb1))
+        (not (block-present ?woolb2))
+        (not (block-present ?woolb3))
+        ; (= (wool-color ?woolb1) 1)
+        ; (= (wool-color ?woolb2) 1)
+        ; (= (wool-color ?woolb3) 1)
+        (wool-has-color-id ?woolb1 ?c)
+        (wool-has-color-id ?woolb2 ?c)
+        (wool-has-color-id ?woolb3 ?c)
+        (not (= ?woolb1 ?woolb2))
+        (not (= ?woolb1 ?woolb3))
+        (not (= ?woolb2 ?woolb3))
+        (not (block-present ?bd))
+        ; (>= (agent-num-wool-block ?ag) 3)
+        (agent-has-n-wool-blocks ?ag ?n_wool_start)
+        (exists
+            (?n_wool_minus_one - count ?n_wool_minus_two - count)
+            (and
+                (are-seq ?n_wool_end ?n_wool_minus_two)
+                (are-seq ?n_wool_minus_two ?n_wool_minus_one)
+                (are-seq ?n_wool_minus_one ?n_wool_start)
+            )
+        )
+        ; (>= (agent-num-wooden-planks ?ag) 3)
+        (agent-has-n-wooden-planks ?ag ?n_planks_start)
+        (exists
+            (?n_planks_minus_one - count ?n_planks_minus_two - count)
+            (and
+                (are-seq ?n_planks_end ?n_planks_minus_two)
+                (are-seq ?n_planks_minus_two ?n_planks_minus_one)
+                (are-seq ?n_planks_minus_one ?n_planks_start)
+            )
+        )
+        (agent-has-n-beds ?ag ?n_beds_start)
+        (are-seq ?n_beds_start ?n_beds_end)
+    )
+    :effect (and
+        ; (decrease (agent-num-wooden-planks ?ag) 3)
+        (not agent-has-n-wooden-planks ?ag ?n_planks_start)
+        (agent-has-n-wooden-planks ?ag ?n_planks_end)
+        ; (decrease (agent-num-wool-block ?ag) 3)
+        (not agent-has-n-wool-blocks ?ag ?n_wool_start)
+        (agent-has-n-wool-blocks ?ag ?n_wool_end)
+        ; (increase (agent-num-bed ?ag) 1)
+        (not (agent-has-n-beds ?ag ?n_beds_start))
+        (agent-has-n-beds ?ag ?n_beds_end)
+        ; (assign (bed-color ?bd) 1)
+        (bed-has-color-id ?bd ?c)
+    )
 )
 
 
 (:action craft-diamond-axe
-    :parameters ( ?ag - agent )
+    :parameters (
+        ?ag - agent
+        ?n_sticks_start - count
+        ?n_sticks_end - count
+        ?n_diamonds_start - count
+        ?n_diamonds_end - count
+        ?n_diamond_axes_start - count
+        ?n_diamond_axes_end - count
+    )
     :precondition (and
-        (>= (agent-num-stick ?ag) 2)
-        (>= (agent-num-diamond ?ag) 3)
+        ; (>= (agent-num-stick ?ag) 2)
+        (agent-has-n-sticks ?ag ?n_sticks_start)
+        (exists
+            (?n_sticks_minus_one - count ?n_sticks_minus_two - count)
+            (and
+                (are-seq ?n_sticks_end ?n_sticks_minus_one)
+                (are-seq ?n_sticks_minus_one ?n_sticks_start)
+            )
+        )
+        ; (>= (agent-num-diamond ?ag) 3)
+        (agent-has-n-diamonds ?ag ?n_diamonds_start)
+        (exists
+            (?n_diamonds_minus_one - count ?n_diamonds_minus_two - count)
+            (and
+                (are-seq ?n_diamonds_end ?n_diamonds_minus_two)
+                (are-seq ?n_diamonds_minus_two ?n_diamonds_minus_one)
+                (are-seq ?n_diamonds_minus_one ?n_diamonds_start)
+            )
+        )
+        (agent-has-n-diamond-axes ?ag ?n_diamond_axes_start)
+        (are-seq ?n_diamond_axes_start ?n_diamond_axes_end)
     )
     :effect (and
-        (increase (agent-num-diamond-axe ?ag) 1)
-        (decrease (agent-num-stick ?ag) 2)
-        (decrease (agent-num-diamond ?ag) 3)
+        ; (increase (agent-num-diamond-axe ?ag) 1)
+        (not (agent-has-n-diamond-axes ?ag ?n_diamond_axes_start))
+        (agent-has-n-diamond-axes ?ag ?n_diamond_axes_end)
+        ; (decrease (agent-num-stick ?ag) 2)
+        (not (agent-has-n-sticks ?ag ?n_sticks_start))
+        (agent-has-n-sticks ?ag ?n_sticks_end)
+        ; (decrease (agent-num-diamond ?ag) 3)
+        (not (agent-has-n-diamonds ?ag ?n_diamonds_start))
+        (agent-has-n-diamonds ?ag ?n_diamonds_end)
     )
 )
 
 
 (:action craft-wooden-planks
-    :parameters (?ag - agent ?wb - wooden-block)
+    :parameters (
+        ?ag - agent
+        ?wb - wooden-block
+        ?n_blocks_start - count
+        ?n_blocks_end - count
+        ?n_planks_start - count
+        ?n_planks_end - count
+    )
     :precondition (and
         (not (block-present ?wb))
-        (>= (agent-num-wooden-block ?ag) 1)
+        ; (>= (agent-num-wooden-block ?ag) 1)
+        (agent-has-n-wooden-blocks ?ag ?n_blocks_start)
+        (are-seq ?n_blocks_end ?n_blocks_start)
+        (agent-has-n-wooden-planks ?ag ?n_planks_start)
+        (exists
+            (?n_planks_plus_one ?n_planks_plus_two ?n_planks_plus_three)
+            (and
+                (are-seq ?n_diamonds_start ?n_diamonds_plus_one)
+                (are-seq ?n_diamonds_plus_one ?n_diamonds_plus_two)
+                (are-seq ?n_diamonds_plus_two ?n_diamonds_plus_three)
+                (are-seq ?n_diamonds_plus_three ?n_diamonds_end)
+            )
+        )
     )
     :effect (and
-        (decrease (agent-num-wooden-block ?ag) 1)
-        (increase (agent-num-wooden-planks ?ag) 4)
+        ; (decrease (agent-num-wooden-block ?ag) 1)
+        (not (agent-has-n-wooden-blocks ?ag ?n_blocks_start))
+        (agent-has-n-wooden-blocks ?ag ?n_blocks_end)
+        ; (increase (agent-num-wooden-planks ?ag) 4)
+        (not (agent-has-n-wooden-planks ?ag ?n_planks_start))
+        (agent-has-n-wooden-planks ?ag ?n_planks_end)
     )
 )
 
 
 (:action craft-blue-dye
-    :parameters ( ?ag - agent )
+    :parameters (
+        ?ag - agent
+        ?n_flowers_start - count
+        ?n_flowers_end - count
+        ?n_dye_start - count
+        ?n_dye_end - count
+    )
     :precondition ( and
-        (>= (agent-num-orchid-flower ?ag) 1)
+        ; (>= (agent-num-orchid-flower ?ag) 1)
+        (agent-has-n-orchid-flowers ?ag ?n_flowers_start)
+        (are-seq ?n_flowers_end ?n_flowers_start)
+        (agent-has-n-blue-dye ?ag ?n_dye_start)
+        (are-seq ?n_dye_start ?n_dye_end)
     )
     :effect (and
-        (increase (agent-num-blue-dye ?ag) 1)
-        (decrease (agent-num-orchid-flower ?ag) 1)
+        ; (increase (agent-num-blue-dye ?ag) 1)
+        (not (agent-has-n-orchid-flowers ?ag ?n_flowers_start))
+        (agent-has-n-orchid-flowers ?ag ?n_flowers_end)
+        ; (decrease (agent-num-orchid-flower ?ag) 1)
+        (not (agent-has-n-blue-dye ?ag ?n_dye_start))
+        (agent-has-n-blue-dye ?ag ?n_dye_end)
     )
 )
 

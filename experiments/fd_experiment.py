@@ -1,4 +1,4 @@
-import os, time, argparse, subprocess, json, shutil
+import os, time, argparse, subprocess, json, shutil, glob
 import pandas as pd
 """
 TODO:
@@ -121,7 +121,49 @@ def run_experiment(n_runs, domain, problem, fd_path, log_dir, force_clear=False)
     df_time_summary = pd.concat([s_times_avg, s_times_std, s_times_cv], axis=1)
     print(f"Timing summary:")
     print(df_time_summary)
-    df_time_summary.to_csv(f"{log_dir}/timing_summary.csv", index=True)    
+    df_time_summary.to_csv(f"{log_dir}/timing_summary.csv", index=True)
+    return timings_dict
+
+
+def run_experiments_on_folder(n_runs, domain, problem_folder, fd_path, log_dir, force_clear=False):
+    total_timings_dict = {}
+    num_solved_problems = 0
+    problem_files = glob.glob(problem_folder + "*")
+
+    for problem in problem_files:
+        log_dir_this_problem = log_dir + "/" + problem.split(".")[-2]
+        
+        try:
+            curr_timings_dict = run_experiment(n_runs, domain, problem, fd_path, log_dir_this_problem, force_clear)
+        except ValueError:
+            # In this case, the randomly-generated problem was impossible to solve.
+            # Simply skip and move on.
+            print(f"Problem {problem} is impossible to solve.")
+            continue
+        
+        num_solved_problems += 1
+        if len(total_timings_dict) == 0:
+            total_timings_dict = curr_timings_dict
+        else:
+            for key in total_timings_dict.keys():
+                total_timings_dict[key] += curr_timings_dict[key]
+        
+        # Convert timings dict to dataframe for easy processing (code mostly
+        # copied from above method).
+        df_times = pd.DataFrame(data=total_timings_dict)
+        s_times_avg = df_times.mean()
+        s_times_avg.name = 'avg'
+        s_times_std = df_times.std()
+        s_times_std.name = 'std'
+        s_times_cv = s_times_std / s_times_avg
+        s_times_cv.name = "cv"
+        df_time_summary = pd.concat([s_times_avg, s_times_std, s_times_cv], axis=1)
+
+        print(f"Finished experiments; {num_solved_problems} problems out of {len(problem_files)} were solvable.")
+        print(f"Aggregate Timing summary:")
+        print(df_time_summary)
+        df_time_summary.to_csv(f"{log_dir}/timing_summary.csv", index=True)
+
 
 def save_cmd_output(cmd_output, save_dir):
     os.makedirs(save_dir, exist_ok=False)
@@ -173,7 +215,11 @@ if __name__ == "__main__":
     parser.add_argument("fd_path", type=str)
     parser.add_argument("log_dir", type=str)
     parser.add_argument("--force_clear_log_dir", default=False, action='store_true')
+    parser.add_argument("--problems_dir", type=str, required=False, default=None)
 
     args = parser.parse_args()
 
-    run_experiment(args.n_runs, args.domain, args.problem, args.fd_path, args.log_dir, args.force_clear_log_dir)
+    if args.problems_dir is None:
+        run_experiment(args.n_runs, args.domain, args.problem, args.fd_path, args.log_dir, args.force_clear_log_dir)
+    else:
+        run_experiments_on_folder(args.n_runs, args.domain, args.problems_dir, args.fd_path, args.log_dir, args.force_clear_log_dir)

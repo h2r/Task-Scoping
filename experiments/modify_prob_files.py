@@ -34,7 +34,8 @@ def find_new_irrel_goal_clauses(domain, problem, **kwargs):
     # Yield all possible combos of conditionally-irrelevant candidates
     # such that the combo length is the number of candidates minus 1.
     # (arbitrary choice on length)
-    for combo in itertools.combinations(conditional_irrel_candidates, len(conditional_irrel_candidates) - 1):
+    # for combo in itertools.combinations(conditional_irrel_candidates, len(conditional_irrel_candidates) - 1):
+    for combo in itertools.combinations(conditional_irrel_candidates, 1):
         yield combo
 
 

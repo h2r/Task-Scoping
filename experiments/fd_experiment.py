@@ -1,4 +1,4 @@
-import os, time, argparse, subprocess, json, shutil, glob
+import os, time, argparse, subprocess, json, shutil, glob, re
 import pandas as pd
 """
 TODO:
@@ -42,8 +42,10 @@ def run_experiment(n_runs, domain, problem, fd_path, log_dir, force_clear=False)
     timings_dict = {
         "translate":[],
         "translate_and_scope":[],
-        "plan_unscoped":[],
-        "plan_scoped":[]
+        "plan_unscoped_time":[],
+        "plan_scoped_time":[],
+        "plan_unscoped_node_expansions": [],
+        "plan_scoped_node_expansions": []
     }
     timings_path = f"{log_dir}/times.json"
     # This would be more precise if we recorded time for multiple iterations of each portion, then divided. TODO consider doing this.
@@ -93,7 +95,8 @@ def run_experiment(n_runs, domain, problem, fd_path, log_dir, force_clear=False)
         if plan_unscoped_cmd_output.returncode != 0:
             raise ValueError(f"Planning on unscoped problem failed with returncode {plan_unscoped_cmd_output.returncode}\nstderr: {plan_unscoped_cmd_output.stderr}\nstdout: {plan_unscoped_cmd_output.stdout}")
 
-        timings_dict["plan_unscoped"].append(plan_unscoped_end_time - plan_unscoped_start_time)
+        timings_dict["plan_unscoped_time"].append(plan_unscoped_end_time - plan_unscoped_start_time)
+        timings_dict["plan_unscoped_node_expansions"].append(int(re.search(r"(Expanded) \d*", plan_unscoped_cmd_output.stdout.decode()).group(0).split(' ')[1]))
         with open(timings_path, "w") as f:
             json.dump(timings_dict, f)
         save_cmd_output(plan_unscoped_cmd_output, f"{log_dir_this_run}/plan_unscoped")
@@ -105,7 +108,8 @@ def run_experiment(n_runs, domain, problem, fd_path, log_dir, force_clear=False)
         plan_scoped_end_time = time.time()
         if plan_scoped_cmd_output.returncode != 0:
             raise ValueError(f"Planning on scoped problem failed with returncode {plan_scoped_cmd_output.returncode}\nstderr: {plan_scoped_cmd_output.stderr}\nstdout: {plan_scoped_cmd_output.stdout}")
-        timings_dict["plan_scoped"].append(plan_scoped_end_time - plan_scoped_start_time)
+        timings_dict["plan_scoped_time"].append(plan_scoped_end_time - plan_scoped_start_time)
+        timings_dict["plan_scoped_node_expansions"].append(int(re.search(r"(Expanded) \d*", plan_scoped_cmd_output.stdout.decode()).group(0).split(' ')[1]))
         save_cmd_output(plan_scoped_cmd_output, f"{log_dir_this_run}/plan_scoped")
     end_time_exp = time.time()
     experiment_duration = end_time_exp - start_time_exp
@@ -148,21 +152,21 @@ def run_experiments_on_folder(n_runs, domain, problem_folder, fd_path, log_dir, 
             for key in total_timings_dict.keys():
                 total_timings_dict[key] += curr_timings_dict[key]
         
-        # Convert timings dict to dataframe for easy processing (code mostly
-        # copied from above method).
-        df_times = pd.DataFrame(data=total_timings_dict)
-        s_times_avg = df_times.mean()
-        s_times_avg.name = 'avg'
-        s_times_std = df_times.std()
-        s_times_std.name = 'std'
-        s_times_cv = s_times_std / s_times_avg
-        s_times_cv.name = "cv"
-        df_time_summary = pd.concat([s_times_avg, s_times_std, s_times_cv], axis=1)
+    # Convert timings dict to dataframe for easy processing (code mostly
+    # copied from above method).
+    df_times = pd.DataFrame(data=total_timings_dict)
+    s_times_avg = df_times.mean()
+    s_times_avg.name = 'avg'
+    s_times_std = df_times.std()
+    s_times_std.name = 'std'
+    s_times_cv = s_times_std / s_times_avg
+    s_times_cv.name = "cv"
+    df_time_summary = pd.concat([s_times_avg, s_times_std, s_times_cv], axis=1)
 
-        print(f"Finished experiments; {num_solved_problems} problems out of {len(problem_files)} were solvable.")
-        print(f"Aggregate Timing summary:")
-        print(df_time_summary)
-        df_time_summary.to_csv(f"{log_dir}/timing_summary.csv", index=True)
+    print(f"Finished experiments; {num_solved_problems} problems out of {len(problem_files)} were solvable.")
+    print(f"Aggregate Timing summary:")
+    print(df_time_summary)
+    df_time_summary.to_csv(f"{log_dir}/timing_summary.csv", index=True)
 
 
 def save_cmd_output(cmd_output, save_dir):

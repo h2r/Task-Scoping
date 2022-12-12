@@ -849,12 +849,11 @@
         (are-seq ?n_blocks_start ?n_blocks_end)
         ; (= (block-hits ?b) 2) ;; convert to >= since > is impossible anyway
         (block-has-n-hits ?b ?n_hits_start)
-        (exists ; we can count backwards 3 from n_hits_start (b/c >= 2)
-            (?n_hits_minus_one ?n_hits_minus_two)
+        (exists ; we can count backwards 2 from n_hits_start (b/c >= 2)
+            (?n_hits_minus_one)
             (and
                 (are-seq ?n_hits_minus_one ?n_hits_start)
-                (are-seq ?n_hits_minus_two ?n_hits_minus_one)
-                (are-seq ?n_hits_end ?n_hits_minus_two)
+                (are-seq ?n_hits_end ?n_hits_minus_one)
             )
         )
         ; (>= ( agent-num-diamond-axe ?ag ) 1)
@@ -949,12 +948,11 @@
         (are-seq ?n_planks_start ?n_planks_end)
         ; (= (block-hits ?b) 2) ;; convert to >= since > is impossible anyway
         (block-has-n-hits ?b ?n_hits_start)
-        (exists ; we can count backwards 3 from n_hits_start (b/c >= 2)
-            (?n_hits_minus_one ?n_hits_minus_two)
+        (exists ; we can count backwards 2 from n_hits_start (b/c >= 2)
+            (?n_hits_minus_one)
             (and
                 (are-seq ?n_hits_minus_one ?n_hits_start)
-                (are-seq ?n_hits_minus_two ?n_hits_minus_one)
-                (are-seq ?n_hits_end ?n_hits_minus_two)
+                (are-seq ?n_hits_end ?n_hits_minus_one)
             )
         )
         ; (>= ( agent-num-diamond-axe ?ag ) 1)
@@ -1049,12 +1047,11 @@
         (are-seq ?n_beds_start ?n_beds_end)
         ; (= (block-hits ?b) 2) ;; convert to >= since > is impossible anyway
         (block-has-n-hits ?b ?n_hits_start)
-        (exists ; we can count backwards 3 from n_hits_start (b/c >= 2)
-            (?n_hits_minus_one ?n_hits_minus_two)
+        (exists ; we can count backwards 2 from n_hits_start (b/c >= 2)
+            (?n_hits_minus_one)
             (and
                 (are-seq ?n_hits_minus_one ?n_hits_start)
-                (are-seq ?n_hits_minus_two ?n_hits_minus_one)
-                (are-seq ?n_hits_end ?n_hits_minus_two)
+                (are-seq ?n_hits_end ?n_hits_minus_one)
             )
         )
         ; ( >= ( agent-num-diamond-axe ?ag ) 1)

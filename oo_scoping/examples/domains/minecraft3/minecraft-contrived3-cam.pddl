@@ -559,7 +559,6 @@
 )
 
 
-;; TODO: CHECK THIS
 (:action apply-blue-dye
     :parameters (
         ?ag - agent
@@ -593,7 +592,6 @@
     )
 )
 
-;; TODO: CHECK THIS
 (:action craft-bed-blue-dye
     :parameters (
         ?ag - agent
@@ -771,7 +769,6 @@
 )
 
 
-;; TODO: CHECK THIS
 (:action hit-wooden-block
     :parameters (
         ?ag - agent
@@ -818,7 +815,6 @@
 )
 
 
-;; TODO: CHECK THIS
 (:action destroy-wooden-block
     :parameters (
         ?ag - agent

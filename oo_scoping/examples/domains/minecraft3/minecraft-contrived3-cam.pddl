@@ -1094,6 +1094,7 @@
         (at-z ?b ?z)
         (are-seq ?n_start ?n_end)
         (present ?b)
+        (agent-has-n-orchid-flowers ?ag ?n_start)
         ; (= (item-hits ?b) 0)
     )
     :effect (and
@@ -1130,6 +1131,7 @@
         (at-z ?b ?z)
         (are-seq ?n_start ?n_end)
         (present ?b)
+        (agent-has-n-oak-saplings ?ag ?n_start)
         ; (= (item-hits ?b) 0)
     )
     :effect (and
@@ -1166,6 +1168,7 @@
         (at-z ?b ?z)
         (are-seq ?n_start ?n_end)
         (present ?b)
+        (agent-has-n-birch-saplings ?ag ?n_start)
         ; (= (item-hits ?b) 0)
     )
     :effect (and

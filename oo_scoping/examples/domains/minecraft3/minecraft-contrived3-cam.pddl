@@ -798,12 +798,11 @@
         (block-present ?b)
         ; (< (block-hits ?b) 2)
         (block-has-n-hits ?b ?n_hits_start)
-        (not exists ; we cannot count backwards 3 from n_hits_start (b/c < 2)
-            (?n_hits_minus_one ?n_hits_minus_two ?n_hits_minus_three)
+        (not exists ; we cannot count backwards 2 from n_hits_start (b/c < 2)
+            (?n_hits_minus_one ?n_hits_minus_two)
             (and
                 (are-seq ?n_hits_minus_one ?n_hits_start)
                 (are-seq ?n_hits_minus_two ?n_hits_minus_one)
-                (are-seq ?n_hits_minus_three ?n_hits_minus_two)
             )
         )
         (are-seq ?n_hits_start ?n_hits_end) ; b/c we want to increase n_hits
@@ -900,12 +899,11 @@
         (block-present ?b)
         ; (< (block-hits ?b) 2)
         (block-has-n-hits ?b ?n_hits_start)
-        (not exists ; we cannot count backwards 3 from n_hits_start (b/c < 2)
-            (?n_hits_minus_one ?n_hits_minus_two ?n_hits_minus_three)
+        (not exists ; we cannot count backwards 2 from n_hits_start (b/c < 2)
+            (?n_hits_minus_one ?n_hits_minus_two)
             (and
                 (are-seq ?n_hits_minus_one ?n_hits_start)
                 (are-seq ?n_hits_minus_two ?n_hits_minus_one)
-                (are-seq ?n_hits_minus_three ?n_hits_minus_two)
             )
         )
         (are-seq ?n_hits_start ?n_hits_end) ; b/c we want to increase n_hits
@@ -1001,12 +999,11 @@
         (block-present ?b)
         ; (< (block-hits ?b) 2)
         (block-has-n-hits ?b ?n_hits_start)
-        (not exists ; we cannot count backwards 3 from n_hits_start (b/c < 2)
-            (?n_hits_minus_one ?n_hits_minus_two ?n_hits_minus_three)
+        (not exists ; we cannot count backwards 2 from n_hits_start (b/c < 2)
+            (?n_hits_minus_one ?n_hits_minus_two)
             (and
                 (are-seq ?n_hits_minus_one ?n_hits_start)
                 (are-seq ?n_hits_minus_two ?n_hits_minus_one)
-                (are-seq ?n_hits_minus_three ?n_hits_minus_two)
             )
         )
         (are-seq ?n_hits_start ?n_hits_end) ; b/c we want to increase n_hits

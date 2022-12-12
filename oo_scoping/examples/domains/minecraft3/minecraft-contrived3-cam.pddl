@@ -129,7 +129,11 @@
             (at-z ?bl ?z)
         )))
     )
-    :effect (and (increase (x ?ag) 1))
+    :effect (and
+        ; (increase (x ?ag) 1))
+        (not (at-x ?ag ?x_start))
+        (at-x ?ag ?x_end)
+    )
 )
 
 (:action move-west
@@ -150,7 +154,11 @@
             (at-z ?bl ?z)
         )))
     )
-    :effect (and (decrease (x ?ag) 1))
+    :effect (and
+        ; (decrease (x ?ag) 1)
+        (not (at-x ?ag ?x_start))
+        (at-x ?ag ?x_end)
+    )
 )
 
 (:action pickup-diamond

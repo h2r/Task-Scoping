@@ -2,19 +2,19 @@
 (:requirements :equality :typing :fluents :negative-preconditions :universal-preconditions :existential-preconditions)
 
 (:types
-	locatable int - object
-	agent item block - locatable
-	bedrock destructible-block - block
-	wooden-block wooden-planks wool-block bed - destructible-block
-	destructible-item diamond stick diamond-axe blue-dye - item
-	orchid-flower oak-sapling birch-sapling - destructible-item
+    locatable int - object
+    agent item block - locatable
+    bedrock destructible-block - block
+    wooden-block wooden-planks wool-block bed - destructible-block
+    destructible-item diamond stick diamond-axe blue-dye - item
+    orchid-flower oak-sapling birch-sapling - destructible-item
     position count color - int
 )
 
 (:predicates
-	(present ?i - item)
-	(block-present ?b - block) ;; block is still present in environment
-	(agent-alive ?ag - agent)
+    (present ?i - item)
+    (block-present ?b - block) ;; block is still present in environment
+    (agent-alive ?ag - agent)
     (gt ?x1 - int ?x2 - int) ;; x1 > x2
     (lt ?x1 - int ?x2 - int) ;; x1 < x2
     (eq ?x1 - int ?x2 - int) ;; x1 == x2

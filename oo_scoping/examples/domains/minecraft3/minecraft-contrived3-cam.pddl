@@ -1097,14 +1097,14 @@
         (at-z ?b ?z)
         (are-seq ?n_start ?n_end)
         (present ?b)
-        ; (= (item-hits ?b) 0) ;; REMOVE??
+        ; (= (item-hits ?b) 0)
     )
     :effect (and
         (not (present ?b))
         ; (increase (agent-num-orchid-flower ?ag) 1)
         (not (agent-has-n-orchid-flowers ?ag ?n_flowers_start))
         (agent-has-n-orchid-flowers ?ag ?n_flowers_end)
-        ; (assign (item-hits ?b) 0) ;; REMOVE??
+        ; (assign (item-hits ?b) 0)
     )
 )
 
@@ -1133,14 +1133,14 @@
         (at-z ?b ?z)
         (are-seq ?n_start ?n_end)
         (present ?b)
-        ; (= (item-hits ?b) 0) ;; REMOVE??
+        ; (= (item-hits ?b) 0)
     )
     :effect (and
         (not (present ?b))
         ; (increase (agent-num-oak-sapling ?ag) 1)
         (not (agent-has-n-oak-saplings ?ag ?n_start))
         (agent-has-n-oak-saplings ?ag ?n_end)
-        ; (assign (item-hits ?b) 0) ;; REMOVE??
+        ; (assign (item-hits ?b) 0)
     )
 )
 
@@ -1169,14 +1169,14 @@
         (at-z ?b ?z)
         (are-seq ?n_start ?n_end)
         (present ?b)
-        ; (= (item-hits ?b) 0) ;; REMOVE??
+        ; (= (item-hits ?b) 0)
     )
     :effect (and
         (not (present ?b))
         ; (increase (agent-num-birch-sapling ?ag) 1)
         (not (agent-has-n-birch-saplings ?ag ?n_start))
         (agent-has-n-birch-saplings ?ag ?n_end)
-        ; (assign (item-hits ?b) 0) ;; REMOVE??
+        ; (assign (item-hits ?b) 0)
     )
 )
 

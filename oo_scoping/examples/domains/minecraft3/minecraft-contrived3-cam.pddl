@@ -1099,8 +1099,8 @@
     :effect (and
         (not (present ?b))
         ; (increase (agent-num-orchid-flower ?ag) 1)
-        (not (agent-has-n-orchid-flowers ?ag ?n_flowers_start))
-        (agent-has-n-orchid-flowers ?ag ?n_flowers_end)
+        (not (agent-has-n-orchid-flowers ?ag ?n_start))
+        (agent-has-n-orchid-flowers ?ag ?n_end)
         ; (assign (item-hits ?b) 0)
     )
 )

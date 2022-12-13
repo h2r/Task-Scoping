@@ -41,8 +41,6 @@
     (agent-has-n-wool-blocks ?ag - agent ?n - count)
     ;(agent-num-bed ?ag - agent)
     (agent-has-n-beds ?ag - agent ?n - count)
-    ;(item-hits ?it - destructible-item)
-    (item-has-n-hits ?it - destructible-item ?n - count)
     ;(block-hits ?b - destructible-block)
     (block-has-n-hits ?b - destructible-block ?n - count)
     ;(wool-color ?woolb - wool-block)
@@ -1091,14 +1089,12 @@
         (are-seq ?n_start ?n_end)
         (present ?b)
         (agent-has-n-orchid-flowers ?ag ?n_start)
-        ; (= (item-hits ?b) 0)
     )
     :effect (and
         (not (present ?b))
         ; (increase (agent-num-orchid-flower ?ag) 1)
         (not (agent-has-n-orchid-flowers ?ag ?n_start))
         (agent-has-n-orchid-flowers ?ag ?n_end)
-        ; (assign (item-hits ?b) 0)
     )
 )
 
@@ -1128,14 +1124,12 @@
         (are-seq ?n_start ?n_end)
         (present ?b)
         (agent-has-n-oak-saplings ?ag ?n_start)
-        ; (= (item-hits ?b) 0)
     )
     :effect (and
         (not (present ?b))
         ; (increase (agent-num-oak-sapling ?ag) 1)
         (not (agent-has-n-oak-saplings ?ag ?n_start))
         (agent-has-n-oak-saplings ?ag ?n_end)
-        ; (assign (item-hits ?b) 0)
     )
 )
 
@@ -1165,14 +1159,12 @@
         (are-seq ?n_start ?n_end)
         (present ?b)
         (agent-has-n-birch-saplings ?ag ?n_start)
-        ; (= (item-hits ?b) 0)
     )
     :effect (and
         (not (present ?b))
         ; (increase (agent-num-birch-sapling ?ag) 1)
         (not (agent-has-n-birch-saplings ?ag ?n_start))
         (agent-has-n-birch-saplings ?ag ?n_end)
-        ; (assign (item-hits ?b) 0)
     )
 )
 

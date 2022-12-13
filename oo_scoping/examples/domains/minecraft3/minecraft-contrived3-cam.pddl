@@ -620,22 +620,24 @@
         (not (block-present ?bd))
         ; (>= (agent-num-wool-block ?ag) 3)
         (agent-has-n-wool-blocks ?ag ?n_wool_start)
-        (exists
-            (?n_wool_minus_one - count ?n_wool_minus_two - count)
-            (and
-                (are-seq ?n_wool_end ?n_wool_minus_two)
-                (are-seq ?n_wool_minus_two ?n_wool_minus_one)
-                (are-seq ?n_wool_minus_one ?n_wool_start)
+        (exists (?n_wool_minus_one - count)
+            (exists (?n_wool_minus_two - count)
+                (and
+                    (are-seq ?n_wool_end ?n_wool_minus_two)
+                    (are-seq ?n_wool_minus_two ?n_wool_minus_one)
+                    (are-seq ?n_wool_minus_one ?n_wool_start)
+                )
             )
         )
         ; (>= (agent-num-wooden-planks ?ag) 3)
         (agent-has-n-wooden-planks ?ag ?n_planks_start)
-        (exists
-            (?n_planks_minus_one - count ?n_planks_minus_two - count)
-            (and
-                (are-seq ?n_planks_end ?n_planks_minus_two)
-                (are-seq ?n_planks_minus_two ?n_planks_minus_one)
-                (are-seq ?n_planks_minus_one ?n_planks_start)
+        (exists (?n_planks_minus_one - count)
+            (exists (?n_planks_minus_two - count)
+                (and
+                    (are-seq ?n_planks_end ?n_planks_minus_two)
+                    (are-seq ?n_planks_minus_two ?n_planks_minus_one)
+                    (are-seq ?n_planks_minus_one ?n_planks_start)
+                )
             )
         )
         (agent-has-n-beds ?ag ?n_beds_start)
@@ -673,21 +675,23 @@
     :precondition (and
         ; (>= (agent-num-stick ?ag) 2)
         (agent-has-n-sticks ?ag ?n_sticks_start)
-        (exists
-            (?n_sticks_minus_one - count ?n_sticks_minus_two - count)
-            (and
-                (are-seq ?n_sticks_end ?n_sticks_minus_one)
-                (are-seq ?n_sticks_minus_one ?n_sticks_start)
+        (exists (?n_sticks_minus_one - count)
+            (exists (?n_sticks_minus_two - count)
+                (and
+                    (are-seq ?n_sticks_end ?n_sticks_minus_one)
+                    (are-seq ?n_sticks_minus_one ?n_sticks_start)
+                )
             )
         )
         ; (>= (agent-num-diamond ?ag) 3)
         (agent-has-n-diamonds ?ag ?n_diamonds_start)
-        (exists
-            (?n_diamonds_minus_one - count ?n_diamonds_minus_two - count)
-            (and
-                (are-seq ?n_diamonds_end ?n_diamonds_minus_two)
-                (are-seq ?n_diamonds_minus_two ?n_diamonds_minus_one)
-                (are-seq ?n_diamonds_minus_one ?n_diamonds_start)
+        (exists (?n_diamonds_minus_one - count)
+            (exists (?n_diamonds_minus_two - count)
+                (and
+                    (are-seq ?n_diamonds_end ?n_diamonds_minus_two)
+                    (are-seq ?n_diamonds_minus_two ?n_diamonds_minus_one)
+                    (are-seq ?n_diamonds_minus_one ?n_diamonds_start)
+                )
             )
         )
         (agent-has-n-diamond-axes ?ag ?n_diamond_axes_start)
@@ -722,13 +726,16 @@
         (agent-has-n-wooden-blocks ?ag ?n_blocks_start)
         (are-seq ?n_blocks_end ?n_blocks_start)
         (agent-has-n-wooden-planks ?ag ?n_planks_start)
-        (exists
-            (?n_planks_plus_one ?n_planks_plus_two ?n_planks_plus_three)
-            (and
-                (are-seq ?n_planks_start ?n_planks_plus_one)
-                (are-seq ?n_planks_plus_one ?n_planks_plus_two)
-                (are-seq ?n_planks_plus_two ?n_planks_plus_three)
-                (are-seq ?n_planks_plus_three ?n_planks_end)
+        (exists (?n_planks_plus_one)
+            (exists (?n_planks_plus_two)
+                (exists (?n_planks_plus_three)
+                    (and
+                        (are-seq ?n_planks_start ?n_planks_plus_one)
+                        (are-seq ?n_planks_plus_one ?n_planks_plus_two)
+                        (are-seq ?n_planks_plus_two ?n_planks_plus_three)
+                        (are-seq ?n_planks_plus_three ?n_planks_end)
+                    )
+                )
             )
         )
     )
@@ -795,11 +802,15 @@
         (block-present ?b)
         ; (< (block-hits ?b) 2)
         (block-has-n-hits ?b ?n_hits_start)
-        (not exists ; we cannot count backwards 2 from n_hits_start (b/c < 2)
-            (?n_hits_minus_one ?n_hits_minus_two)
-            (and
-                (are-seq ?n_hits_minus_one ?n_hits_start)
-                (are-seq ?n_hits_minus_two ?n_hits_minus_one)
+        ; we cannot count backwards 2 from n_hits_start (b/c < 2)
+        (not
+            (exists (?n_hits_minus_one)
+                (exists (?n_hits_minus_two)
+                    (and
+                        (are-seq ?n_hits_minus_one ?n_hits_start)
+                        (are-seq ?n_hits_minus_two ?n_hits_minus_one)
+                    )
+                )
             )
         )
         (are-seq ?n_hits_start ?n_hits_end) ; b/c we want to increase n_hits
@@ -845,8 +856,8 @@
         (are-seq ?n_blocks_start ?n_blocks_end)
         ; (= (block-hits ?b) 2) ;; convert to >= since > is impossible anyway
         (block-has-n-hits ?b ?n_hits_start)
-        (exists ; we can count backwards 2 from n_hits_start (b/c >= 2)
-            (?n_hits_minus_one)
+        ; we can count backwards 2 from n_hits_start (b/c >= 2)
+        (exists (?n_hits_minus_one)
             (and
                 (are-seq ?n_hits_minus_one ?n_hits_start)
                 (are-seq ?n_hits_end ?n_hits_minus_one)
@@ -894,11 +905,15 @@
         (block-present ?b)
         ; (< (block-hits ?b) 2)
         (block-has-n-hits ?b ?n_hits_start)
-        (not exists ; we cannot count backwards 2 from n_hits_start (b/c < 2)
-            (?n_hits_minus_one ?n_hits_minus_two)
-            (and
-                (are-seq ?n_hits_minus_one ?n_hits_start)
-                (are-seq ?n_hits_minus_two ?n_hits_minus_one)
+        ; we cannot count backwards 2 from n_hits_start (b/c < 2)
+        (not
+            (exists (?n_hits_minus_one)
+                (exists (?n_hits_minus_two)
+                    (and
+                        (are-seq ?n_hits_minus_one ?n_hits_start)
+                        (are-seq ?n_hits_minus_two ?n_hits_minus_one)
+                    )
+                )
             )
         )
         (are-seq ?n_hits_start ?n_hits_end) ; b/c we want to increase n_hits
@@ -944,8 +959,8 @@
         (are-seq ?n_planks_start ?n_planks_end)
         ; (= (block-hits ?b) 2) ;; convert to >= since > is impossible anyway
         (block-has-n-hits ?b ?n_hits_start)
-        (exists ; we can count backwards 2 from n_hits_start (b/c >= 2)
-            (?n_hits_minus_one)
+        ; we can count backwards 2 from n_hits_start (b/c >= 2)
+        (exists (?n_hits_minus_one)
             (and
                 (are-seq ?n_hits_minus_one ?n_hits_start)
                 (are-seq ?n_hits_end ?n_hits_minus_one)
@@ -993,11 +1008,15 @@
         (block-present ?b)
         ; (< (block-hits ?b) 2)
         (block-has-n-hits ?b ?n_hits_start)
-        (not exists ; we cannot count backwards 2 from n_hits_start (b/c < 2)
-            (?n_hits_minus_one ?n_hits_minus_two)
-            (and
-                (are-seq ?n_hits_minus_one ?n_hits_start)
-                (are-seq ?n_hits_minus_two ?n_hits_minus_one)
+        ; we cannot count backwards 2 from n_hits_start (b/c < 2)
+        (not
+            (exists (?n_hits_minus_one)
+                (exists (?n_hits_minus_two)
+                    (and
+                        (are-seq ?n_hits_minus_one ?n_hits_start)
+                        (are-seq ?n_hits_minus_two ?n_hits_minus_one)
+                    )
+                )
             )
         )
         (are-seq ?n_hits_start ?n_hits_end) ; b/c we want to increase n_hits
@@ -1043,8 +1062,8 @@
         (are-seq ?n_beds_start ?n_beds_end)
         ; (= (block-hits ?b) 2) ;; convert to >= since > is impossible anyway
         (block-has-n-hits ?b ?n_hits_start)
-        (exists ; we can count backwards 2 from n_hits_start (b/c >= 2)
-            (?n_hits_minus_one)
+        ; we can count backwards 2 from n_hits_start (b/c >= 2)
+        (exists (?n_hits_minus_one)
             (and
                 (are-seq ?n_hits_minus_one ?n_hits_start)
                 (are-seq ?n_hits_end ?n_hits_minus_one)

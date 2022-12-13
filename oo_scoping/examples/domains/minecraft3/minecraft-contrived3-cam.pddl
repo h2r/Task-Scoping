@@ -596,7 +596,8 @@
         ?woolb1 - wool-block
         ?woolb2 - wool-block
         ?woolb3 - wool-block
-        ?c - color
+        ?color_start - color
+        ?color_end - color
         ?bd - bed
         ?n_wool_start - count
         ?n_wool_end - count
@@ -612,9 +613,9 @@
         ; (= (wool-color ?woolb1) 1)
         ; (= (wool-color ?woolb2) 1)
         ; (= (wool-color ?woolb3) 1)
-        (wool-has-color-id ?woolb1 ?c)
-        (wool-has-color-id ?woolb2 ?c)
-        (wool-has-color-id ?woolb3 ?c)
+        (wool-has-color-id ?woolb1 ?color_end)
+        (wool-has-color-id ?woolb2 ?color_end)
+        (wool-has-color-id ?woolb3 ?color_end)
         (not (= ?woolb1 ?woolb2))
         (not (= ?woolb1 ?woolb3))
         (not (= ?woolb2 ?woolb3))
@@ -641,6 +642,8 @@
         )
         (agent-has-n-beds ?ag ?n_beds_start)
         (are-seq ?n_beds_start ?n_beds_end)
+        (bed-has-color-id ?bd ?color_start)
+        (neq ?color_start ?color_end)
     )
     :effect (and
         ; (decrease (agent-num-wooden-planks ?ag) 3)
@@ -653,7 +656,8 @@
         (not (agent-has-n-beds ?ag ?n_beds_start))
         (agent-has-n-beds ?ag ?n_beds_end)
         ; (assign (bed-color ?bd) 1)
-        (bed-has-color-id ?bd ?c)
+        (not (bed-has-color-id ?bd ?c_start))
+        (bed-has-color-id ?bd ?c_end)
     )
 )
 

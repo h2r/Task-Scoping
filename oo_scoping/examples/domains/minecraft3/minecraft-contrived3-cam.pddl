@@ -725,10 +725,10 @@
         (exists
             (?n_planks_plus_one ?n_planks_plus_two ?n_planks_plus_three)
             (and
-                (are-seq ?n_diamonds_start ?n_diamonds_plus_one)
-                (are-seq ?n_diamonds_plus_one ?n_diamonds_plus_two)
-                (are-seq ?n_diamonds_plus_two ?n_diamonds_plus_three)
-                (are-seq ?n_diamonds_plus_three ?n_diamonds_end)
+                (are-seq ?n_planks_start ?n_planks_plus_one)
+                (are-seq ?n_planks_plus_one ?n_planks_plus_two)
+                (are-seq ?n_planks_plus_two ?n_planks_plus_three)
+                (are-seq ?n_planks_plus_three ?n_planks_end)
             )
         )
     )

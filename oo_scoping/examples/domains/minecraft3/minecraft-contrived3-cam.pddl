@@ -653,8 +653,8 @@
         (not (agent-has-n-beds ?ag ?n_beds_start))
         (agent-has-n-beds ?ag ?n_beds_end)
         ; (assign (bed-color ?bd) 1)
-        (not (bed-has-color-id ?bd ?c_start))
-        (bed-has-color-id ?bd ?c_end)
+        (not (bed-has-color-id ?bd ?color_start))
+        (bed-has-color-id ?bd ?color_end)
     )
 )
 

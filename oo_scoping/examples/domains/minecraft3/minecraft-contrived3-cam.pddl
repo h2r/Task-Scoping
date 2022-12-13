@@ -15,9 +15,6 @@
     (present ?i - item)
     (block-present ?b - block) ;; block is still present in environment
     (agent-alive ?ag - agent)
-    (gt ?x1 - int ?x2 - int) ;; x1 > x2
-    (lt ?x1 - int ?x2 - int) ;; x1 < x2
-    (eq ?x1 - int ?x2 - int) ;; x1 == x2
     (are-seq ?x1 - int ?x2 - int) ;; true if x1 + 1 = x2 (i.e. they are sequential)
     ;(agent-num-diamond ?ag - agent)
     (agent-has-n-diamonds ?ag - agent ?n - count)

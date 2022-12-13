@@ -1,5 +1,5 @@
 (define (domain minecraft-contrived3-cam)
-(:requirements :equality :typing :fluents :negative-preconditions :universal-preconditions :existential-preconditions)
+(:requirements :equality :typing :negative-preconditions :universal-preconditions :existential-preconditions)
 
 (:types
     locatable int - object

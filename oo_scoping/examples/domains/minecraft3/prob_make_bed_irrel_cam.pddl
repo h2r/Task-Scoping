@@ -1,6 +1,6 @@
-(define (problem MINECRAFTCONTRIVED-3)
-    (:domain minecraft-bedmaking)
+(define (problem minecraft-contrived3-cam-1)
 
+(:domain minecraft-contrived3-cam)
 
 (:objects
 	steve - agent

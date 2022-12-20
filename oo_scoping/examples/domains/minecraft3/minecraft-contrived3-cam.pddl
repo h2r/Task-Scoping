@@ -310,7 +310,7 @@
         ?x - position
         ?y_start - position
         ?y_end - position
-        ?x - position
+        ?z - position
     )
     :precondition (and
         ; (>= (agent-num-diamond ?ag) 1)
@@ -347,7 +347,7 @@
         ?x - position
         ?y_start - position
         ?y_end - position
-        ?x - position
+        ?z - position
     )
     :precondition (and
         ; (>= (agent-num-stick ?ag) 1)
@@ -383,7 +383,7 @@
         ?x - position
         ?y_start - position
         ?y_end - position
-        ?x - position
+        ?z - position
     )
     :precondition (and
         ; (>= (agent-num-blue-dye ?ag) 1)
@@ -419,7 +419,7 @@
         ?x - position
         ?y_start - position
         ?y_end - position
-        ?x - position
+        ?z - position
     )
     :precondition (and
         ; (>= (agent-num-wooden-block ?ag) 1)
@@ -455,7 +455,7 @@
         ?x - position
         ?y_start - position
         ?y_end - position
-        ?x - position
+        ?z - position
     )
     :precondition (and
         ; (>= (agent-num-wooden-planks ?ag) 1)
@@ -491,7 +491,7 @@
         ?x - position
         ?y_start - position
         ?y_end - position
-        ?x - position
+        ?z - position
     )
     :precondition (and
         ; (>= (agent-num-wool-block ?ag) 1)
@@ -527,7 +527,7 @@
         ?x - position
         ?y_start - position
         ?y_end - position
-        ?x - position
+        ?z - position
     )
     :precondition (and
         ; (>= (agent-num-bed ?ag) 1)

@@ -782,6 +782,15 @@ def main():
         with open(options.sas_file, "w") as output_file:
             sas_task.output(output_file)
 
+    scope_sas(sas_task)
+
+def scope_sas(sas_task=None):
+    if sas_task is None:
+        with timers.timing("Writing output SAS file"):
+            with open(options.sas_file, "r") as input_file:
+                sas_task : .output(input_file)
+
+    timer = timers.Timer()
     if options.scope:
         # This below block of code performs task scoping on the SAS+ domain.
         str2var_dict = scoping_sas_parser.make_str2var_dict(sas_task.variables)
@@ -817,7 +826,7 @@ def main():
             # These are used to estimate size of effective state space of scoped domain.
             # We do this because we do not in fact remove fluents from the sas+ domain, we only remove operators
             def get_effectively_relevant_pvars(
-                cae_triples: Iterable[SkillPDDL], action_names=None
+                cae_triples: Iterable[SkillPDDL], action_names = None
             ):
                 """
                 :param cae_triples: operators from original domain
@@ -914,7 +923,7 @@ def main_from_other_script(**kwargs):
         # Reserve about 10 MB of emergency memory.
         # https://stackoverflow.com/questions/19469608/
         emergency_memory = b"x" * 10**7
-        main()
+        scope_sas()
 
         # main()
     except MemoryError:

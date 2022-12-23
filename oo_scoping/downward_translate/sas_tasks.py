@@ -94,6 +94,20 @@ class SASTask:
         for axiom in self.axioms:
             axiom.output(stream)
 
+    def load(self, filename='output.sas'):
+        with open(filename, 'r') as stream:
+            lines = stream.readlines()
+
+        assert lines.pop(0) == "begin_version"
+        assert int(lines.pop(0)) == SAS_FILE_VERSION
+        assert lines.pop(0) == "end_version"
+        assert lines.pop(0) == "begin_metric"
+        self.metric = int(lines.pop(0))
+        assert lines.pop(0) == "end_metric"
+        self.variables = SASVariables().parse(lines)
+        n_mutexes = lines.pop(0)
+
+
     def get_encoding_size(self):
         task_size = 0
         task_size += self.variables.get_encoding_size()
@@ -166,6 +180,15 @@ class SASVariables:
             for value in values:
                 print(value, file=stream)
             print("end_variable", file=stream)
+
+    def parse(self, lines):
+        n_vars = int(lines.pop(0))
+        self.ranges = []
+        self.axiom_layers = []
+        self.value_names = []
+        for i in range(n_vars):
+            assert lines.pop(0) == "begin_variable"
+        pass
 
     def get_encoding_size(self):
         # A variable with range k has encoding size k + 1 to also give the

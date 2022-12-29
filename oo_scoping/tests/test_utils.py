@@ -5,6 +5,7 @@ import z3
 
 from oo_scoping.utils import get_atoms
 
+
 class TestGetAtomsBase(unittest.TestCase):
     def test_get_atoms(self):
         A = z3.Bool("A")
@@ -21,14 +22,11 @@ class TestGetAtomsBase(unittest.TestCase):
         D = z3.Int("D")
         cd = z3.Not(C == D)
 
-        expr = z3.Or(z3.And(A,B), cd)
-        atoms = {A,B,C,D}
+        expr = z3.Or(z3.And(A, B), cd)
+        atoms = {A, B, C, D}
         atoms_pred = set(get_atoms(expr))
         self.assertEqual(atoms_pred, atoms, str(atoms_pred))
 
 
-
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

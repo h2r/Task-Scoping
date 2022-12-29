@@ -265,31 +265,26 @@ def get_atoms(
     Returns list of base-level z3 expressions from list of (potentially) high level z3 expressions.
     Ex. 'a == b' would be returned as [a,b], where a and b are baselevel z3 expressions (intref, boolref, etc)
     """
-    # TODO remove duplicates
-    atoms = []
+    atoms = set()
     open_nodes = list(args)
-    closed_nodes = []
     while len(open_nodes) > 0:
         expr = open_nodes.pop()
-        closed_nodes.append(expr)
         # We don't need to add python primitives as atoms
         if isinstance(expr, (bool, int)):
             continue
         if isinstance(expr, z3.Goal):  # What is a z3.Goal ?
             expr = expr.as_expr()
-            # IDK if we need this
-            closed_nodes.append(expr)
         
         children = expr.children()
         if len(children) == 0:
-            atoms.append(expr)
+            atoms.add(expr)
         else:
             open_nodes.extend(children)
 
     if remove_constants:
         atoms = remove_constant_atoms(atoms)
 
-    return atoms
+    return list(atoms)
 
 
 def remove_constant_atoms(atoms):

@@ -784,6 +784,8 @@ def main():
 
     if options.scope:
         # This below block of code performs task scoping on the SAS+ domain.
+        if len(sas_task.axioms) > 0:
+            raise NotImplementedError("Scoping does not yet support sas files with axioms.")
         str2var_dict = scoping_sas_parser.make_str2var_dict(sas_task.variables)
         str_grounded_action_list = scoping_sas_parser.make_str_grounded_actions(
             sas_task.operators

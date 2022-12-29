@@ -231,10 +231,11 @@ def get_possible_values(expr_list, obj, solver=None):
     return vals
 
 
-def get_atoms(
+def get_atoms_recursive(
     *args: Union[bool, z3.ExprRef, z3.Goal], remove_constants=True
 ) -> List[z3.ExprRef]:
     """
+    Use get_atoms instead
     Returns list of base-level z3 expressions from list of (potentially) high level z3 expressions.
     Ex. 'a == b' would be returned as [a,b], where a and b are baselevel z3 expressions (intref, boolref, etc)
     """
@@ -257,6 +258,40 @@ def get_atoms(
     return atoms
 
 
+def get_atoms(
+    *args: Union[bool, z3.ExprRef, z3.Goal], remove_constants=True
+) -> List[z3.ExprRef]:
+    """
+    Returns list of base-level z3 expressions from list of (potentially) high level z3 expressions.
+    Ex. 'a == b' would be returned as [a,b], where a and b are baselevel z3 expressions (intref, boolref, etc)
+    """
+    # TODO remove duplicates
+    atoms = []
+    open_nodes = list(args)
+    closed_nodes = []
+    while len(open_nodes) > 0:
+        expr = open_nodes.pop()
+        closed_nodes.append(expr)
+        # We don't need to add python primitives as atoms
+        if isinstance(expr, (bool, int)):
+            continue
+        if isinstance(expr, z3.Goal):  # What is a z3.Goal ?
+            expr = expr.as_expr()
+            # IDK if we need this
+            closed_nodes.append(expr)
+        
+        children = expr.children()
+        if len(children) == 0:
+            atoms.append(expr)
+        else:
+            open_nodes.extend(children)
+
+    if remove_constants:
+        atoms = remove_constant_atoms(atoms)
+
+    return atoms
+
+
 def remove_constant_atoms(atoms):
     """
     Remove z3 expressions that refer to a constant
@@ -276,15 +311,6 @@ def remove_constant_atoms(atoms):
             #     print(f"moo? {s}")
     return atoms_filtered
 
-
-def get_atoms_test():
-    A = z3.Bool("A")
-    B = z3.Bool("B")
-    both = z3.And(A, B)
-    Aonly = z3.And(A, z3.Not(B))
-    Acomp = z3.Or(both, Aonly)
-    assert set(get_atoms(both)) == {A, B}, set(get_atoms(both))
-    assert set(get_atoms(Aonly)) == {A, B}, set(get_atoms(Aonly))
 
 
 def get_diff_and_int(a, b):

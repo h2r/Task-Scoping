@@ -1,5 +1,9 @@
 import os, time, argparse, subprocess, json, shutil, glob, re
 import pandas as pd
+
+# Example command:
+# python experiments/fd_experiment.py 3 examples/IPC_domains_propositional/driverlog/domain.pddl examples/IPC_domains_propositional/driverlog/prob15.pddl ~/Documents/GitHub/downward/fast-downward.py ./logs --problems_dir randomly_generated_prob_files/driverlog/
+
 """
 TODO:
 Get state-visited counts
@@ -45,7 +49,8 @@ def run_experiment(n_runs, domain, problem, fd_path, log_dir, force_clear=False)
         "plan_unscoped_time":[],
         "plan_scoped_time":[],
         "plan_unscoped_node_expansions": [],
-        "plan_scoped_node_expansions": []
+        "plan_scoped_node_expansions": [],
+        "encoding_size": []
     }
     timings_path = f"{log_dir}/times.json"
     # This would be more precise if we recorded time for multiple iterations of each portion, then divided. TODO consider doing this.
@@ -68,6 +73,7 @@ def run_experiment(n_runs, domain, problem, fd_path, log_dir, force_clear=False)
                     raise ValueError(f"Translation failed with returncode {trans_cmd_output.returncode}\nstderr: {trans_cmd_output.stderr}\nstdout: {trans_cmd_output.stdout}")
 
         timings_dict["translate"].append(translate_end - translate_start)
+        timings_dict["encoding_size"].append(int(re.search(r"(Translator task size:) \d*", trans_cmd_output.stdout.decode()).group().split(' ')[3]))
         with open(timings_path, "w") as f:
             json.dump(timings_dict, f)
         save_cmd_output(trans_cmd_output, f"{log_dir_this_run}/translate")

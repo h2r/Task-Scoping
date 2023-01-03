@@ -1,10 +1,11 @@
 # NOTE: To execute this file, make sure you have a Malmo client already running via
 # ./runClient.sh (on Linux)
-# Additionally, to use this file correctly, copy it to be located at 
+# Additionally, to use this file correctly, copy it to be located at
 # MalmoPlatform/build/install/Python_Examples
 
 from __future__ import print_function
 from __future__ import division
+
 # ------------------------------------------------------------------------------------------------
 # Copyright (c) 2016 Microsoft Corporation
 #
@@ -45,11 +46,13 @@ import malmoutils
 import uuid
 import argparse
 
+
 def begins(s, *args):
     for x in args:
-        if len(x) <= len(s) and s[:len(x)] == x:
+        if len(x) <= len(s) and s[: len(x)] == x:
             return True
     return False
+
 
 def act(agent_host, pddl_steps, move_sleep):
     action_parts_0s = [x.split("(")[1].split(")")[0].split(" ")[0] for x in pddl_steps]
@@ -58,7 +61,7 @@ def act(agent_host, pddl_steps, move_sleep):
     print("~~~~~~~~~~~~")
     # print(pddl_steps)
     for a in action_parts_0s:
-    # for s_pddl in pddl_steps:
+        # for s_pddl in pddl_steps:
         # action_parts = s_pddl.split("(")[1].split(")")[0].split(" ")
 
         # Move
@@ -86,14 +89,14 @@ def act(agent_host, pddl_steps, move_sleep):
         # Destroy
         # Attack for 10 seconds.
         # If we were destroying multiple types of blocks, we would decide attack time for each block
-        elif begins(a,"destroy"):
+        elif begins(a, "destroy"):
             print("Attacking")
             agent_host.sendCommand("attack 1")
             time.sleep(10)
             agent_host.sendCommand("attack 0")
-        
+
         # Pickup happens automatically, so skip
-        elif begins(a,"pickup"):
+        elif begins(a, "pickup"):
             continue
 
         # Craft
@@ -103,7 +106,6 @@ def act(agent_host, pddl_steps, move_sleep):
         elif a == "craft-flint-and-steel":
             agent_host.sendCommand("craft flint_and_steel")
 
-            
         else:
             raise NotImplementedError(f"Cannot handle action: {a}")
 
@@ -119,15 +121,38 @@ def act(agent_host, pddl_steps, move_sleep):
     agent_host.sendCommand("hotbar.4 1")
     time.sleep(0.5)
     agent_host.sendCommand("hotbar.4 0")
-    
+
 
 # Get plan based on goal
 parser = argparse.ArgumentParser()
-parser.add_argument("--goal", type=str, help="name of a txt file (without the .txt extension) that contains a plan for a minecraft domain")
-parser.add_argument("--problem_name", type=str, help="name of the xml problem file you'd like to display")
-parser.add_argument("--use_watcher", type=bool, default=False, help="whether or not to spawn a Watcher to record video of what the main agent is doing")
-parser.add_argument("--malmo_scoping_dir", type=str, default="examples/malmo", help="absolute path location to the MALMO scoping directory")
-parser.add_argument("--execute_plan", type=bool, default=False, help="whether or not the agent should execute the given plan")
+parser.add_argument(
+    "--goal",
+    type=str,
+    help="name of a txt file (without the .txt extension) that contains a plan for a minecraft domain",
+)
+parser.add_argument(
+    "--problem_name",
+    type=str,
+    help="name of the xml problem file you'd like to display",
+)
+parser.add_argument(
+    "--use_watcher",
+    type=bool,
+    default=False,
+    help="whether or not to spawn a Watcher to record video of what the main agent is doing",
+)
+parser.add_argument(
+    "--malmo_scoping_dir",
+    type=str,
+    default="examples/malmo",
+    help="absolute path location to the MALMO scoping directory",
+)
+parser.add_argument(
+    "--execute_plan",
+    type=bool,
+    default=False,
+    help="whether or not the agent should execute the given plan",
+)
 args = parser.parse_args()
 
 # Set location of files from scoping project
@@ -153,34 +178,52 @@ else:
 
 
 # recordingsDirectory = malmoutils.get_recordings_directory(agent_host)
-video_requirements = ''
+video_requirements = ""
 # '<VideoProducer><Width>860</Width><Height>480</Height></VideoProducer>' if agent_host[0].receivedArgument("record_video") else ''
 
-def safeStartMission(agent_host, my_mission, my_client_pool, my_mission_record, role, expId):
+
+def safeStartMission(
+    agent_host, my_mission, my_client_pool, my_mission_record, role, expId
+):
     used_attempts = 0
     max_attempts = 5
     print("Calling startMission for role", role)
     while True:
         try:
             # Attempt start:
-            agent_host.startMission(my_mission, my_client_pool, my_mission_record, role, expId)
+            agent_host.startMission(
+                my_mission, my_client_pool, my_mission_record, role, expId
+            )
             break
         except MalmoPython.MissionException as e:
             errorCode = e.details.errorCode
             if errorCode == MalmoPython.MissionErrorCode.MISSION_SERVER_WARMING_UP:
                 print("Server not quite ready yet - waiting...")
                 time.sleep(2)
-            elif errorCode == MalmoPython.MissionErrorCode.MISSION_INSUFFICIENT_CLIENTS_AVAILABLE:
+            elif (
+                errorCode
+                == MalmoPython.MissionErrorCode.MISSION_INSUFFICIENT_CLIENTS_AVAILABLE
+            ):
                 print("Not enough available Minecraft instances running.")
                 used_attempts += 1
                 if used_attempts < max_attempts:
-                    print("Will wait in case they are starting up.", max_attempts - used_attempts, "attempts left.")
+                    print(
+                        "Will wait in case they are starting up.",
+                        max_attempts - used_attempts,
+                        "attempts left.",
+                    )
                     time.sleep(2)
             elif errorCode == MalmoPython.MissionErrorCode.MISSION_SERVER_NOT_FOUND:
-                print("Server not found - has the mission with role 0 been started yet?")
+                print(
+                    "Server not found - has the mission with role 0 been started yet?"
+                )
                 used_attempts += 1
                 if used_attempts < max_attempts:
-                    print("Will wait and retry.", max_attempts - used_attempts, "attempts left.")
+                    print(
+                        "Will wait and retry.",
+                        max_attempts - used_attempts,
+                        "attempts left.",
+                    )
                     time.sleep(2)
             else:
                 print("Other error:", e.message)
@@ -191,8 +234,9 @@ def safeStartMission(agent_host, my_mission, my_client_pool, my_mission_record, 
             exit(1)
     print("startMission called okay.")
 
+
 def safeWaitForStart(agent_hosts):
-    print("Waiting for the mission to start", end=' ')
+    print("Waiting for the mission to start", end=" ")
     start_flags = [False for a in agent_hosts]
     start_time = time.time()
     time_out = 120  # Allow a two minute timeout.
@@ -207,7 +251,7 @@ def safeWaitForStart(agent_hosts):
             print("Bailing now.")
             exit(1)
         time.sleep(0.1)
-        print(".", end=' ')
+        print(".", end=" ")
     if time.time() - start_time >= time_out:
         print("Timed out while waiting for mission to start - bailing.")
         exit(1)
@@ -216,20 +260,28 @@ def safeWaitForStart(agent_hosts):
 
 
 def getMissionXML(xml_file):
-    with open(xml_file,"r") as f:
+    with open(xml_file, "r") as f:
         template = f.read()
     return template.format(summary="hi", video_requirements=video_requirements)
+
 
 validate = True
 client_pool = MalmoPython.ClientPool()
 client_pool.add(MalmoPython.ClientInfo("127.0.0.1", 10000))
-client_pool.add(MalmoPython.ClientInfo('127.0.0.1', 10001))
+client_pool.add(MalmoPython.ClientInfo("127.0.0.1", 10001))
 print(client_pool)
 my_mission = MalmoPython.MissionSpec(getMissionXML(xml_file), True)
 
 experimentID = str(uuid.uuid4())
 for i in range(len(agent_hosts)):
-    safeStartMission(agent_hosts[i], my_mission, client_pool, MalmoPython.MissionRecordSpec(), i, experimentID)
+    safeStartMission(
+        agent_hosts[i],
+        my_mission,
+        client_pool,
+        MalmoPython.MissionRecordSpec(),
+        i,
+        experimentID,
+    )
 
 safeWaitForStart(agent_hosts)
 time.sleep(1)
@@ -262,4 +314,3 @@ move_sleep = 1.5
 
 if args.execute_plan:
     act(agent_host, pddl_steps, move_sleep)
-

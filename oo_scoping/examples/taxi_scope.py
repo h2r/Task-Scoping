@@ -11,7 +11,6 @@ from oo_scoping.examples import domains_dir
 from oo_scoping.utils import make_dir
 
 
-
 def remove_objects(input_path, output_path, objects):
     with open(input_path, "r") as f:
         instance_lines = f.read().splitlines()
@@ -23,32 +22,34 @@ def remove_objects(input_path, output_path, objects):
                 in_objects_flag = False
         if "(:objects" in l:
             in_objects_flag = True
-        
+
         if not any(o in l for o in objects):
             scoped_lines.append(l)
         else:
             if in_objects_flag:
                 split_l = l.split(" ")
                 obj_type = split_l[-1]
-                objs = [o for o in split_l[:-2] if o not in objects and o != '']
+                objs = [o for o in split_l[:-2] if o not in objects and o != ""]
                 if len(objs) > 0:
                     l_new = " ".join(objs) + " - " + obj_type
                     scoped_lines.append(l_new)
             else:
                 scoped_lines.append(";" + l)
 
-    with open(output_path, "w")  as f:
+    with open(output_path, "w") as f:
         f.write("\n".join(scoped_lines))
+
 
 def get_scoped_path(p):
     p_split = p.split(".")
     base = ".".join(p_split[:-1])
     return base + "_scoped." + p_split[-1]
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     start_time = time.time()
-    domain =  f"{domains_dir}/existential-taxi/taxi-domain.pddl"
-    problem =  f"{domains_dir}/existential-taxi/prob-02.pddl"
+    domain = f"{domains_dir}/existential-taxi/taxi-domain.pddl"
+    problem = f"{domains_dir}/existential-taxi/prob-02.pddl"
 
     parser = PDDL_Parser_z3()
     parser.parse_domain(domain)
@@ -63,22 +64,25 @@ if __name__ == '__main__':
     init_cond_list = parser.get_init_cond_list()
 
     # Run the scoper on the constructed goal, skills and initial condition
-    rel_pvars, rel_skills = scope(goals=goal_cond, skills=skill_list, start_condition=init_cond_list)
-      
+    rel_pvars, rel_skills = scope(
+        goals=goal_cond, skills=skill_list, start_condition=init_cond_list
+    )
+
     print("~~~~~Relevant skills~~~~~")
-    print("\n\n".join(map(str,rel_skills)))
+    print("\n\n".join(map(str, rel_skills)))
     print("~~~~~Relevant pvars~~~~~")
     for p in rel_pvars:
         print(p)
- 
+
     # print(rel_pvars)
     # print(rel_skills)
 
     def pvars2objects(pvars):
-        objs = condition_str2objects(map(str,pvars))
+        objs = condition_str2objects(map(str, pvars))
         objs = [s.strip() for s in objs]
         objs = sorted(list(set(objs)))
         return objs
+
     all_pvars = []
     for s in skill_list:
         all_pvars.extend(get_atoms(s.precondition))

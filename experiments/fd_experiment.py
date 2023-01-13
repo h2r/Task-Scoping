@@ -3,12 +3,12 @@ import pandas as pd
 
 # Example command:
 # python experiments/fd_experiment.py 3 examples/IPC_domains_propositional/driverlog/domain.pddl examples/IPC_domains_propositional/driverlog/prob15.pddl ~/Documents/GitHub/downward/fast-downward.py ./logs --problems_dir randomly_generated_prob_files/driverlog/
-
 """
 TODO:
 Get state-visited counts
 Use https://gist.github.com/nawatts/e2cdca610463200c12eac2a14efc0bfb to print output
 """
+repo_root = os.path.dirname(os.path.dirname(__file__))
 
 # Helper functions
 def get_scoped_file_path(unscoped_file):
@@ -172,6 +172,7 @@ def run_experiments_on_folder(n_runs, domain, problem_folder, fd_path, log_dir, 
     print(f"Finished experiments; {num_solved_problems} problems out of {len(problem_files)} were solvable.")
     print(f"Aggregate Timing summary:")
     print(df_time_summary)
+    os.makedirs(log_dir, exist_ok=True)
     df_time_summary.to_csv(f"{log_dir}/timing_summary.csv", index=True)
 
 
@@ -201,13 +202,13 @@ def save_cmd_output(cmd_output, save_dir):
     
 
 def translate(domain, problem, sas_path):
-    cmd_pieces = ["python", "downward_translate/translate_and_scope.py", domain, problem, "--sas-file", sas_path]
+    cmd_pieces = ["python", f"{repo_root}/downward_translate/translate_and_scope.py", domain, problem, "--sas-file", sas_path]
     cmd_output = subprocess.run(cmd_pieces, capture_output=True, shell=False)
     return cmd_output
 
 
 def translate_and_scope(domain, problem, unscoped_sas_path):
-    cmd_pieces = ["python", "downward_translate/translate_and_scope.py", domain, problem, "--sas-file", unscoped_sas_path, "--scope", "True"]
+    cmd_pieces = ["python", f"{repo_root}/downward_translate/translate_and_scope.py", domain, problem, "--sas-file", unscoped_sas_path, "--scope", "True"]
     cmd_output = subprocess.run(cmd_pieces, capture_output=True, shell=False)
     return cmd_output
 

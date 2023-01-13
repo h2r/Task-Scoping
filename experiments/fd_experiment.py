@@ -1,4 +1,7 @@
-import os, time, argparse, subprocess, json, shutil, glob, re
+import os, time, argparse, subprocess, json, shutil, glob, re, enum
+from typing import Iterable
+
+
 import pandas as pd
 
 # Example command:
@@ -18,14 +21,9 @@ def add_path_suffix(p, s):
     basename, ext = os.path.splitext(p)
     return basename + s + ext
 
-# def dir_path(path):
-#     if os.path.isdir(path):
-#         return path
-#     else:
-#         raise argparse.ArgumentTypeError(f"readable_dir:{path} is not a valid path")
 
 # Main function
-def run_experiment(n_runs, domain, problem, fd_path, log_dir, force_clear=False):
+def run_experiment(n_runs, domain, problem, fd_path, log_dir, plan_type: str, force_clear=False,):
     start_time_exp = time.time()
     # Clear log dir if force_clear is True
     if force_clear and os.path.exists(log_dir):
@@ -96,7 +94,8 @@ def run_experiment(n_runs, domain, problem, fd_path, log_dir, force_clear=False)
         # Planning on unscoped
         print("Planning on unscoped")
         plan_unscoped_start_time = time.time()
-        plan_unscoped_cmd_output = plan(sas_2_path, fd_path)
+        plan_unscoped_cmd_output = plan(sas_path, fd_path, plan_type=plan_type)
+        # plan_unscoped_cmd_output = plan(sas_2_path, fd_path, plan_type=plan_type)
         plan_unscoped_end_time = time.time()
         if plan_unscoped_cmd_output.returncode != 0:
             raise ValueError(f"Planning on unscoped problem failed with returncode {plan_unscoped_cmd_output.returncode}\nstderr: {plan_unscoped_cmd_output.stderr}\nstdout: {plan_unscoped_cmd_output.stdout}")
@@ -110,7 +109,7 @@ def run_experiment(n_runs, domain, problem, fd_path, log_dir, force_clear=False)
         # Planning on scoped
         print("Planning on scoped")
         plan_scoped_start_time = time.time()
-        plan_scoped_cmd_output = plan(sas_scoped_path, fd_path)
+        plan_scoped_cmd_output = plan(sas_scoped_path, fd_path, plan_type=plan_type)
         plan_scoped_end_time = time.time()
         if plan_scoped_cmd_output.returncode != 0:
             raise ValueError(f"Planning on scoped problem failed with returncode {plan_scoped_cmd_output.returncode}\nstderr: {plan_scoped_cmd_output.stderr}\nstdout: {plan_scoped_cmd_output.stdout}")
@@ -135,7 +134,7 @@ def run_experiment(n_runs, domain, problem, fd_path, log_dir, force_clear=False)
     return timings_dict
 
 
-def run_experiments_on_folder(n_runs, domain, problem_folder, fd_path, log_dir, force_clear=False):
+def run_experiments_on_folder(n_runs, domain, problem_folder, fd_path, log_dir,plan_type: str, force_clear=False):
     total_timings_dict = {}
     num_solved_problems = 0
     problem_files = glob.glob(problem_folder + "*")
@@ -144,7 +143,7 @@ def run_experiments_on_folder(n_runs, domain, problem_folder, fd_path, log_dir, 
         log_dir_this_problem = log_dir + "/" + problem.split(".")[-2]
         
         try:
-            curr_timings_dict = run_experiment(n_runs, domain, problem, fd_path, log_dir_this_problem, force_clear)
+            curr_timings_dict = run_experiment(n_runs, domain, problem, fd_path, log_dir_this_problem, plan_type=plan_type, force_clear=force_clear)
         except ValueError:
             # In this case, the randomly-generated problem was impossible to solve.
             # Simply skip and move on.
@@ -212,8 +211,17 @@ def translate_and_scope(domain, problem, unscoped_sas_path):
     cmd_output = subprocess.run(cmd_pieces, capture_output=True, shell=False)
     return cmd_output
 
-def plan(sas_path, fd_path):
-    cmd_pieces = ["python", fd_path, "--alias", "seq-opt-lmcut", sas_path]
+
+SEARCH_CONFIGS = {
+    "lmcut":"astar(lmcut())",
+    "ms":"astar(merge_and_shrink(shrink_strategy=shrink_bisimulation(greedy=false),merge_strategy=merge_sccs(order_of_sccs=topological,merge_selector=score_based_filtering(scoring_functions=[goal_relevance,dfp,total_order])),label_reduction=exact(before_shrinking=true,before_merging=false),max_states=50k,threshold_before_merge=1))"
+}
+
+def plan(sas_path, fd_path, plan_type: str = "lmcut"):
+    search_config = SEARCH_CONFIGS[plan_type]
+    # Note: we don't call "python" at the beginning
+    # Note: "--" separates the file path arg from the remaining args
+    cmd_pieces = [fd_path, sas_path, "--", "--search", search_config]
     cmd_output = subprocess.run(cmd_pieces, capture_output=True, shell=False)
     return cmd_output
 
@@ -225,12 +233,13 @@ if __name__ == "__main__":
     parser.add_argument("problem", type=str)
     parser.add_argument("fd_path", type=str)
     parser.add_argument("log_dir", type=str)
+    parser.add_argument("--plan_type", type=str, default="lmcut", choices=list(SEARCH_CONFIGS.keys()), help="Plan techniques to use.")
     parser.add_argument("--force_clear_log_dir", default=False, action='store_true')
     parser.add_argument("--problems_dir", type=str, required=False, default=None)
 
     args = parser.parse_args()
 
     if args.problems_dir is None:
-        run_experiment(args.n_runs, args.domain, args.problem, args.fd_path, args.log_dir, args.force_clear_log_dir)
+        run_experiment(args.n_runs, args.domain, args.problem, args.fd_path, args.log_dir, plan_type=args.plan_type, force_clear=args.force_clear_log_dir)
     else:
-        run_experiments_on_folder(args.n_runs, args.domain, args.problems_dir, args.fd_path, args.log_dir, args.force_clear_log_dir)
+        run_experiments_on_folder(args.n_runs, args.domain, args.problems_dir, args.fd_path, args.log_dir, plan_type=args.plan_type, force_clear=args.force_clear_log_dir)

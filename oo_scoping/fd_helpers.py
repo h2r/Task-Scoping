@@ -12,13 +12,17 @@ def translate_and_scope(domain: str, problem: str, unscoped_sas_path: str) -> su
     cmd_output = subprocess.run(cmd_pieces, capture_output=True, shell=False)
     return cmd_output
 
-def plan(sas_path: str, fd_path: Optional[str] = None, config_args: Iterable = ("--alias", "seq-opt-lmcut")) -> subprocess.CompletedProcess[bytes]:
+def get_plan_cmd_pieces(sas_path: str, fd_path: Optional[str] = None, config_args: Iterable = ("--alias", "seq-opt-lmcut")) -> subprocess.CompletedProcess[bytes]:
     # Try to load fd_path from env variable if it is unspecified
     if fd_path is None:
         fd_path = os.getenv("FD_PATH")
         if fd_path is None:
             raise ValueError("Please either specify fd_path or set the env variable FD_PATH")
     config_args = list(config_args)
-    cmd_pieces = ["python", fd_path, "--search"] + config_args + [sas_path]
+    cmd_pieces = ["python", fd_path, "--search"] + [sas_path] + config_args
+    return cmd_pieces
+
+def plan(sas_path: str, fd_path: Optional[str] = None, config_args: Iterable = ("--alias", "seq-opt-lmcut")) -> subprocess.CompletedProcess[bytes]:
+    cmd_pieces = get_plan_cmd_pieces(sas_path, fd_path, config_args)
     cmd_output = subprocess.run(cmd_pieces, capture_output=True, shell=False)
     return cmd_output

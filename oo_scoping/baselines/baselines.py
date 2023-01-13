@@ -1,11 +1,11 @@
 import os, enum
 from subprocess import CompletedProcess
-from oo_scoping.fd_helpers import plan
+from oo_scoping.fd_helpers import plan, get_plan_cmd_pieces
 
 def print_completed_process(r: CompletedProcess[bytes]) -> None:
     print(f"Return code: {r.returncode}")
-    print(f"stderr:\n{r.stderr}")
-    print(f"stdout:\n{r.stdout}")
+    print(f"stderr:\n{r.stderr.decode()}")
+    print(f"stdout:\n{r.stdout.decode()}")
 
 class FDSearchConfigs(enum.Enum):
     # From https://www.fast-downward.org/Doc/Evaluator?highlight=%28dfp%29
@@ -19,3 +19,4 @@ if __name__ == "__main__":
 
     r = plan(example_sas_pth, config_args=FDSearchConfigs.SCC_DFP.value)
     print_completed_process(r)
+    # print(" ".join(get_plan_cmd_pieces(example_sas_pth, config_args=FDSearchConfigs.SCC_DFP.value)))

@@ -1,5 +1,6 @@
 import os, time, argparse, subprocess, json, shutil
 import pandas as pd
+from oo_scoping.writeback_pddl import get_scoped_problem_path, get_scoped_domain_path
 
 root_dir = os.path.dirname(os.path.dirname(__file__))
 
@@ -60,7 +61,9 @@ def run_experiment(n_runs, domain, problem, log_dir, force_clear=False):
         # Planning on scoped
         print("Planning (scoped)")
         plan_scoped_start_time = time.time()
-        plan_scoped_cmd_output = plan(domain, problem) 
+        problem_scoped_with_cl = get_scoped_problem_path(problem, suffix="with_cl")
+        domain_scoped = get_scoped_domain_path(domain, problem)
+        plan_scoped_cmd_output = plan(domain_scoped, problem_scoped_with_cl) 
         if plan_scoped_cmd_output.returncode != 0:
             raise ValueError(f"Planning on scoped problem failed with returncode {plan_scoped_cmd_output.returncode}\nstderr: {plan_scoped_cmd_output.stderr}\nstdout: {plan_scoped_cmd_output.stdout}")
         plan_scoped_end_time = time.time()

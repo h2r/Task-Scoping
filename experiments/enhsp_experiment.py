@@ -120,7 +120,7 @@ def scope(domain, problem):
     return cmd_output
 
 def plan(domain, problem):
-    cmd_pieces = ["/root/.planutils/bin/enhsp-2020", "--domain", domain, "-f", problem, "-planner", "opt-hlm"]
+    cmd_pieces = ["./enhsp-2020.sif", "--domain", domain, "-f", problem, "-planner", "opt-hlm"]
     cmd_output = subprocess.run(" ".join(cmd_pieces), capture_output=True, shell=True)
     return cmd_output
 

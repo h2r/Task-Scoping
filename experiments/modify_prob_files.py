@@ -2,7 +2,7 @@ from oo_scoping.PDDL import PDDL_Parser
 import argparse
 import itertools
 import os
-import shutil
+import glob
 
 def find_new_irrel_goal_clauses(domain, problem, **kwargs):
     """
@@ -42,10 +42,15 @@ def find_new_irrel_goal_clauses(domain, problem, **kwargs):
 def write_irrel_prob_files(domain, problem, **kwargs):
     domain_name = domain.split('/')[-2] 
     save_folder = f"randomly_generated_prob_files/{domain_name}"
-    if os.path.exists(save_folder):
-        shutil.rmtree(save_folder)
-    os.makedirs(save_folder)
+    if not os.path.exists(save_folder):
+        os.makedirs(save_folder)
+    current_problem_files = glob.glob(save_folder+ "/*")
     i = 0
+    # find an i to continue from
+    for i in range(10000):
+        output_filename = f"{save_folder}/irrel{str(i)}.pddl"
+        if output_filename not in current_problem_files:
+            break
     for goal_conds in find_new_irrel_goal_clauses(domain, problem):
         output_filename = f"{save_folder}/irrel{str(i)}.pddl"
         wf = open(output_filename, "w+")

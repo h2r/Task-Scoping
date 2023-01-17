@@ -40,8 +40,9 @@ def find_new_irrel_goal_clauses(domain, problem, **kwargs):
 
 
 def write_irrel_prob_files(domain, problem, **kwargs):
-    domain_name = domain.split('/')[-2] 
-    save_folder = f"randomly_generated_prob_files/{domain_name}"
+    domain_name = domain.split('/')[-2]
+    problem_name = problem.split('/')[-1]
+    save_folder = f"randomly_generated_prob_files/{domain_name}/{problem_name}"
     if not os.path.exists(save_folder):
         os.makedirs(save_folder)
     current_problem_files = glob.glob(save_folder+ "/*")
@@ -78,4 +79,3 @@ if __name__ == "__main__":
     parser.add_argument("--problem",type=str,help="Path location of the PDDL problem file corresponding to the specified domain")
     args = parser.parse_args()
     write_irrel_prob_files(args.domain, args.problem, **{'verbose': 1})
-    

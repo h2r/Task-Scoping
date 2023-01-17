@@ -819,7 +819,8 @@ def main():
         )
         goal_cond = scoping_sas_parser.make_goal_cond(sas_task.goal.pairs, str2var_dict)
         rel_pvars, cl_pvars, rel_skills = scope(
-            goals=goal_cond, skills=cae_triples, start_condition=init_cond_list
+            goals=goal_cond, skills=cae_triples, start_condition=init_cond_list,
+            # state_constraints= TODO,
         )
         sas_file_scoped = get_scoped_file_path(options.sas_file)
 

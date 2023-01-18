@@ -1,4 +1,4 @@
-(define (problem composite_prob_1) 
+(define (problem composite_prob_2)
 (:domain ipc_composite)
 (:objects
 	; Depot
@@ -306,10 +306,10 @@
 		; (on-depot crate2 pallet0)
 
 		; Satellite Goal
-		; (have_image planet4 infrared0)
-		; (have_image phenomenon5 image2)
-		; (have_image phenomenon6 infrared0)
-		; (have_image star7 infrared0)
+		(have_image planet4 infrared0)
+		(have_image phenomenon5 image2)
+		(have_image phenomenon6 infrared0)
+		(have_image star7 infrared0)
 
 		; DriverLog Goal
 		; (located-at-driverlog driver1 s1)
@@ -321,9 +321,9 @@
 		; (located-at-driverlog package3 s0)
 
 		; Rover goal
-		(communicated_soil_data waypoint2)
-		(communicated_rock_data waypoint3)
-		(communicated_image_data objective1 high_res)
+		; (communicated_soil_data waypoint2)
+		; (communicated_rock_data waypoint3)
+		; (communicated_image_data objective1 high_res)
 
 		;ZenoTravel goal
 		; (located-zeno person1 city2)

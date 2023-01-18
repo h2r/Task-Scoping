@@ -16,3 +16,5 @@ sas_plan
 ignore
 logs
 randomly_generated_prob_files
+# Singularity images, eg for enhsp
+*.sif 

@@ -8,7 +8,7 @@ summaries_dir = f"{os.path.dirname(__file__)}/ignore/"
 
 
 
-prob_name_pat = "(prob\d+):"
+prob_name_pat = "(prob\S+):"
 
 
 class ResultParser:
@@ -16,6 +16,7 @@ class ResultParser:
         self.s = s
         self.lines = [x.strip() for x in self.s.splitlines()]
         self.i = 0
+        self.x = set()
     
     def parse(self):
         # # Config
@@ -26,6 +27,10 @@ class ResultParser:
         finished = False
         dfs = []
         while not finished:
+            if self.i in self.x:
+                # raise ValueError(str(self.i))
+                print("oof")
+            self.x.add(self.i)
             if self.i >= len(self.lines):
                 finished = True
                 break
@@ -51,6 +56,9 @@ class ResultParser:
         # parse rows
         rows = []
         while in_problem_chunk:
+            if self.i in self.x:
+                raise ValueError(str(self.i))
+            self.x.add(self.i)
             if self.i >= len(self.lines):
                 in_problem_chunk = False
                 self.i += 1

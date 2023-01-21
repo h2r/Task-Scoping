@@ -54,12 +54,12 @@
 ;    (gbutton-on gb3)
 ;    (connected-buttons rb3 gb3)
 
-    (= (ball-x ball1) 5000)
-    (= (ball-y ball1) 5000)
+    (= (ball-x ball1) 5)
+    (= (ball-y ball1) 5)
 
-    (= (bell-x bell1) 10000)
-    (= (bell-y bell1) 10000)
- 
+    (= (bell-x bell1) 10)
+    (= (bell-y bell1) 10)
+
     (not (monkey-screaming jack))
     (monkey-watching-bell jack bell1)
 

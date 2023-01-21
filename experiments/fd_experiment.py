@@ -127,9 +127,10 @@ def run_experiment(n_runs, domain, problem, fd_path, log_dir, plan_type: str, fo
             plan_scoped_time = plan_scoped_end_time - plan_scoped_start_time
             timings_dict["plan_scoped_time"].append(plan_scoped_time)
             timings_dict["total_scoped_time"].append(translate_time + scoping_time + plan_scoped_time)
-            timings_dict["plan_scoped_generated_nodes"].append(int(re.search(r"(Generated) \d*", plan_scoped_cmd_output.stdout.decode()).group(0).split(' ')[1]))
-            timings_dict["plan_scoped_node_expansions"].append(int(re.search(r"(Expanded) \d*", plan_scoped_cmd_output.stdout.decode()).group(0).split(' ')[1]))
             timings_dict["plan_scoped_exit_code"].append(plan_scoped_cmd_output.returncode)
+            if plan_scoped_cmd_output.returncode != 0:
+                timings_dict["plan_scoped_generated_nodes"].append(int(re.search(r"(Generated) \d*", plan_scoped_cmd_output.stdout.decode()).group(0).split(' ')[1]))
+                timings_dict["plan_scoped_node_expansions"].append(int(re.search(r"(Expanded) \d*", plan_scoped_cmd_output.stdout.decode()).group(0).split(' ')[1]))
             with open(timings_path, "w") as f:
                 json.dump(timings_dict, f)
             save_cmd_output(plan_scoped_cmd_output, f"{log_dir_this_run}/plan_scoped")
@@ -143,9 +144,10 @@ def run_experiment(n_runs, domain, problem, fd_path, log_dir, plan_type: str, fo
             plan_unscoped_time = plan_unscoped_end_time - plan_unscoped_start_time
             timings_dict["plan_unscoped_time"].append(plan_unscoped_time)
             timings_dict["total_unscoped_time"].append(translate_time + plan_unscoped_time)
-            timings_dict["plan_unscoped_generated_nodes"].append(int(re.search(r"(Generated) \d*", plan_unscoped_cmd_output.stdout.decode()).group(0).split(' ')[1]))
-            timings_dict["plan_unscoped_node_expansions"].append(int(re.search(r"(Expanded) \d*", plan_unscoped_cmd_output.stdout.decode()).group(0).split(' ')[1]))
             timings_dict["plan_unscoped_exit_code"].append(plan_unscoped_cmd_output.returncode)
+            if plan_unscoped_cmd_output.returncode != 0:
+                timings_dict["plan_unscoped_generated_nodes"].append(int(re.search(r"(Generated) \d*", plan_unscoped_cmd_output.stdout.decode()).group(0).split(' ')[1]))
+                timings_dict["plan_unscoped_node_expansions"].append(int(re.search(r"(Expanded) \d*", plan_unscoped_cmd_output.stdout.decode()).group(0).split(' ')[1]))
             with open(timings_path, "w") as f:
                 json.dump(timings_dict, f)
             save_cmd_output(plan_unscoped_cmd_output, f"{log_dir_this_run}/plan_unscoped")

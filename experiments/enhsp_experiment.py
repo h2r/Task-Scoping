@@ -42,6 +42,9 @@ def run_experiment(n_runs, domain, problem, log_dir, force_clear=False, planner=
         "expanded_nodes_unscoped": [],
         "evaluated_states_scoped": [],
         "evaluated_states_unscoped": [],
+        "scope_exit_code": [],
+        "plan_scoped_exit_code": [],
+        "plan_unscoped_exit_code": [],
     }
 
     # This would be more precise if we recorded time for multiple iterations of each portion, then divided. TODO consider doing this.
@@ -59,13 +62,14 @@ def run_experiment(n_runs, domain, problem, log_dir, force_clear=False, planner=
             scope_start = time.time()
             scope_cmd_output = scope(domain, problem)
             scope_end = time.time()
-            if scope_cmd_output.returncode != 0:
-                raise ValueError(f"Scoping failed with returncode {scope_cmd_output.returncode}\nstderr: {scope_cmd_output.stderr}\nstdout: {scope_cmd_output.stdout}")
             scope_time = scope_end - scope_start
             timings_dict["scope"].append(scope_time)
+            timings_dict["scope_exit_code"].append(scope_cmd_output.returncode)
             with open(timings_path, "w") as f:
                 json.dump(timings_dict, f)
             save_cmd_output(scope_cmd_output, f"{log_dir_this_run}/scope")
+            if scope_cmd_output.returncode != 0:
+                raise ValueError(f"Scoping failed with returncode {scope_cmd_output.returncode}\nstderr: {scope_cmd_output.stderr}\nstdout: {scope_cmd_output.stdout}")
 
             # Planning on scoped
             print("Planning (scoped)")
@@ -73,15 +77,16 @@ def run_experiment(n_runs, domain, problem, log_dir, force_clear=False, planner=
             problem_scoped_with_cl = get_scoped_problem_path(problem)#, suffix="with_cl")
             domain_scoped = get_scoped_domain_path(domain, problem)
             plan_scoped_cmd_output = plan(domain_scoped, problem_scoped_with_cl, planner=planner)
-            if plan_scoped_cmd_output.returncode != 0:
-                raise ValueError(f"Planning on scoped problem failed with returncode {plan_scoped_cmd_output.returncode}\nstderr: {plan_scoped_cmd_output.stderr}\nstdout: {plan_scoped_cmd_output.stdout}")
             plan_scoped_end_time = time.time()
             plan_scoped_time = plan_scoped_end_time - plan_scoped_start_time
             timings_dict["plan_scoped"].append(plan_scoped_time)
             timings_dict["total_scoped_time"].append(scope_time + plan_scoped_time)
-            timings_dict["plan_length_scoped"].append(int(re.search(r"(Plan-Length:)(?! )\d*", plan_scoped_cmd_output.stdout.decode()).group().split(':')[-1]))
-            timings_dict["expanded_nodes_scoped"].append(int(re.search(r"(Expanded Nodes:)(?! )\d*", plan_scoped_cmd_output.stdout.decode()).group().split(':')[-1]))
-            timings_dict["evaluated_states_scoped"].append(int(re.search(r"(States Evaluated:)(?! )\d*", plan_scoped_cmd_output.stdout.decode()).group().split(':')[-1]))
+            exit_code, plan_length, expanded_nodes, evaluated_states = process_planning_exit_code(plan_scoped_cmd_output)
+            # exit_code = plan_scoped_cmd_output.returncode
+            timings_dict["plan_scoped_exit_code"].append(exit_code)
+            timings_dict["plan_length_scoped"].append(plan_length)
+            timings_dict["expanded_nodes_scoped"].append(expanded_nodes)
+            timings_dict["evaluated_states_scoped"].append(evaluated_states)
             with open(timings_path, "w") as f:
                 json.dump(timings_dict, f)
             save_cmd_output(plan_scoped_cmd_output, f"{log_dir_this_run}/plan_scoped")
@@ -91,12 +96,13 @@ def run_experiment(n_runs, domain, problem, log_dir, force_clear=False, planner=
             plan_unscoped_start_time = time.time()
             plan_unscoped_cmd_output = plan(domain, problem, planner=planner)
             plan_unscoped_end_time = time.time()
-            if plan_unscoped_cmd_output.returncode != 0:
-                raise ValueError(f"Planning on unscoped problem failed with returncode {plan_unscoped_cmd_output.returncode}\nstderr: {plan_unscoped_cmd_output.stderr}\nstdout: {plan_unscoped_cmd_output.stdout}")
             timings_dict["plan_unscoped"].append(plan_unscoped_end_time - plan_unscoped_start_time)
-            timings_dict["plan_length_unscoped"].append(int(re.search(r"(Plan-Length:)(?! )\d*", plan_unscoped_cmd_output.stdout.decode()).group().split(':')[-1]))
-            timings_dict["expanded_nodes_unscoped"].append(int(re.search(r"(Expanded Nodes:)(?! )\d*", plan_unscoped_cmd_output.stdout.decode()).group().split(':')[-1]))
-            timings_dict["evaluated_states_unscoped"].append(int(re.search(r"(States Evaluated:)(?! )\d*", plan_unscoped_cmd_output.stdout.decode()).group().split(':')[-1]))
+            exit_code, plan_length, expanded_nodes, evaluated_states = process_planning_exit_code(plan_unscoped_cmd_output)
+            # exit_code = plan_unscoped_cmd_output.returncode
+            timings_dict["plan_unscoped_exit_code"].append(exit_code)
+            timings_dict["plan_length_unscoped"].append(plan_length)
+            timings_dict["expanded_nodes_unscoped"].append(expanded_nodes)
+            timings_dict["evaluated_states_unscoped"].append(evaluated_states)
             with open(timings_path, "w") as f:
                 json.dump(timings_dict, f)
             save_cmd_output(plan_unscoped_cmd_output, f"{log_dir_this_run}/plan_unscoped")
@@ -112,7 +118,7 @@ def run_experiment(n_runs, domain, problem, log_dir, force_clear=False, planner=
     experiment_duration = end_time_exp - start_time_exp
     print(f"Finished experiment")
     print(f"Ran {n_runs} trials for a total duration of {experiment_duration}")
-    # print(timings_dict)
+    print(timings_dict)
     df_times = pd.DataFrame(data=timings_dict)
     s_times_avg = df_times.mean()
     s_times_avg.name = 'avg'
@@ -125,6 +131,26 @@ def run_experiment(n_runs, domain, problem, log_dir, force_clear=False, planner=
     print(df_time_summary)
     if n_runs > 1:
         df_time_summary.to_csv(f"{log_dir}/timing_summary.csv", index=True)
+
+def process_planning_exit_code(cmd_output):
+    stdout_str = cmd_output.stdout.decode()
+    stderr_str = cmd_output.stderr.decode()
+    exit_code = cmd_output.returncode
+    if exit_code == 0:
+        plan_length = int(re.search(r"(Plan-Length:)(?! )\d*", stdout_str).group().split(':')[-1])
+        expanded_nodes = int(re.search(r"(Expanded Nodes:)(?! )\d*", stdout_str).group().split(':')[-1])
+        evaluated_states = int(re.search(r"(States Evaluated:)(?! )\d*", stdout_str).group().split(':')[-1])
+    elif exit_code == 137: # out of memory
+        plan_length = np.nan
+        expanded_nodes = int(re.findall(r"(Expanded Nodes: )(\d*)", stdout_str)[-1][-1])
+        evaluated_states = int(re.findall(r"(Evaluated States: )(\d*)", stdout_str)[-1][-1])
+    else:
+        raise RuntimeError(
+            f"Planning on scoped problem failed with returncode {exit_code}\n"
+            f"stderr: {stderr_str}\n"
+            f"stdout: {stdout_str}"
+        )
+    return exit_code, plan_length, expanded_nodes, evaluated_states
 
 def save_cmd_output(cmd_output, save_dir):
     os.makedirs(save_dir, exist_ok=False)

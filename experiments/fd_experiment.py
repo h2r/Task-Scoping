@@ -63,7 +63,10 @@ def run_experiment(n_runs, domain, problem, fd_path, log_dir, plan_type: str, fo
         "plan_unscoped_node_expansions": [],
         "plan_scoped_generated_nodes": [],
         "plan_scoped_node_expansions": [],
-        "encoding_size": []
+        "encoding_size": [],
+        "scoping_exit_code": [],
+        "plan_scoped_exit_code": [],
+        "plan_unscoped_exit_code": [],
     }
 
     # This would be more precise if we recorded time for multiple iterations of each portion, then divided. TODO consider doing this.
@@ -105,29 +108,28 @@ def run_experiment(n_runs, domain, problem, fd_path, log_dir, plan_type: str, fo
             translate_and_scope_start = time.time()
             scope_cmd_output = translate_and_scope(domain, problem, sas_2_path)
             translate_and_scope_end = time.time()
-            if scope_cmd_output.returncode != 0:
-                raise ValueError(f"Scoping failed with returncode {scope_cmd_output.returncode}\nstderr: {scope_cmd_output.stderr}\nstdout: {scope_cmd_output.stdout}")
-
             translate_and_scope_time = translate_and_scope_end - translate_and_scope_start
             scoping_time = translate_and_scope_time - translate_time
             timings_dict["scoping"].append(scoping_time)
             timings_dict["translate_and_scope"].append(translate_and_scope_time)
+            timings_dict["scoping_exit_code"].append(scope_cmd_output.returncode)
             with open(timings_path, "w") as f:
                 json.dump(timings_dict, f)
             save_cmd_output(scope_cmd_output, f"{log_dir_this_run}/translate_and_scope")
+            if scope_cmd_output.returncode != 0:
+                raise ValueError(f"Scoping failed with returncode {scope_cmd_output.returncode}\nstderr: {scope_cmd_output.stderr}\nstdout: {scope_cmd_output.stdout}")
 
             # Planning on scoped
             print("Planning on scoped")
             plan_scoped_start_time = time.time()
             plan_scoped_cmd_output = plan(sas_scoped_path, fd_path, plan_type=plan_type)
             plan_scoped_end_time = time.time()
-            if plan_scoped_cmd_output.returncode != 0:
-                raise ValueError(f"Planning on scoped problem failed with returncode {plan_scoped_cmd_output.returncode}\nstderr: {plan_scoped_cmd_output.stderr}\nstdout: {plan_scoped_cmd_output.stdout}")
             plan_scoped_time = plan_scoped_end_time - plan_scoped_start_time
             timings_dict["plan_scoped_time"].append(plan_scoped_time)
             timings_dict["total_scoped_time"].append(translate_time + scoping_time + plan_scoped_time)
             timings_dict["plan_scoped_generated_nodes"].append(int(re.search(r"(Generated) \d*", plan_scoped_cmd_output.stdout.decode()).group(0).split(' ')[1]))
             timings_dict["plan_scoped_node_expansions"].append(int(re.search(r"(Expanded) \d*", plan_scoped_cmd_output.stdout.decode()).group(0).split(' ')[1]))
+            timings_dict["plan_scoped_exit_code"].append(plan_scoped_cmd_output.returncode)
             with open(timings_path, "w") as f:
                 json.dump(timings_dict, f)
             save_cmd_output(plan_scoped_cmd_output, f"{log_dir_this_run}/plan_scoped")
@@ -138,14 +140,12 @@ def run_experiment(n_runs, domain, problem, fd_path, log_dir, plan_type: str, fo
             plan_unscoped_cmd_output = plan(sas_path, fd_path, plan_type=plan_type)
             # plan_unscoped_cmd_output = plan(sas_2_path, fd_path, plan_type=plan_type)
             plan_unscoped_end_time = time.time()
-            if plan_unscoped_cmd_output.returncode != 0:
-                raise ValueError(f"Planning on unscoped problem failed with returncode {plan_unscoped_cmd_output.returncode}\nstderr: {plan_unscoped_cmd_output.stderr}\nstdout: {plan_unscoped_cmd_output.stdout}")
-
             plan_unscoped_time = plan_unscoped_end_time - plan_unscoped_start_time
             timings_dict["plan_unscoped_time"].append(plan_unscoped_time)
             timings_dict["total_unscoped_time"].append(translate_time + plan_unscoped_time)
             timings_dict["plan_unscoped_generated_nodes"].append(int(re.search(r"(Generated) \d*", plan_unscoped_cmd_output.stdout.decode()).group(0).split(' ')[1]))
             timings_dict["plan_unscoped_node_expansions"].append(int(re.search(r"(Expanded) \d*", plan_unscoped_cmd_output.stdout.decode()).group(0).split(' ')[1]))
+            timings_dict["plan_unscoped_exit_code"].append(plan_unscoped_cmd_output.returncode)
             with open(timings_path, "w") as f:
                 json.dump(timings_dict, f)
             save_cmd_output(plan_unscoped_cmd_output, f"{log_dir_this_run}/plan_unscoped")

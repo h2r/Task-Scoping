@@ -8,17 +8,18 @@ from oo_scoping.domains.malmo_writer import make_malmo_domain
 
 item_types = ["diamond-pickaxe"]
 
+
 def get_object_declarations(objects):
     prefix = "(:objects\n\t"
     suffix = "\n)"
     lines = []
     for type_name, object_names in objects.items():
-        lines.append( " ".join(object_names) + " - " + type_name)
+        lines.append(" ".join(object_names) + " - " + type_name)
     return prefix + "\n\t".join(lines) + suffix
 
 
 def get_init_location_conds(pos, object_name):
-    x,y,z = pos
+    x, y, z = pos
     init_conds = []
     init_conds.append(f"(= (x {object_name}) {x})")
     init_conds.append(f"(= (y {object_name}) {y})")
@@ -28,23 +29,24 @@ def get_init_location_conds(pos, object_name):
 
 def get_boundary_positions(x_min, x_max, y_min, y_max, z_min, z_max):
     positions = []
-    for x,y in product(range(x_min - 1, x_max + 2), range(y_min - 1, y_max + 2)):
+    for x, y in product(range(x_min - 1, x_max + 2), range(y_min - 1, y_max + 2)):
         # Ceiling
-        positions.append((x,y,z_max + 1))
+        positions.append((x, y, z_max + 1))
         # Floor
-        positions.append((x,y,z_min - 1))
+        positions.append((x, y, z_min - 1))
 
     for x, z in product(range(x_min - 1, x_max + 2), range(z_min - 1, z_max + 2)):
         # Front wall
-        positions.append((x,y_min - 1,z))
+        positions.append((x, y_min - 1, z))
         # Back wall
         positions.append((x, y_max + 1, z))
-    for z,y in product(range(z_min - 1, z_max + 2), range(y_min - 1, y_max + 2)):
+    for z, y in product(range(z_min - 1, z_max + 2), range(y_min - 1, y_max + 2)):
         # Left wall
         positions.append((x_min - 1, y, z))
         # Right wall
         positions.append((x_max + 1, y, z))
     return positions
+
 
 def make_init_conds_str(init_conds):
     s_prefix = "(:init"
@@ -58,9 +60,11 @@ def get_inventory_funcs(item_types):
         if t != "netherportal":
             inventory_count_vars.append(f"(agent-num-{t} ?ag - agent)")
     return inventory_count_vars
-    
+
+
 def get_pickup_actions(item_types):
     pass
+
 
 def invert_dict(d):
     d_new = OrderedDict()
@@ -70,24 +74,28 @@ def invert_dict(d):
         d_new[v].append(k)
     return d_new
 
+
 def get_functions_str(functions):
     prefix = "(:functions"
     suffix = ")"
     lines = ["\t" + f for f in functions]
     body = "\n".join(lines)
-    return prefix + '\n' + body + "\n" + suffix
+    return prefix + "\n" + body + "\n" + suffix
+
 
 def get_predicates_str(predicates):
     prefix = "(:predicates"
     suffix = ")"
     lines = ["\t " + f for f in predicates]
     body = "\n".join(lines)
-    return prefix + '\n' + body + "\n" + suffix
+    return prefix + "\n" + body + "\n" + suffix
+
 
 def get_move_actions():
     # TODO block can't be at same z or higher z
     s = "(:action move-north\n :parameters (?ag - agent)\n :precondition (and (agent-alive ?ag)\n                    (not (exists (?bl - block) (and (= (x ?bl) (x ?ag))\n                                                    (= (y ?bl) (+ (y ?ag) 1))\n                                                    (= (z ?bl) (z ?ag))))))\n :effect (and (increase (y ?ag) 1))\n)\n\n(:action move-south\n :parameters (?ag - agent)\n :precondition (and (agent-alive ?ag)\n                    (not (exists (?bl - block) (and (= (x ?bl) (x ?ag))\n                                                    (= (y ?bl) (- (y ?ag) 1))\n                                                    (= (z ?bl) (z ?ag))))))\n :effect (and (decrease (y ?ag) 1))\n)\n\n(:action move-east\n :parameters (?ag - agent)\n :precondition (and (agent-alive ?ag)\n                    (not (exists (?bl - block) (and (= (x ?bl) (+ (x ?ag) 1))\n                                                    (= (y ?bl) (y ?ag))\n                                                    (= (z ?bl) (z ?ag) )))))\n :effect (and (increase (x ?ag) 1))\n)\n\n(:action move-west\n :parameters (?ag - agent)\n :precondition (and (agent-alive ?ag)\n                    (not (exists (?bl - block) (and (= (x ?bl) (- (x ?ag) 1))\n                                                    (= (y ?bl) (y ?ag))\n                                                    (= (z ?bl) (z ?ag))))))\n :effect (and (decrease (x ?ag) 1))\n)"
     return s
+
 
 def make_pickup_actions(item_types):
     action_template = """(:action pickup-{t}
@@ -102,12 +110,13 @@ def make_pickup_actions(item_types):
 """
     actions = []
     for t in item_types:
-        if(t != "netherportal"):
+        if t != "netherportal":
             actions.append(action_template.format(t=t))
     return actions
 
+
 def make_drop_actions(item_types, item_or_block=True):
-    if(item_or_block):
+    if item_or_block:
         action_template = """(:action drop-{t}
  :parameters (?ag - agent ?i - {t})
  :precondition (and (>= (agent-num-{t} ?ag) 1)
@@ -141,12 +150,14 @@ def make_drop_actions(item_types, item_or_block=True):
 
     actions = []
     for t in item_types:
-        if(t != "netherportal" and t != "diamond-pickaxe"):
+        if t != "netherportal" and t != "diamond-pickaxe":
             actions.append(action_template.format(t=t))
     return actions
 
+
 def make_block_stack_actions(block_type):
     pass
+
 
 def make_netherportal_action():
     # No restriction on obdisian being in portal shape?
@@ -168,13 +179,16 @@ def make_netherportal_action():
 """
     return action
 
-def get_destructible_block_action(block_type, needed_tool = None):
+
+def get_destructible_block_action(block_type, needed_tool=None):
     # TODO either set x,y,z to far away, or check for block existence in movement actions
     # TODO both hit and destroy are possible when block-hits = 3. Bug?
     if needed_tool is None:
         tool_precond = ""
     else:
-        tool_precond = f"\n                        ( >= ( agent-num-{needed_tool} ?ag ) 1 )"
+        tool_precond = (
+            f"\n                        ( >= ( agent-num-{needed_tool} ?ag ) 1 )"
+        )
     hit_s = f"""(:action hit-{block_type}
     :parameters (?ag - agent ?b - {block_type})
     :precondition (and (= (x ?b) (x ?ag))
@@ -196,6 +210,7 @@ def get_destructible_block_action(block_type, needed_tool = None):
             )
     )"""
     return [hit_s, destroy_s]
+
 
 def make_domain():
     sections = []
@@ -220,7 +235,7 @@ def make_domain():
     inverse_type_hierarchy = invert_dict(type_hierarchy)
     types_s = make_types_declaration(type_hierarchy)
     sections.append(types_s)
-    
+
     predicates = []
     predicates.append("(present ?i - item)")
     predicates.append("(block-present ?b - block)")
@@ -229,7 +244,7 @@ def make_domain():
     functions.append("(block-hits ?b - destructible-block)")
     functions.extend(get_inventory_funcs(inverse_type_hierarchy["item"]))
     functions.extend(get_inventory_funcs(inverse_type_hierarchy["destructible-block"]))
-    for d in ["x","y","z"]:
+    for d in ["x", "y", "z"]:
         functions.append(f"({d} ?l - locatable)")
 
     predicates_s = get_predicates_str(predicates)
@@ -241,11 +256,15 @@ def make_domain():
     actions.append(get_move_actions())
     # actions.extend(make_pickup_actions(inverse_type_hierarchy["item"]))
     # actions.extend(make_drop_actions(inverse_type_hierarchy["item"]))
-    actions.extend(make_drop_actions(inverse_type_hierarchy["destructible-block"], False))
+    actions.extend(
+        make_drop_actions(inverse_type_hierarchy["destructible-block"], False)
+    )
 
     for block_type in inverse_type_hierarchy["destructible-block"]:
         if block_type == "obsidian-block":
-            actions.extend(get_destructible_block_action(block_type, needed_tool = "diamond-pickaxe"))
+            actions.extend(
+                get_destructible_block_action(block_type, needed_tool="diamond-pickaxe")
+            )
         else:
             actions.extend(get_destructible_block_action(block_type))
 
@@ -255,7 +274,8 @@ def make_domain():
     print(domain_s)
     return domain_s
 
-def get_crafting_action(name, inputs, outputs, extra_preconditions = tuple()):
+
+def get_crafting_action(name, inputs, outputs, extra_preconditions=tuple()):
     """
     input: Dict[item_type] -> item_count
     output: Dict[item_type] -> item_count
@@ -287,14 +307,31 @@ def get_crafting_action(name, inputs, outputs, extra_preconditions = tuple()):
 
     return "\n".join([prefix, precond_s, effects_s, suffix])
 
-def make_instance_1(start_with_pick = True, use_bedrock_boundaries = False, add_irrel_items = False, goal_var = ""):
+
+def make_instance_1(
+    start_with_pick=True,
+    use_bedrock_boundaries=False,
+    add_irrel_items=False,
+    goal_var="",
+):
     object_names = OrderedDict()
     object_names["agent"] = ["steve"]
     object_names["diamond-pickaxe"] = ["old-pointy"]
-    object_names["oak_wood-block"] = ["oak1", "oak2", "oak3", "oak4", "oak5", "oak6", "oak7",
-                                      "oak8", "oak9", "oak10", "oak11"]
+    object_names["oak_wood-block"] = [
+        "oak1",
+        "oak2",
+        "oak3",
+        "oak4",
+        "oak5",
+        "oak6",
+        "oak7",
+        "oak8",
+        "oak9",
+        "oak10",
+        "oak11",
+    ]
     object_names["oak_wood_stairs-block"] = ["oak_stairs1"]
-    
+
     agent_name = "steve"
     house_origin_x = 2
     house_origin_y = 2
@@ -302,12 +339,12 @@ def make_instance_1(start_with_pick = True, use_bedrock_boundaries = False, add_
     header = """(define (problem MINECRAFTHUT)
     (:domain minecraft-house)"""
 
-    # TODO: Figure out what the placement of the blocks should be for the goal (see if we can use an 
+    # TODO: Figure out what the placement of the blocks should be for the goal (see if we can use an
     # existnetial!)
     # Make the block on predicates and block placing actions correctly for this domain
     # Also write out the initial state!
     # finish up things and see if we can't build this house!
-    if (goal_var == "build_oak_stupa"):
+    if goal_var == "build_oak_stupa":
         goal = f"""(:goal (and
                 (block-present oak_stairs1 )
                 (= (x oak_stairs1) {house_origin_x})
@@ -429,11 +466,11 @@ def make_instance_1(start_with_pick = True, use_bedrock_boundaries = False, add_
     x_min, x_max = 0, 11
     y_min, y_max = 0, 8
     z_min, z_max = 0, 4
-    
+
     # Writing initial conditions!
     init_conds = [f"(agent-alive {agent_name})"]
-    agent_start_pos = (0,0,0)
-    init_conds.extend(get_init_location_conds(agent_start_pos,agent_name))
+    agent_start_pos = (0, 0, 0)
+    init_conds.extend(get_init_location_conds(agent_start_pos, agent_name))
     inventory_count = OrderedDict()
     for item_type in item_types:
         inventory_count[item_type] = 0
@@ -441,21 +478,41 @@ def make_instance_1(start_with_pick = True, use_bedrock_boundaries = False, add_
         inventory_count["diamond-pickaxe"] = 1
     for item_type, item_count in inventory_count.items():
         if item_type != "netherportal":
-            init_conds.append(f"( = ( agent-num-{item_type} {agent_name} ) {item_count} )")
+            init_conds.append(
+                f"( = ( agent-num-{item_type} {agent_name} ) {item_count} )"
+            )
     # init_conds.append(f"( = ( agent-num-diamond-pickaxe {agent_name} ) 1 )")
     block_locations = OrderedDict()
-    block_locations["oak_wood-block"] = [(1,1,1), (1,1,1), (1,1,1), (1,1,1), (1,1,1), (1,1,1), (1,1,1), (1,1,1),
-                                         (1,1,1), (1,1,1), (1,1,1)
-                                         ]
-    block_locations["oak_wood_stairs-block"] = [(1,1,1)]
+    block_locations["oak_wood-block"] = [
+        (1, 1, 1),
+        (1, 1, 1),
+        (1, 1, 1),
+        (1, 1, 1),
+        (1, 1, 1),
+        (1, 1, 1),
+        (1, 1, 1),
+        (1, 1, 1),
+        (1, 1, 1),
+        (1, 1, 1),
+        (1, 1, 1),
+    ]
+    block_locations["oak_wood_stairs-block"] = [(1, 1, 1)]
 
     for wood_block_loc in range(len(block_locations["oak_wood-block"])):
         block_name = object_names["oak_wood-block"][wood_block_loc]
-        init_conds.extend(get_init_location_conds(block_locations["oak_wood-block"][wood_block_loc], block_name))
+        init_conds.extend(
+            get_init_location_conds(
+                block_locations["oak_wood-block"][wood_block_loc], block_name
+            )
+        )
         init_conds.append(f"( not ( block-present {block_name} ) )")
     for wood_block_loc in range(len(block_locations["oak_wood_stairs-block"])):
         block_name = object_names["oak_wood_stairs-block"][wood_block_loc]
-        init_conds.extend(get_init_location_conds(block_locations["oak_wood_stairs-block"][wood_block_loc], block_name))
+        init_conds.extend(
+            get_init_location_conds(
+                block_locations["oak_wood_stairs-block"][wood_block_loc], block_name
+            )
+        )
         init_conds.append(f"( not ( block-present {block_name} ) )")
 
     for s in object_names["oak_wood-block"]:
@@ -466,12 +523,13 @@ def make_instance_1(start_with_pick = True, use_bedrock_boundaries = False, add_
     init_conds.append("(= (agent-num-oak_wood-block steve) 48)")
     init_conds.append("(= (agent-num-oak_wood_stairs-block steve) 1)")
     diamond_pick_name = object_names["diamond-pickaxe"][0]
-    init_conds.extend(get_init_location_conds((0,0,0), diamond_pick_name))
+    init_conds.extend(get_init_location_conds((0, 0, 0), diamond_pick_name))
     init_conds.append(f"( not ( present {diamond_pick_name} ) )")
 
-
     if use_bedrock_boundaries:
-        boundary_positions = get_boundary_positions(x_min, x_max, y_min, y_max, z_min, z_max)
+        boundary_positions = get_boundary_positions(
+            x_min, x_max, y_min, y_max, z_min, z_max
+        )
         object_names["bedrock"] = [f"bed{i}" for i in range(len(boundary_positions))]
         # We don't add these to block_locations because we build the malmo boundaries using a different function
         for i in range(len(boundary_positions)):
@@ -491,10 +549,10 @@ def make_instance_1(start_with_pick = True, use_bedrock_boundaries = False, add_
     # print(set_initial_conditions(item_counts))
     item_counts = []
     for item_type in item_types:
-        item_counts.append(len(object_names.get(item_type,[])))
+        item_counts.append(len(object_names.get(item_type, [])))
     item_counts_dict = OrderedDict()
     for item_type in item_types:
-        item_counts_dict[item_type] = len(object_names.get(item_type,[]))
+        item_counts_dict[item_type] = len(object_names.get(item_type, []))
 
     prob_parts = [header, object_declaration, init_conds, goal, ")"]
     prob_s = "\n\n\n".join(prob_parts)
@@ -504,7 +562,8 @@ def make_instance_1(start_with_pick = True, use_bedrock_boundaries = False, add_
     # malmo_s = make_malmo_domain(block_locations, item_locations, agent_start_pos
     #     ,inventory_count,x_min,x_max,y_min, y_max, z_min, z_max)
 
-    return prob_s, None #malmo_s
+    return prob_s, None  # malmo_s
+
 
 def make_types_declaration(type_hierarchy):
     inverse_type_hierarchy = invert_dict(type_hierarchy)
@@ -521,13 +580,16 @@ def make_types_declaration(type_hierarchy):
     types_suffix = ")"
     types_s = types_prefix + "\n\t" + "\n\t".join(lines) + "\n" + types_suffix
     return types_s
-        
+
+
 if __name__ == "__main__":
     dom_s = make_domain()
-    with open("domains/minecraft_housebuilding/minecraft-wood_stupa.pddl","w") as f:
+    with open("domains/minecraft_housebuilding/minecraft-wood_stupa.pddl", "w") as f:
         f.write(dom_s)
-    prob_s, malmo_s = make_instance_1(start_with_pick=False, add_irrel_items=False, goal_var="build_oak_stupa_simple")
-    with open("domains/minecraft_housebuilding/prob_stupa_with_pick.pddl","w") as f:
+    prob_s, malmo_s = make_instance_1(
+        start_with_pick=False, add_irrel_items=False, goal_var="build_oak_stupa_simple"
+    )
+    with open("domains/minecraft_housebuilding/prob_stupa_with_pick.pddl", "w") as f:
         f.write(prob_s)
     # with open("domains/malmo/problems/prob_nether_with_pick.xml","w") as f:
     #     f.write(malmo_s)

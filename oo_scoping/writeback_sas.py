@@ -3,16 +3,18 @@
 # this numbering will change (i.e, deleting var0 from the problem would make var1 now var0, which will confuse everything else...)
 # Thus, we also cannot prune the initial state
 
+
 def prune_goal_conds(i_line, sas_domain_lines, rel_pvars):
     goal_cond_list = []
     while "end_goal" not in sas_domain_lines[i_line]:
-        goal_vars_and_vals = sas_domain_lines[i_line].split(' ')
-        if 'var'+goal_vars_and_vals[0] in rel_pvars:
+        goal_vars_and_vals = sas_domain_lines[i_line].split(" ")
+        if "var" + goal_vars_and_vals[0] in rel_pvars:
             goal_cond_list.append(sas_domain_lines[i_line])
         i_line += 1
     return goal_cond_list, i_line
 
-def writeback_scoped_sas(rel_ops, rel_pvars, problem_file_path, scoped_path = None):
+
+def writeback_scoped_sas(rel_ops, rel_pvars, problem_file_path, scoped_path=None):
     """
     Function that writes out a scoped SAS+ problem file
 
@@ -31,7 +33,7 @@ def writeback_scoped_sas(rel_ops, rel_pvars, problem_file_path, scoped_path = No
 
     with open(problem_file_path, "r") as f:
         sas_domain_lines = f.readlines()
-        
+
         i_line = 0
         while i_line < len(sas_domain_lines):
             if "begin_operator" in sas_domain_lines[i_line]:
@@ -39,7 +41,7 @@ def writeback_scoped_sas(rel_ops, rel_pvars, problem_file_path, scoped_path = No
                 # We do this here because the operator count is the line before the first operator.
                 if not first_operator_encountered:
                     scoped_domain_lines.pop(-1)
-                    scoped_domain_lines.append(str(len(rel_ops))+'\n')
+                    scoped_domain_lines.append(str(len(rel_ops)) + "\n")
                     first_operator_encountered = True
                 # If the next line after a begin_operator statement is
                 # not in the rel_ops set, then just keep skipping lines until
@@ -57,8 +59,7 @@ def writeback_scoped_sas(rel_ops, rel_pvars, problem_file_path, scoped_path = No
                 skip_lines = False
                 i_line += 1
 
-
-            # # The line below 'end_metric' is the number of state variables in the 
+            # # The line below 'end_metric' is the number of state variables in the
             # # problem, so write this out there.
             # elif "end_metric" in sas_domain_lines[i_line]:
             #     scoped_domain_lines.append(sas_domain_lines[i_line])
@@ -95,15 +96,16 @@ def writeback_scoped_sas(rel_ops, rel_pvars, problem_file_path, scoped_path = No
             #     scoped_domain_lines.append(sas_domain_lines[i_line])
             #     i_line += 1
 
-
             elif "begin_goal" in sas_domain_lines[i_line]:
                 # Append the begin_goal statement
                 scoped_domain_lines.append(sas_domain_lines[i_line])
                 i_line += 1
                 # Get a list of all the relevant goal conditions
-                rel_goal_conds, i_line = prune_goal_conds(i_line, sas_domain_lines, rel_pvars)
+                rel_goal_conds, i_line = prune_goal_conds(
+                    i_line, sas_domain_lines, rel_pvars
+                )
                 # Add the new number of goal conditions to scoped_domain_lines
-                scoped_domain_lines.append(str(len(rel_goal_conds))+'\n')
+                scoped_domain_lines.append(str(len(rel_goal_conds)) + "\n")
                 # Add all the goal conds
                 scoped_domain_lines.extend(rel_goal_conds)
                 # Add the end_goal statement to scoped_domain_lines
@@ -118,6 +120,6 @@ def writeback_scoped_sas(rel_ops, rel_pvars, problem_file_path, scoped_path = No
     # The filepath will always be <file_name>.sas at the end, so create a file
     # named <file_name>_scoped.sas
     if scoped_path is None:
-        scoped_path = problem_file_path[:-4]+'_scoped'+problem_file_path[-4:]
-    with open(scoped_path,'w+') as f_scoped:
+        scoped_path = problem_file_path[:-4] + "_scoped" + problem_file_path[-4:]
+    with open(scoped_path, "w+") as f_scoped:
         f_scoped.writelines(scoped_domain_lines)

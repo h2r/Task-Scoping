@@ -1,7 +1,9 @@
 #! /usr/bin/env python3
 
 
+from argparse import Namespace
 import os
+import pickle
 import sys
 import traceback
 from typing import Iterable
@@ -759,22 +761,43 @@ def dump_statistics(sas_task):
 
 def main():
     timer = timers.Timer()
-    with timers.timing("Parsing", True):
-        task = pddl_parser.open(
-            domain_filename=options.domain, task_filename=options.task
+    if not options.load:
+        with timers.timing("Parsing", True):
+            task = pddl_parser.open(
+                domain_filename=options.domain, task_filename=options.task
+            )
+
+        with timers.timing("Normalizing task"):
+            normalize.normalize(task)
+
+        if options.generate_relaxed_task:
+            # Remove delete effects.
+            for action in task.actions:
+                for index, effect in reversed(list(enumerate(action.effects))):
+                    if effect.literal.negated:
+                        del action.effects[index]
+
+        sas_task = pddl_to_sas(task)
+
+        remaining_options = Namespace(
+            scope = options.scope,
+            sas_file = options.sas_file,
+            sas_file_correct = options.sas_file_correct,
+            write_erfs = options.write_erfs,
         )
 
-    with timers.timing("Normalizing task"):
-        normalize.normalize(task)
-
-    if options.generate_relaxed_task:
-        # Remove delete effects.
-        for action in task.actions:
-            for index, effect in reversed(list(enumerate(action.effects))):
-                if effect.literal.negated:
-                    del action.effects[index]
-
-    sas_task = pddl_to_sas(task)
+        with open('sas_task.pkl', 'wb') as file:
+            pickle.dump(sas_task, file)
+        with open('options.pkl', 'wb') as file:
+            pickle.dump(remaining_options, file)
+        print(f'Saved sas_task and options to pickle files.')
+    else:
+        with open('sas_task.pkl', 'rb') as file:
+            sas_task = pickle.load(file)
+        with open('options.pkl', 'rb') as file:
+            remaining_options = pickle.load(file)
+            options.copy_args_to_module(remaining_options)
+        print(f'Loaded sas_task and options from pickle files.')
 
     dump_statistics(sas_task)
 
@@ -796,7 +819,8 @@ def main():
         )
         goal_cond = scoping_sas_parser.make_goal_cond(sas_task.goal.pairs, str2var_dict)
         rel_pvars, cl_pvars, rel_skills = scope(
-            goals=goal_cond, skills=cae_triples, start_condition=init_cond_list
+            goals=goal_cond, skills=cae_triples, start_condition=init_cond_list,
+            # state_constraints= TODO,
         )
         sas_file_scoped = get_scoped_file_path(options.sas_file)
 

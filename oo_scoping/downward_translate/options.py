@@ -49,7 +49,14 @@ def parse_args():
     argparser.add_argument(
         "--scope",
         default=False,
+        action='store_true',
         help="Whether or not to run scoping (default: %(default)s)",
+    )
+    argparser.add_argument(
+        "--load",
+        default=False,
+        action='store_true',
+        help="Whether or not to load pickled sas_task (default: %(default)s)",
     )
     argparser.add_argument(
         "--invariant-generation-max-time",

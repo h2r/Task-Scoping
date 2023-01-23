@@ -1,0 +1,25 @@
+\begin{table*}[t]
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrrrrrrrrrrr}
+\toprule
+\textbf{Problem} & \multicolumn{2}{c}{\textbf{Operators}} & \multicolumn{2}{c}{\textbf{Expansions}} & \multicolumn{2}{c}{\textbf{Evaluations}} & \textbf{Translate} & \textbf{Scoping} & \multicolumn{2}{c}{\textbf{Planning Time (s)}} & \multicolumn{2}{c}{\textbf{Total Time (s)}}\\
+  & Unscoped & Scoped & Unscoped & Scoped & Unscoped & Scoped &  &  & Unscoped & Scoped & Unscoped & Scoped\\
+\midrule
+Driverlog 15 & $2,592$ & $\mathbf{2,112}$ & $527,636$ & $\mathbf{460,244}$ & $8,796,110$ & $\mathbf{7,289,831}$ & $0.5 \pm 0.0$ & $3.6 \pm 0.2$ & $12.4 \pm 0.5$ & $\mathbf{9.4 \pm 0.4}$ & $\mathbf{12.9 \pm 0.5}$ & $13.5 \pm 0.5$\\
+Driverlog 16 & $4,890$ & $\mathbf{3,540}$ & $38,681$ & $\mathbf{29,618}$ & $925,264$ & $\mathbf{577,118}$ & $0.7 \pm 0.0$ & $8.4 \pm 0.4$ & $7.6 \pm 0.2$ & $\mathbf{4.5 \pm 0.2}$ & $\mathbf{8.3 \pm 0.3}$ & $13.6 \pm 0.6$\\
+Driverlog 17 & $6,170$ & $\mathbf{3,770}$ & $7,768,684$ & $\mathbf{4,607,258}$ & $198,623,900$ & $\mathbf{88,705,990}$ & $0.8 \pm 0.0$ & $9.5 \pm 0.3$ & $154.0 \pm 4.8$ & $\mathbf{50.2 \pm 1.5}$ & $154.9 \pm 4.9$ & $\mathbf{60.6 \pm 1.8}$\\
+Logistics 15 & $650$ & $\mathbf{250}$ & $5,951,997$ & $\mathbf{672,736}$ & $140,607,200$ & $\mathbf{11,646,320}$ & $0.3 \pm 0.0$ & $0.7 \pm 0.0$ & $73.7 \pm 2.9$ & $\mathbf{11.1 \pm 0.8}$ & $74.0 \pm 2.9$ & $\mathbf{12.1 \pm 0.8}$\\
+Logistics 20 & $650$ & $\mathbf{250}$ & $289,584$ & $\mathbf{86,663}$ & $6,941,424$ & $\mathbf{1,524,997}$ & $0.3 \pm 0.0$ & $0.7 \pm 0.0$ & $\mathbf{7.8 \pm 0.4}$ & $8.6 \pm 0.5$ & $\mathbf{8.1 \pm 0.4}$ & $9.5 \pm 0.6$\\
+Logistics 25 & $650$ & $\mathbf{290}$ & $11,437,240$ & $\mathbf{1,944,960}$ & $265,871,100$ & $\mathbf{35,198,000}$ & $0.3 \pm 0.0$ & $0.8 \pm 0.0$ & $148.0 \pm 5.2$ & $\mathbf{21.5 \pm 1.1}$ & $148.3 \pm 5.3$ & $\mathbf{22.5 \pm 1.1}$\\
+Satellite 05 & $609$ & $\mathbf{339}$ & $114$ & $114$ & $7,001$ & $\mathbf{3,950}$ & $0.3 \pm 0.1$ & $0.6 \pm 0.1$ & $\mathbf{3.9 \pm 0.2}$ & $4.5 \pm 0.2$ & $\mathbf{4.2 \pm 0.2}$ & $5.5 \pm 0.3$\\
+Satellite 06 & $582$ & $\mathbf{362}$ & $21$ & $21$ & $1,084$ & $\mathbf{684}$ & $0.3 \pm 0.1$ & $0.5 \pm 0.1$ & $\mathbf{1.0 \pm 0.1}$ & $1.4 \pm 0.1$ & $\mathbf{1.4 \pm 0.1}$ & $2.2 \pm 0.1$\\
+Satellite 07 & $983$ & $\mathbf{587}$ & $> 21,423,400$ & $\mathbf{13,438,440}$ & $> 362,395,000$ & $\mathbf{679,734,000}$ & $0.4 \pm 0.1$ & $0.9 \pm 0.1$ & $> 813.3 \pm 4.2$ & $\mathbf{203.2 \pm 5.6}$ & $> 838.1 \pm 18.3$ & $\mathbf{204.5 \pm 5.7}$\\
+Zenotravel 10 & $1,155$ & $\mathbf{1,095}$ & $1,466,718$ & $\mathbf{1,031,280}$ & $37,782,140$ & $\mathbf{25,677,010}$ & $0.3 \pm 0.0$ & $2.4 \pm 0.0$ & $22.1 \pm 0.4$ & $\mathbf{16.6 \pm 0.3}$ & $22.5 \pm 0.4$ & $\mathbf{19.3 \pm 0.4}$\\
+Zenotravel 12 & $3,375$ & $\mathbf{3,159}$ & $5,306,442$ & $\mathbf{3,348,866}$ & $231,592,500$ & $\mathbf{140,117,800}$ & $0.6 \pm 0.0$ & $7.3 \pm 0.1$ & $125.4 \pm 4.9$ & $\mathbf{72.3 \pm 3.6}$ & $125.9 \pm 5.0$ & $\mathbf{80.2 \pm 3.7}$\\
+Zenotravel 14 & $6,700$ & $\mathbf{6,200}$ & $> 6,462,279$ & $> 5,392,118$ & $> 168,064,648$ & $> 130,752,144$ & $1.0 \pm 0.0$ & $14.3 \pm 0.3$ & $> 644.6 \pm 11.5$ & $> 661.4 \pm 17.0$ & $> 644.6 \pm 11.5$ & $> 676.2 \pm 17.1$\\
+\bottomrule
+\end{tabular}
+}
+\caption{Results for our Fast Downward experiments using the Merge and Shrink heuristic.}
+\label{table:fd_experiments_ms}
+\end{table*}

@@ -65,6 +65,12 @@ def scope_pddl(domain: str, problem: str, **kwargs: dict) -> None:
 
     scoped_domain_path = get_scoped_domain_path(domain, problem)
     writeback_domain(domain, scoped_domain_path, irrel_actions)
+    print('All actions:', len(all_actions))
+    print('Relevant actions:', len(relevant_actions))
+    print('All objects:', len(all_objects))
+    print('Relevant (+CL) objects:', len(all_objects) - len(objects2remove_keep_cl))
+    print('All grounded actions:', len(skill_list))
+    print('Relevant grounded actions:', len(rel_skills))
 
 
 if __name__ == "__main__":

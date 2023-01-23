@@ -191,102 +191,102 @@
 ;--------------------------------------------------------------------------------
 ; Depot
 
-(:action drive
-:parameters (?x - truck-depot ?y - place ?z - place)
-:precondition (and (located-at-depot ?x ?y))
-:effect (and (not (located-at-depot ?x ?y)) (located-at-depot ?x ?z)
-		(increase (fuel-cost) 10)))
+;(:action drive
+;:parameters (?x - truck-depot ?y - place ?z - place)
+;:precondition (and (located-at-depot ?x ?y))
+;:effect (and (not (located-at-depot ?x ?y)) (located-at-depot ?x ?z)
+;		(increase (fuel-cost) 10)))
 
-(:action lift
-:parameters (?x - hoist ?y - crate ?z - surface ?p - place)
-:precondition (and (located-at-depot ?x ?p) (available-depot ?x) (located-at-depot ?y ?p) (on-depot ?y ?z) (clear ?y))
-:effect (and (not (located-at-depot ?y ?p)) (lifting ?x ?y) (not (clear ?y)) (not (available-depot ?x))
-             (clear ?z) (not (on-depot ?y ?z)) (increase (fuel-cost) 1)))
+;(:action lift
+;:parameters (?x - hoist ?y - crate ?z - surface ?p - place)
+;:precondition (and (located-at-depot ?x ?p) (available-depot ?x) (located-at-depot ?y ?p) (on-depot ?y ?z) (clear ?y))
+;:effect (and (not (located-at-depot ?y ?p)) (lifting ?x ?y) (not (clear ?y)) (not (available-depot ?x))
+;             (clear ?z) (not (on-depot ?y ?z)) (increase (fuel-cost) 1)))
 
-(:action drop-depot
-:parameters (?x - hoist ?y - crate ?z - surface ?p - place)
-:precondition (and (located-at-depot ?x ?p) (located-at-depot ?z ?p) (clear ?z) (lifting ?x ?y))
-:effect (and (available-depot ?x) (not (lifting ?x ?y)) (located-at-depot ?y ?p) (not (clear ?z)) (clear ?y)
-		(on-depot ?y ?z)))
+;(:action drop-depot
+;:parameters (?x - hoist ?y - crate ?z - surface ?p - place)
+;:precondition (and (located-at-depot ?x ?p) (located-at-depot ?z ?p) (clear ?z) (lifting ?x ?y))
+;:effect (and (available-depot ?x) (not (lifting ?x ?y)) (located-at-depot ?y ?p) (not (clear ?z)) (clear ?y)
+;		(on-depot ?y ?z)))
 
-(:action load
-:parameters (?x - hoist ?y - crate ?z - truck-depot ?p - place)
-:precondition (and (located-at-depot ?x ?p) (located-at-depot ?z ?p) (lifting ?x ?y)
-		(<= (+ (current_load ?z) (weight ?y)) (load_limit ?z)))
-:effect (and (not (lifting ?x ?y)) (in-depot ?y ?z) (available-depot ?x)
-		(increase (current_load ?z) (weight ?y))))
+;(:action load
+;:parameters (?x - hoist ?y - crate ?z - truck-depot ?p - place)
+;:precondition (and (located-at-depot ?x ?p) (located-at-depot ?z ?p) (lifting ?x ?y)
+;		(<= (+ (current_load ?z) (weight ?y)) (load_limit ?z)))
+;:effect (and (not (lifting ?x ?y)) (in-depot ?y ?z) (available-depot ?x)
+;		(increase (current_load ?z) (weight ?y))))
 
-(:action unload
-:parameters (?x - hoist ?y - crate ?z - truck-depot ?p - place)
-:precondition (and (located-at-depot ?x ?p) (located-at-depot ?z ?p) (available-depot ?x) (in-depot ?y ?z))
-:effect (and (not (in-depot ?y ?z)) (not (available-depot ?x)) (lifting ?x ?y)
-		(decrease (current_load ?z) (weight ?y))))
+;(:action unload
+;:parameters (?x - hoist ?y - crate ?z - truck-depot ?p - place)
+;:precondition (and (located-at-depot ?x ?p) (located-at-depot ?z ?p) (available-depot ?x) (in-depot ?y ?z))
+;:effect (and (not (in-depot ?y ?z)) (not (available-depot ?x)) (lifting ?x ?y)
+;		(decrease (current_load ?z) (weight ?y))))
 
 ;--------------------------------------------------------------------------------
 ; Driverlog
 
-;(:action load-truck-driverlog
-;  :parameters
-;   (?obj - obj
-;    ?truck - truck-driverlog
-;    ?loc - location)
-;  :precondition
-;   (and (located-at-driverlog ?truck ?loc) (located-at-driverlog ?obj ?loc))
-;  :effect
-;   (and (not (located-at-driverlog ?obj ?loc)) (in ?obj ?truck)))
+(:action load-truck-driverlog
+  :parameters
+   (?obj - obj
+    ?truck - truck-driverlog
+    ?loc - location)
+  :precondition
+   (and (located-at-driverlog ?truck ?loc) (located-at-driverlog ?obj ?loc))
+  :effect
+   (and (not (located-at-driverlog ?obj ?loc)) (in ?obj ?truck)))
 
-;(:action unload-truck
-;  :parameters
-;   (?obj - obj
-;    ?truck - truck-driverlog
-;    ?loc - location)
-;  :precondition
-;   (and (located-at-driverlog ?truck ?loc) (in ?obj ?truck))
-;  :effect
-;   (and (not (in ?obj ?truck)) (located-at-driverlog ?obj ?loc)))
+(:action unload-truck
+  :parameters
+   (?obj - obj
+    ?truck - truck-driverlog
+    ?loc - location)
+  :precondition
+   (and (located-at-driverlog ?truck ?loc) (in ?obj ?truck))
+  :effect
+   (and (not (in ?obj ?truck)) (located-at-driverlog ?obj ?loc)))
 
-;(:action board-truck
-;  :parameters
-;   (?driver - driver
-;    ?truck - truck-driverlog
-;    ?loc - location)
-;  :precondition
-;   (and (located-at-driverlog ?truck ?loc) (located-at-driverlog ?driver ?loc) (empty-driverlog  ?truck))
-;  :effect
-;   (and (not (located-at-driverlog ?driver ?loc)) (driving ?driver ?truck) (not (empty-driverlog  ?truck))))
+(:action board-truck
+  :parameters
+   (?driver - driver
+    ?truck - truck-driverlog
+    ?loc - location)
+  :precondition
+   (and (located-at-driverlog ?truck ?loc) (located-at-driverlog ?driver ?loc) (empty-driverlog  ?truck))
+  :effect
+   (and (not (located-at-driverlog ?driver ?loc)) (driving ?driver ?truck) (not (empty-driverlog  ?truck))))
 
-;(:action disembark-truck
-;  :parameters
-;   (?driver - driver
-;    ?truck - truck-driverlog
-;    ?loc - location)
-;  :precondition
-;   (and (located-at-driverlog ?truck ?loc) (driving ?driver ?truck))
-;  :effect
-;   (and (not (driving ?driver ?truck)) (located-at-driverlog ?driver ?loc) (empty-driverlog  ?truck)))
+(:action disembark-truck
+  :parameters
+   (?driver - driver
+    ?truck - truck-driverlog
+    ?loc - location)
+  :precondition
+   (and (located-at-driverlog ?truck ?loc) (driving ?driver ?truck))
+  :effect
+   (and (not (driving ?driver ?truck)) (located-at-driverlog ?driver ?loc) (empty-driverlog  ?truck)))
 
-;(:action drive-truck
-;  :parameters
-;   (?truck - truck-driverlog
-;    ?loc-from - location
-;    ?loc-to - location
-;    ?driver - driver)
-;  :precondition
-;   (and (located-at-driverlog ?truck ?loc-from)
-;   (driving ?driver ?truck) (link ?loc-from ?loc-to))
-;  :effect
-;   (and (not (located-at-driverlog ?truck ?loc-from)) (located-at-driverlog ?truck ?loc-to)
-;		(increase (driven) (time-to-drive ?loc-from ?loc-to))))
+(:action drive-truck
+  :parameters
+   (?truck - truck-driverlog
+    ?loc-from - location
+    ?loc-to - location
+    ?driver - driver)
+  :precondition
+   (and (located-at-driverlog ?truck ?loc-from)
+   (driving ?driver ?truck) (link ?loc-from ?loc-to))
+  :effect
+   (and (not (located-at-driverlog ?truck ?loc-from)) (located-at-driverlog ?truck ?loc-to)
+		(increase (driven) (time-to-drive ?loc-from ?loc-to))))
 
-;(:action walk
-;  :parameters
-;   (?driver - driver
-;    ?loc-from - location
-;    ?loc-to - location)
-;  :precondition
-;   (and (located-at-driverlog ?driver ?loc-from) (path ?loc-from ?loc-to))
-;  :effect
-;   (and (not (located-at-driverlog ?driver ?loc-from)) (located-at-driverlog ?driver ?loc-to)
-;	(increase (walked) (time-to-walk ?loc-from ?loc-to))))
+(:action walk
+  :parameters
+   (?driver - driver
+    ?loc-from - location
+    ?loc-to - location)
+  :precondition
+   (and (located-at-driverlog ?driver ?loc-from) (path ?loc-from ?loc-to))
+  :effect
+   (and (not (located-at-driverlog ?driver ?loc-from)) (located-at-driverlog ?driver ?loc-to)
+	(increase (walked) (time-to-walk ?loc-from ?loc-to))))
 
 )

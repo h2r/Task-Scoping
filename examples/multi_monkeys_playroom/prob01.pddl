@@ -33,11 +33,11 @@
     (gbutton-on gb1)
     (connected-buttons rb1 gb1)
 
-    (= (ball-x ball1) 50)
-    (= (ball-y ball1) 50)
+    (= (ball-x ball1) 5)
+    (= (ball-y ball1) 5)
 
-    (= (bell-x bell1) 100)
-    (= (bell-y bell1) 100)
+    (= (bell-x bell1) 10)
+    (= (bell-y bell1) 10)
 
     (not (monkey-screaming jack))
     (monkey-watching-bell jack bell1)

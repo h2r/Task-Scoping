@@ -1,4 +1,4 @@
-(define (problem composite_prob_1)
+(define (problem composite_prob_3)
 (:domain ipc_composite)
 (:objects
 	; Depot
@@ -240,9 +240,9 @@
 
 (:goal (and
 		; Depot Goal
-		(on-depot crate0 crate1)
-		(on-depot crate1 pallet2)
-		(on-depot crate2 pallet0)
+		; (on-depot crate0 crate1)
+		; (on-depot crate1 pallet2)
+		; (on-depot crate2 pallet0)
 
 		; Satellite Goal
 		; (have_image planet4 infrared0)
@@ -251,13 +251,13 @@
 		; (have_image star7 infrared0)
 
 		; DriverLog Goal
-		; (located-at-driverlog driver1 s1)
-		; (located-at-driverlog driver2 s1)
-		; (located-at-driverlog truckd1 s2)
-		; (located-at-driverlog truckd2 s0)
-		; (located-at-driverlog package1 s0)
-		; (located-at-driverlog package2 s2)
-		; (located-at-driverlog package3 s0)
+		(located-at-driverlog driver1 s1)
+		(located-at-driverlog driver2 s1)
+		(located-at-driverlog truckd1 s2)
+		(located-at-driverlog truckd2 s0)
+		(located-at-driverlog package1 s0)
+		(located-at-driverlog package2 s2)
+		(located-at-driverlog package3 s0)
 
 		;ZenoTravel goal
 		; (located-zeno person1 city2)

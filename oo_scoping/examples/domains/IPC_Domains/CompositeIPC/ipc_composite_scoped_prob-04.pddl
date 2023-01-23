@@ -138,89 +138,89 @@
 
 ;--------------------------------------------------------------------------------
 ; Zeno
-;(:action board
-; :parameters (?p - person ?a - aircraft ?c - city)
-; :precondition (and (located-zeno ?p ?c)
-;                 (located-zeno ?a ?c))
-; :effect (and (not (located-zeno ?p ?c))
-;              (in-zeno ?p ?a)
-;		(increase (onboard ?a) 1)))
+(:action board
+ :parameters (?p - person ?a - aircraft ?c - city)
+ :precondition (and (located-zeno ?p ?c)
+                 (located-zeno ?a ?c))
+ :effect (and (not (located-zeno ?p ?c))
+              (in-zeno ?p ?a)
+		(increase (onboard ?a) 1)))
 
 
-;(:action debark
-; :parameters (?p - person ?a - aircraft ?c - city)
-; :precondition (and (in-zeno ?p ?a)
-;                 (located-zeno ?a ?c))
-; :effect (and (not (in-zeno ?p ?a))
-;              (located-zeno ?p ?c)
-;		(decrease (onboard ?a) 1)))
+(:action debark
+ :parameters (?p - person ?a - aircraft ?c - city)
+ :precondition (and (in-zeno ?p ?a)
+                 (located-zeno ?a ?c))
+ :effect (and (not (in-zeno ?p ?a))
+              (located-zeno ?p ?c)
+		(decrease (onboard ?a) 1)))
 
-;(:action fly-slow
-; :parameters (?a - aircraft ?c1 ?c2 - city)
-; :precondition (and (located-zeno ?a ?c1)
-;                 (>= (fuel-zeno ?a)
-;                         (* (distance ?c1 ?c2) (slow-burn ?a))))
-; :effect (and (not (located-zeno ?a ?c1))
-;              (located-zeno ?a ?c2)
-;              (increase (total-fuel-used)
-;                         (* (distance ?c1 ?c2) (slow-burn ?a)))
-;              (decrease (fuel-zeno ?a)
-;                         (* (distance ?c1 ?c2) (slow-burn ?a)))))
+(:action fly-slow
+ :parameters (?a - aircraft ?c1 ?c2 - city)
+ :precondition (and (located-zeno ?a ?c1)
+                 (>= (fuel-zeno ?a)
+                         (* (distance ?c1 ?c2) (slow-burn ?a))))
+ :effect (and (not (located-zeno ?a ?c1))
+              (located-zeno ?a ?c2)
+              (increase (total-fuel-used)
+                         (* (distance ?c1 ?c2) (slow-burn ?a)))
+              (decrease (fuel-zeno ?a)
+                         (* (distance ?c1 ?c2) (slow-burn ?a)))))
 
-;(:action fly-fast
-; :parameters (?a - aircraft ?c1 ?c2 - city)
-; :precondition (and (located-zeno ?a ?c1)
-;                 (>= (fuel-zeno ?a)
-;                         (* (distance ?c1 ?c2) (fast-burn ?a)))
-;                 (<= (onboard ?a) (zoom-limit ?a)))
-; :effect (and (not (located-zeno ?a ?c1))
-;              (located-zeno ?a ?c2)
-;              (increase (total-fuel-used)
-;                         (* (distance ?c1 ?c2) (fast-burn ?a)))
-;              (decrease (fuel-zeno ?a)
-;                         (* (distance ?c1 ?c2) (fast-burn ?a)))
-;	)
-;)
+(:action fly-fast
+ :parameters (?a - aircraft ?c1 ?c2 - city)
+ :precondition (and (located-zeno ?a ?c1)
+                 (>= (fuel-zeno ?a)
+                         (* (distance ?c1 ?c2) (fast-burn ?a)))
+                 (<= (onboard ?a) (zoom-limit ?a)))
+ :effect (and (not (located-zeno ?a ?c1))
+              (located-zeno ?a ?c2)
+              (increase (total-fuel-used)
+                         (* (distance ?c1 ?c2) (fast-burn ?a)))
+              (decrease (fuel-zeno ?a)
+                         (* (distance ?c1 ?c2) (fast-burn ?a)))
+	)
+)
 
-;(:action refuel
-; :parameters (?a - aircraft)
-; :precondition (and (> (capacity ?a) (fuel-zeno ?a)))
-; :effect (and (assign (fuel-zeno ?a) (capacity ?a)))
-;)
+(:action refuel
+ :parameters (?a - aircraft)
+ :precondition (and (> (capacity ?a) (fuel-zeno ?a)))
+ :effect (and (assign (fuel-zeno ?a) (capacity ?a)))
+)
 
 ;--------------------------------------------------------------------------------
 ; Depot
 
-(:action drive
-:parameters (?x - truck-depot ?y - place ?z - place)
-:precondition (and (located-at-depot ?x ?y))
-:effect (and (not (located-at-depot ?x ?y)) (located-at-depot ?x ?z)
-		(increase (fuel-cost) 10)))
+;(:action drive
+;:parameters (?x - truck-depot ?y - place ?z - place)
+;:precondition (and (located-at-depot ?x ?y))
+;:effect (and (not (located-at-depot ?x ?y)) (located-at-depot ?x ?z)
+;		(increase (fuel-cost) 10)))
 
-(:action lift
-:parameters (?x - hoist ?y - crate ?z - surface ?p - place)
-:precondition (and (located-at-depot ?x ?p) (available-depot ?x) (located-at-depot ?y ?p) (on-depot ?y ?z) (clear ?y))
-:effect (and (not (located-at-depot ?y ?p)) (lifting ?x ?y) (not (clear ?y)) (not (available-depot ?x))
-             (clear ?z) (not (on-depot ?y ?z)) (increase (fuel-cost) 1)))
+;(:action lift
+;:parameters (?x - hoist ?y - crate ?z - surface ?p - place)
+;:precondition (and (located-at-depot ?x ?p) (available-depot ?x) (located-at-depot ?y ?p) (on-depot ?y ?z) (clear ?y))
+;:effect (and (not (located-at-depot ?y ?p)) (lifting ?x ?y) (not (clear ?y)) (not (available-depot ?x))
+;             (clear ?z) (not (on-depot ?y ?z)) (increase (fuel-cost) 1)))
 
-(:action drop-depot
-:parameters (?x - hoist ?y - crate ?z - surface ?p - place)
-:precondition (and (located-at-depot ?x ?p) (located-at-depot ?z ?p) (clear ?z) (lifting ?x ?y))
-:effect (and (available-depot ?x) (not (lifting ?x ?y)) (located-at-depot ?y ?p) (not (clear ?z)) (clear ?y)
-		(on-depot ?y ?z)))
+;(:action drop-depot
+;:parameters (?x - hoist ?y - crate ?z - surface ?p - place)
+;:precondition (and (located-at-depot ?x ?p) (located-at-depot ?z ?p) (clear ?z) (lifting ?x ?y))
+;:effect (and (available-depot ?x) (not (lifting ?x ?y)) (located-at-depot ?y ?p) (not (clear ?z)) (clear ?y)
+;		(on-depot ?y ?z)))
 
-(:action load
-:parameters (?x - hoist ?y - crate ?z - truck-depot ?p - place)
-:precondition (and (located-at-depot ?x ?p) (located-at-depot ?z ?p) (lifting ?x ?y)
-		(<= (+ (current_load ?z) (weight ?y)) (load_limit ?z)))
-:effect (and (not (lifting ?x ?y)) (in-depot ?y ?z) (available-depot ?x)
-		(increase (current_load ?z) (weight ?y))))
+;(:action load
+;:parameters (?x - hoist ?y - crate ?z - truck-depot ?p - place)
+;:precondition (and (located-at-depot ?x ?p) (located-at-depot ?z ?p) (lifting ?x ?y)
+;		(<= (+ (current_load ?z) (weight ?y)) (load_limit ?z)))
+;:effect (and (not (lifting ?x ?y)) (in-depot ?y ?z) (available-depot ?x)
+;		(increase (current_load ?z) (weight ?y))))
 
-(:action unload
-:parameters (?x - hoist ?y - crate ?z - truck-depot ?p - place)
-:precondition (and (located-at-depot ?x ?p) (located-at-depot ?z ?p) (available-depot ?x) (in-depot ?y ?z))
-:effect (and (not (in-depot ?y ?z)) (not (available-depot ?x)) (lifting ?x ?y)
-		(decrease (current_load ?z) (weight ?y))))
+;(:action unload
+;:parameters (?x - hoist ?y - crate ?z - truck-depot ?p - place)
+;:precondition (and (located-at-depot ?x ?p) (located-at-depot ?z ?p) (available-depot ?x) (in-depot ?y ?z))
+;:effect (and (not (in-depot ?y ?z)) (not (available-depot ?x)) (lifting ?x ?y)
+;		(decrease (current_load ?z) (weight ?y))))
 
 ;--------------------------------------------------------------------------------
 ; Driverlog

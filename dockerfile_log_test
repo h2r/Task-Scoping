@@ -1,9 +1,0 @@
-FROM aiplanning/planutils
-
-# RUN echo "~~Can you see me?\n\nCat~~" && echo "why won't this print?"
-
-# RUN echo '~~can u see this~~'
-
-# RUN echo ~~how about this~~
-
-RUN apt-get update -y && echo "I'm getting printed! Thanks, --progress=plain!"

@@ -248,20 +248,22 @@ def save_cmd_output(cmd_output, save_dir):
 
 
 def translate(domain, problem, sas_path):
-    cmd_pieces = ["python", f"{repo_root}/downward_translate/translate_and_scope.py", domain, problem, "--sas-file", sas_path]
+    cmd_pieces = ["python", f"{repo_root}/oo_scoping/downward_translate/translate_and_scope.py", domain, problem, "--sas-file", sas_path]
     cmd_output = subprocess.run(cmd_pieces, capture_output=True, shell=False)
     return cmd_output
 
 
 def translate_and_scope(domain, problem, unscoped_sas_path):
-    cmd_pieces = ["python", f"{repo_root}/downward_translate/translate_and_scope.py", domain, problem, "--sas-file", unscoped_sas_path, "--scope", "True"]
+    cmd_pieces = ["python", f"{repo_root}/oo_scoping/downward_translate/translate_and_scope.py", domain, problem, "--sas-file", unscoped_sas_path, "--scope", "True"]
     cmd_output = subprocess.run(cmd_pieces, capture_output=True, shell=False)
     return cmd_output
 
 
 SEARCH_CONFIGS = {
     "lmcut":"astar(lmcut())",
-    "ms":"astar(merge_and_shrink(shrink_strategy=shrink_bisimulation(greedy=false),merge_strategy=merge_sccs(order_of_sccs=topological,merge_selector=score_based_filtering(scoring_functions=[goal_relevance,dfp,total_order])),label_reduction=exact(before_shrinking=true,before_merging=false),max_states=50k,threshold_before_merge=1))"
+    "ms":"astar(merge_and_shrink(shrink_strategy=shrink_bisimulation(greedy=false),merge_strategy=merge_sccs(order_of_sccs=topological,merge_selector=score_based_filtering(scoring_functions=[goal_relevance,dfp,total_order])),label_reduction=exact(before_shrinking=true,before_merging=false),max_states=50k,threshold_before_merge=1))",
+    "h2":"astar(hm(m=2, verbosity=normal, transform=no_transform(), cache_estimates=true))"
+    # h2 is incredibly slow in FD. Don't use it.
 }
 
 def plan(sas_path, fd_path, plan_type: str = "lmcut"):

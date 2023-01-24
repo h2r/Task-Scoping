@@ -6,7 +6,7 @@ import os
 
 
 
-ign_pats = [".git*",".gitignore", "oo_scoping.egg-info/*", ".vscode", ".ds_store", "ignore*"]
+ign_pats = [".git*",".gitignore", "oo_scoping.egg-info/*", ".vscode", ".ds_store", "ignore*", "ubuntu_scripts_new_planutils/*"]
 repo_root = os.path.dirname(__file__)
 repo_parent = os.path.dirname(repo_root)
 tgt_dir = os.path.join(repo_parent, "scoping_supplement")
@@ -19,7 +19,7 @@ if os.path.isdir(tgt_dir):
 
 copytree(repo_root, tgt_dir_repo, ignore=ignore_patterns(*ign_pats))
 
-supplement_pdf_pth = os.path.join(repo_parent, "Scoping_AAAI_2022_Supplement.pdf")
+supplement_pdf_pth = os.path.join(repo_parent, "Scoping_AAAI_2023_Supplement.pdf")
 shutil.copy(supplement_pdf_pth, tgt_dir)
 
 archive_pth = os.path.join(repo_parent, "scoping_supplement")

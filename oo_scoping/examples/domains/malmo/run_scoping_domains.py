@@ -156,8 +156,6 @@ parser.add_argument(
 args = parser.parse_args()
 
 # Set location of files from scoping project
-# malmo_scoping_directory = "examples/malmo"
-# malmo_scoping_directory = "/Users/michaelfishman/repos/scoping/OO-Scoping-IPC/examples/malmo"
 plan_directory = f"{args.malmo_scoping_dir}/plans"
 plan_path = f"{plan_directory}/{args.goal}.txt"
 problem_directory = f"{args.malmo_scoping_dir}/problems"

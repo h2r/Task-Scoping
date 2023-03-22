@@ -27,6 +27,12 @@
     :effect (and (has-stone ?ag))
 )
 
+(:action wait
+    :parameters (?ag)
+    :precondition (and (not (hungry ?ag)))
+    :effect (and (hungry ?ag))
+)
+
 (:action eat
     :parameters (?ag)
     :precondition (and (has-food ?ag) (hungry ?ag))

@@ -1,4 +1,4 @@
-# Task Scoping with VaPAR
+# Task Scoping
 
 ## Installation
 Make sure to have python 3.7.9 installed (we recommend a virtual or conda environment!). Then, from the root of this repo's directory, run:
@@ -6,14 +6,14 @@ Make sure to have python 3.7.9 installed (we recommend a virtual or conda enviro
 ```pip install -e .```
 
 ## Usage
-You will need to run a different command depending on whether your domain and problem PDDL files are propositional or numeric. 
+You will need to run a different command depending on whether your domain and problem PDDL files are propositional or numeric.
 
 ### Propositional Domains
-For these domains, we first convert the problem into the SAS+ representation, then run VaPAR to scope the domain and problem.
+For these domains, we first convert the problem into the SAS+ representation, then scope the domain and problem.
 
 ```python oo_scoping/downward_translate/translate_and_scope.py <domain_path> <problem_path> --sas-file <desired_sas_file_name> --scope True```
 
-This will generate 2 files in the current directory: 1 `.sas` file with the name `<desired_sas_file_name>` and 1 with `_scoped` inserted into the name. The latter is the file after VaPAR has been used to scope the original file. Each of these files can then directly be used for planning with Fast Downward or any other planner that uses SAS+ files.
+This will generate 2 files in the current directory: 1 `.sas` file with the name `<desired_sas_file_name>` and 1 with `_scoped` inserted into the name. The latter is the file after scoping. Each of these files can then directly be used for planning with Fast Downward or any other planner that uses SAS+ files.
 
 Note: this leverages a PDDL to SAS+ translator taken directly from the [Fast Downward codebase](https://github.com/aibasel/downward).
 
@@ -26,13 +26,13 @@ Example:
 You can also run this from within a python script by calling `oo_scoping.downward_translate.translate_and_scope.main_from_other_script`. The kwargs to pass are specified in [oo_scoping/downward_translate/options.py](oo_scoping/downward_translate/options.py). The main kwargs are `domain`, `task`, `--scope`, and `sas_file`.
 
 ### Numeric Domains
-For these domains, we first ground all variables and operators, then run VaPAR on the grounded problem and use this to return "scoped" domain and problem PDDL files.
+For these domains, we first ground all variables and operators, then run task scoping on the grounded problem and use this to return "scoped" domain and problem PDDL files.
 
 ```python oo_scoping/pddl_scoper.py --domain <path_to_domain_file> --prob <path_to_problem_file>```
 
 Note that this assumes the domain and problem file are within the same directory.
 
-The scoped domain and problem will be placed in the same directories as the input domain and problem. Use the scoped problem that ends with "with_cl". The file that says "sans_cl" may remove some causally-linked objects that, in principle, can be ignored, but maybe unsafe to remove (this discrepancy arises because VaPAR identifies *grounded* state-variables and operators to remove, whereas PDDL files are lifted by default).
+The scoped domain and problem will be placed in the same directories as the input domain and problem. Use the scoped problem that ends with "with_cl". The file that says "sans_cl" may remove some causally-linked objects that, in principle, can be ignored, but maybe unsafe to remove (this discrepancy arises because task scoping identifies *grounded* state-variables and operators to remove, whereas PDDL files are lifted by default).
 
 Example:
 

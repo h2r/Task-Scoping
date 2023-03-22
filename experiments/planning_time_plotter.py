@@ -31,7 +31,7 @@ def plot():
     pands_with_error = [planner_and_scoper_time - planner_and_scoper_stddev, planner_and_scoper_time + planner_and_scoper_stddev]
 
     errorfill(domain_num, planner_time, yerr=planner_with_error, color='red', linestyle='-', plt_label='ENHSP-2020', marker='o')
-    errorfill(domain_num, planner_and_scoper_time, yerr=pands_with_error, color='blue', linestyle='-', plt_label='VaPAR (ours) + ENHSP-2020', marker = 'o')
+    errorfill(domain_num, planner_and_scoper_time, yerr=pands_with_error, color='blue', linestyle='-', plt_label='Scoping (ours) + ENHSP-2020', marker = 'o')
 
     plt.xlabel('Log size of domain (base 10)')
     plt.ylabel('Wall clock time taken to find plan/s')

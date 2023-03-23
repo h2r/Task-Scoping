@@ -471,6 +471,22 @@ class PDDL_Parser:
             grounded_actions.append(grounded_action)
         return grounded_actions
 
+    def get_state_variable_count(self) -> int:
+        """Return the number of grounded state variables.
+        This works by computing all groundings for lifted predicates
+        and lifted functions.
+
+        This assumes that the parser has already run 
+        self.parse_domain and self.parse_problem
+        """
+        grounded_state_vars = []
+        for pred_name, pred_vars in self.predicates.items():
+            groundings = self.get_predicate_groundings((pred_name, pred_vars))
+            grounded_state_vars.extend(groundings)
+        for pred_name, pred_vars in self.functions.items():
+            groundings = self.get_predicate_groundings((pred_name, pred_vars))
+            grounded_state_vars.extend(groundings)
+        return len(grounded_state_vars)
 
 #     def get_deepest_subtypes(self, ancestors):
 #         descendants = self.get_descendants(ancestors)

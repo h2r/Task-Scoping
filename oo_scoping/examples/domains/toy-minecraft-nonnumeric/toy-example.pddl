@@ -9,9 +9,21 @@
     (has-axe ?ag)
 )
 
-(:action get_food
+(:action hunt
     :parameters (?ag)
-    :precondition (and (not (has-food ?ag)))
+    :precondition (and
+        (not (has-food ?ag))
+        (not (hungry ?ag))
+    )
+    :effect (and (has-food ?ag))
+)
+
+(:action gather
+    :parameters (?ag)
+    :precondition (and
+        (not (has-food ?ag))
+        (hungry ?ag)
+    )
     :effect (and (has-food ?ag))
 )
 
@@ -25,12 +37,6 @@
     :parameters (?ag)
     :precondition (and (not (has-stone ?ag)))
     :effect (and (has-stone ?ag))
-)
-
-(:action wait
-    :parameters (?ag)
-    :precondition (and (not (hungry ?ag)))
-    :effect (and (hungry ?ag))
 )
 
 (:action eat
@@ -54,6 +60,12 @@
         (not (has-stone ?ag))
         (has-axe ?ag)
     )
+)
+
+(:action wait
+    :parameters (?ag)
+    :precondition (and (not (hungry ?ag)))
+    :effect (and (hungry ?ag))
 )
 
 )

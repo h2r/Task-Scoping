@@ -3,15 +3,15 @@
 
 (:types object)
 
+(:predicates
+    (hungry ?ag - object)
+    (has-axe ?ag - object)
+)
+
 (:functions
     (n-food ?ag - object)
     (n-sticks ?ag - object)
     (n-stone ?ag - object)
-)
-
-(:predicates
-    (hungry ?ag - object)
-    (has-axe ?ag - object)
 )
 
 (:action hunt

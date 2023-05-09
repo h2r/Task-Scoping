@@ -1,51 +1,75 @@
 (define (domain toy-example)
-(:requirements :equality :fluents)
+(:requirements :typing :equality :fluents)
 
-(:predicates
-    (n-food ?n)
-    (n-sticks ?n)
-    (n-stone ?n)
-    (hungry ?ag)
-    (has-axe ?ag)
+(:types object)
+
+(:functions
+    (n-food ?ag - object)
+    (n-sticks ?ag - object)
+    (n-stone ?ag - object)
 )
 
-(:action get_food
-    :parameters (?n)
-    :precondition (and (< (n-food ?n) 5))
-    :effect (and (increase (n-food ?n)))
+(:predicates
+    (hungry ?ag - object)
+    (has-axe ?ag - object)
+)
+
+(:action hunt
+    :parameters (?ag - object)
+    :precondition (and
+        (< (n-food ?ag) 5)
+        (not (hungry ?ag))
+    )
+    :effect (and
+        (increase (n-food ?ag) 1)
+        (hungry ?ag)
+    )
+)
+
+(:action gather
+    :parameters (?ag - object)
+    :precondition (and
+        (< (n-food ?ag) 5)
+        (hungry ?ag)
+    )
+    :effect (and
+        (increase (n-food ?ag) 1)
+    )
 )
 
 (:action get_stick
-    :parameters (?n)
-    :precondition (and (< (n-sticks ?n) 5))
-    :effect (and (increase (n-sticks ?n)))
+    :parameters (?ag - object)
+    :precondition (and (< (n-sticks ?ag) 5))
+    :effect (and (increase (n-sticks ?ag) 1))
 )
 
 (:action get_stone
-    :parameters (?n)
-    :precondition (and (< (n-stone ?n) 5))
-    :effect (and (increase (n-stone ?n)))
+    :parameters (?ag - object)
+    :precondition (and (< (n-stone ?ag) 5))
+    :effect (and (increase (n-stone ?ag) 1))
 )
 
 (:action eat
-    :parameters (?n ?ag)
-    :precondition (and (> (n-food ?n) 0))
+    :parameters (?ag - object)
+    :precondition (and (> (n-food ?ag) 0))
     :effect (and
-        (decrease (n-food ?n))
+        (decrease (n-food ?ag) 1)
         (not (hungry ?ag))
     )
 )
 
 (:action make_axe
-    :parameters (?n_sticks ?n_stone ?ag)
+    :parameters (?ag - object)
     :precondition (and
-        (> (n-sticks ?n) 0)
-        (> (n-stone ?n) 0)
+        (> (n-sticks ?ag) 0)
+        (> (n-stone ?ag) 0)
         (not (has-axe ?ag))
     )
     :effect (and
-        (decrease (n-sticks ?n))
-        (decrease (n-stone ?n))
+        (decrease (n-sticks ?ag) 1)
+        (decrease (n-stone ?ag) 1)
         (has-axe ?ag)
     )
+)
+
 )

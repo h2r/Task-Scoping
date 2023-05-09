@@ -2,12 +2,12 @@
 
 (:domain toy-example)
 
-(:objects steve)
+(:objects steve - object)
 
 (:init
-	(not (= n-food 0))
-	(not (= n-sticks 0))
-	(not (= n-stone 0))
+	(= (n-food steve) 0)
+	(= (n-sticks steve) 0)
+	(= (n-stone steve) 0)
 	(not (hungry steve))
 	(not (has-axe steve))
 )

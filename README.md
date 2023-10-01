@@ -1,6 +1,6 @@
 # Task Scoping
 
-**This code was mostly written before the authors became competent engineers.s**
+**This code was mostly written before the authors became competent engineers.**
 
 ## Installation
 Make sure to have python 3.7.9 installed (we recommend a virtual or conda environment!). Then, from the root of this repo's directory, run:

@@ -9,7 +9,7 @@ Z3Variable: TypeAlias = z3.ExprRef
 """A z3 expression representing a single grounded pvar. eg `x-position(passenger0)`"""
 
 
-Z3ValueAssignment: TypeAlias = z3.ExprRef
+Z3ValueAssignment: TypeAlias = z3.BoolRef
 """A z3 expression representing a value-assignment to a variable. Eg `x-position(passenger0) == 3`
 TODO: Maybe this should be for z3.BoolRef?"""
 

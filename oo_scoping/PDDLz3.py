@@ -9,7 +9,7 @@ from oo_scoping.utils import (
     get_unique_z3_vars,
 )
 from typing import List, Tuple, Dict, Iterable
-
+from oo_scoping.z3_type_aliases import Z3ValueAssignment, Z3ValueAssignmentList
 
 class PDDL_Parser_z3(PDDL_Parser):
     def make_z3_atoms(self, things_dict, z3_class, str2var=None):
@@ -45,8 +45,8 @@ class PDDL_Parser_z3(PDDL_Parser):
         str2var_dict = self.make_z3_atoms(self.functions, z3.Int, str2var_dict)
         return str2var_dict
 
-    def str_grounded_actions2skills(self, str_grounded_actions, str2var_dict):
-        skill_list = []
+    def str_grounded_actions2skills(self, str_grounded_actions, str2var_dict) -> List[SkillPDDL]:
+        skill_list: List[SkillPDDL] = []
         for action_class in str_grounded_actions:
             for grounded_action in action_class:
                 precond = self.action2precondition(grounded_action, str2var_dict)
@@ -65,7 +65,7 @@ class PDDL_Parser_z3(PDDL_Parser):
         ]
         return z3.And(*clauses)
 
-    def get_skills(self):
+    def get_skills(self) -> List[SkillPDDL]:
         str2var_dict = self.make_str2var_dict()
         # print("Got str2var dict")
         str_grounded_actions = [self.get_action_groundings(a) for a in self.actions]
@@ -76,7 +76,7 @@ class PDDL_Parser_z3(PDDL_Parser):
         # print("Got skill list")
         return skill_list
 
-    def get_goal_cond(self):
+    def get_goal_cond(self) -> z3.BoolRef:
         str2var_dict = self.make_str2var_dict()
         goal_list = [
             compile_expression(pos_goal_expr, str2var_dict, self)
@@ -87,9 +87,10 @@ class PDDL_Parser_z3(PDDL_Parser):
             for neg_goal_expr in self.negative_goals
         ]
         goal_cond = z3.And(*goal_list)
+        assert isinstance(goal_cond, z3.BoolRef)
         return goal_cond
 
-    def get_init_cond_list(self, pred_default=False):
+    def get_init_cond_list(self, pred_default=False) -> Z3ValueAssignmentList:
         str2var_dict = self.make_str2var_dict()
         init_cond_list = [
             compile_expression(init_cond, str2var_dict, self)

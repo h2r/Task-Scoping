@@ -1,9 +1,11 @@
-"""Core scoping algorithm. Defined using abstract groundings classes, so that we can plug in 
+"""
+TODO: PROBABLY SCRAPPING THIS IN FAVOR OF METHOD IN PDDLTASK ABSTRACT BASE CLASS
+Core scoping algorithm. Defined using abstract groundings classes, so that we can plug in 
 whichever concrete grounding implementation we want."""
 from __future__ import annotations
 
-from oo_scoping.lifted.abstract_groundings import *
 from oo_scoping.lifted.atomic_classes import *
+from oo_scoping.lifted.abstract_groundings import *
 
 
 def scope(
@@ -19,8 +21,6 @@ def scope(
             The groundings will ideally be specified in a compact way.
         initial_state: Partial initial state.
         goal: Assumed to be a single variable-value assignment, WLOG.
-
-    TODO: Take in scopingtask instead. Probably.
     """
     # Initialize relevant vars. TODO: What is the format?
     # I don't think it's just (lifted pvars, groundingsset) - we may need a union of these

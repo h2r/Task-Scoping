@@ -1,16 +1,16 @@
 from __future__ import annotations
-import re, os, copy
-from abc import ABC
-from collections.abc import Iterable
-from typing import Union, List
-from itertools import product, chain
-import pathlib
-import pdb
-import z3
-from typing import List
 
-from oo_scoping.skill_classes import SkillPDDL
+import os
+import pathlib
+import re
+from collections.abc import Iterable
+from itertools import product
+from typing import List, Union
+
+import z3
+
 from oo_scoping.z3_type_aliases import Z3Variable
+
 # TODO Split this into multiple scripts. Remove unneeded functions.
 
 solver = z3.Solver()
@@ -139,19 +139,6 @@ def expr2pvar_names(expressions):
     return pvars
 
 
-def get_all_objects(skills: List[SkillPDDL]):
-    all_pvars = []
-    for s in skills:
-        all_pvars.extend(expr2pvar_names_single(s.precondition))
-        # Add params, if they exist
-        if hasattr(s, "params"):
-            all_pvars.extend(s.params)
-    all_objects = []
-    for x in all_pvars:
-        all_objects.extend(condition_str2objects(x))
-
-    all_objects = sorted(list(set(all_objects)))
-    return all_objects
 
 
 def solver_implies_condition(solver, precondition):

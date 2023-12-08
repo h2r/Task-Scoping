@@ -14,7 +14,7 @@ from oo_scoping.lifted.abstract_groundings import (
 )
 from oo_scoping.PDDLz3 import PDDL_Parser_z3
 from oo_scoping.scoping import effects2pvars, skills2effects
-from oo_scoping.skill_classes import SkillPDDL, merge_skills_pddl
+from oo_scoping.skill_classes import SkillPDDL, merge_skills_pddl, EffectTypePDDL
 from oo_scoping.utils import (
     get_atoms,
     get_unique_z3_vars,
@@ -71,7 +71,7 @@ class ListOfPvarGrounded(PVarGroundedSet[Z3ValueAssignment, Z3ValueAssignmentLis
 def get_atoms_assert_one(expr: z3.ExprRef) -> z3.ExprRef:
     """Assert that expr has a single atom and return it."""
     atoms = get_atoms(expr)
-    if len(atoms) != 0:
+    if len(atoms) != 1:
         raise ValueError(f"More than one atom: {expr}; {atoms}")
     return atoms[0]
 
@@ -144,12 +144,29 @@ class ListOfOperatorGroundeds(OperatorWithGroundingsSet[ListOfPvarGrounded, Z3Va
         return ListOfOperatorGroundeds(merged_operators, self.solver)
 
 
+@dataclass
 class EnumeratedPDDLTask(PDDLTask[ListOfPvarGrounded, Z3ValueAssignment, Z3ValueAssignmentList, ListOfOperatorGroundeds]):
+    all_operators: ListOfOperatorGroundeds
+    initial_state: Z3ValueAssignmentList
+    goal: Z3ValueAssignment
+    """For now we're just making goal always the dummy_goal. We'll remove that later."""
+    pvars_grounding_type = ListOfPvarGrounded
+
     @classmethod
     def from_domain_and_problem_files(cls, domain_path: str, problem_path: str) -> EnumeratedPDDLTask:
         parser = PDDL_Parser_z3()
         parser.parse_domain(domain_path)
         parser.parse_problem(problem_path)
         # TODO: Handle dummy goal stuff. Store relevant data.
-        raise NotImplementedError()
+
+        skill_list = parser.get_skills()
+        goal_cond = parser.get_goal_cond()
+        initial_state = parser.get_init_cond_list()
+
+        dummy_goal = z3.Bool("dummy_goal")  # TODO make sure this var does not already exist
+
+        dummy_goal_et = EffectTypePDDL(dummy_goal, 0)
+        dummy_final_skill = SkillPDDL(goal_cond, "DummyFinalSkill", dummy_goal_et)
+        skills_with_dummy =  skill_list + [dummy_final_skill]
+        return EnumeratedPDDLTask(ListOfOperatorGroundeds(skills_with_dummy, z3.Solver()), initial_state, dummy_goal)
 

@@ -1,20 +1,21 @@
-from typing import (
-    List,
-    Iterable,
-    Tuple,
-    Hashable,
-    Union,
-    Optional,
-    Set,
-    Dict,
-    OrderedDict,
-	NewType
-)
-from itertools import chain, product
-from collections import OrderedDict
-import z3
 import copy
-from oo_scoping.utils import simplify_disjunction, flatten, get_unique_z3_vars
+from collections import OrderedDict
+from itertools import chain
+from typing import (
+    Dict,
+    Iterable,
+    List,
+    NewType,
+    Optional,
+    OrderedDict,
+    Set,
+    Tuple,
+    Union,
+)
+
+import z3
+
+from oo_scoping.utils import flatten, get_unique_z3_vars, simplify_disjunction
 
 
 class EffectTypePDDL:  # EffectTypes are Immutable

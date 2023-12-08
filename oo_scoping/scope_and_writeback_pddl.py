@@ -11,7 +11,6 @@ from oo_scoping.utils import (
     product_dict,
     nested_list_replace,
     get_atoms,
-    get_all_objects,
     condition_str2objects,
     pvars2objects,
     get_unique_z3_vars,

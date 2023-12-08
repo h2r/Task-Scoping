@@ -9,8 +9,8 @@ import pdb
 import z3
 from typing import List
 
-# from oo_scoping.skill_classes import SkillPDDL
-
+from oo_scoping.skill_classes import SkillPDDL
+from oo_scoping.z3_type_aliases import Z3Variable
 # TODO Split this into multiple scripts. Remove unneeded functions.
 
 solver = z3.Solver()
@@ -235,6 +235,7 @@ def get_atoms_recursive(
     *args: Union[bool, z3.ExprRef, z3.Goal], remove_constants=True
 ) -> List[z3.ExprRef]:
     """
+    DO NOT USE
     Use get_atoms instead
     Returns list of base-level z3 expressions from list of (potentially) high level z3 expressions.
     Ex. 'a == b' would be returned as [a,b], where a and b are baselevel z3 expressions (intref, boolref, etc)
@@ -260,7 +261,7 @@ def get_atoms_recursive(
 
 def get_atoms(
     *args: Union[bool, z3.ExprRef, z3.Goal], remove_constants=True
-) -> List[z3.ExprRef]:
+) -> List[Z3Variable]:
     """
     Returns list of base-level z3 expressions from list of (potentially) high level z3 expressions.
     Ex. 'a == b' would be returned as [a,b], where a and b are baselevel z3 expressions (intref, boolref, etc)
@@ -274,7 +275,8 @@ def get_atoms(
             continue
         if isinstance(expr, z3.Goal):  # What is a z3.Goal ?
             expr = expr.as_expr()
-        
+            # Pylance complains about `expr.children()` unless we assert it isn't a Probe.
+            assert not isinstance(expr, z3.Probe)
         children = expr.children()
         if len(children) == 0:
             atoms.add(expr)
@@ -287,7 +289,7 @@ def get_atoms(
     return list(atoms)
 
 
-def remove_constant_atoms(atoms):
+def remove_constant_atoms(atoms: Iterable[Z3Variable]) -> List[Z3Variable]:
     """
     Remove z3 expressions that refer to a constant
     """

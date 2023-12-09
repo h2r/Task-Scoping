@@ -88,13 +88,14 @@ OperatorCollectionType = TypeVar(
 )
 
 
-PDDLTaskTypeVarUnbound = TypeVar("PDDLTaskTypeVarUnbound")
+PDDLTaskTypeVarUnbound = TypeVar("PDDLTaskTypeVarUnbound", bound="PDDLTask")
 
 
 class PDDLTask(Generic[PVGSBound, GoalType, PartialStateType, OperatorCollectionType], ABC):
     """Holds a PDDL Task. Main thing passed into scoping probably. Needs to implement parsing."""
 
     all_operators: OperatorCollectionType
+    all_pvars: PVGSBound
     initial_state: PartialStateType
     goal: GoalType
     pvars_grounding_type: Type[PVarGroundedSet[GoalType, PartialStateType]]
@@ -105,7 +106,7 @@ class PDDLTask(Generic[PVGSBound, GoalType, PartialStateType, OperatorCollection
     ) -> PDDLTaskTypeVarUnbound:
         raise NotImplementedError("Child classes should implement this")
 
-    def scope(self) -> PVGSBound:
+    def scope(self) -> tuple[OperatorCollectionType, PVGSBound]:
         """Get a compressed operator set sufficient for optimal planning.
         
         TODO: Should probably return a PDDLTask."""
@@ -116,7 +117,7 @@ class PDDLTask(Generic[PVGSBound, GoalType, PartialStateType, OperatorCollection
         relevant_pvars = (
             self.pvars_grounding_type.from_concrete_variable_value_assignment(self.goal)
         )
-
+        merged_operators = self.all_operators  # Set this to convince pylance it is not unbound
         while relevant_pvars_old != relevant_pvars:
             # Get merged operators
             merged_operators = self.all_operators.get_merged_operators(
@@ -146,4 +147,4 @@ class PDDLTask(Generic[PVGSBound, GoalType, PartialStateType, OperatorCollection
             )
 
         # return merged_operators  # type: ignore This is never unbound.
-        return relevant_pvars  # type: ignore I miss higher kinded types
+        return (merged_operators, relevant_pvars)  # type: ignore

@@ -1,29 +1,38 @@
 print("Starting scope and writeback imports")
-import sys, pprint, time, itertools, re, copy
-from collections import OrderedDict
-from typing import List, Tuple, Dict, Iterable
-import z3
 import argparse
+import copy
+import itertools
+import pprint
+import re
+import sys
+import time
+from collections import OrderedDict
+from typing import Dict, Iterable, List, Tuple
+
+import z3
+
 from oo_scoping.action import Action
 from oo_scoping.PDDLz3 import PDDL_Parser_z3
+from oo_scoping.scoping import scope
 from oo_scoping.skill_classes import EffectTypePDDL, SkillPDDL
 from oo_scoping.utils import (
-    product_dict,
-    nested_list_replace,
-    get_atoms,
     condition_str2objects,
-    pvars2objects,
+    get_atoms,
     get_unique_z3_vars,
+    nested_list_replace,
+    product_dict,
+    pvars2objects,
 )
 from oo_scoping.writeback_pddl import (
-    writeback_problem,
-    writeback_domain,
-    get_scoped_problem_path,
     get_scoped_domain_path,
+    get_scoped_problem_path,
+    writeback_domain,
+    writeback_problem,
 )
-from oo_scoping.scoping import scope
+from oo_scoping.z3_type_aliases import Z3Variable
 
 print("Starting scope and writeback")
+
 
 
 def scope_pddl(domain, problem):

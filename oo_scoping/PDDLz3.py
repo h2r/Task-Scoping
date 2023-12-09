@@ -1,18 +1,26 @@
-from oo_scoping.PDDL import PDDL_Parser, Action
-import z3, re
+import re
 from collections import OrderedDict
+from typing import Dict, Iterable, List, Tuple, Optional
+
+import z3
+
+from oo_scoping.PDDL import Action, PDDL_Parser
 from oo_scoping.skill_classes import EffectTypePDDL, SkillPDDL
 from oo_scoping.utils import (
-    product_dict,
-    nested_list_replace,
     get_atoms,
     get_unique_z3_vars,
+    nested_list_replace,
+    product_dict,
 )
-from typing import List, Tuple, Dict, Iterable
-from oo_scoping.z3_type_aliases import Z3ValueAssignment, Z3ValueAssignmentList
+from oo_scoping.z3_type_aliases import (
+    Z3ValueAssignment,
+    Z3ValueAssignmentList,
+    Z3Variable,
+)
+
 
 class PDDL_Parser_z3(PDDL_Parser):
-    def make_z3_atoms(self, things_dict, z3_class, str2var=None):
+    def make_z3_atoms(self, things_dict, z3_class, str2var: Optional[dict[str, Z3Variable]]=None) -> dict[str, Z3Variable]:
         """
         things_dict should be parser.predicates or parser.functions
         z3_class should be z3.Bool or z3.Int
@@ -39,7 +47,7 @@ class PDDL_Parser_z3(PDDL_Parser):
         return str2var
 
     # TODO make this a property?
-    def make_str2var_dict(self):
+    def make_str2var_dict(self) -> dict[str,Z3Variable]:
         str2var_dict = OrderedDict()
         str2var_dict = self.make_z3_atoms(self.predicates, z3.Bool, str2var_dict)
         str2var_dict = self.make_z3_atoms(self.functions, z3.Int, str2var_dict)

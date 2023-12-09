@@ -1,4 +1,5 @@
 """Helpers to get example domain paths."""
+from __future__ import annotations
 import os
 
 domains_dir = os.path.dirname(__file__) + "/domains"

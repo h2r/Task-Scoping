@@ -31,8 +31,8 @@ from oo_scoping.z3_type_aliases import (
 @dataclass(frozen=True)
 class ListOfPvarGrounded(PVarGroundedSet[Z3ValueAssignment, Z3ValueAssignmentList]):
     """Stores a list of grounded pvars, like OG scoping. No compression, completely unlifted."""
-    pvars: List[Z3Variable]
 
+    pvars: List[Z3Variable]
 
     @classmethod
     def new_empty(cls) -> ListOfPvarGrounded:
@@ -50,10 +50,12 @@ class ListOfPvarGrounded(PVarGroundedSet[Z3ValueAssignment, Z3ValueAssignmentLis
         pvars_with_duplicates: List[Z3Variable] = []
         for g in grounded_sets:
             pvars_with_duplicates += g.pvars
-        pvars_without_duplicates =  get_unique_z3_vars(pvars_with_duplicates)
+        pvars_without_duplicates = get_unique_z3_vars(pvars_with_duplicates)
         return ListOfPvarGrounded(pvars_without_duplicates)
 
-    def mask_from_partial_state(self, partial_state: Z3ValueAssignmentList) -> Z3ValueAssignmentList:
+    def mask_from_partial_state(
+        self, partial_state: Z3ValueAssignmentList
+    ) -> Z3ValueAssignmentList:
         """Return a new partial state with these grounded PVars ignores"""
         partial_state_masked: Z3ValueAssignmentList = []
         for value_assignment in partial_state:
@@ -64,9 +66,9 @@ class ListOfPvarGrounded(PVarGroundedSet[Z3ValueAssignment, Z3ValueAssignmentLis
 
     @cached_property
     def pvar_names(self) -> List[str]:
-        """Get names of pvars. 
-        """
+        """Get names of pvars."""
         return [str(p) for p in self.pvars]
+
 
 def get_atoms_assert_one(expr: z3.ExprRef) -> z3.ExprRef:
     """Assert that expr has a single atom and return it."""
@@ -75,6 +77,7 @@ def get_atoms_assert_one(expr: z3.ExprRef) -> z3.ExprRef:
         raise ValueError(f"More than one atom: {expr}; {atoms}")
     return atoms[0]
 
+
 def value_assignment_to_name(value_assignment: Z3ValueAssignment) -> str:
     # TODO?: Remove assert to get a speedup. Assert is here to make dev less buggy.
     atom = get_atoms_assert_one(value_assignment)
@@ -82,7 +85,9 @@ def value_assignment_to_name(value_assignment: Z3ValueAssignment) -> str:
 
 
 @dataclass
-class ListOfOperatorGroundeds(OperatorWithGroundingsSet[ListOfPvarGrounded, Z3ValueAssignmentList]):
+class ListOfOperatorGroundeds(
+    OperatorWithGroundingsSet[ListOfPvarGrounded, Z3ValueAssignmentList]
+):
     operators_grounded: List[SkillPDDL]
     solver: z3.Solver
     """We store a z3 solver becuase creating them is expensive."""
@@ -139,21 +144,33 @@ class ListOfOperatorGroundeds(OperatorWithGroundingsSet[ListOfPvarGrounded, Z3Va
         """Partition operators by relevant_pvars and then merge them."""
         self.solver.push()
         self.solver.add(*initial_state)
-        merged_operators = merge_skills_pddl(self.operators_grounded, relevant_pvars.pvars, self.solver)
+        merged_operators = merge_skills_pddl(
+            self.operators_grounded, relevant_pvars.pvars, self.solver
+        )
         self.solver.pop()
         return ListOfOperatorGroundeds(merged_operators, self.solver)
 
 
 @dataclass
-class EnumeratedPDDLTask(PDDLTask[ListOfPvarGrounded, Z3ValueAssignment, Z3ValueAssignmentList, ListOfOperatorGroundeds]):
+class EnumeratedPDDLTask(
+    PDDLTask[
+        ListOfPvarGrounded,
+        Z3ValueAssignment,
+        Z3ValueAssignmentList,
+        ListOfOperatorGroundeds,
+    ]
+):
     all_operators: ListOfOperatorGroundeds
+    all_pvars: ListOfPvarGrounded
     initial_state: Z3ValueAssignmentList
     goal: Z3ValueAssignment
     """For now we're just making goal always the dummy_goal. We'll remove that later."""
     pvars_grounding_type = ListOfPvarGrounded
 
     @classmethod
-    def from_domain_and_problem_files(cls, domain_path: str, problem_path: str) -> EnumeratedPDDLTask:
+    def from_domain_and_problem_files(
+        cls, domain_path: str, problem_path: str
+    ) -> EnumeratedPDDLTask:
         parser = PDDL_Parser_z3()
         parser.parse_domain(domain_path)
         parser.parse_problem(problem_path)
@@ -163,10 +180,18 @@ class EnumeratedPDDLTask(PDDLTask[ListOfPvarGrounded, Z3ValueAssignment, Z3Value
         goal_cond = parser.get_goal_cond()
         initial_state = parser.get_init_cond_list()
 
-        dummy_goal = z3.Bool("dummy_goal")  # TODO make sure this var does not already exist
+        dummy_goal = z3.Bool(
+            "dummy_goal"
+        )  # TODO make sure this var does not already exist
 
         dummy_goal_et = EffectTypePDDL(dummy_goal, 0)
         dummy_final_skill = SkillPDDL(goal_cond, "DummyFinalSkill", dummy_goal_et)
-        skills_with_dummy =  skill_list + [dummy_final_skill]
-        return EnumeratedPDDLTask(ListOfOperatorGroundeds(skills_with_dummy, z3.Solver()), initial_state, dummy_goal)
-
+        skills_with_dummy = skill_list + [dummy_final_skill]
+        str_to_var = parser.make_str2var_dict()
+        pvars = ListOfPvarGrounded(list(str_to_var.values()))
+        return EnumeratedPDDLTask(
+            ListOfOperatorGroundeds(skills_with_dummy, z3.Solver()),
+            pvars,
+            initial_state,
+            dummy_goal,
+        )

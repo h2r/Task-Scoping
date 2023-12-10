@@ -5,8 +5,9 @@ from oo_scoping.lifted.enumerated_operators_like_og_scoping import EnumeratedPDD
 from oo_scoping.PDDLz3 import PDDL_Parser_z3
 from oo_scoping.scoping import scope
 from oo_scoping.skill_classes import SkillPDDL
-from oo_scoping.test.domains.pickup_unlock_open_domain import PickupUnlockOpenPaths
+from oo_scoping.test.domains.pickup_unlock_open import PickupUnlockOpenPaths
 from oo_scoping.test.domains.radio import RadioPaths
+from oo_scoping.test.domains.double_doors import DoubleDoorsPaths
 from oo_scoping.z3_type_aliases import Z3Variable
 
 # Scoper = Callable[[str, str]]
@@ -91,6 +92,21 @@ class TestHolder:
                 ignored_values=["dummy_goal"],
             )
             self.assertTrue(venn.match(), f"{venn}")
+
+
+        def test_double_doors_operator_merge(self) -> None:
+            """If we can enter through left or right door, we shouldn't care which door is open."""
+            _scoped_operators, scoped_pvars = self.get_relevant_operators_and_pvars(
+                DoubleDoorsPaths.domain, DoubleDoorsPaths.Problems.outside_left_open_no_key
+            )
+            correct_var_names = ["is-inside(d)"]
+            venn = Venn(
+                correct_var_names,
+                set(map(str, scoped_pvars)),
+                ignored_values=["dummy_goal"],
+            )
+            self.assertTrue(venn.match(), f"{venn}")
+            pass
 
 
 class TestLifedButNotReallyScoping(TestHolder.ScopingTestDefinitions):

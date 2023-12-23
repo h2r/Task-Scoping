@@ -9,6 +9,6 @@ if __name__ == "__main__":
     #     print("~~~~~~~~~")
     #     print(o)
 
-    rel_vars = task.scope()
-    for p in rel_vars.pvar_names:
+    ops, vars = task.scope()
+    for p in vars.pvar_names:
         print(p)

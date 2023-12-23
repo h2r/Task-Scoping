@@ -83,11 +83,7 @@ class OperatorWithGroundingsSet(Generic[PVGS, PartialStateType, EffectSetType], 
 
     @abstractmethod
     def partition_by_effects(self, relevant_pvars: PVGS) -> Dict[EffectSetType, Self]:
-        """Group operators by their effects on relevant variables.
-
-        Make sure to keep track of groundings for operator params, and groundings
-        for quantifiers separately. (IDK if we need this warning here or for merge)
-        """
+        """Group operators by their effects on relevant variables."""
         raise NotImplementedError("Child class should implement this")
 
     @abstractmethod

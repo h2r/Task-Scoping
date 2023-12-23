@@ -149,6 +149,7 @@ class CartesianPvarSet(PVarGroundedSet[PartialStateType, PartialStateType]):
 
 ActionName: TypeAlias = str
 
+
 @dataclass(eq=True, frozen=True)
 class CartesianGroundedAction:
     # TODO: Refactor/change this. It probably doesn't hold what we want how we want it.
@@ -159,20 +160,29 @@ class CartesianGroundedAction:
     effects: Any
     """Effects should keep track of the variable names/types it takes, but not groundings."""
     precondition: Any
-    """NOT just a partial state. Should keep track of the variable names/types, but not groundings."""
+    """NOT just a partial state. Should keep track of the variable names/types, but not groundings.
+    Ideally we'll store an AST or something. The final form of this will depend on the logic tool we use
+    (unless we just convert it to logic as needed). For now, we just need to be able to get pvars and bindings from it."""
     groundings: CartesianGroundings
     """We _probably_ want to store the groundings here, rather than in the effects/preconditions/parameters."""
+
+    def get_affected_pvars(self) -> CartesianPvarSet:
+        raise NotImplementedError()
 
 @dataclass
 class CartesianGroundedActionsSet(OperatorWithGroundingsSet[CartesianPvarSet, PartialStateType,EffectsMultiVar]):
     actions: List[CartesianGroundedAction]
 
     def get_affected_pvars(self) -> CartesianPvarSet:
-        raise NotImplementedError()
+        pvars = CartesianPvarSet.new_empty()
+        for a in self.actions:
+            pvars = pvars.union(a.get_affected_pvars())
+        return pvars
 
     def get_non_guaranteed_pvars(
         self, initial_state_guaranteed: PartialStateType
     ) -> CartesianPvarSet:
+        """Requires a logic tool."""
         raise NotImplementedError()
 
 
@@ -181,6 +191,7 @@ class CartesianGroundedActionsSet(OperatorWithGroundingsSet[CartesianPvarSet, Pa
 
         Make sure to keep track of groundings for operator params, and groundings
         for quantifiers separately. (IDK if we need this warning here or for merge)
+        No logic tool needed.
         """
         raise NotImplementedError()
 
@@ -191,7 +202,7 @@ class CartesianGroundedActionsSet(OperatorWithGroundingsSet[CartesianPvarSet, Pa
     ) -> CartesianGroundedActionsSet:
         """Merge operators which have the same effects on relevant variables. initial_state is used to simplify preconditions.
 
-        This is probably the hardest thing to implement.
+        Requires a logic tool. This is probably the hardest thing to implement.
         """
         raise NotImplementedError()
 

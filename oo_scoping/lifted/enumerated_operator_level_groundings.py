@@ -1,5 +1,6 @@
 """These are collection classes similar to current scoping, 
 except that we group together concrete operators that come from the same lifted operator.
+VERY NOT COMPLETE.
 
 """
 from __future__ import annotations

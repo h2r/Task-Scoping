@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 from collections import OrderedDict
 from itertools import chain
@@ -5,21 +7,25 @@ from typing import (
     Dict,
     Iterable,
     List,
-    NewType,
     Optional,
-    OrderedDict,
     Set,
     Tuple,
+    TypeAlias,
     Union,
 )
 
 import z3
 
 from oo_scoping.utils import flatten, get_unique_z3_vars, simplify_disjunction
+from oo_scoping.z3_type_aliases import Z3Variable
 
 
 class EffectTypePDDL:  # EffectTypes are Immutable
-    def __init__(self, pvar: z3.ExprRef, index, params: Optional[Iterable] = None):
+    def __init__(self, pvar: Z3Variable, index, params: Optional[Iterable[Z3Variable]] = None):
+        """Args:
+            pvar: Z3 variable affected
+            index: Used to distinguish effects on the same pvar. Usually a str
+            params: z3 variables which influence how pvar is affected"""
         self.pvar, self.index = pvar, index
         # These params are NOT the same as pddl params, and should probably be renamed
         # These params are vars on which the effect relies - ex. in p.y <- t.y, t.y is a param
@@ -30,14 +36,14 @@ class EffectTypePDDL:  # EffectTypes are Immutable
         self.index_str = str(self.index)
         self.params_str = str(self.params)
 
-    def __eq__(self, other):
+    def __eq__(self, other: EffectTypePDDL):
         return (
             z3.eq(self.pvar, other.pvar)
             and self.index == other.index
             and self.params == other.params
         )
 
-    def __lt__(self, other):
+    def __lt__(self, other: EffectTypePDDL):
         # TODO incorporate pvar type into sort.
         if self.pvar_str > other.pvar_str:
             return False
@@ -49,15 +55,15 @@ class EffectTypePDDL:  # EffectTypes are Immutable
                     return False
         return True
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         # return f"ET({self.pvar},{self.index},{self.params})"
         # I'm tempted to use unicode arrow
         return f"{self.pvar} <- {self.index}"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.__repr__()
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash((hash(self.pvar), hash(self.index), hash(self.params)))
 
 
@@ -67,11 +73,9 @@ class SkillPDDL:  # Skills are Immutable
         precondition: z3.ExprRef,
         action: Union[str, List[str], Tuple[str, ...]],
         effects: Union[Iterable[EffectTypePDDL], EffectTypePDDL],
-        side_effects: Union[Iterable[EffectTypePDDL], EffectTypePDDL] = None,
+        side_effects: Union[Iterable[EffectTypePDDL], EffectTypePDDL] = tuple(),
     ):
-        if side_effects is None:
-            side_effects = ()
-        elif isinstance(side_effects, EffectTypePDDL):
+        if isinstance(side_effects, EffectTypePDDL):
             side_effects = (side_effects,)
         if isinstance(effects, EffectTypePDDL):
             effects = (effects,)
@@ -92,7 +96,7 @@ class SkillPDDL:  # Skills are Immutable
     def all_effects(self) -> Tuple[EffectTypePDDL, ...]:
         return tuple(set(self.effects + self.side_effects))
 
-    def __eq__(self, other):
+    def __eq__(self, other: SkillPDDL) -> bool:
         if not isinstance(other, SkillPDDL):
             return False
         same_prec = z3.eq(self.precondition, other.precondition)
@@ -101,29 +105,29 @@ class SkillPDDL:  # Skills are Immutable
         same_side_effects = self.side_effects == other.side_effects
         return same_prec and same_action and same_effects and same_side_effects
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         s = (
             f"{self.action}\nPrecondition: {self.precondition}\nEffects: {self.effects}"
             f"\nSide Effects: {self.side_effects}"
         )
         return s
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.__repr__()
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         part_hashes = []
         for x in [self.precondition, self.action, self.effects, self.side_effects]:
             part_hashes.append(hash(x))
         return hash(tuple(part_hashes))
 
-    def __lt__(self, other):
+    def __lt__(self, other: SkillPDDL) -> bool:
         # NOTE: This sort is arbitrary. We are defining it just to get a canonical ordering.
         # return self.str_repr < other.str_repr
         return self.action_str < other.action_str
         # return str(self) < str(other)
 
-    def move_irrelevant2side_effects(self, rel_pvars: Set[str]):
+    def move_irrelevant2side_effects(self, rel_pvars: Set[str]) -> SkillPDDL:
         """Returns a new skill with irrelevant pvars moved to side effects"""
         # Check that no relevant vars are in side effects
         # for e in self.side_effects:
@@ -136,7 +140,7 @@ class SkillPDDL:  # Skills are Immutable
         return SkillPDDL(self.precondition, self.action, new_effects, new_side_effects)
 
     @property
-    def params(self):
+    def params(self) -> List[Z3Variable]:
         params = []
         for x in self.effects:
             if hasattr(x, "params"):
@@ -145,7 +149,9 @@ class SkillPDDL:  # Skills are Immutable
         # return tuple(sorted(list(set(params))))
         # return tuple(chain(*[x.params for x in self.effects]))
 
-HashedSkills = NewType("HashedSkills", Dict[Tuple[EffectTypePDDL,...], List[SkillPDDL]])
+EffectsType: TypeAlias = Tuple[EffectTypePDDL,...]
+HashedSkills: TypeAlias = Dict[EffectsType, List[SkillPDDL]]
+# HashedSkills = NewType("HashedSkills", Dict[Tuple[EffectTypePDDL,...], List[SkillPDDL]])
 
 
 def move_copy_se(x):
@@ -209,7 +215,7 @@ def merge_skills_inner(hashed_skills: HashedSkills, solver: z3.Solver) -> List[S
 def merge_skills_pddl(
     skills: Iterable[SkillPDDL],
     relevant_pvars: Iterable[z3.ExprRef],
-    solver: Optional[z3.Solver] = None,
+    solver: z3.Solver,
 ) -> List[SkillPDDL]:
     """
     Merges skills that have the same effects on relevant_pvars

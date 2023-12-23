@@ -4,12 +4,13 @@ The toplevel class is PDDLTask. All other classes exist to support PDDLTask.scop
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Generic, List, Type, TypeVar
+from typing import Generic, Type, TypeVar, Dict, Hashable
+from typing_extensions import Self
 
-
-PVGS = TypeVar("PVGS")
 GoalType = TypeVar("GoalType")
 PartialStateType = TypeVar("PartialStateType")
+
+EffectSetType = TypeVar("EffectSetType", bound=Hashable)
 
 
 class PVarGroundedSet(Generic[GoalType, PartialStateType], ABC):
@@ -22,19 +23,18 @@ class PVarGroundedSet(Generic[GoalType, PartialStateType], ABC):
     2. Implement the methods below.
     """
 
-
     @classmethod
-    def new_empty(cls: Type[PVGS]) -> PVGS:
+    @abstractmethod
+    def new_empty(cls) -> Self:
         raise NotImplementedError()
 
     @classmethod
-    def from_concrete_variable_value_assignment(
-        cls: Type[PVGS], cvva: GoalType
-    ) -> PVGS:
+    @abstractmethod
+    def from_concrete_variable_value_assignment(cls, cvva: GoalType) -> Self:
         raise NotImplementedError()
 
-    @classmethod
-    def union(cls: Type[PVGS], grounded_sets: List[PVGS]) -> PVGS:
+    @abstractmethod
+    def union(self, other: Self) -> Self:
         raise NotImplementedError()
 
     @abstractmethod
@@ -44,12 +44,11 @@ class PVarGroundedSet(Generic[GoalType, PartialStateType], ABC):
         """Return a new partial state with these grounded PVars ignores"""
         raise NotImplementedError()
 
-PVGSBound = TypeVar("PVGSBound", bound=PVarGroundedSet)
 
-OWGS = TypeVar("OWGS")
+PVGS = TypeVar("PVGS", bound=PVarGroundedSet)
 
 
-class OperatorWithGroundingsSet(Generic[PVGSBound, PartialStateType], ABC):
+class OperatorWithGroundingsSet(Generic[PVGS, PartialStateType, EffectSetType], ABC):
     """Collection of operators with groundings.
 
 
@@ -59,26 +58,52 @@ class OperatorWithGroundingsSet(Generic[PVGSBound, PartialStateType], ABC):
     """
 
     @abstractmethod
-    def get_affected_pvars(self) -> PVGSBound:
+    def get_affected_pvars(self) -> PVGS:
         raise NotImplementedError()
 
     @abstractmethod
     def get_non_guaranteed_pvars(
         self, initial_state_guaranteed: PartialStateType
-    ) -> PVGSBound:
+    ) -> PVGS:
         """Maybe hard."""
         # TODO: Possibly the input should be something else with more structure, that lets us be more efficient.
         raise NotImplementedError()
 
-    @abstractmethod
     def get_merged_operators(
-        self: OWGS, initial_state: PartialStateType, relevant_pvars: PVGSBound
-    ) -> OWGS:
-        """This is probably the hardest thing to implement.
-        Make sure to keep track of groundings for operator params, and groundings
-        for quantifiers separately.
+        self, initial_state: PartialStateType, relevant_pvars: PVGS
+    ) -> Self:
+        """Partition operators by their effects on relevant variables, and then merge operators with matching effects.
 
-        Also: how do we cope with the initial_state when without grounding everything?
+        Subclasses don't need to implement this.
+        """
+        effects_to_operators = self.partition_by_effects(relevant_pvars)
+        return self.merge_operators_with_matching_effects(
+            initial_state, effects_to_operators
+        )
+
+    @abstractmethod
+    def partition_by_effects(self, relevant_pvars: PVGS) -> Dict[EffectSetType, Self]:
+        """Group operators by their effects on relevant variables.
+
+        Make sure to keep track of groundings for operator params, and groundings
+        for quantifiers separately. (IDK if we need this warning here or for merge)
+        """
+        raise NotImplementedError("Child class should implement this")
+
+    @abstractmethod
+    def merge_operators_with_matching_effects(
+        self,
+        initial_state: PartialStateType,
+        effects_to_operators: Dict[EffectSetType, Self],
+    ) -> Self:
+        """Merge operators which have the same effects on relevant variables. initial_state is used to simplify preconditions.
+
+        This is probably the hardest thing to implement. A few questions:
+
+        1. How do we deal with initial_state without grounding everything?
+        2. How do we express, disjunct, and simplify ungrounded/first order preconditions?
+        3. Make sure to keep track of groundings for operator params, and groundings
+        for quantifiers separately.
         """
         raise NotImplementedError("Child class should implement this")
 
@@ -88,27 +113,23 @@ OperatorCollectionType = TypeVar(
 )
 
 
-PDDLTaskTypeVarUnbound = TypeVar("PDDLTaskTypeVarUnbound", bound="PDDLTask")
-
-
-class PDDLTask(Generic[PVGSBound, GoalType, PartialStateType, OperatorCollectionType], ABC):
+class PDDLTask(Generic[PVGS, GoalType, PartialStateType, OperatorCollectionType], ABC):
     """Holds a PDDL Task. Main thing passed into scoping probably. Needs to implement parsing."""
 
     all_operators: OperatorCollectionType
-    all_pvars: PVGSBound
+    all_pvars: PVGS
     initial_state: PartialStateType
     goal: GoalType
     pvars_grounding_type: Type[PVarGroundedSet[GoalType, PartialStateType]]
 
     @classmethod
-    def from_domain_and_problem_files(
-        cls: Type[PDDLTaskTypeVarUnbound], domain_path: str, problem_path: str
-    ) -> PDDLTaskTypeVarUnbound:
+    @abstractmethod
+    def from_domain_and_problem_files(cls, domain_path: str, problem_path: str) -> Self:
         raise NotImplementedError("Child classes should implement this")
 
-    def scope(self) -> tuple[OperatorCollectionType, PVGSBound]:
+    def scope(self) -> tuple[OperatorCollectionType, PVGS]:
         """Get a compressed operator set sufficient for optimal planning.
-        
+
         TODO: Should probably return a PDDLTask."""
         # Initialize relevant vars. TODO: What is the format?
         # I don't think it's just (lifted pvars, groundingsset) - we may need a union of these
@@ -117,7 +138,9 @@ class PDDLTask(Generic[PVGSBound, GoalType, PartialStateType, OperatorCollection
         relevant_pvars = (
             self.pvars_grounding_type.from_concrete_variable_value_assignment(self.goal)
         )
-        merged_operators = self.all_operators  # Set this to convince pylance it is not unbound
+        merged_operators = (
+            self.all_operators
+        )  # Set this to convince pylance it is not unbound
         while relevant_pvars_old != relevant_pvars:
             # Get merged operators
             merged_operators = self.all_operators.get_merged_operators(
@@ -130,7 +153,7 @@ class PDDLTask(Generic[PVGSBound, GoalType, PartialStateType, OperatorCollection
             # It's probably impossible in python - I think we need higher kinded types.
             # https://github.com/python/typing/discussions/999
             # https://github.com/python/typing/issues/548
-            affected_pvars_per_operator: PVGSBound = merged_operators.get_affected_pvars()
+            affected_pvars_per_operator: PVGS = merged_operators.get_affected_pvars()
             assert isinstance(affected_pvars_per_operator, self.pvars_grounding_type)
             # Get partial initial state over non-affected pvars
             initial_state_guaranteed = (
@@ -139,11 +162,8 @@ class PDDLTask(Generic[PVGSBound, GoalType, PartialStateType, OperatorCollection
 
             # Update relevant pvars based on non-guaranteed preconditions
             relevant_pvars_old = relevant_pvars
-            relevant_pvars = self.pvars_grounding_type.union(
-                [
-                    relevant_pvars,
-                    merged_operators.get_non_guaranteed_pvars(initial_state_guaranteed),
-                ]
+            relevant_pvars = relevant_pvars.union(
+                    merged_operators.get_non_guaranteed_pvars(initial_state_guaranteed)
             )
 
         # return merged_operators  # type: ignore This is never unbound.

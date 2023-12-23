@@ -1,9 +1,10 @@
-"""Data structures and methods for unlifted scoping."""
+"""Data structures and methods for unlifted scoping. Complete."""
 from __future__ import annotations
 
 from dataclasses import dataclass
 from functools import cached_property
-from typing import List
+from itertools import chain
+from typing import Dict, List
 
 import z3
 
@@ -14,10 +15,17 @@ from oo_scoping.lifted.abstract_groundings import (
 )
 from oo_scoping.PDDLz3 import PDDL_Parser_z3
 from oo_scoping.scoping import effects2pvars, skills2effects
-from oo_scoping.skill_classes import SkillPDDL, merge_skills_pddl, EffectTypePDDL
+from oo_scoping.skill_classes import (
+    EffectsType,
+    EffectTypePDDL,
+    SkillPDDL,
+    group_skills_by_effects,
+)
 from oo_scoping.utils import (
+    flatten,
     get_atoms,
     get_unique_z3_vars,
+    simplify_disjunction,
     solver_implies_condition,
     split_conj,
 )
@@ -26,6 +34,8 @@ from oo_scoping.z3_type_aliases import (
     Z3ValueAssignmentList,
     Z3Variable,
 )
+
+# OGEffectSetType: TypeAlias = Union[Iterable[EffectTypePDDL], EffectTypePDDL]
 
 
 @dataclass(frozen=True)
@@ -45,11 +55,8 @@ class ListOfPvarGrounded(PVarGroundedSet[Z3ValueAssignment, Z3ValueAssignmentLis
         atom = get_atoms_assert_one(cvva)
         return ListOfPvarGrounded([atom])
 
-    @classmethod
-    def union(cls, grounded_sets: List[ListOfPvarGrounded]) -> ListOfPvarGrounded:
-        pvars_with_duplicates: List[Z3Variable] = []
-        for g in grounded_sets:
-            pvars_with_duplicates += g.pvars
+    def union(self, other: ListOfPvarGrounded) -> ListOfPvarGrounded:
+        pvars_with_duplicates = self.pvars + other.pvars
         pvars_without_duplicates = get_unique_z3_vars(pvars_with_duplicates)
         return ListOfPvarGrounded(pvars_without_duplicates)
 
@@ -86,7 +93,7 @@ def value_assignment_to_name(value_assignment: Z3ValueAssignment) -> str:
 
 @dataclass
 class ListOfOperatorGroundeds(
-    OperatorWithGroundingsSet[ListOfPvarGrounded, Z3ValueAssignmentList]
+    OperatorWithGroundingsSet[ListOfPvarGrounded, Z3ValueAssignmentList, EffectsType]
 ):
     operators_grounded: List[SkillPDDL]
     solver: z3.Solver
@@ -138,17 +145,43 @@ class ListOfOperatorGroundeds(
         self.solver.pop()
         return ListOfPvarGrounded(pvars_new)
 
-    def get_merged_operators(
-        self, initial_state: Z3ValueAssignmentList, relevant_pvars: ListOfPvarGrounded
+    def partition_by_effects(
+        self, relevant_pvars: ListOfPvarGrounded
+    ) -> Dict[EffectsType, ListOfOperatorGroundeds]:
+        # return super().partition_by_effects(initial_state, relevant_pvars)
+        effects_to_operator_sets = group_skills_by_effects(
+            self.operators_grounded, set(relevant_pvars.pvar_names)
+        )
+        effects_to_self = {
+            e: ListOfOperatorGroundeds(operators, self.solver)
+            for e, operators in effects_to_operator_sets.items()
+        }
+        return effects_to_self
+
+    def merge_operators_with_matching_effects(
+        self,
+        initial_state: Z3ValueAssignmentList,
+        effects_to_operators: Dict[EffectsType, ListOfOperatorGroundeds],
     ) -> ListOfOperatorGroundeds:
-        """Partition operators by relevant_pvars and then merge them."""
         self.solver.push()
         self.solver.add(*initial_state)
-        merged_operators = merge_skills_pddl(
-            self.operators_grounded, relevant_pvars.pvars, self.solver
-        )
+        new_skills: List[SkillPDDL] = []
+        for effects, skills_holder in effects_to_operators.items():
+            # Skip empty effects
+            if len(effects) == 0:
+                continue
+            skills = skills_holder.operators_grounded
+            actions = sorted(list(set(flatten([s.action for s in skills]))))
+            side_effects = chain(*[s.side_effects for s in skills])
+            conds = [s.precondition for s in skills]
+            precondition = simplify_disjunction(conds, my_solver=self.solver)
+            # Actions is the list of actions that appeared in any of the parent skills
+            if len(actions) == 1:
+                actions = actions[0]
+            s_merged = SkillPDDL(precondition, actions, effects, side_effects)
+            new_skills.append(s_merged)
         self.solver.pop()
-        return ListOfOperatorGroundeds(merged_operators, self.solver)
+        return ListOfOperatorGroundeds(new_skills, self.solver)
 
 
 @dataclass

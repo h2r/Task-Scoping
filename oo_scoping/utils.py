@@ -28,7 +28,7 @@ def pvars2objects(pvars):
     return objs
 
 
-def simplify_disjunction(conds, my_solver=None, tactic="aig"):
+def simplify_disjunction(conds, my_solver=None, tactic="aig") -> z3.BoolRef:
     # tactic = 'simplify'
     global solver
     if my_solver is None:
@@ -39,8 +39,10 @@ def simplify_disjunction(conds, my_solver=None, tactic="aig"):
     g = z3.Goal()
     g.add(disj)
     disj_simp = z3.Tactic(tactic)(g).as_expr()
+    assert not isinstance(disj_simp, z3.Probe), "Remove or refine this assert"
     if disj_simp.decl().name() == "and":
         disj_simp = z3.And(*disj_simp.children())
+    assert isinstance(disj_simp, z3.BoolRef), "Remove or refine this assert"
     return disj_simp
 
 
@@ -339,13 +341,13 @@ def nested_list_replace(arr, replacements):
         raise TypeError(f"Unsupported type: {type(arr)}")
 
 
-def get_unique_z3_vars(args):
+def get_unique_z3_vars(args: List[Z3Variable]) -> List[Z3Variable]:
     vars = get_unique_z3_vars_unsorted(args)
     vars = sort_z3_vars(vars)
     return vars
 
 
-def get_unique_z3_vars_unsorted(args, fast=True):
+def get_unique_z3_vars_unsorted(args: List[Z3Variable], fast=True) -> List[Z3Variable]:
     """
     :param args: List of z3 vars
     :param fast: When True, check for equality based on string equality only
@@ -367,7 +369,7 @@ def get_unique_z3_vars_unsorted(args, fast=True):
     return uvars
 
 
-def sort_z3_vars(vars):
+def sort_z3_vars(vars: List[Z3Variable]) -> List[Z3Variable]:
     return sorted(vars, key=lambda x: str(x))
 
 

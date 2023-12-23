@@ -7,12 +7,12 @@ from itertools import chain, product
 from oo_scoping.action import Action
 import copy
 from oo_scoping.utils import product_dict, nested_list_replace
-from typing import Dict
+from typing import Dict, List
 
 
 class PDDL_Parser:
     # TODO convert type hierarchy to ordered dict (parent: [children])
-
+    actions: List[Action]
     SUPPORTED_REQUIREMENTS = [
         ":strips",
         ":negative-preconditions",
@@ -104,7 +104,7 @@ class PDDL_Parser:
             self.domain_name = "unknown"
             self.requirements = []
             self.types = []
-            self.actions = []
+            self.actions: List[Action] = []
             self.predicates = OrderedDict()
             self.functions = OrderedDict()
             while tokens:

@@ -217,7 +217,20 @@ class UngroundedMultiVarEffect:
 
 @dataclass(frozen=True, eq=True)
 class UngroundedPrecondition:
+    """Needs integration with logic tool. How we actually store the data in this class
+    will most likely depend on the tool. Eg. for Z3 we use a z3.BoolRef.
+    But we can't use Z3 for this, since it can't express lifted (ie first order logic) expressions.
+    """
+
     pass
+
+
+@dataclass(frozen=True, eq=True)
+class CartesianPrecondition:
+    """Needs integration with logic tool"""
+
+    precondition: UngroundedPrecondition
+    groundings: CartesianGroundings
 
 
 @dataclass(eq=True, frozen=True)
@@ -231,7 +244,8 @@ class CartesianEffect:
 
 @dataclass(eq=True, frozen=True)
 class CartesianEffectSet:
-    effects: frozenset[CartesianEffect]
+    var_to_effect: Dict[PvarName, CartesianEffect]
+    # effects: frozenset[CartesianEffect]
 
 
 @dataclass(eq=True, frozen=True)
@@ -239,19 +253,24 @@ class CartesianGroundedAction:
     # TODO: Refactor/change this. It probably doesn't hold what we want how we want it.
     # Be mindful of how we track groundings and parameters (the things that determine how we affect the affected variable)
     name: ActionName
-    parameters: Any
+    parameters: List[UngroundedPvar]
     """Affect how the target variables are affected. Has variable names and types, but not groundings."""
-    effects: Dict[UngroundedPvar, UngroundedSingleVarEffect]
-    """Effects should keep track of the variable names/types it takes, but not groundings.
-    For merged operators, we will need effects to track groundings. TODO: Make it so."""
-    precondition: UngroundedPrecondition
-    """NOT just a partial state. Should keep track of the variable names/types, but not groundings.
+    effects: CartesianEffectSet
+    """Effects hold pvar, effect_id, and groundings. We store groundings separately for each effect so that
+    we can remove irrelevant groundings for each pvar, based on relevant_pvars."""
+    precondition: CartesianPrecondition
+    """NOT just a partial state. Should keep track of the variable names/types. Also keeps track of groundings for now,
+    because maybe the logic tool can prune grounding sets for quantified variables (ie variables not part of action.groundings).
+    Also, it's possible that a parameter to the action is not mentioned in the precondition.
+
     Ideally we'll store an AST or something. The final form of this will depend on the logic tool we use
     (unless we just convert it to logic as needed). For now, we just need to be able to get UngroundedPvars from it,
     with object variable names.
     """
     groundings: CartesianGroundings
-    """We _probably_ want to store the groundings here, rather than in the effects/preconditions/parameters."""
+    """Groundings used for preconditions and parameters. effects use separate groundings for each pvar, though any of those
+    grounding sets could just be a reference to this action-level groundings.
+    TODO: Precondition can maybe use different groundings, in case the logic tool throws some away?"""
 
     def get_affected_pvars(self) -> CartesianPvarSet:
         raise NotImplementedError()
@@ -260,12 +279,10 @@ class CartesianGroundedAction:
         self, relevant_pvars: CartesianPvarSet
     ) -> CartesianPvarSet:
         name_to_groundings: Dict[PvarName, CartesianGroundings] = dict()
-        for pvar in self.effects.keys():
-            relevant_groundings = relevant_pvars.name_to_groundings.get(
-                pvar.var_name, None
-            )
+        for pvar in self.effects.var_to_effect.keys():
+            relevant_groundings = relevant_pvars.name_to_groundings.get(pvar, None)
             if relevant_groundings is not None:
-                name_to_groundings[pvar.var_name] = self.groundings.intersect(
+                name_to_groundings[pvar] = self.groundings.intersect(
                     relevant_groundings
                 )
         return CartesianPvarSet(name_to_groundings)
@@ -274,17 +291,15 @@ class CartesianGroundedAction:
         self, relevant_pvars: CartesianPvarSet
     ) -> CartesianEffectSet:
         # TODO: Probably iterate over relevant_pvars instead. We iterate over effects for now
-        cartesian_effects: List[CartesianEffect] = []
-        for pvar, effect in self.effects.items():
-            relevant_groundings = relevant_pvars.name_to_groundings.get(
-                pvar.var_name, None
-            )
+        name_to_effect: Dict[PvarName, CartesianEffect] = dict()
+        for pvar, effect in self.effects.var_to_effect.items():
+            relevant_groundings = relevant_pvars.name_to_groundings.get(pvar, None)
             if relevant_groundings is not None:
                 filtered_groundings = self.groundings.intersect(relevant_groundings)
-                cartesian_effects.append(
-                    CartesianEffect(pvar, effect.effect_id, filtered_groundings)
+                name_to_effect[pvar] = CartesianEffect(
+                    effect.var, effect.effect_id, filtered_groundings
                 )
-        return CartesianEffectSet(frozenset(cartesian_effects))
+        return CartesianEffectSet(name_to_effect)
 
 
 @dataclass
@@ -334,7 +349,24 @@ class CartesianGroundedActionsSet(
             effect: CartesianGroundedActionsSet(actions)
             for effect, actions in effects_to_actions.items()
         }
-        
+
+    def get_joined_names(self) -> str:
+        """Concatenates all action names. Used to create names for merged actions."""
+        return "|".join([a.name for a in self.actions])
+
+    def get_all_parameters(self) -> List[UngroundedPvar]:
+        """Get parameters used in any action."""
+        all_params: List[UngroundedPvar] = []
+        for a in self.actions:
+            all_params = concatenate_without_dupes_inorder(all_params, a.parameters)
+        return all_params
+
+    def get_merged_groundings(self) -> CartesianGroundings:
+        # TODO: What are the new groundings?
+        raise NotImplementedError(
+            "What should this be? I think not just intersection or union. Think it through"
+            " based on what happens in og enumerated scoping."
+        )
 
     def merge_operators_with_matching_effects(
         self,
@@ -345,12 +377,25 @@ class CartesianGroundedActionsSet(
 
         Requires a logic tool. This is probably the hardest thing to implement.
         """
-        # Create merged effects. Does _not_ need logic tool.
-        # TODO: Does the merged effects need to keep track of relevant groundings separately for each pvar,
-        # or can we just use a maximal groundings set?
-
-        # Merge preconditions. Needs logic tool.
+        merged_actions: List[CartesianGroundedAction] = []
+        for effects, actions in effects_to_operators.items():
+            # TODO: Refactor abstract method based on the decomposition used here. Probably.
+            merged_actions.append(
+                CartesianGroundedAction(
+                    name=actions.get_joined_names(),
+                    parameters=actions.get_all_parameters(),
+                    precondition=actions.merge_preconditions(initial_state),
+                    groundings=actions.get_merged_groundings(),
+                    effects=effects,
+                )
+            )
         raise NotImplementedError()
+
+    def merge_preconditions(
+        self, initial_state: PartialStateType
+    ) -> CartesianPrecondition:
+        # TODO: Implement
+        raise NotImplementedError("This depends on the logic tool we use.")
 
 
 """This got too fancy with passing in a callable. We should probably inline it."""
@@ -389,6 +434,7 @@ def do_cartesian(
 
 
 def concatenate_without_dupes_inorder(arr0: Iterable[V], arr1: Iterable[V]) -> List[V]:
+    # TODO: Don't use this, especially when concatenating many iterables at once. Do something faster.
     new_list: List[V] = copy.copy(list(arr0))
     for x in arr1:
         if x not in new_list:

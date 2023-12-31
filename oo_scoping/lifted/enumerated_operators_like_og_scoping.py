@@ -97,7 +97,8 @@ class ListOfOperatorGroundeds(
 ):
     operators_grounded: List[SkillPDDL]
     solver: z3.Solver
-    """We store a z3 solver becuase creating them is expensive."""
+    """We store a z3 solver becuase creating them is expensive. We should probably store it elsewhere.
+    Maybe have a reified OperatorMerger abstract base class. But this is fine for now."""
 
     def get_affected_pvars(self) -> ListOfPvarGrounded:
         effects = skills2effects(self.operators_grounded)

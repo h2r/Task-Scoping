@@ -1,11 +1,12 @@
 from __future__ import annotations
 import itertools
 from dataclasses import dataclass
-from typing import List, TypeVar
+from typing import List, TypeVar, Tuple
 from oo_scoping.lifted.abstract_groundings import (
     OperatorWithGroundingsSet,
     PVarGroundedSet,
 )
+
 # from pddl.logic import Constant, Variable
 # from pddl.action import Action
 # from pddl.parser.domain import Domain, DomainParser
@@ -17,7 +18,9 @@ from oo_scoping.action import Action
 from typing import TypeAlias, Any, Dict, Iterable, Callable
 import enum
 import copy
+from collections import defaultdict
 
+# TODO: Make hashing/eq checking based on frozensets, order independent
 
 # TODO: Use types from our PDDL parsers
 Constant: TypeAlias = Any
@@ -34,13 +37,16 @@ distinct effects for the sake of partitioning skills by their effects.
 ParamName: TypeAlias = str
 ObjectName: TypeAlias = str
 
+
 @dataclass
 class SingleGrounding:
     param_to_object: Dict[ParamName, ObjectName]
 
-@dataclass
+
+@dataclass(frozen=True, eq=True)
 class CartesianGroundings:
     """Represents a set of groundings as a product of (groundings for v) for a set of variables v"""
+
     param_to_groundings: dict[ParamName, list[ObjectName]]
 
     def to_list_of_groundings(self) -> list[SingleGrounding]:
@@ -51,59 +57,73 @@ class CartesianGroundings:
         combined_variable_to_groundings = copy.deepcopy(self.param_to_groundings)
         for var_name, other_groundings in other.param_to_groundings.items():
             if var_name in combined_variable_to_groundings:
-                combined_variable_to_groundings[var_name] = concatenate_without_dupes_inorder(combined_variable_to_groundings[var_name], other_groundings)
+                combined_variable_to_groundings[
+                    var_name
+                ] = concatenate_without_dupes_inorder(
+                    combined_variable_to_groundings[var_name], other_groundings
+                )
             else:
-                combined_variable_to_groundings[var_name] = copy.deepcopy(other_groundings)
+                combined_variable_to_groundings[var_name] = copy.deepcopy(
+                    other_groundings
+                )
         return CartesianGroundings(combined_variable_to_groundings)
-    
+
     def intersect(self, other: CartesianGroundings) -> CartesianGroundings:
         """We maybe don't need this"""
         intersected_variable_to_groundings: dict[ParamName, list[ObjectName]] = dict()
         for param_name, object_names in self.param_to_groundings.items():
             if param_name in other.param_to_groundings.keys():
                 other_object_names = other.param_to_groundings[param_name]
-                intersected_variable_to_groundings[param_name] = [object_name for object_name in object_names if object_name in other_object_names]
+                intersected_variable_to_groundings[param_name] = [
+                    object_name
+                    for object_name in object_names
+                    if object_name in other_object_names
+                ]
         return CartesianGroundings(intersected_variable_to_groundings)
-    
+
     def relative_complement(self, other: CartesianGroundings) -> CartesianGroundings:
         """Return a CartesianGroundings that contains all groundings in self but _not_ in other."""
         filtered_param_to_groundings: dict[ParamName, list[ObjectName]] = dict()
         for param_name, object_names in self.param_to_groundings.items():
             banned_objects = other.param_to_groundings.get(param_name, [])
-            filtered_param_to_groundings[param_name] = [obj for obj in object_names if obj not in banned_objects]
+            filtered_param_to_groundings[param_name] = [
+                obj for obj in object_names if obj not in banned_objects
+            ]
         return CartesianGroundings(filtered_param_to_groundings)
-    
+
+    def __hash__(self) -> int:
+        return hash(frozenset(self.param_to_groundings.items()))
+
+
 class PvarDomain(enum.Enum):
     """What values can a pvar take."""
+
     binary = enum.auto()
     real = enum.auto()
-
-
 
 
 @dataclass
 class CartesianPvar:
     """A single pvar and a collection of groundings for it."""
+
     var_name: PvarName
     groundings: CartesianGroundings
     # domain: PvarDomain
+
 
 PartialStateType: TypeAlias = Dict[CartesianPvar, int]
 GoalType: TypeAlias = PartialStateType
 """For now assume a goal is a single value for a single grounding."""
 
-# @dataclass(eq=True, frozen=True)
-# class EffectSingleVar:
-#     pvar: PvarName
-#     # TODO: Use some encoding for effect val. Probably from the pddl parser directly.
-#     effect_val: str
 
-@dataclass(eq=True, frozen=True)
-class EffectsMultiVar:
-    # TODO: Probably wrong, needs to be more tightly integrated into actions.
-    """Effects on a multiple of pvars. Each action has one of these."""
-    effects: Dict[PvarName, EffectId]
+@dataclass
+class UngroundedPvar:
+    """Pvar, with free variables for its arguments.
+    This should likely be a parent class to CartesianPvar.
+    """
 
+    var_name: PvarName
+    params: List[ParamName]
 
 
 @dataclass(eq=True, frozen=True)
@@ -116,9 +136,13 @@ class CartesianPvarSet(PVarGroundedSet[PartialStateType, PartialStateType]):
         return CartesianPvarSet(dict())
 
     @classmethod
-    def from_concrete_variable_value_assignment(cls, cvva: GoalType) -> CartesianPvarSet:
+    def from_concrete_variable_value_assignment(
+        cls, cvva: GoalType
+    ) -> CartesianPvarSet:
         """WLOG there is a single, grounded, goal pvar, so we just need to store that grounded pvar."""
-        return CartesianPvarSet({pvar.var_name: pvar.groundings for pvar in cvva.keys()})
+        return CartesianPvarSet(
+            {pvar.var_name: pvar.groundings for pvar in cvva.keys()}
+        )
 
     def union(self, other: CartesianPvarSet) -> CartesianPvarSet:
         merged_name_to_groundings = copy.deepcopy(self.name_to_groundings)
@@ -126,7 +150,9 @@ class CartesianPvarSet(PVarGroundedSet[PartialStateType, PartialStateType]):
             if pvar_name not in merged_name_to_groundings.keys():
                 merged_name_to_groundings[pvar_name] = copy.deepcopy(other_groundings)
             else:
-                merged_name_to_groundings[pvar_name] = merged_name_to_groundings[pvar_name].union(other_groundings)
+                merged_name_to_groundings[pvar_name] = merged_name_to_groundings[
+                    pvar_name
+                ].union(other_groundings)
         return CartesianPvarSet(merged_name_to_groundings)
 
     def mask_from_partial_state(
@@ -138,16 +164,74 @@ class CartesianPvarSet(PVarGroundedSet[PartialStateType, PartialStateType]):
             our_groundings = self.name_to_groundings.get(cartesian_pvar.var_name, None)
             if our_groundings is not None:
                 # We hold some groundings of the lifted pvar. We must mask those from the output.
-                masked_pvar = CartesianPvar(cartesian_pvar.var_name, cartesian_pvar.groundings.relative_complement(our_groundings))
+                masked_pvar = CartesianPvar(
+                    cartesian_pvar.var_name,
+                    cartesian_pvar.groundings.relative_complement(our_groundings),
+                )
                 masked_partial_state[masked_pvar] = val
             else:
                 # We don't hold the lifted pvar at all, so we preserve the state entirely
                 masked_partial_state[copy.deepcopy(cartesian_pvar)] = val
         return masked_partial_state
-    
+
+    def __hash__(self) -> int:
+        return hash(frozenset(self.name_to_groundings.items()))
+
+    def __eq__(self, __value: object) -> bool:
+        if isinstance(__value, CartesianPvarSet):
+            return frozenset(self.name_to_groundings.items()) == frozenset(
+                __value.name_to_groundings.items()
+            )
+        else:
+            return False
 
 
 ActionName: TypeAlias = str
+
+
+@dataclass(frozen=True, eq=True)
+class UngroundedSingleVarEffect:
+    """Effect on a single pvar. Needs to have free variables for the objects mentioned.
+    The groundings for these free will be stored in the action holding this effect.
+
+    Must be hashable and support equality checking. (We can get these for free via dataclass,
+    as long as this class's attributes are all hashable and support equality, and we keep instances
+     of this class immutable.)
+
+    Does _not_ need to actually keep track of detailed effects. It needs
+    """
+
+    pvar: UngroundedPvar
+    effect_id: EffectId
+
+    def get_affected_lifted_pvars(self) -> List[UngroundedPvar]:
+        raise NotImplementedError(
+            "We need to define the data held by this class first."
+        )
+
+
+@dataclass(frozen=True, eq=True)
+class UngroundedMultiVarEffect:
+    pvar_to_effect: Dict[UngroundedPvar, UngroundedSingleVarEffect]
+
+
+@dataclass(frozen=True, eq=True)
+class UngroundedPrecondition:
+    pass
+
+
+@dataclass(eq=True, frozen=True)
+class CartesianEffect:
+    """Effect on a single pvar, using cartesian groundings."""
+
+    var: UngroundedPvar
+    effect_id: EffectId
+    groundings: CartesianGroundings
+
+
+@dataclass(eq=True, frozen=True)
+class CartesianEffectSet:
+    effects: frozenset[CartesianEffect]
 
 
 @dataclass(eq=True, frozen=True)
@@ -157,20 +241,58 @@ class CartesianGroundedAction:
     name: ActionName
     parameters: Any
     """Affect how the target variables are affected. Has variable names and types, but not groundings."""
-    effects: Any
-    """Effects should keep track of the variable names/types it takes, but not groundings."""
-    precondition: Any
+    effects: Dict[UngroundedPvar, UngroundedSingleVarEffect]
+    """Effects should keep track of the variable names/types it takes, but not groundings.
+    For merged operators, we will need effects to track groundings. TODO: Make it so."""
+    precondition: UngroundedPrecondition
     """NOT just a partial state. Should keep track of the variable names/types, but not groundings.
     Ideally we'll store an AST or something. The final form of this will depend on the logic tool we use
-    (unless we just convert it to logic as needed). For now, we just need to be able to get pvars and bindings from it."""
+    (unless we just convert it to logic as needed). For now, we just need to be able to get UngroundedPvars from it,
+    with object variable names.
+    """
     groundings: CartesianGroundings
     """We _probably_ want to store the groundings here, rather than in the effects/preconditions/parameters."""
 
     def get_affected_pvars(self) -> CartesianPvarSet:
         raise NotImplementedError()
 
+    def get_affected_relevant_pvars(
+        self, relevant_pvars: CartesianPvarSet
+    ) -> CartesianPvarSet:
+        name_to_groundings: Dict[PvarName, CartesianGroundings] = dict()
+        for pvar in self.effects.keys():
+            relevant_groundings = relevant_pvars.name_to_groundings.get(
+                pvar.var_name, None
+            )
+            if relevant_groundings is not None:
+                name_to_groundings[pvar.var_name] = self.groundings.intersect(
+                    relevant_groundings
+                )
+        return CartesianPvarSet(name_to_groundings)
+
+    def get_relevant_effects(
+        self, relevant_pvars: CartesianPvarSet
+    ) -> CartesianEffectSet:
+        # TODO: Probably iterate over relevant_pvars instead. We iterate over effects for now
+        cartesian_effects: List[CartesianEffect] = []
+        for pvar, effect in self.effects.items():
+            relevant_groundings = relevant_pvars.name_to_groundings.get(
+                pvar.var_name, None
+            )
+            if relevant_groundings is not None:
+                filtered_groundings = self.groundings.intersect(relevant_groundings)
+                cartesian_effects.append(
+                    CartesianEffect(pvar, effect.effect_id, filtered_groundings)
+                )
+        return CartesianEffectSet(frozenset(cartesian_effects))
+
+
 @dataclass
-class CartesianGroundedActionsSet(OperatorWithGroundingsSet[CartesianPvarSet, PartialStateType,EffectsMultiVar]):
+class CartesianGroundedActionsSet(
+    OperatorWithGroundingsSet[
+        CartesianPvarSet, PartialStateType, UngroundedMultiVarEffect
+    ]
+):
     actions: List[CartesianGroundedAction]
 
     def get_affected_pvars(self) -> CartesianPvarSet:
@@ -185,27 +307,50 @@ class CartesianGroundedActionsSet(OperatorWithGroundingsSet[CartesianPvarSet, Pa
         """Requires a logic tool."""
         raise NotImplementedError()
 
-
-    def partition_by_effects(self, relevant_pvars: CartesianPvarSet) -> Dict[EffectsMultiVar, CartesianGroundedActionsSet]:
+    def partition_by_effects(
+        self, relevant_pvars: CartesianPvarSet
+    ) -> Dict[CartesianEffectSet, CartesianGroundedActionsSet]:
         """Group operators by their effects on relevant variables.
 
         Make sure to keep track of groundings for operator params, and groundings
         for quantifiers separately. (IDK if we need this warning here or for merge)
         No logic tool needed.
+
+        A first version of this will treat ungrounded effects as the same only if they use
+        the same names for their object variables. We aren't going to deal with object variable
+        renaming/symmetry stuff.
+
+        # TODO: I think this may be throwing out too much information about groundings for the new operators.
+        Make sure it isn't.
         """
-        raise NotImplementedError()
+        effects_to_actions: Dict[
+            CartesianEffectSet, List[CartesianGroundedAction]
+        ] = defaultdict(list)
+        for action in self.actions:
+            effects_to_actions[action.get_relevant_effects(relevant_pvars)].append(
+                action
+            )
+        return {
+            effect: CartesianGroundedActionsSet(actions)
+            for effect, actions in effects_to_actions.items()
+        }
+        
 
     def merge_operators_with_matching_effects(
         self,
         initial_state: PartialStateType,
-        effects_to_operators: Dict[EffectsMultiVar, CartesianGroundedActionsSet],
+        effects_to_operators: Dict[CartesianEffectSet, CartesianGroundedActionsSet],
     ) -> CartesianGroundedActionsSet:
         """Merge operators which have the same effects on relevant variables. initial_state is used to simplify preconditions.
 
         Requires a logic tool. This is probably the hardest thing to implement.
         """
-        raise NotImplementedError()
+        # Create merged effects. Does _not_ need logic tool.
+        # TODO: Does the merged effects need to keep track of relevant groundings separately for each pvar,
+        # or can we just use a maximal groundings set?
 
+        # Merge preconditions. Needs logic tool.
+        raise NotImplementedError()
 
 
 """This got too fancy with passing in a callable. We should probably inline it."""
@@ -213,14 +358,18 @@ K = TypeVar("K")
 V = TypeVar("V")
 R = TypeVar("R")
 
+
 def identity(x: R) -> R:
     return x
 
-def do_cartesian(d: dict[K, list[V]], f: Callable[[dict[K, V]], R] = identity) -> list[R]:
+
+def do_cartesian(
+    d: dict[K, list[V]], f: Callable[[dict[K, V]], R] = identity
+) -> list[R]:
     """
     Args:
         d: A dict mapping each key to a list of candidate values
-        
+
     Returns:
         A list of all possible (key -> value) mappings.
     """
@@ -245,6 +394,7 @@ def concatenate_without_dupes_inorder(arr0: Iterable[V], arr1: Iterable[V]) -> L
         if x not in new_list:
             new_list.append(x)
     return new_list
+
 
 if __name__ == "__main__":
     pass

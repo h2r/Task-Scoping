@@ -93,23 +93,6 @@ def run_experiment(n_runs, sas_file, fd_path, log_dir, plan_type: str, force_cle
 
             sas_scoped_path = sas_file[:-4] + "_scoped" + sas_file[-4:]
 
-            # Planning on scoped
-            print("Planning on scoped")
-            plan_scoped_cmd_output = plan(sas_scoped_path, fd_path, plan_type=plan_type)
-            plan_scoped_start_time = time.time()
-            plan_scoped_cmd_output = plan(sas_scoped_path, fd_path, plan_type=plan_type)
-            plan_scoped_end_time = time.time()
-            plan_scoped_time = plan_scoped_end_time - plan_scoped_start_time
-            timings_dict["plan_scoped_time"].append(plan_scoped_time)
-            timings_dict["total_scoped_time"].append(scoping_time + plan_scoped_time)
-            timings_dict["plan_scoped_exit_code"].append(plan_scoped_cmd_output.returncode)
-            if plan_scoped_cmd_output.returncode == 0:
-                timings_dict["plan_scoped_generated_nodes"].append(int(re.search(r"(Generated) \d*", plan_scoped_cmd_output.stdout.decode()).group(0).split(' ')[1]))
-                timings_dict["plan_scoped_node_expansions"].append(int(re.search(r"(Expanded) \d*", plan_scoped_cmd_output.stdout.decode()).group(0).split(' ')[1]))
-            with open(timings_path, "w") as f:
-                json.dump(timings_dict, f)
-            save_cmd_output(plan_scoped_cmd_output, f"{log_dir_this_run}/plan_scoped")
-
             # Planning on unscoped
             print("Planning on unscoped")
             plan_unscoped_cmd_output = plan(sas_file, fd_path, plan_type=plan_type)
@@ -126,6 +109,23 @@ def run_experiment(n_runs, sas_file, fd_path, log_dir, plan_type: str, force_cle
             with open(timings_path, "w") as f:
                 json.dump(timings_dict, f)
             save_cmd_output(plan_unscoped_cmd_output, f"{log_dir_this_run}/plan_unscoped")
+
+            # Planning on scoped
+            print("Planning on scoped")
+            plan_scoped_cmd_output = plan(sas_scoped_path, fd_path, plan_type=plan_type)
+            plan_scoped_start_time = time.time()
+            plan_scoped_cmd_output = plan(sas_scoped_path, fd_path, plan_type=plan_type)
+            plan_scoped_end_time = time.time()
+            plan_scoped_time = plan_scoped_end_time - plan_scoped_start_time
+            timings_dict["plan_scoped_time"].append(plan_scoped_time)
+            timings_dict["total_scoped_time"].append(scoping_time + plan_scoped_time)
+            timings_dict["plan_scoped_exit_code"].append(plan_scoped_cmd_output.returncode)
+            if plan_scoped_cmd_output.returncode == 0:
+                timings_dict["plan_scoped_generated_nodes"].append(int(re.search(r"(Generated) \d*", plan_scoped_cmd_output.stdout.decode()).group(0).split(' ')[1]))
+                timings_dict["plan_scoped_node_expansions"].append(int(re.search(r"(Expanded) \d*", plan_scoped_cmd_output.stdout.decode()).group(0).split(' ')[1]))
+            with open(timings_path, "w") as f:
+                json.dump(timings_dict, f)
+            save_cmd_output(plan_scoped_cmd_output, f"{log_dir_this_run}/plan_scoped")
         else:
             print("Loading results")
             with open(timings_path, "r") as f:
@@ -260,10 +260,10 @@ def plan(sas_path, fd_path, plan_type: str = "lmcut"):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("n_runs" ,type=int)
-    parser.add_argument("sas_file", type=str)
-    parser.add_argument("fd_path", type=str)
-    parser.add_argument("log_dir", type=str)
+    parser.add_argument("--n_runs" ,type=int)
+    parser.add_argument("--sas_file", type=str)
+    parser.add_argument("--fd_path", type=str)
+    parser.add_argument("--log_dir", type=str)
     parser.add_argument("--plan_type", type=str, default="lmcut", choices=list(SEARCH_CONFIGS.keys()), help="Plan techniques to use.")
     parser.add_argument("--force_clear_log_dir", default=False, action='store_true')
     parser.add_argument("--problems_dir", type=str, required=False, default=None)

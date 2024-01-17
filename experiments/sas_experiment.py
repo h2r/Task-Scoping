@@ -78,7 +78,6 @@ def run_experiment(n_runs, sas_file, fd_path, log_dir, plan_type: str, force_cle
 
             # Scoping
             print("Scoping")
-            scope_cmd_output = just_scope(sas_path=sas_file)
             scope_start = time.time()
             scope_cmd_output = just_scope(sas_path=sas_file)
             scope_end = time.time()
@@ -95,7 +94,6 @@ def run_experiment(n_runs, sas_file, fd_path, log_dir, plan_type: str, force_cle
 
             # Planning on unscoped
             print("Planning on unscoped")
-            plan_unscoped_cmd_output = plan(sas_file, fd_path, plan_type=plan_type)
             plan_unscoped_start_time = time.time()
             plan_unscoped_cmd_output = plan(sas_file, fd_path, plan_type=plan_type)
             # plan_unscoped_cmd_output = plan(sas_2_path, fd_path, plan_type=plan_type)
@@ -112,7 +110,6 @@ def run_experiment(n_runs, sas_file, fd_path, log_dir, plan_type: str, force_cle
 
             # Planning on scoped
             print("Planning on scoped")
-            plan_scoped_cmd_output = plan(sas_scoped_path, fd_path, plan_type=plan_type)
             plan_scoped_start_time = time.time()
             plan_scoped_cmd_output = plan(sas_scoped_path, fd_path, plan_type=plan_type)
             plan_scoped_end_time = time.time()

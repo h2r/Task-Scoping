@@ -52,6 +52,11 @@ def parse_args():
         help="Whether or not to run scoping (default: %(default)s)",
     )
     argparser.add_argument(
+        "--scope-only",
+        default=False,
+        help="Whether to only scope (default: %(default)s)",
+    )
+    argparser.add_argument(
         "--invariant-generation-max-time",
         default=300,
         type=int,

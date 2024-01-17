@@ -760,38 +760,38 @@ def dump_statistics(sas_task):
 
 
 def main():
-    timer = timers.Timer()
-    with timers.timing("Parsing", True):
-        task = pddl_parser.open(
-            domain_filename=options.domain, task_filename=options.task
-        )
+    if not options.scope_only:
+        timer = timers.Timer()
+        with timers.timing("Parsing", True):
+            task = pddl_parser.open(
+                domain_filename=options.domain, task_filename=options.task
+            )
 
-    with timers.timing("Normalizing task"):
-        normalize.normalize(task)
+        with timers.timing("Normalizing task"):
+            normalize.normalize(task)
 
-    if options.generate_relaxed_task:
-        # Remove delete effects.
-        for action in task.actions:
-            for index, effect in reversed(list(enumerate(action.effects))):
-                if effect.literal.negated:
-                    del action.effects[index]
+        if options.generate_relaxed_task:
+            # Remove delete effects.
+            for action in task.actions:
+                for index, effect in reversed(list(enumerate(action.effects))):
+                    if effect.literal.negated:
+                        del action.effects[index]
 
-    sas_task = pddl_to_sas(task)
+        sas_task = pddl_to_sas(task)
 
-    dump_statistics(sas_task)
+        dump_statistics(sas_task)
 
-    with timers.timing("Writing output SAS file"):
-        with open(options.sas_file, "w") as output_file:
-            sas_task.output(output_file)
+        with timers.timing("Writing output SAS file"):
+            with open(options.sas_file, "w") as output_file:
+                sas_task.output(output_file)
 
-    scope_sas(sas_task=None)
+    scope_sas(sas_path=options.sas_file)
 
-def scope_sas(sas_task=None):
-    if sas_task is None:
-        with timers.timing("Reading output SAS file"):
-            parser = sas_parser.SasParser(pth=options.sas_file)
-            parser.parse()
-            sas_task : sas_tasks.SASTask = parser.to_fd()
+def scope_sas(sas_path):
+    with timers.timing("Reading SAS file"):
+        parser = sas_parser.SasParser(pth=sas_path)
+        parser.parse()
+        sas_task : sas_tasks.SASTask = parser.to_fd()
 
     timer = timers.Timer()
     if options.scope:

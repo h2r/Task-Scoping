@@ -30,12 +30,14 @@ from oo_scoping.downward_translate import options
 from oo_scoping.downward_translate import pddl
 from oo_scoping.downward_translate import pddl_parser
 from oo_scoping.downward_translate import sas_tasks
+from oo_scoping import sas_parser
+
 from oo_scoping.downward_translate import simplify
 from oo_scoping.downward_translate import timers
 from oo_scoping.downward_translate import tools
 from oo_scoping.downward_translate import variable_order
 
-from oo_scoping.downward_translate import scoping_sas_parser
+from oo_scoping.downward_translate import scoping_sas_converter
 from oo_scoping.scoping import scope
 from oo_scoping.writeback_sas import writeback_scoped_sas
 from oo_scoping.utils import get_atoms
@@ -782,41 +784,45 @@ def main():
         with open(options.sas_file, "w") as output_file:
             sas_task.output(output_file)
 
-    scope_sas(sas_task)
+    scope_sas(sas_task=None)
 
 def scope_sas(sas_task=None):
     if sas_task is None:
-        with timers.timing("Writing output SAS file"):
-            with open(options.sas_file, "r") as input_file:
-                sas_task : .output(input_file)
+        with timers.timing("Reading output SAS file"):
+            parser = sas_parser.SasParser(pth=options.sas_file)
+            parser.parse()
+            sas_task : sas_tasks.SASTask = parser.to_fd()
 
     timer = timers.Timer()
     if options.scope:
         # This below block of code performs task scoping on the SAS+ domain.
-        str2var_dict = scoping_sas_parser.make_str2var_dict(sas_task.variables)
-        str_grounded_action_list = scoping_sas_parser.make_str_grounded_actions(
+        str2var_dict = scoping_sas_converter.make_str2var_dict(sas_task.variables)
+        str_grounded_action_list = scoping_sas_converter.make_str_grounded_actions(
             sas_task.operators
         )
-        cae_triples = scoping_sas_parser.str_grounded_actions2skills(
+        cae_triples = scoping_sas_converter.str_grounded_actions2skills(
             str_grounded_action_list, str2var_dict
         )
-        init_cond_list = scoping_sas_parser.make_init_cond_list(
+        init_cond_list = scoping_sas_converter.make_init_cond_list(
             sas_task.init.values, str2var_dict
         )
-        goal_cond = scoping_sas_parser.make_goal_cond(sas_task.goal.pairs, str2var_dict)
+        goal_cond = scoping_sas_converter.make_goal_cond(sas_task.goal.pairs, str2var_dict)
         rel_pvars, cl_pvars, rel_skills = scope(
             goals=goal_cond, skills=cae_triples, start_condition=init_cond_list
         )
         sas_file_scoped = get_scoped_file_path(options.sas_file)
 
+        def strip_parens(s):
+            return s.replace('(', '').replace(')', '')
+
         # Make a set for rel pvars and rel actions so that we can lookup amongst these quickly during writeback
         rel_skill_names = set()
         for rel_skill in rel_skills:
             if type(rel_skill.action) == str:
-                rel_skill_names.add(rel_skill.action[1:-1])
+                rel_skill_names.add(strip_parens(rel_skill.action))
             elif type(rel_skill.action) == list:
                 for skill_name in rel_skill.action:
-                    rel_skill_names.add(skill_name[1:-1])
+                    rel_skill_names.add(strip_parens(skill_name))
         rel_pvars_names = set()
         for pvar in rel_pvars:
             rel_pvars_names.add(str(pvar)[:-2])

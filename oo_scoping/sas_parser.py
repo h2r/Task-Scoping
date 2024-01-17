@@ -5,6 +5,7 @@ from typing import Dict, Tuple, List, Set, NewType, Optional, Iterable, TypeVar,
 import itertools
 
 import z3
+from oo_scoping.downward_translate import sas_tasks as fd
 
 from oo_scoping.skill_classes import SkillPDDL, EffectTypePDDL
 
@@ -24,6 +25,11 @@ class SasVar:
     @staticmethod
     def split_values(s: str) -> Tuple[SasVarVal, ...]:
         return tuple([SasVarVal(x) for x in s.split("\n")])
+
+    def lookup(self, value: SasVarVal) -> int:
+        if value is None:
+            return -1
+        return self.vals.index(value)
 
     def get_var_val_pair(self, i: int) -> SasVarValPair:
         return SasVarValPair(self, i)
@@ -48,21 +54,22 @@ class SasEffect:
     and the var in result must be the same
     It is maybe wasteful to keep it separate
     """
-    condition: Tuple[SasVarValPair,...]
+    cond: Tuple[SasVarValPair,...]
+    var: int
     affected_var: SasVar
-    affected_var_condition: Optional[int]
-    result_val: int
+    pre: Optional[int]
+    post: int
 
     @property
     def affected_var_condition_pair(self) -> Optional[SasVarValPair]:
-        if self.affected_var_condition is None:
+        if self.pre is None:
             return None
         else:
-            return SasVarValPair(self.affected_var, self.affected_var_condition)
+            return SasVarValPair(self.affected_var, self.pre)
 
     @property
     def result_var_val_pair(self) -> SasVarValPair:
-        return SasVarValPair(self.affected_var, self.result_val)
+        return SasVarValPair(self.affected_var, self.post)
 
     @property
     def full_condition(self) -> Tuple[SasVarValPair,...]:
@@ -71,16 +78,16 @@ class SasEffect:
         and affected var condition
         MF: Should we sort by var? Nah.
         """
-        if self.affected_var_condition is None:
-            return self.condition
+        if self.pre is None:
+            return self.cond
         else:
-            return self.condition + [self.affected_var_condition_pair]
+            return self.cond + [self.affected_var_condition_pair]
 
 
 @dataclass(frozen=True, order=True)
 class SasOperator:
     nm: str
-    prevail: Tuple[SasVarValPair,...]
+    prevail: Tuple[Tuple,...]
     effects: Tuple[SasEffect,...]
     cost: int = 1 #Default to 1, in case we don't use action cost
 
@@ -304,10 +311,11 @@ class SasParser:
             raise ValueError("We miscounted")
 
         return SasEffect(
-            condition=tuple(conds),
+            cond=tuple(conds),
+            var=num_var_affected,
             affected_var=var_affected,
-            affected_var_condition=val_cond,
-            result_val=num_val_result
+            pre=val_cond,
+            post=num_val_result
         )
 
     # Helper functions
@@ -330,7 +338,8 @@ class SasParser:
 
     def get_sas_var_val_pair_from_str(self, s: str) -> SasVarValPair:
         var_num, val_num = SasParser.get_var_val_nums_from_str(s)
-        return self.get_sas_var_val_pair_from_ints(var_num, val_num)
+        # return self.get_sas_var_val_pair_from_ints(var_num, val_num)
+        return (var_num, val_num)
 
 
     def var_val_pair2ints(self, p: SasVarValPair) -> Tuple[int, int]:
@@ -436,18 +445,18 @@ class SasParser:
 
 
     def effect2sas_str(self, e: SasEffect) -> str:
-        pieces: List[str] = [str(len(e.condition))]
+        pieces: List[str] = [str(len(e.cond))]
         # Effect conditions
-        pieces.extend([self.var_val_pair2sas_str(p) for p in e.condition])
+        pieces.extend([self.var_val_pair2sas_str(p) for p in e.cond])
         # Affected var
         pieces.append(str(self.sas_vars.index(e.affected_var)))
         # Affected var condition
-        if e.affected_var_condition is None:
+        if e.pre is None:
             pieces.append("-1")
         else:
-            pieces.append(str(e.affected_var.vals.index(e.affected_var_condition)))
+            pieces.append(str(e.affected_var.vals.index(e.pre)))
         # Result value
-        pieces.append(str(e.result_val))
+        pieces.append(str(e.post))
         return " ".join(pieces)
 
     ## Axioms
@@ -457,14 +466,14 @@ class SasParser:
         return "\n".join(pieces)
 
     def axiom2sas_str(self, a: SasAxiom) -> str:
-        pieces: List[str] = ["begin_rule", str(len(a.condition))]
+        pieces: List[str] = ["begin_rule", str(len(a.cond))]
         # Conditions
-        pieces.extend([self.var_val_pair2sas_str(p) for p in a.condition])
+        pieces.extend([self.var_val_pair2sas_str(p) for p in a.cond])
         # Affected var
         i_var = self.sas_vars.index(a.affected_var)
         # i_val_old = a.affected_var.vals.index(a.affected_var_condition)
         # i_val_new = a.affected_var.vals.index(a.result_val)
-        pieces.append(f"{i_var} {a.affected_var_condition} {a.result_val}")
+        pieces.append(f"{i_var} {a.pre} {a.post}")
         pieces.append("end_rule")
         return "\n".join(pieces)
 
@@ -472,62 +481,43 @@ class SasParser:
     def check_parse(self) -> bool:
         return self.generate_sas() == self.s_sas
 
-
     # Converting to scopeable representation
-    def z3var(self, v: SasVar) -> z3.Int:
-        """
-        Get the z3 var for a SasVar
-        """
-        if v in self._z3vars.keys():
-            self._z3vars[v.nm] = z3.Int(v.nm)
-        return self._z3vars[v.nm]
+    def to_fd(self) -> fd.SASTask:
+        # Variables
+        ranges = [v.range for v in self.sas_vars]
+        axiom_layers = [v.axiom_layer for v in self.sas_vars]
+        value_names = [v.nm for v in self.sas_vars]
+        variables = fd.SASVariables(ranges, axiom_layers, value_names)
 
-    def effect_type(self, p: SasVarValPair) -> EffectTypePDDL:
-        return EffectTypePDDL(pvar=self.z3var(p.var), index=p.val)
+        # Mutexes
+        mutexes = [fd.SASMutexGroup(m.facts) for m in self.mutexes]
 
-    def varvalpair2condition(self, p: SasVarValPair) -> z3.BoolRef:
-        return self.z3var(p.var) == p.val
+        # Init
+        init = fd.SASInit([p.val for p in self.initial_state.var_value_pairs])
 
-    def sasoperator2skill(self, a: SasOperator) -> SkillPDDL:
-        # Start with prevail conditions and effect preconditions
-        preconditions = list(a.prevail)
-        for effect in a.effects:
-            if effect.affected_var_condition is not None and effect.affected_var_condition != -1:
-                preconditions.append(effect.affected_var_condition_pair)
+        # Goal
+        goal = fd.SASGoal(self.goal.var_value_pairs)
 
-        # Add mutex-derived preconditions
-        for mutex in self.sas_mutexes:
-            for pair in mutex.facts:
-                if pair in preconditions:
-                    # For each other pair in the mutex group, add a precondition that it's not true
-                    other_pairs = [p for p in mutex.facts if p != pair]
-                    for other_pair in other_pairs:
-                        # Here we add a precondition to ensure the other pairs are not true
-                        preconditions.append(self.negate_condition(other_pair))
+        # Operators
+        operators = []
+        for op in self.operators:
+            pre_post = []
+            for e in op.effects:
+                pre_as_int = self.sas_vars[e.var].lookup(e.pre)
+                pre_post.append( (e.var, pre_as_int, e.post, e.cond) )
+            operators.append(fd.SASOperator(op.nm, op.prevail, pre_post, op.cost))
 
-        # Convert preconditions to z3.ExprRef
-        precondition_expr = z3.And(*[self.varvalpair2condition(p) for p in preconditions])
+        # Axioms
+        if self.axioms:
+            raise NotImplementedError("Axioms not implemented")
+        axioms = []
 
-        # Convert effects to EffectTypePDDL
-        effects = []
-        for effect in a.effects:
-            affected_var_str = effect.result_var_val_pair.var.nm
-            index = effect.result_var_val_pair.val  # The index in the SasVar.vals list
-            pvar = z3.Bool(affected_var_str)
-            effect_pddl = EffectTypePDDL(pvar=pvar, index=index)
-            effects.append(effect_pddl)
+        # Metric
+        metric = self.metric
 
-        # Create the SkillPDDL
-        action_name = a.nm
-        skill = SkillPDDL(precondition=precondition_expr, action=action_name, effects=effects)
+        sas_task = fd.SASTask(variables, mutexes, init, goal, operators, axioms, metric)
+        return sas_task
 
-        return skill
-
-    def negate_condition(self, pair: SasVarValPair) -> z3.ExprRef:
-        return z3.Not(self.varvalpair2condition(pair))
-
-    def scope(self):
-        pass
 
 def test():
     repo_root = "../../.."

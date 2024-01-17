@@ -236,7 +236,7 @@ def translate_and_scope(domain, problem, unscoped_sas_path):
     return cmd_output
 
 def just_scope(sas_path):
-    cmd_pieces = ["python", f"{repo_root}/oo_scoping/downward_translate/translate_and_scope.py", "--sas-file", sas_path, "--scope", "True", "--scope-only", "True"]
+    cmd_pieces = ["python", f"{repo_root}/oo_scoping/downward_translate/translate_and_scope.py", "--sas-file", 'fdr-generator/benchmarks/'+sas_path, "--scope", "True", "--scope-only", "True"]
     print(" ".join(cmd_pieces))
     cmd_output = subprocess.run(cmd_pieces, capture_output=True, shell=False)
     return cmd_output

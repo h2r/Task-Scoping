@@ -25,7 +25,7 @@ def add_path_suffix(p, s):
 
 # Main function
 def run_experiment(n_runs, sas_file, fd_path, log_dir, plan_type: str, force_clear=False, run_id=None):
-    log_dir = log_dir + "/fd/" + plan_type + "/" + sas_file.split('.')[-2]
+    log_dir = log_dir + "/fd/" + plan_type + "/" + sas_file.split('/')[0] + "/" + sas_file.split('/')[1]
     start_time_exp = time.time()
 
     if run_id is None or run_id == -1:

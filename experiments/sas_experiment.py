@@ -254,7 +254,7 @@ def plan(sas_path, fd_path, plan_type: str = "lmcut"):
     # Note: we don't call "python" at the beginning
     # Note: "--" separates the file path arg from the remaining args
     cmd_pieces = [fd_path, sas_path, "--", "--search", search_config]
-    cmd_output = subprocess.run(cmd_pieces, capture_output=True, shell=False)
+    cmd_output = subprocess.run(cmd_pieces, capture_output=True, shell=False, timeout=600)
     return cmd_output
 
 

@@ -197,7 +197,7 @@ def run_experiments_on_folder(n_runs, sas_dir, fd_path, log_dir,plan_type: str, 
 
 
 def save_cmd_output(cmd_output, save_dir):
-    os.makedirs(save_dir, exist_ok=False)
+    os.makedirs(save_dir, exist_ok=True)
     outpaths = {
         "args":f"{save_dir}/args.txt",
         "stdout":f"{save_dir}/stdout.txt",

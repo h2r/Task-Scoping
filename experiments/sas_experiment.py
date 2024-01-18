@@ -26,6 +26,7 @@ def add_path_suffix(p, s):
 # Main function
 def run_experiment(n_runs, sas_file, fd_path, log_dir, plan_type: str, force_clear=False, run_id=None):
     tag = sas_file.split('/')[0] + "/" + sas_file.split('/')[1] + "/" + sas_file.split('/')[2][:-4]
+    sas_file = 'fdr-generator/benchmarks/' + sas_file
     log_dir = log_dir + "/fd/" + plan_type + "/" + tag
     start_time_exp = time.time()
 
@@ -75,7 +76,7 @@ def run_experiment(n_runs, sas_file, fd_path, log_dir, plan_type: str, force_cle
         if run_id != -1:
             if force_clear and os.path.exists(log_dir_this_run):
                 shutil.rmtree(log_dir_this_run)
-            os.makedirs(log_dir_this_run, exist_ok=False)
+            os.makedirs(log_dir_this_run, exist_ok=True)
 
             # Scoping
             print("Scoping")
@@ -234,7 +235,7 @@ def translate_and_scope(domain, problem, unscoped_sas_path):
     return cmd_output
 
 def just_scope(sas_path):
-    cmd_pieces = ["python", f"{repo_root}/oo_scoping/downward_translate/translate_and_scope.py", "--sas-file", 'fdr-generator/benchmarks/'+sas_path, "--scope", "True", "--scope-only", "True"]
+    cmd_pieces = ["python", f"{repo_root}/oo_scoping/downward_translate/translate_and_scope.py", "--sas-file", sas_path, "--scope", "True", "--scope-only", "True"]
     print(" ".join(cmd_pieces))
     cmd_output = subprocess.run(cmd_pieces, capture_output=True, shell=False)
     return cmd_output
@@ -252,6 +253,8 @@ def plan(sas_path, fd_path, plan_type: str = "lmcut"):
     # Note: we don't call "python" at the beginning
     # Note: "--" separates the file path arg from the remaining args
     cmd_pieces = [fd_path, sas_path, "--", "--search", search_config]
+    print(' '.join(cmd_pieces))
+    print()
     cmd_output = subprocess.run(cmd_pieces, capture_output=True, shell=False, timeout=600)
     return cmd_output
 

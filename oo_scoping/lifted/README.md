@@ -1,27 +1,39 @@
-# Scoping V2
+# Lifted Scoping
 
-This is an attempt at lifted scoping. For now it's just the skeleton code and types. Bits we expect to be hard are marked.
+This package introduces _Lifted Scoping_: Scoping without grounding all actions and variables. Hopefully this will allow scoping to be faster, and operate on problems too large to be grounded.
 
-## Overview
-`scoping.py` has the scoping algorithm, written in terms of abstract classes which hold collections of operators/pvars.
+## Architecture
 
-`abstract_groundings.py` defines some abstract base classes for specifying collections of grounded pvars and operators, potentially compactly. These classes have abstract methods/classmethods for carrying out a portion of scoping. These abstract methods need to be overridden by implementation in concrete child classes.
+[abstract_groundings.py](abstract_groundings.py) holds
 
-The idea is that we will find smarter ways to implement the abstract classes, but `scoping.py` will remain unchanged.
-
-## Planned implementations for collections of operators/pvars
-
-Step 1: Implement them as we do in our current scoping repo - lists of fully grounded operators and pvars. `enumerated_operators_like_og_scoping.py` starts this (WIP).
+1. `PDDLTask`. The `PDDLTask.scope` method implements the scoping algorithm in a way generic to underlying data structures. 
+2. Abstract base classes (ABCs) for the data structures. These define abstract methods that must be implemented in order for `PDDLTask.scope` to run. If you implement concrete subclasses for each of these ABCs, then you can use them with `PDDLTask.scope`.
+   1. `PVarGroundedSet` holds a set of grounded pvars.
+   2. `OperatorWithGroundingsSet` holds a set of grounded operators/actions.
 
 
-Step 2: Factor out the groundings for each lifted operator/pvar, like `(lifted_operator, groundings)`. The groundings will (I think) always be the product set of the groundings for each parameter, so we can get a much more compact representation by just storing the per-parameter groundings.
-`enumerated_operator_level_groundings.py` starts this.
 
-Step 3: Make another improvement! One option is finding a more compact way to store the groundings from step 2. Maybe by adding the option to store the groundings as "all objects of type T", rather than listing out all the objects of type T, or "all objects of type T except for ...". I'm not sure if this will be the right next step. We should probably find/make domains where that strain version 2 and then go from there.
+## Implementations
+
+### Classic
+
+[enumerated_operators_like_og_scoping.py](enumerated_operators_like_og_scoping.py) implements the original, non-lifted scoping data structures. It uses lists of grounded pvars, and lists of grounded operators. For precondition handling, it uses z3.
 
 
-## Expected difficulties
+### Cartesian
 
-Finding tool for manipulating lifted predicates. z3 doesn't handle first order logic - we patched over this by replacing `forall`/`exists` with conjunction/disjunction over the grounded propositions.
+[cartesian.py](cartesian.py) uses a cartesian product factorization for groundings: For action $A$ with parameters $?x$ and $?y$ and, we express the groundings as $\{A(x, y) \mid (x, y) \in X \times Y \}$ for some sets of objects $X$ and $Y$.
 
-(Possible) Identifying when two predicates are equivalent up to renaming of parameters. I don't think we really need this for a v1.
+#### Obstacles
+
+1. Finding/implementing tool to handle lifted preconditions using first order logic. This will be an obstacle for all lifted scoping algorithms, except for trivial lifted-pvar-based scoping which ignores all groundings and requires no logic and just does backwards reachability from the lifted goal pvar. 
+2. (Possible) Grounding sets not being cartesian products.
+   1. (Current solution): Use upper-bound cartesian product representation. Preserves soundness, makes scoping less thorough. We'll probably use this for now.
+   2. Use union-of-product representation, or some other lossless (or less lossy) representation. Possibly complicated and slow. 
+   3. (PAC integration): Use estimates for variable/action significance to keep close to the product representation, discarding low significance groundings.
+3. Is grounding the initial state a problem?
+
+
+## Tests
+
+[tests](../tests/) tests that our scoping algorithms work on some example domains. Currently, these example domains are minimal examples used to test trivial scoping, action merging, and causal links. Test definitions will be written in a scoper-agnostic manner, able to be used with any of our implementations, as long as the implementation has a method to convert it's outputs into a common format. For less-thorough scoping implementations, we'll need no weaken the test conditions.

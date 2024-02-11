@@ -45,3 +45,12 @@ But if action1 has an extra effect on another pvar, which has different relevant
 [This](https://github.com/AI-Planning/pddl) PDDL parser fixed issues which prevented it from parsing our minecreaft domain. I think we can use it now (if we replace subtraction with adding a negative number. They're working on that issue, too). It seems to have much better typing than our current, janky, copied-to-this-repo parser, so we should use it going forwards.
 
 Working on getting relevant effects from cartesian actions.
+
+
+## 2024-01-01
+
+Is the cartesian product assumption for groundings sets correct/lossless? We've recently run into some nuances wrt groundings. It seems plausible to me now that `F(a0, b0)` and `F(a1, b1)` are relevant, but `F(a0, b1)` is not. If this is true, then here are some options:
+
+1. (Principled lossless) Use union of products for groundings. This is sound and thorough, but may introduce performance cost and code complexity.
+   1. Will the code really be much more complex? Can we get this relatively easily? I don't yet see precisely where this issue will come up.
+2. (Approximation) Use conservative upper bounds - treat `F(a0, b1)` as relevant. This preserves soundness but makes scoping less thorough. We can't prune PDDL files at the grounded pvar level anyway, only at the lifted pvar and grounded object level, but restricting the algorithm to this level of coarseness will still end up considering more objects/pvars as relevant. Also, I don't like limiting the algorithm based on the expressive power of pddl.

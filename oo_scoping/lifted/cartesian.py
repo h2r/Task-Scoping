@@ -54,6 +54,17 @@ class CartesianGroundings:
         return do_cartesian(self.param_to_groundings, SingleGrounding)
 
     def union(self, other: CartesianGroundings) -> CartesianGroundings:
+        """WARNING: This isn't a union. This is an upper bound of a union.
+        
+        Using upper bounds here preserve soundness since it will only ever make us consider
+        _more_ pvars/actions as relevant. But it makes scoping less thorough.
+        
+        We could implement stricter unions as sets of cartesian groundings. And optionally
+        add some checks for when we can actually compress a set of products into a single product.
+        The simplification checks are probably expensive. There could be neat tie-ins with
+        probably approximately correct scoping, where the simplifications get to ignore low significance
+        groundings.
+        """
         combined_variable_to_groundings = copy.deepcopy(self.param_to_groundings)
         for var_name, other_groundings in other.param_to_groundings.items():
             if var_name in combined_variable_to_groundings:
@@ -268,7 +279,10 @@ class CartesianGroundedAction:
     with object variable names.
     """
     groundings: CartesianGroundings
-    """Groundings used for preconditions and parameters. effects use separate groundings for each pvar, though any of those
+    """The groundings parameterize the concrete actionss
+    .
+    These groundings are used for preconditions and parameters. 
+    effects use separate groundings for each pvar, though any of those
     grounding sets could just be a reference to this action-level groundings.
     TODO: Precondition can maybe use different groundings, in case the logic tool throws some away?"""
 
@@ -335,8 +349,10 @@ class CartesianGroundedActionsSet(
         the same names for their object variables. We aren't going to deal with object variable
         renaming/symmetry stuff.
 
-        # TODO: I think this may be throwing out too much information about groundings for the new operators.
-        Make sure it isn't.
+        TODO: We need to partition based on shared groundings, too. 
+        Each choice of a grounding gives a set of effect-equivalent grounded actions.
+        If lifted action A0 has grounding g but A1 does not, then we can't
+        merge A0 and A1 at g.
         """
         effects_to_actions: Dict[
             CartesianEffectSet, List[CartesianGroundedAction]

@@ -15,7 +15,7 @@ init_state = [
     ('path', 'l1', 'l3'),
     ('path', 'l2', 'l3'),
     ('path', 'l3', 'l4'),
-    ('alive', 'agent')
+    ('alive', 'steve')
 ]
 
 @dataclass(frozen=True, order=True)
@@ -27,12 +27,12 @@ class Action:
 
 a1 = Action(
     name='a1',
-    variables = ['x', 'y', 'w', 'agent'],
+    variables = ['x', 'y', 'w', 'ag'],
     precondition = [
         ('at', 'x', 'y'),
         ('path', 'y', 'w'),
         ('path', 'w', 'z'),
-        # ('alive', 'agent')
+        ('alive', 'steve')
     ],
     effect = [
         ('at', 'x', 'z'),
@@ -61,7 +61,10 @@ def join_preconditions(tables:Dict[str, pd.DataFrame], predicate_list:List[Tuple
         remapped_tables.append(table)
     result, *rest = remapped_tables
     for table in rest:
-        result = result.merge(table)
+        try:
+            result = result.merge(table)
+        except pd.errors.MergeError:
+            result = result.join(table, how='cross')
     return result
 
 def select_effects(groundings_table:pd.DataFrame, predicate_list:Tuple[str]) -> Dict[str, pd.DataFrame]:

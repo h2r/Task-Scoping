@@ -39,39 +39,57 @@ a1 = Action(
     ],
 )
 
-def get_facts(fact_list, predicate):
+def build_fact_table(fact_list: List[Tuple[str]], predicate: Tuple[str]) -> pd.DataFrame:
     facts = [fact[1:] for fact in fact_list if fact[0] == predicate]
     assert np.allclose(list(map(len, facts)), len(facts[0]))
-    return facts
-
-facts = get_facts(init_state, 'at')
-
-def build_fact_table(fact_list, predicate):
-    facts = get_facts(fact_list, predicate)
     columns = list(alphabet[:len(facts[0])])
     data = pd.DataFrame(facts, columns=columns)
     data.name = predicate
     return data
 
-tables = [build_fact_table(init_state, name) for name in ['at', 'path', 'alive']]
+def initialize_fact_tables(fact_list: List[Tuple[str]]):
+    predicate_names = sorted(list(set([fact[0] for fact in fact_list])))
+    return {name:build_fact_table(fact_list, name) for name in predicate_names}
 
-def merge(tables:List[pd.DataFrame], predicate_list:List[Tuple[str]]):
+def join_preconditions(tables:Dict[str, pd.DataFrame], predicate_list:List[Tuple[str]]) -> pd.DataFrame:
     remapped_tables = []
-    tables_dict = {table.name: table for table in tables}
     for predicate in predicate_list:
         table_name, *params = predicate
-        table = tables_dict[table_name]
+        table = tables[table_name]
         column_names = dict(zip(table.columns, params))
         table = table.rename(columns=column_names)
         remapped_tables.append(table)
-
-    result = None
-    for table in remapped_tables:
-        if result is None:
-            result = table
-        else:
-            result = result.merge(table)
-
+    result, *rest = remapped_tables
+    for table in rest:
+        result = result.merge(table)
     return result
 
-result = merge(tables, a1.precondition)
+def select_effects(groundings_table:pd.DataFrame, predicate_list:Tuple[str]) -> Dict[str, pd.DataFrame]:
+    results = {}
+    for predicate in predicate_list:
+        table_name, *parameters = predicate
+        results[table_name] = groundings_table[parameters]
+    return results
+
+def extend_fact_tables(tables: Dict[str, pd.DataFrame], updates: Dict[str, pd.DataFrame]) -> bool:
+    did_extend = False
+    for table_name, new_facts in updates.items():
+        table = tables[table_name]
+        column_mapping = {new: orig for new, orig in zip(new_facts.columns, table.columns)}
+        new_facts = new_facts.rename(columns=column_mapping)
+        new_table = pd.concat((table, new_facts)).drop_duplicates()
+        if len(new_table) > len(table):
+            did_extend = True
+        tables[table_name] = new_table
+        return did_extend
+
+def generate_next_fact_layer(tables: Dict[str, pd.DataFrame], action: Action) -> Dict[str, pd.DataFrame]:
+    result = join_preconditions(tables, a1.precondition)
+    updates = select_effects(result, a1.effect)
+    did_extend = extend_fact_tables(tables, updates)
+    return did_extend
+
+tables = initialize_fact_tables(init_state)
+generate_next_fact_layer(tables, a1)
+generate_next_fact_layer(tables, a1)
+tables

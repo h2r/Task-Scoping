@@ -4,8 +4,6 @@ from typing import Dict, Tuple, List, Set, NewType, Optional, Iterable, TypeVar,
 import numpy as np
 import pandas as pd
 
-alphabet = 'abcdefghijklmnopqrstuvwxyz'
-
 @dataclass(frozen=True, order=True)
 class Action:
     name: str
@@ -16,7 +14,7 @@ class Action:
 def build_fact_table(fact_list: List[Tuple[str]], predicate: Tuple[str]) -> pd.DataFrame:
     facts = [fact[1:] for fact in fact_list if fact[0] == predicate]
     assert np.allclose(list(map(len, facts)), len(facts[0]))
-    columns = list(alphabet[:len(facts[0])])
+    columns = [f'v{i}' for i in range(len(facts[0]))]
     data = pd.DataFrame(facts, columns=columns)
     data.name = predicate
     return data

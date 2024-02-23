@@ -30,12 +30,14 @@ from oo_scoping.downward_translate import options
 from oo_scoping.downward_translate import pddl
 from oo_scoping.downward_translate import pddl_parser
 from oo_scoping.downward_translate import sas_tasks
+from oo_scoping import sas_parser
+
 from oo_scoping.downward_translate import simplify
 from oo_scoping.downward_translate import timers
 from oo_scoping.downward_translate import tools
 from oo_scoping.downward_translate import variable_order
 
-from oo_scoping.downward_translate import scoping_sas_parser
+from oo_scoping.downward_translate import scoping_sas_converter
 from oo_scoping.scoping import scope
 from oo_scoping.writeback_sas import writeback_scoped_sas
 from oo_scoping.utils import get_atoms
@@ -758,56 +760,69 @@ def dump_statistics(sas_task):
 
 
 def main():
+    if not options.scope_only:
+        timer = timers.Timer()
+        with timers.timing("Parsing", True):
+            task = pddl_parser.open(
+                domain_filename=options.domain, task_filename=options.task
+            )
+
+        with timers.timing("Normalizing task"):
+            normalize.normalize(task)
+
+        if options.generate_relaxed_task:
+            # Remove delete effects.
+            for action in task.actions:
+                for index, effect in reversed(list(enumerate(action.effects))):
+                    if effect.literal.negated:
+                        del action.effects[index]
+
+        sas_task = pddl_to_sas(task)
+
+        dump_statistics(sas_task)
+
+        with timers.timing("Writing output SAS file"):
+            with open(options.sas_file, "w") as output_file:
+                sas_task.output(output_file)
+
+    scope_sas(sas_path=options.sas_file)
+
+def scope_sas(sas_path):
+    with timers.timing("Reading SAS file"):
+        parser = sas_parser.SasParser(pth=sas_path)
+        parser.parse()
+        sas_task : sas_tasks.SASTask = parser.to_fd()
+
     timer = timers.Timer()
-    with timers.timing("Parsing", True):
-        task = pddl_parser.open(
-            domain_filename=options.domain, task_filename=options.task
-        )
-
-    with timers.timing("Normalizing task"):
-        normalize.normalize(task)
-
-    if options.generate_relaxed_task:
-        # Remove delete effects.
-        for action in task.actions:
-            for index, effect in reversed(list(enumerate(action.effects))):
-                if effect.literal.negated:
-                    del action.effects[index]
-
-    sas_task = pddl_to_sas(task)
-
-    dump_statistics(sas_task)
-
-    with timers.timing("Writing output SAS file"):
-        with open(options.sas_file, "w") as output_file:
-            sas_task.output(output_file)
-
     if options.scope:
         # This below block of code performs task scoping on the SAS+ domain.
-        str2var_dict = scoping_sas_parser.make_str2var_dict(sas_task.variables)
-        str_grounded_action_list = scoping_sas_parser.make_str_grounded_actions(
+        str2var_dict = scoping_sas_converter.make_str2var_dict(sas_task.variables)
+        str_grounded_action_list = scoping_sas_converter.make_str_grounded_actions(
             sas_task.operators
         )
-        cae_triples = scoping_sas_parser.str_grounded_actions2skills(
+        cae_triples = scoping_sas_converter.str_grounded_actions2skills(
             str_grounded_action_list, str2var_dict
         )
-        init_cond_list = scoping_sas_parser.make_init_cond_list(
+        init_cond_list = scoping_sas_converter.make_init_cond_list(
             sas_task.init.values, str2var_dict
         )
-        goal_cond = scoping_sas_parser.make_goal_cond(sas_task.goal.pairs, str2var_dict)
+        goal_cond = scoping_sas_converter.make_goal_cond(sas_task.goal.pairs, str2var_dict)
         rel_pvars, cl_pvars, rel_skills = scope(
             goals=goal_cond, skills=cae_triples, start_condition=init_cond_list
         )
         sas_file_scoped = get_scoped_file_path(options.sas_file)
 
+        def strip_parens(s):
+            return s.replace('(', '').replace(')', '')
+
         # Make a set for rel pvars and rel actions so that we can lookup amongst these quickly during writeback
         rel_skill_names = set()
         for rel_skill in rel_skills:
             if type(rel_skill.action) == str:
-                rel_skill_names.add(rel_skill.action[1:-1])
+                rel_skill_names.add(strip_parens(rel_skill.action))
             elif type(rel_skill.action) == list:
                 for skill_name in rel_skill.action:
-                    rel_skill_names.add(skill_name[1:-1])
+                    rel_skill_names.add(strip_parens(skill_name))
         rel_pvars_names = set()
         for pvar in rel_pvars:
             rel_pvars_names.add(str(pvar)[:-2])
@@ -817,7 +832,7 @@ def main():
             # These are used to estimate size of effective state space of scoped domain.
             # We do this because we do not in fact remove fluents from the sas+ domain, we only remove operators
             def get_effectively_relevant_pvars(
-                cae_triples: Iterable[SkillPDDL], action_names=None
+                cae_triples: Iterable[SkillPDDL], action_names = None
             ):
                 """
                 :param cae_triples: operators from original domain
@@ -914,7 +929,7 @@ def main_from_other_script(**kwargs):
         # Reserve about 10 MB of emergency memory.
         # https://stackoverflow.com/questions/19469608/
         emergency_memory = b"x" * 10**7
-        main()
+        scope_sas()
 
         # main()
     except MemoryError:

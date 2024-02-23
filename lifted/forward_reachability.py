@@ -77,7 +77,7 @@ def main():
         ('path', 'l1', 'l3'),
         ('path', 'l2', 'l3'),
         ('path', 'l3', 'l4'),
-        ('alive', 'steve')
+        ('alive', 'agent')
     ]
 
     a1 = Action(
@@ -87,7 +87,7 @@ def main():
             ('at', 'x', 'y'),
             ('path', 'y', 'w'),
             ('path', 'w', 'z'),
-            ('alive', 'steve')
+            ('alive', 'ag')
         ],
         effect = [
             ('at', 'x', 'z'),
@@ -100,7 +100,7 @@ def main():
             ('at', 'x', 'z'),
             ('path', 'y', 'w'),
             ('path', 'w', 'z'),
-            ('alive', 'steve')
+            ('alive', 'ag')
         ],
         effect = [
             ('at', 'x', 'y'),

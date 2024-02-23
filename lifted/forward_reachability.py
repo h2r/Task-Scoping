@@ -6,38 +6,12 @@ import pandas as pd
 
 alphabet = 'abcdefghijklmnopqrstuvwxyz'
 
-init_state = [
-    ('at', 'obj1', 'l1'),
-    ('at', 'obj2', 'l1'),
-    ('at', 'obj3', 'l3'),
-    ('at', 'obj4', 'l2'),
-    ('path', 'l1', 'l2'),
-    ('path', 'l1', 'l3'),
-    ('path', 'l2', 'l3'),
-    ('path', 'l3', 'l4'),
-    ('alive', 'steve')
-]
-
 @dataclass(frozen=True, order=True)
 class Action:
     name: str
     variables: List[str]
     precondition: List[Tuple[str]]
     effect: List[Tuple[str]]
-
-a1 = Action(
-    name='a1',
-    variables = ['x', 'y', 'w', 'ag'],
-    precondition = [
-        ('at', 'x', 'y'),
-        ('path', 'y', 'w'),
-        ('path', 'w', 'z'),
-        ('alive', 'steve')
-    ],
-    effect = [
-        ('at', 'x', 'z'),
-    ],
-)
 
 def build_fact_table(fact_list: List[Tuple[str]], predicate: Tuple[str]) -> pd.DataFrame:
     facts = [fact[1:] for fact in fact_list if fact[0] == predicate]
@@ -86,13 +60,57 @@ def extend_fact_tables(tables: Dict[str, pd.DataFrame], updates: Dict[str, pd.Da
         tables[table_name] = new_table
         return did_extend
 
-def generate_next_fact_layer(tables: Dict[str, pd.DataFrame], action: Action) -> Dict[str, pd.DataFrame]:
-    result = join_preconditions(tables, a1.precondition)
-    updates = select_effects(result, a1.effect)
-    did_extend = extend_fact_tables(tables, updates)
+def generate_next_fact_layer(tables: Dict[str, pd.DataFrame], actions: List[Action]) -> Dict[str, pd.DataFrame]:
+    did_extend = False
+    for action in actions:
+        result = join_preconditions(tables, action.precondition)
+        updates = select_effects(result, action.effect)
+        did_extend = did_extend or extend_fact_tables(tables, updates)
     return did_extend
 
-tables = initialize_fact_tables(init_state)
-generate_next_fact_layer(tables, a1)
-generate_next_fact_layer(tables, a1)
-tables
+
+def main():
+    init_state = [
+        ('at', 'obj1', 'l1'),
+        ('at', 'obj2', 'l1'),
+        ('at', 'obj3', 'l3'),
+        ('at', 'obj4', 'l2'),
+        ('path', 'l1', 'l2'),
+        ('path', 'l1', 'l3'),
+        ('path', 'l2', 'l3'),
+        ('path', 'l3', 'l4'),
+        ('alive', 'steve')
+    ]
+
+    a1 = Action(
+        name='a1',
+        variables = ['x', 'y', 'w', 'z', 'ag'],
+        precondition = [
+            ('at', 'x', 'y'),
+            ('path', 'y', 'w'),
+            ('path', 'w', 'z'),
+            ('alive', 'steve')
+        ],
+        effect = [
+            ('at', 'x', 'z'),
+        ],
+    )
+    a2 = Action(
+        name='a2',
+        variables = ['x', 'y', 'w', 'z', 'ag'],
+        precondition = [
+            ('at', 'x', 'z'),
+            ('path', 'y', 'w'),
+            ('path', 'w', 'z'),
+            ('alive', 'steve')
+        ],
+        effect = [
+            ('at', 'x', 'y'),
+        ],
+    )
+    actions = [a1, a2]
+    tables = initialize_fact_tables(init_state)
+    while generate_next_fact_layer(tables, actions):
+        pass
+
+    tables

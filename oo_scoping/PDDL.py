@@ -88,7 +88,7 @@ class PDDL_Parser:
             raise Exception("Malformed expression")
         # Handle :types
         types_str = re.findall(
-            ":types ([^()]*)", str, flags=(re.DOTALL | re.MULTILINE)
+            ":types \s([^()]*)", str, flags=(re.DOTALL | re.MULTILINE)
         )[0]
         if type_start is not None:
             list[0].insert(type_start, types_str)
@@ -222,7 +222,7 @@ class PDDL_Parser:
         with open(domain_filename, "r") as f:
             domain_str = f.read()
         types_str = re.findall(
-            ":types ([^()]*)", domain_str, flags=(re.DOTALL | re.MULTILINE)
+            ":types \s([^()]*)", domain_str, flags=(re.DOTALL | re.MULTILINE)
         )[0]
         types_lines = types_str.replace("\t", "").split("\n")
         # [(subtype, parentype)]
